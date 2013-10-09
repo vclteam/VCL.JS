@@ -26,3 +26,7 @@ For a getting started video tutorial please refer to our website.
 http://www.vcljs.com
 
 You may also load the visual studio plugin in which includes everything you need to get started.
+
+# Contribution
+
+[See `CONTRIBUTING.md`](https://github.com/vclteam/VCL.JS/blob/master/CONTRIBUTING.md)
