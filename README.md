@@ -11,7 +11,7 @@ These are the features that make VCL.JS a joy to use:
 - Visual Component Library- include Page,Grid,Input,Gauges,Charts and many more
 - Data Binding
 - Routing
-- 
+
 
 
 
