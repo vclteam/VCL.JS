@@ -9,12 +9,20 @@ VCL.JS does those things for you, so you can focus on building business logic an
 
 These are the features that make VCL.JS a joy to use:
 - Visual Component Library- include Page,Grid,Input,Gauges,Charts and many more
-- Data Binding
+- Pure javascript
+- Single page application
+- .Net Backend
+- Data binding
+- Simple database query execution 
 - Routing
+- Twitter bootstrap 
+- AMD - Module loader
 
 
 
-
-
+Getting Started
+================
 For a getting started video tutorial please refer to our website.
 http://www.vcljs.com
+
+You may also load the visual studio plugin in which includes everything you need to get started.
