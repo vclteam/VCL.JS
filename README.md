@@ -17,4 +17,4 @@ These are the features that make VCL.JS a joy to use:
 
 
 For a getting started video tutorial please refer to our website.
-HTTP://www.vcljs.com
+http://www.vcljs.com
