@@ -1,4 +1,4 @@
-VCL.JS
+WHAT IS VCL.JS
 ======
 
 VCL.JS is a TypScript component based framework for enterprise web application.
@@ -22,7 +22,7 @@ These are the features that make VCL.JS a joy to use:
 
 Getting Started
 ================
-For a getting started video tutorial please refer to our website.
+For a getting started please refer to our website.
 http://www.vcljs.com
 
 You may also load the visual studio plugin in which includes everything you need to get started.
