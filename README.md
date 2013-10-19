@@ -30,3 +30,8 @@ You may also load the visual studio plugin in which includes everything you need
 # Contribution
 
 [See `CONTRIBUTING.md`](https://github.com/vclteam/VCL.JS/blob/master/CONTRIBUTING.md)
+
+# Video
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=YOUTUBE_VIDEO_ID_HERE
+" target="_blank"><img src="http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg" 
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
