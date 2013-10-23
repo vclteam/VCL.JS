@@ -4,19 +4,7 @@ import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 import VXCB = require("VCL/VXChartBase");
 
-export class VXChartBar extends VXCB.VXChartBase {
-    private _maximumbarwidth: number = 40;
-    public get MaximumBarWidth(): number {
-        return this._maximumbarwidth;
-    }
-    public set MaximumBarWidth(val: number) {
-        if (val != this._maximumbarwidth) {
-            this._maximumbarwidth = val;
-            this.draw(true);
-        }
-    }
-
-
+export class VXChartVBar extends VXCB.VXChartBase {
     private _titleX: string;
     public get TitleX(): string {
         return this._titleX;
@@ -287,7 +275,6 @@ export class VXChartBar extends VXCB.VXChartBase {
             gridTextSize: 12,
             gridTextFamily: 'sans-serif',
             gridTextWeight: 'normal',
-            maximumbarwidth: this.MaximumBarWidth,
             grid: this.ShowGridLines
         }, this);
         
@@ -295,7 +282,7 @@ export class VXChartBar extends VXCB.VXChartBase {
     }
 }
 
-export class VXDBChartBar extends VXChartBar {
+export class VXDBChartVBar extends VXChartVBar {
     private _value1field: string;
     /**
     * Specifies the field from which the edit control displays data.
@@ -667,13 +654,13 @@ class Bar extends VXCB.Grid {
 
     onGridClick(x, y) {
         if (!this.owner) return;
-        var owner = <VXChartBar>this.owner;
+        var owner = <VXChartVBar>this.owner;
         if (!owner.onClicked) return;
 
         var idx = this.hitTest(x, y);
         if (idx >= 0 && idx <= owner.values.length()) {
-            if (owner instanceof VXDBChartBar && (<VXDBChartBar>owner).Dataset != null) {
-                (<VXDBChartBar>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
+            if (owner instanceof VXDBChartVBar && (<VXDBChartVBar>owner).Dataset != null) {
+                (<VXDBChartVBar>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
             }
             (V.tryAndCatch(() => { owner.onClicked(owner.values.toArray()[idx]); }));
         }
@@ -719,13 +706,11 @@ class Bar extends VXCB.Grid {
     drawBar(xPos, yPos, width, height, barColor, oldheight, oldy) {
         var self = this;
         var bar;
-        var maxWidth: number = Math.min(this.options.maximumbarwidth,width);
-        var newXpos = xPos + ((width - maxWidth) / 2) ;
         if (oldheight > 0) {
-            bar = this.raphael.rect(newXpos, oldy, maxWidth, oldheight).attr('fill', barColor).attr('stroke-width', 0);
+            bar = this.raphael.rect(xPos, oldy, width, oldheight).attr('fill', barColor).attr('stroke-width', 0);
             bar.animate({ height: height, y: yPos }, 500, '>');
         } else {
-            bar = this.raphael.rect(newXpos, yPos, maxWidth, height).attr('fill', barColor).attr('stroke-width', 0);
+            bar = this.raphael.rect(xPos, yPos, width, height).attr('fill', barColor).attr('stroke-width', 0);
         }
         
         
@@ -737,115 +722,4 @@ class Bar extends VXCB.Grid {
         return bar;
     }
 
-}
-
-
-
-export class VXChartBullet extends VXC.VXComponent {
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
-        super(aOwner, renderTo);
-        this.Width = 200;
-    }
-
-    private _title: string = "Title";
-    public get Title(): string {
-        return this._title;
-    }
-    public set Title(val: string) {
-        if (val != this._title) {
-            this._title = val;
-            this.draw(true);
-        }
-    }
-
-    private _titlecolor: string;
-    public get TitleColor(): string {
-        return this._titlecolor;
-    }
-    public set TitleColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-
-            if (val != this._titlecolor) {
-                this._titlecolor = val;
-                this.draw(true);
-            }
-        }
-    }
-
-
-    private _value: number = 0;
-    public get Value(): number {
-        return this._value;
-    }
-    public set Value(val: number) {
-        if (val != this._value) {
-            this._value = val;
-            this.draw(true);
-        }
-    }
-
-    private _maximum: number = 100;
-    public get Maximum(): number {
-        return this._maximum;
-    }
-    public set Maximum(val: number) {
-        if (val != this._maximum) {
-            this._maximum = val;
-            this.draw(true);
-        }
-    }
-
-    private _showsubtitle: boolean = true;
-    public get ShowSubTitle(): boolean {
-        return this._showsubtitle;
-    }
-    public set ShowSubTitle(val: boolean) {
-        if (val != this._showsubtitle) {
-            this._showsubtitle = val;
-            this.draw(true);
-        }
-    }
-
-    private _showvalue: boolean = true;
-    public get ShowValue(): boolean {
-        return this._showvalue;
-    }
-    public set ShowValue(val: boolean) {
-        if (val != this._showvalue) {
-            this._showvalue = val;
-            this.draw(true);
-        }
-    }
-
-
-    private _valuefontsize: number = 24;
-    public get ValueFontSize(): number {
-        return this._valuefontsize;
-    }
-    public set ValueFontSize(val: number) {
-        if (val != this._value) {
-            this._valuefontsize = val;
-            this.draw(true);
-        }
-    }
-
-    public draw(reCreate: boolean) {
-        if (!this.showed) return;
-        this.create();
-    }
-    public create() {
-        this.jComponent.empty(); //clear all subcomponents
-        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
-        this.jComponent.bulletChart({
-            title: this.Title,
-            titlecolor : this.TitleColor,
-            current: this.Value,
-            total: this.Maximum,
-            tititlefontsize: this.ValueFontSize,
-            showsubtitle: this.ShowSubTitle,
-            showvalue: this.ShowValue
-        });
-    }
 }

@@ -26,6 +26,16 @@ export class VXComponent extends VXO.VXObject {
         if (aOwner != null && !aOwner.isContainer) {
             V.Application.raiseException("only container components can own components");
             throw "only container components can own components";
+
+        }
+        if (aOwner != null) {
+            //set dataset of dbelements
+            if ((<VXCO.VXContainer>aOwner).Dataset != null) {
+                try {
+                    (<any>this).Dataset = (<VXCO.VXContainer>aOwner).Dataset;
+                } catch(err) {}
+                
+            }
         }
 
 
@@ -224,7 +234,12 @@ export class VXComponent extends VXO.VXObject {
     */
     public get Width(): number { return this.jComponent.width(); }
     public set Width(pixel: number) { this.jComponent.width(pixel); }
-
+    public animateResize(duration : number = 400,widthPixel?: number, heightPixel?: number,completeCallBack?: () => void) {
+        if (!widthPixel && !heightPixel) return;
+        if (widthPixel && heightPixel) this.jComponent.animate({ width: widthPixel, height: heightPixel }, duration, completeCallBack);
+        else if (widthPixel) this.jComponent.animate({ width: widthPixel }, duration, completeCallBack);
+        else if (heightPixel) this.jComponent.animate({ height: heightPixel }, duration, completeCallBack);
+    }
 
     /**
     * Specifies the height of the component in pixels.

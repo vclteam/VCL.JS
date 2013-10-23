@@ -807,7 +807,7 @@ class Line extends VXCB.Grid {
         if (owner.onClicked == null) return;
 
         var index = this.hitTest(x, y);
-        if (index >= 0 && index <= owner.values.size()) {
+        if (index >= 0 && index <= owner.values.length()) {
             var id = this.data[index].id;
             var item = owner.values.FindItemByID(id);
 
@@ -1152,7 +1152,7 @@ class Line extends VXCB.Grid {
 
 function labelSeries(dmin, dmax, pxwidth, specName, xLabelFormat) {
     var d, d0, ddensity, name, ret, s, spec, t, _i, _len, _ref;
-    ddensity = 200 * (dmax - dmin) / pxwidth;
+    ddensity = 130 * (dmax - dmin) / pxwidth;
     d0 = new Date(dmin);
     spec = LABEL_SPECS[specName];
     if (spec === void 0) {

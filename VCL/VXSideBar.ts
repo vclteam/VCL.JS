@@ -41,7 +41,7 @@ export class VXNavBar extends VXBarBase {
         //if (!this.Transparent) well.addClass('well');
 
 
-        if (this.items.size() > 0) {
+        if (this.items.length() > 0) {
             var ulClass = "nav";
             if (this.Pills) ulClass += ' nav-pills';
             var menuItems: JQuery = this.items.createmenu(ulClass);
@@ -96,7 +96,7 @@ export class VXSideBar extends VXBarBase {
         if (!this.Transparent) well.addClass('well');
 
 
-        if (this.items.size() > 0) {
+        if (this.items.length() > 0) {
             var menuItems: JQuery = this.items.createmenu('nav nav-list');
             menuItems.appendTo(well);
 

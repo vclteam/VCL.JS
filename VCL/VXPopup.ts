@@ -37,11 +37,11 @@ export class VXPopup extends VXC.VXContainer {
     constructor() {
         super(null, null);
         this.Width = 520; //bootstrap span5 as default
+        
 
-        var htmlFileName = this.getClassName();
         //TODO: need to support path
         var x = new VXDS.VXServer(false);
-        x.getHTML(htmlFileName + ".html",
+        x.getHTML(this.getClassName() + ".html",
             (htmlFile: any) => {
                 this.jComponent.html(htmlFile);
                 if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))

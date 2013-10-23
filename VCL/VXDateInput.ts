@@ -17,6 +17,18 @@ export class VXDateInputBase extends VXI.VXEditorBase {
         }
     }
 
+    private _calendartype: V.CalendarType = V.CalendarType.Daily;
+    public get CalendarType(): V.CalendarType {
+        return this._calendartype;
+    }
+    public set CalendarType(val: V.CalendarType) {
+        if (val != this._calendartype) {
+            this._calendartype = val;
+            this.draw(true);
+        }
+    }
+
+
     private autoclose: boolean = true;
     public get AutoClose(): boolean {
         return this.autoclose;
@@ -55,7 +67,7 @@ export class VXDateInputBase extends VXI.VXEditorBase {
             this.jButton.attr("disabled", "disabled");
         }
         var df = this.DateFormat == null ? V.Application.DateFormat : this.DateFormat;
-        this.jComponent.datepicker({ format: df, autoclose: this.AutoClose }).on('changeDate', function (ev) {
+        this.jComponent.datepicker({ format: df, autoclose: this.AutoClose, minViewMode: this.CalendarType == V.CalendarType.Daily ? 0 : 1 }).on('changeDate', function (ev) {
             this.Date = ev.date;
         });
 
@@ -67,7 +79,7 @@ export class VXDateInputBase extends VXI.VXEditorBase {
     }
 }
 
-export class VXDateInput extends VXDateInputBase{
+export class VXDateInput extends VXDateInputBase {
     private _date: Date;
     public get Date(): Date {
         return this._date;
@@ -104,7 +116,7 @@ export class VXDateInput extends VXDateInputBase{
 }
 
 export class VXDBDateInput extends VXDateInputBase {
-   
+    
     public get Date(): Date {
         return this.DateValue;
     }
@@ -142,7 +154,7 @@ export class VXDBDateInput extends VXDateInputBase {
         this.draw(false);
     }
 
-   
+    
 
     private _dataset: VXD.VXDataset;
     /*
@@ -180,6 +192,7 @@ export class VXDBDateInput extends VXDateInputBase {
             this.validateEnabled();
             this.create();
         }
+        this.initialized = true;
         this.jComponent.datepicker("update", this.Date);
         this.setEditorWidth();
     }
@@ -384,7 +397,7 @@ Datepicker.prototype = {
     },
 
     show: function (e) {
-        if ($(e.target).attr("disabled")) return; 
+        if ($(e.target).attr("disabled")) return;
         this.picker.show();
         this.height = this.component ? this.component.outerHeight() : this.element.outerHeight();
         this.update();
@@ -553,7 +566,7 @@ Datepicker.prototype = {
 
     fillMonths: function () {
         var html: string = '';
-        var  i : number = 0;
+        var i: number = 0;
         while (i < 12) {
             html += '<span class="month">' + dates[this.language].monthsShort[i++] + '</span>';
         }
@@ -593,13 +606,13 @@ Datepicker.prototype = {
                     // ISO also states week starts on Monday, but we can be more abstract here.
 
                     // Start of current week: based on weekstart/current date
-                    var    ws = new Date(+prevMonth + (this.weekStart - prevMonth.getUTCDay() - 7) % 7 * 864e5);
+                    var ws = new Date(+prevMonth + (this.weekStart - prevMonth.getUTCDay() - 7) % 7 * 864e5);
                     // Thursday of this week
                     var th: any = new Date(+ws + (7 + 4 - ws.getUTCDay()) % 7 * 864e5);
                     // First Thursday of year, year from thursday
-                    var yth: any= new Date(+(yth = UTCDate(th.getUTCFullYear(), 0, 1)) + (7 + 4 - yth.getUTCDay()) % 7 * 864e5);
+                    var yth: any = new Date(+(yth = UTCDate(th.getUTCFullYear(), 0, 1)) + (7 + 4 - yth.getUTCDay()) % 7 * 864e5);
                     // Calendar week: ms between thursdays, div ms per day, div 7 days
-                    var   calWeek : number = (th - yth) / 864e5 / 7 + 1;
+                    var calWeek: number = (th - yth) / 864e5 / 7 + 1;
                     html.push('<td class="cw">' + calWeek + '</td>');
                 }
             }
@@ -768,7 +781,7 @@ Datepicker.prototype = {
                     if (target.is('.day') && !target.is('.disabled')) {
                         var day = parseInt(target.text(), 10) || 1;
                         var year = this.viewDate.getUTCFullYear();
-                        var month : number = this.viewDate.getUTCMonth();
+                        var month: number = this.viewDate.getUTCMonth();
                         if (target.is('.old')) {
                             if (month === 0) {
                                 month = 11;
@@ -998,7 +1011,7 @@ var dates = $.fn.datepicker.dates = {
     }
 };
 
-var DPGlobal :any = {
+var DPGlobal: any = {
     modes: [
         {
             clsName: 'days',
@@ -1125,7 +1138,7 @@ var DPGlobal :any = {
         return date;
     },
     formatDate: function (date, format, language) {
-        var val :any = {
+        var val: any = {
             d: date.getUTCDate(),
             D: dates[language].daysShort[date.getUTCDay()],
             DD: dates[language].days[date.getUTCDay()],
@@ -1138,7 +1151,7 @@ var DPGlobal :any = {
         val.dd = (val.d < 10 ? '0' : '') + val.d;
         val.mm = (val.m < 10 ? '0' : '') + val.m;
         var date = [];
-        var seps :any = $.extend([], format.separators);
+        var seps: any = $.extend([], format.separators);
         for (var i = 0, cnt = format.parts.length; i < cnt; i++) {
             if (seps.length)
                 date.push(seps.shift());
@@ -1146,15 +1159,15 @@ var DPGlobal :any = {
         }
         return date.join('');
     },
-    headTemplate: '<thead>' +    '<tr>' +    '<th class="prev"><i class="icon-arrow-left"/></th>' +    '<th colspan="5" class="switch"></th>' +
-    '<th class="next"><i class="icon-arrow-right"/></th>' +    '</tr>' +    '</thead>',
+    headTemplate: '<thead>' + '<tr>' + '<th class="prev"><i class="icon-arrow-left"/></th>' + '<th colspan="5" class="switch"></th>' +
+    '<th class="next"><i class="icon-arrow-right"/></th>' + '</tr>' + '</thead>',
     contTemplate: '<tbody><tr><td colspan="7"></td></tr></tbody>',
     footTemplate: '<tfoot><tr><th colspan="7" class="today"></th></tr></tfoot>'
 };
 DPGlobal.template = '<div class="datepicker">' +
-    '<div class="datepicker-days">' + '<table class=" table-condensed">' + DPGlobal.headTemplate + '<tbody></tbody>'
-    + DPGlobal.footTemplate + '</table>' + '</div>' + '<div class="datepicker-months">' + '<table class="table-condensed">' + DPGlobal.headTemplate +
-    DPGlobal.contTemplate +DPGlobal.footTemplate +'</table>' +'</div>' +'<div class="datepicker-years">' +'<table class="table-condensed">' +
-    DPGlobal.headTemplate +DPGlobal.contTemplate +DPGlobal.footTemplate +'</table>' +'</div>' +'</div>';
+'<div class="datepicker-days">' + '<table class=" table-condensed">' + DPGlobal.headTemplate + '<tbody></tbody>'
++ DPGlobal.footTemplate + '</table>' + '</div>' + '<div class="datepicker-months">' + '<table class="table-condensed">' + DPGlobal.headTemplate +
+DPGlobal.contTemplate + DPGlobal.footTemplate + '</table>' + '</div>' + '<div class="datepicker-years">' + '<table class="table-condensed">' +
+DPGlobal.headTemplate + DPGlobal.contTemplate + DPGlobal.footTemplate + '</table>' + '</div>' + '</div>';
 
 

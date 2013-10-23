@@ -42,6 +42,22 @@ export class VXComboboxBase extends VXB.VXEditorBase {
         }
     }
 
+    private _noneselectedtext: string = "Nothing selected";
+    /*
+    * display selected count insted of values
+    * The number of minimum items that will show count insted of values
+    */
+    public get NoneSelectedText(): string {
+        return this._noneselectedtext;
+    }
+    public set NoneSelectedText(val: string) {
+        if (val != this._noneselectedtext) {
+            this._noneselectedtext = val;
+            this.draw(true);
+        }
+    }
+
+
     private _showselectioncount: number = 3;
     /*
     * display selected count insted of values
@@ -70,7 +86,7 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     }
 
 
-    private _combostyle: V.ComboStyle = V.ComboStyle.btn_default;
+    private _combostyle: V.ComboStyle = V.ComboStyle.Default;
     public get ComboStyle(): V.ComboStyle {
         return this._combostyle;
     }
@@ -135,12 +151,12 @@ export class VXComboboxBase extends VXB.VXEditorBase {
         if (this.ShowSearchBox) this.jEdit.attr('data-live-search', "true");
         var options: any = new Object();
         switch (this.ComboStyle) {
-            case V.ComboStyle.btn_default: break;
-            case V.ComboStyle.btn_primary: options.style = "btn-primary"; break;
-            case V.ComboStyle.btn_info: options.style = "btn-info"; break;
-            case V.ComboStyle.btn_success: options.style = "btn-success"; break;
-            case V.ComboStyle.btn_warning: options.style = "btn-warning"; break;
-            case V.ComboStyle.btn_danger: options.style = "btn-danger"; break;
+            case V.ComboStyle.Default: break;
+            case V.ComboStyle.Primary: options.style = "btn-primary"; break;
+            case V.ComboStyle.Info: options.style = "btn-info"; break;
+            case V.ComboStyle.Success: options.style = "btn-success"; break;
+            case V.ComboStyle.Warning: options.style = "btn-warning"; break;
+            case V.ComboStyle.Danger: options.style = "btn-danger"; break;
         }
 
         this.items.forEach((item: VXComboItem) => {
@@ -162,10 +178,29 @@ export class VXComboboxBase extends VXB.VXEditorBase {
         });
         options.width = 'fit';
         options.selectedTextFormat = "count>" + this.ShowSelectionCount;
+        options.noneSelectedText = this.NoneSelectedText;
 
         this.jEdit.selectpicker(options);
 
         super.create();
+    }
+
+    public get SelectedItems(): V.TComboItem[] {
+        var arr: V.TComboItem[] = [];
+        this.items.forEach((item) => { if (item.Checked) arr.push(item) });
+        return arr;
+    }
+
+    public set SelectedItems(val: V.TComboItem[]) {
+        this.items.forEach((item) => { item.Checked = false });
+        for (var i = 0; i < val.length; i++) {
+            var rc = this.items.FindItemByID(val[i].ID);
+            if (rc) {
+                rc.Checked = true;
+                if (!this.MultipleSelect) break;
+            }
+        }
+        this.draw(false);
     }
 
     public draw(reCreate: boolean) {
@@ -194,8 +229,7 @@ export class VXCombobox extends VXComboboxBase {
     public create() {
         super.create();
         var self = this;
-        this.jEdit.change(() => {
-            var a: string;
+        this.jEdit.change((item) => {
             var currVal: string[] = this.jEdit.selectpicker("val").toString().split(',');
             var newVal: Array = new Array();
             this.items.forEach((item) => { item.Checked = false; });
@@ -228,7 +262,7 @@ export class VXCombobox extends VXComboboxBase {
                 if (localValue != null) Value.push(localValue.ID);
             }
         }
-        this.jEdit.selectpicker('val', Value);   
+        if (this.jEdit.selectpicker("val").toString() != Value.toString())  this.jEdit.selectpicker('val', Value);   
     }
 
 }
@@ -330,7 +364,7 @@ export class VXDBCombobox extends VXComboboxBase {
                 if (localValue != null) Value.push(localValue.ID);
             }
         }
-        this.jEdit.selectpicker('val', Value);
+        if (this.jEdit.selectpicker("val").toString() != Value.toString()) this.jEdit.selectpicker('val', Value);
 
     }
 

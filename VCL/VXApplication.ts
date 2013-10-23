@@ -396,7 +396,7 @@ export class VXApplication {
             $("<span/>").text(item.Text).appendTo(baritem);
             var lineItem: JQuery = $('<li>/');
             baritem.appendTo(lineItem);
-            if (item.menu.size() > 0) {
+            if (item.menu.length() > 0) {
 
                 item.menu.createmenu('dropdown-menu').appendTo(lineItem);
                 baritem.addClass('dropdown-toggle');

@@ -6,7 +6,59 @@ import VXCB = require("VCL/VXChartBase");
 
 declare var Raphael;
 export class VXChartDot extends VXCB.VXChartBase {
-    public onClicked: (value: V.TDotValue) => void;
+    public onClicked: (item: V.TDotValue) => void;
+
+    /*
+    * Occurs when the grid needs to paint a hint ,return a string
+    */
+    public onGetLabelText : (item: V.TDotValue) => string ;
+
+    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+        super(aOwner, renderTo);
+        this.FitToWidth = true;
+        this.Height = 200;
+
+        this.onGetLabelText = (item: V.TDotValue) => {
+            return item.Value + "\n" + item.LabelX + "\n" + item.LabelY;
+        }
+    }
+
+
+    private _titleX: string;
+    public get TitleX(): string {
+        return this._titleX;
+    }
+    public set TitleX(val: string) {
+        if (val != this._titleX) {
+            this._titleX = val;
+            this.draw(true);
+        }
+    }
+
+    private _titleY: string;
+    public get TitleY(): string {
+        return this._titleY;
+    }
+    public set TitleY(val: string) {
+        if (val != this._titleY) {
+            this._titleY = val;
+            this.draw(true);
+        }
+    }
+
+    private _showselecteditem: boolean = true;
+    /*
+    * whether or not to enable coloring higher value symbols with warmer hue
+    */
+    public get ShowSelectedItem(): boolean {
+        return this._showselecteditem;
+    }
+    public set ShowSelectedItem(val: boolean) {
+        if (val != this._showselecteditem) {
+            this._showselecteditem = val;
+            this.draw(true);
+        }
+    }
 
     private _heatmap: boolean = true;
     /*
@@ -66,7 +118,7 @@ export class VXChartDot extends VXCB.VXChartBase {
         if (!this.showed) return;
         this.create();
     }
-
+    private selectednode: any;
 
     private raphael: any;
     private dotchart: any;
@@ -83,7 +135,7 @@ export class VXChartDot extends VXCB.VXChartBase {
         var ids  = [];
         var axisy = [];
         var axisx = [];
-        if (this.values.size() == 0) return;
+        if (this.values.length() == 0) return;
        
         this.values.forEach((item) => {
             var idx = xSet.indexOf(item.LabelX);
@@ -108,16 +160,28 @@ export class VXChartDot extends VXCB.VXChartBase {
             axis: "0 0 1 1",
             axisxstep: axisx.length - 1, axisystep: axisy.length - 1,
             axisxlabels: axisx, axisylabels: axisy,
-            axisxtype: " ", axisytype: " ", opacity: this.Opacity,
+            axisxtype: " ", axisytype: " ", opacity: this.Opacity,titleX : this.TitleX,titleY : this.TitleY
 
         }).hover(function () {
-            var txt = this.value + "\n" + this.obj.LabelX + "\n" + this.obj.LabelY;
-            this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 0, this.r + 2).insertBefore(this);
+            var txt = "";
+            if (this.obj != null) txt = self.onGetLabelText(this.obj)
+            //this.value + "\n" + this.obj.LabelX + "\n" + this.obj.LabelY;
+            var w = self.jComponent.width() / 2;
+            if (this.x > w)
+                this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 180, this.r + 2).insertBefore(this);
+            else this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 0, this.r + 2).insertBefore(this);
             this.marker.show();
             }, function () {
                 this.marker && this.marker.hide();
             });
         this.dotchart.click(function (x, b, f) {
+            if (self.ShowSelectedItem) {
+                if (self.selectednode) {
+                    self.selectednode.attr({ stroke: "none", "stroke-width": 0 })
+                 }
+                self.selectednode = this;
+                this.attr({ stroke: "#000", "stroke-width": 2 })
+            }
             if (self.onClicked) self.onClicked(this.obj);
         });
     }

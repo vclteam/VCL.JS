@@ -9,6 +9,7 @@ export class VXDBGrid extends VXC.VXComponent {
     public needrecreate: boolean = false;
     private _dataset: VXD.VXDataset;
     private selectedRecordId: number;
+    public onRowClicked: () => void;
 
     public onGetRowStyle: (record: V.TRecord) => V.GridRowStyle;
 
@@ -17,7 +18,7 @@ export class VXDBGrid extends VXC.VXComponent {
         this.FitToWidth = true;
     }
 
-    private _showselectedrecord: boolean = false;
+    private _showselectedrecord: boolean = true;
     /*
     * Adds zebra-striping to any tdbgridt control.
     */
@@ -364,6 +365,19 @@ class VXDBGridDataSource {
 
         var _grid = this.grid;
 
+        //bind the clicked eventes
+        _grid.jComponent.find("." + _grid.ID + "-row").click(function (item) {
+            var recNum: number = parseInt($(this).attr('data-record'));
+            _grid.Dataset.Recno = recNum;
+            var recId = _grid.Dataset.getRecordIndex();
+            if (_grid.ShowSelectedRecord) {
+                _grid.jComponent.find('tr').removeClass('info success error warning Default');
+
+                _grid.jComponent.find('tr').filter('*[data-record="' + recId + '"]').addClass(V.GridRowStyle[_grid.SelectedRecordStyle].toLowerCase());
+            }
+            (<any>_grid).selectedRecordId = recId
+            if (_grid.onRowClicked()) _grid.onRowClicked();
+        });
         _grid.columns.forEach((columnItem: VXDBGridColumn) => {
             if (columnItem.onClicked != null) {
                 columnItem.grid.jComponent.find("." + columnItem.ID).click(function (item) {
@@ -377,7 +391,7 @@ class VXDBGridDataSource {
                     }
                     (<any>_grid).selectedRecordId = recId
 
-                    columnItem.onClicked();
+                    if (columnItem.onClicked()) columnItem.onClicked();
                 });
             }
             return true;
@@ -547,6 +561,7 @@ Datagrid.prototype = {
 
     renderData: function () {
         var self = this;
+        var _grid : VXDBGrid = this.options.dataSource.grid;
 
         this.$tbody.html(this.placeholderRowHTML(this.options.loadingHTML));
 
@@ -567,9 +582,12 @@ Datagrid.prototype = {
             self.updatePageDropdown(data);
             self.updatePageButtons(data);
 
+
+            //build up the current grid
             var rowCnt = self.options.dataOptions.pageSize;
             $.each(data.data, function (index, row) {
                 var LineHTML: string = "";
+                //checked
                 $.each(self.columns, function (index, column) {
                     if (column.property == '___CHECKED___') {
                         LineHTML += '<td style="text-align:center;overflow:hidden">  <input type="checkbox" class="___CHECKED___" ';
@@ -581,9 +599,13 @@ Datagrid.prototype = {
                         else if (column.align == 'c') LineHTML += '<td style="text-align:center;overflow:hidden">' + row[column.property] + '</td>';
                     }
                 });
+                //color class
+                var rowClass = "";
+                if (_grid) rowClass = _grid.ID + "-row";
                 if (row.___CLASSS___ != null)
-                    rowHTML += '<tr data-record=' + row.___RECORDID___ + ' class="' + V.GridRowStyle[row.___CLASSS___].toLowerCase() + '">' + LineHTML + '</tr>';
-                else rowHTML += '<tr data-record=' + row.___RECORDID___ + '>' + LineHTML + '</tr>';
+                    rowHTML += '<tr data-record=' + row.___RECORDID___ + ' class="'+rowClass +" "+ V.GridRowStyle[row.___CLASSS___].toLowerCase() + '">' + LineHTML + '</tr>';
+                else
+                    rowHTML += '<tr data-record=' + row.___RECORDID___ + ' class="' + rowClass+'">' + LineHTML + '</tr>';
                 rowCnt--;
             });
 

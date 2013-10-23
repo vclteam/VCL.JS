@@ -300,7 +300,7 @@ class Donut extends VXCB.EventEmitter {
         if (this.owner) {
             var owner = <VXChartDonut>this.owner;
 
-            if (owner.onClicked != null && idx <= owner.values.size()) (V.tryAndCatch(() => { owner.onClicked(owner.values.toArray()[idx]); }));
+            if (owner.onClicked != null && idx <= owner.values.length()) (V.tryAndCatch(() => { owner.onClicked(owner.values.toArray()[idx]); }));
         }
         return y;
     }
@@ -323,7 +323,7 @@ class Donut extends VXCB.EventEmitter {
             if (owner instanceof VXDBChartDonut && (<VXDBChartDonut>owner).Dataset != null){
                 (<VXDBChartDonut>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
             }
-            if (owner.onSelectionchanged != null && idx <= owner.values.size()) {
+            if (owner.onSelectionchanged != null && idx <= owner.values.length()) {
                 (V.tryAndCatch(() => { owner.onSelectionchanged(owner.values.toArray()[idx]); }));
             }
         }

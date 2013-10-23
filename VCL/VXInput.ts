@@ -124,6 +124,7 @@ export class VXDBInput extends VXB.VXInputBase {
             this.validateEnabled();
             this.create();
         }
+        this.initialized = true;
         this.jEdit.val(this.DataValue);
     }
 

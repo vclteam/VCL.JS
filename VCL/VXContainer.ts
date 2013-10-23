@@ -8,7 +8,6 @@ export class VXContainer extends VXC.VXComponent {
     public components = new VXO.VXCollection < VXC.VXComponent>();
     constructor(aOwner: VXC.VXComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.FitToWidth = true;
         if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
     }
 
@@ -32,10 +31,24 @@ export class VXContainer extends VXC.VXComponent {
         return true;
     }
 
+    private _dataset: VXD.VXDataset;
+    /*
+      * Specifies the dataset thfor the container,all sub component will bind to this dataset by default.
+      */
+    public get Dataset(): VXD.VXDataset {
+        return this._dataset;
+    }
+    public set Dataset(val: VXD.VXDataset) {
+        if (val != this._dataset) {  
+            this._dataset = val;
+        }
+    }
+
     private getProgressElement() :string {
         return "PROFRESS__" + this.ID;
     }
-    public showLoadingProgressBar() {
+
+    private  showLoadingProgressBar() {
        if ($("#" + this.getProgressElement()).length > 0) return; //alreay there
         var loadingHTML = '<div id="' + this.getProgressElement() +
             '" class="progress progress-striped active" style="top:50%;left:50%;z-index:9999;' +
@@ -43,26 +56,26 @@ export class VXContainer extends VXC.VXComponent {
         $(loadingHTML).appendTo($(this.jComponent));
     }
 
-    public hideLoadingProgressBar() {
+    private hideLoadingProgressBar() {
         $("#" + this.getProgressElement()).remove();
     }
 
 
     private activeQueries = new VXO.collections.Set<VXD.VXDatasetInt>();
-    public addQuery(query: VXD.VXDatasetInt) {
+    private addQuery(query: VXD.VXDatasetInt) {
         if (query == null) return;
         if (!query.ShowProgressBar) return;
         this.activeQueries.add(query);
         
-        if (this.activeQueries.size() > 0) this.showLoadingProgressBar();
+        if (this.activeQueries.length() > 0) this.showLoadingProgressBar();
     }
 
-    public removeQuery(query: VXD.VXDatasetInt) {
+    private removeQuery(query: VXD.VXDatasetInt) {
         if (query == null) return;
         if (!query.ShowProgressBar) return;
         this.activeQueries.remove(query);
 
-        if (this.activeQueries.size() == 0) this.hideLoadingProgressBar();
+        if (this.activeQueries.length() == 0) this.hideLoadingProgressBar();
     }
 
 }

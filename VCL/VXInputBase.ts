@@ -38,6 +38,7 @@ export class VXEditorBase extends VXC.VXComponent {
     public set LabelText(val: string) {
         if (val != this._labeltext) {
             this._labeltext = val;
+            this.LabelVisible = true;
             this.draw(true);
         }
     }

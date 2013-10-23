@@ -59,12 +59,12 @@ export class VXButton extends VXC.VXComponent {
         }
     }
 
-    public menu = new VXM.VXMenuItemCollection<VXM.VXMenuItem>();
-    public addMenuItem(text : string,onClicked?:()=>void): VXM.VXMenuItem {
+    public menuItems = new VXM.VXMenuItemCollection<VXM.VXMenuItem>();
+    public createMenuItem(text : string,onClicked?:()=>void): VXM.VXMenuItem {
         var menuItem = new VXM.VXMenuItem();
         menuItem.Text = text;
         menuItem.onClicked = onClicked;
-        this.menu.add(menuItem);
+        this.menuItems.add(menuItem);
         return menuItem;
     }
 
@@ -107,7 +107,8 @@ export class VXButton extends VXC.VXComponent {
         this.jImage = $('<i/>');
         this.jText = $('<span/>');
 
-        this.jBtn = $('<a/>');
+        this.jBtn = $('<button/>');
+        this.jBtn.css('height', '100%');
         this.jBtn.addClass("btn");
         this.jBtn.css('display', this.jComponent.css('display'));
         //this.jBtn.css('padding-right', '0px');
@@ -141,11 +142,12 @@ export class VXButton extends VXC.VXComponent {
 
         
         
-        if (this.menu.size() > 0) {
+        if (this.menuItems.length() > 0) {
             this.jBtn.append($('<span class="caret"/>'));
             this.jBtn.attr('data-toggle', "dropdown");
-            this.jBtn.addClass('dropdown-toggle')
-            this.menu.createmenu('dropdown-menu').appendTo(this.jComponent);
+            this.jBtn.addClass('dropdown-toggle');
+            this.menuItems.createmenu('dropdown-menu').appendTo(this.jComponent);
+            $('.dropdown-toggle').dropdown()
         }
         this.jBtn.append(this.jText);
 
@@ -176,7 +178,7 @@ export class VXButton extends VXC.VXComponent {
         this.initialized = true;
 
         $(this.jText).text(this.Text);
-        
+    
     }
 }
 

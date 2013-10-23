@@ -106,13 +106,13 @@ export class VXQuery extends VXQueryBase {
         if (this.onBeforeOpen != null) (V.tryAndCatch(() => { this.onBeforeOpen(this); }))
         var server = new VXDS.VXServer();
         var paramJSON = this.paramAsJSON();
-        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).addQuery(this); }
+        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).addQuery(this); }
         server.send("Query", { __EXECUTE__: false, __SQL__: this.SQL, __SQLPARAM__: paramJSON, __DB__: this.ConnectionName }, (data) => {
             this.loadRemoteResults(data);
-            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).removeQuery(this); }
+            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
         },
             (errorMessage: string) => {
-                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).removeQuery(this); }
+                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
 
                 if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
             else V.Application.raiseException(errorMessage);
@@ -126,13 +126,13 @@ export class VXQuery extends VXQueryBase {
     public ExecSQL(onComplete?: (data) => {}) {
         var server = new VXDS.VXServer();
         var paramJSON = this.paramAsJSON();
-        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).addQuery(this); }
+        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).addQuery(this); }
         server.send("Query", { __EXECUTE__: true, __SQL__: this.SQL, __SQLPARAM__: paramJSON, __DB__: this.ConnectionName }, (data) => {
             if (this.onExecuteCompleted != null) (V.tryAndCatch(() => { this.onExecuteCompleted(); }))
-            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).removeQuery(this); }
+            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
         },
             (errorMessage: string) => {
-                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).removeQuery(this); }
+                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
 
                 if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
             else V.Application.raiseException(errorMessage);
@@ -164,13 +164,13 @@ export class VXQueryRemote extends VXQueryBase {
         var server = new VXDS.VXServer();
         var paramJSON = this.paramAsJSON();
 
-        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).addQuery(this); }
+        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).addQuery(this); }
         server.send("RemoteQuery", { __QUERYID__: this.QueryID, __SQLPARAM__: paramJSON }, (data) => {
-            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).removeQuery(this); }
+            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
             this.loadRemoteResults(data);
         },
             (errorMessage: string) => {
-                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).removeQuery(this); }
+                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
 
                 if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
            else V.Application.raiseException(errorMessage);

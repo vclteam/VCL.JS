@@ -692,7 +692,7 @@ export module collections {
             if (!(other instanceof collections.LinkedList)) {
                 return false;
             }
-            if (this.size() !== other.size()) {
+            if (this.length() !== other.length()) {
                 return false;
             }
             return this.equalsAux(this.firstNode, other.firstNode, eqF);
@@ -800,7 +800,7 @@ export module collections {
          * Returns the number of elements in this list.
          * @return {number} the number of elements in this list.
          */
-        size(): number {
+        length(): number {
             return this.nElements;
         }
 
@@ -1043,7 +1043,7 @@ export module collections {
          * Returns the number of keys in this dictionary.
          * @return {number} the number of key-value mappings in this dictionary.
          */
-        size(): number {
+        length(): number {
             return this.nElements;
         }
 
@@ -1077,7 +1077,7 @@ export module collections {
     // 	if(!(other instanceof collections.Dictionary)){
     // 		return false;
     // 	}
-    // 	if(this.size() !== other.size()){
+    // 	if(this.length() !== other.length()){
     // 		return false;
     // 	}
     // 	return this.equalsAux(this.firstNode,other.firstNode,eqF);
@@ -1251,8 +1251,8 @@ export module collections {
          * Returns the number of keys in this dictionary.
          * @return {number} the number of key-value mappings in this dictionary.
          */
-        size(): number {
-            return this.dict.size();
+        length(): number {
+            return this.dict.length();
         }
 
         /**
@@ -1469,7 +1469,7 @@ export module collections {
          * Returns the number of elements in this heap.
          * @return {number} the number of elements in this heap.
          */
-        size(): number {
+        length(): number {
             return this.data.length;
         }
         /**
@@ -1554,8 +1554,8 @@ export module collections {
          * Returns the number of elements in this stack.
          * @return {number} the number of elements in this stack.
          */
-        size(): number {
-            return this.list.size();
+        length(): number {
+            return this.list.length();
         }
 
         /**
@@ -1650,7 +1650,7 @@ export module collections {
          * @return {*} the head of this queue, or undefined if this queue is empty.
          */
         dequeue(): T {
-            if (this.list.size() !== 0) {
+            if (this.list.length() !== 0) {
                 var el = this.list.first();
                 this.list.removeElementAtIndex(0);
                 return el;
@@ -1663,7 +1663,7 @@ export module collections {
          */
         peek(): T {
 
-            if (this.list.size() !== 0) {
+            if (this.list.length() !== 0) {
                 return this.list.first();
             }
             return undefined;
@@ -1673,8 +1673,8 @@ export module collections {
          * Returns the number of elements in this queue.
          * @return {number} the number of elements in this queue.
          */
-        size(): number {
-            return this.list.size();
+        length(): number {
+            return this.list.length();
         }
 
         /**
@@ -1705,7 +1705,7 @@ export module collections {
          * otherwise.
          */
         isEmpty(): boolean {
-            return this.list.size() <= 0;
+            return this.list.length() <= 0;
         }
 
         /**
@@ -1784,7 +1784,7 @@ export module collections {
          *  or undefined if this queue is empty.
          */
         dequeue(): T {
-            if (this.heap.size() !== 0) {
+            if (this.heap.length() !== 0) {
                 var el = this.heap.peek();
                 this.heap.removeRoot();
                 return el;
@@ -1823,8 +1823,8 @@ export module collections {
          * Returns the number of elements in this priority queue.
          * @return {number} the number of elements in this priority queue.
          */
-        size(): number {
-            return this.heap.size();
+        length(): number {
+            return this.heap.length();
         }
 
         /**
@@ -1949,7 +1949,7 @@ export module collections {
          */
         isSubsetOf(otherSet: Set<T>): boolean {
 
-            if (this.size() > otherSet.size()) {
+            if (this.length() > otherSet.length()) {
                 return false;
             }
 
@@ -2009,8 +2009,8 @@ export module collections {
          * Returns the number of elements in this set.
          * @return {number} the number of elements in this set.
          */
-        size(): number {
-            return this.dictionary.size();
+        length(): number {
+            return this.dictionary.length();
         }
 
         /**
@@ -2192,7 +2192,7 @@ export module collections {
          * Returns the number of elements in this bag.
          * @return {number} the number of elements in this bag.
          */
-        size(): number {
+        length(): number {
             return this.nElements;
         }
 

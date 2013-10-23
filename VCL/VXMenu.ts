@@ -5,6 +5,7 @@ import VXU = require("VCL/VXUtils");
 export class VXMenuItem extends VXO.VXCollectionItem {
     public jComponent: JQuery;
     public create() {
+        var self = this;
         if (this.jComponent == null) this.jComponent = $('<li/>');
         if (!this.Enabled) this.jComponent.addClass('disabled');
         else this.jComponent.removeClass('disabled');
@@ -14,10 +15,9 @@ export class VXMenuItem extends VXO.VXCollectionItem {
         else {
             this.jComponent.empty();
             var itemRef: JQuery = $('<a/>');
-            itemRef.attr('href', '#');
             itemRef.click(() => {
                 if (this.Enabled && this.onClicked != null) {
-                    (V.tryAndCatch(() => { this.onClicked(); }))
+                    (V.tryAndCatch(() => { this.onClicked(self); }))
                 }
             })
             itemRef.text(this.Text);
@@ -109,7 +109,7 @@ export class VXMenuItem extends VXO.VXCollectionItem {
         }
     }
 
-    public onClicked: () => void;
+    public onClicked: (item: V.TMenuItem) => void;
 }
 
 

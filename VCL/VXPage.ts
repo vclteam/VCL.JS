@@ -11,10 +11,11 @@ import VXD = require("VCL/VXDataset");
 export class VXPage extends VXCO.VXContainer {
     constructor() {
         super(null, null);
-        //var htmlFileName = this.getClassName();
-        //TODO: need to support path
+
         var x = new VXDS.VXServer(false);
-        x.getHTML((<any>this).HTMLfileName,
+        var htmlFilename: string = (<any>this).HTMLfileName;
+        if (htmlFilename == null) htmlFilename = this.getClassName() + ".html";
+        x.getHTML(htmlFilename,
             (htmlFile: any) => {
                 $(this.jComponent).html(htmlFile);
                 if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))

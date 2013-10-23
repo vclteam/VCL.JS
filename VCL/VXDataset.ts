@@ -4,22 +4,22 @@ import VXO = require("VCL/VXObject");
 import VXC = require("VCL/VXComponent");
 
 export interface VXDatasetInt {
-    ShowProgressBar : boolean;
+    ShowProgressBar: boolean;
 }
 
-export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
+export class VXDataset extends VXO.VXObject implements VXDatasetInt {
     public recordset: any[] = [];
     private tempRecordset: Object[];
     private sourceRecordset: Object[];
     private sortProperty: string;
     private sortDirection: string;
 
-    
+
     public onBeforeOpen: (dataset: VXDataset) => void;
     public onAfterOpen: (dataset: VXDataset) => void;
 
     public owner: VXC.VXComponent;
-    constructor(aOwner : VXC.VXComponent) {
+    constructor(aOwner: VXC.VXComponent) {
         super();
         this.owner = aOwner;
     }
@@ -48,29 +48,25 @@ export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
     * Use applyFilter to specify a dataset filter. When filtering is applied to a dataset, only those records that meet a filter's conditions are available.
     */
     public applyFilter(filterCallback: (record?: V.TRecord) => boolean) {
-        var self = this;
         this.tempRecordset = null;
         if (this.sourceRecordset == null) this.sourceRecordset = this.recordset;
         else this.recordset = this.sourceRecordset;
 
         var tempRecordset = [];
-        var rec = new V.TRecord(null);
         this.DisableControls();
         var recIndex = 0;
-        this.first()
-        while (true) {
-            var item = this.recordset[this.Recno];
-            rec.recordset = [item];
-            
-            if (filterCallback(rec)) {
+        for (var i = 0, len = this.recordset.length; i < len; i++) {
+            this.Recno = i;
+
+            if (filterCallback()) {
+                var item = jQuery.extend(true, {}, this.recordset[i]);
                 tempRecordset.push(item);
                 item["___RECORDID___"] = recIndex;
                 recIndex++;
             }
-            if (!this.next()) break;
         }
-        this.DisableControls();
         this.recordset = tempRecordset;
+        this.EnableControls(); 
         this.first();
         this.stateChanged();
     }
@@ -78,23 +74,21 @@ export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
     /**
     *  Iterator function, which can be used to seamlessly iterate over all records
     */
-    public forEach(Callback: () => void) {
+    public forEach(Callback: () => void ) {
         this.DisableControls();
         var recIndex = this.Recno;
-        this.first();
-        if (this.RecordCount > 0) while (true) {
+        for (var i = 0, len = this.recordset.length; i < len; i++) {
+            this.Recno = i;
             Callback();
-            if (!this.next()) break;
         }
         this.Recno = recIndex;
-        this.EnableControls();
-     
+        this.EnableControls(); 
     }
 
     /**
     * Clear the filter for a dataset.
     */
-    public cleareFilter(filterCallback: () => boolean) {
+    public clearFilter() {
         this.tempRecordset = null;
         this.recordset = this.sourceRecordset;
         this.first();
@@ -112,7 +106,7 @@ export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
         return a[fieldname.toUpperCase()];
     }
 
-    public setFieldValue(fieldname: string,value : any): void {
+    public setFieldValue(fieldname: string, value: any): void {
         if (this.Recno == -1) return null;
         var a = this.recordset[this.Recno];
         a[fieldname.toUpperCase()] = value;
@@ -147,18 +141,18 @@ export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
     * Disables data display in data bounded components associated with the dataset.
     **/
     private _enabledControl: boolean = true;
-    public  DisableControls() {
+    public DisableControls() {
         this._enabledControl = false;
     }
-  
+    
     /**
     * Enable data display in data bounded components associated with the dataset.
     **/
 
-    public  EnableControls() {
+    public EnableControls() {
         this._enabledControl = true;
     }
-   
+    
 
     private _showprogressbar: boolean = true;
     public get ShowProgressBar(): boolean {
@@ -176,11 +170,12 @@ export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
         return this._recno;
     }
     public set Recno(val: number) {
-        if (val > (this.RecordCount-1)) val = this.RecordCount - 1;
-        if (val <0) val = 0;
-       this._recno = val;
+        if (this.RecordCount < 1) val = -1
+        else if (val > (this.RecordCount - 1)) val = this.RecordCount - 1;
+        else if (val < 0) val = 0;
+        this._recno = val;
 
-       if (this._enabledControl) this.selectionChanged();
+        if (this._enabledControl) this.selectionChanged();
     }
 
     private _active: boolean = false;
@@ -193,7 +188,7 @@ export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
         return this.recordset[this.Recno]["___RECORDID___"];
     }
 
-    public setData(data:any[]) {
+    public setData(data: any[]) {
         this.recordset = [];
         this.sourceRecordset = null;
         if (data == null) {
@@ -224,7 +219,7 @@ export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
 
     }
 
-    public getRecords(start: number, end: number, sortDirection: string, sortProperty : string) : any {
+    public getRecords(start: number, end: number, sortDirection: string, sortProperty: string): any {
         if (sortDirection == null) return this.recordset.slice(start, end + 1); //not sort was mentions
         sortProperty = sortProperty.toUpperCase();
         sortDirection = sortDirection.toUpperCase();
@@ -261,7 +256,7 @@ export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
     **/
 
     public next(): boolean {
-        if ((this.RecordCount-1) > this.Recno) {
+        if ((this.RecordCount - 1) > this.Recno) {
             this.Recno++;
             return true;
         } else return false;
@@ -283,14 +278,14 @@ export class VXDataset extends VXO.VXObject implements VXDatasetInt  {
     **/
 
     public first(): void {
-        if (this.RecordCount > 0) this.Recno = 0;
+        this.Recno = 0;
     }
 
     /**
     * Moves to the last record in the dataset.
     **/
     public last(): void {
-        if (this.RecordCount > 0) this.Recno = this.RecordCount;
+        this.Recno = this.RecordCount;
     }
 
 

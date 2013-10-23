@@ -24,10 +24,9 @@ export class VXPanel extends VXCO.VXContainer {
     public jHeader: JQuery;
     private jHeaderText: JQuery;
     public jContent: JQuery;
-    public jImage: JQuery;
     private jButton: JQuery;
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string,headerText? : string) {
+    constructor(aOwner: VXC.VXComponent, renderTo?: string, headerText?: string) {
         super(aOwner, renderTo);
         if (headerText != null) this.HeaderText = headerText;
     }
@@ -42,24 +41,6 @@ export class VXPanel extends VXCO.VXContainer {
             this.draw(true);
         }
     }
-    /*
-    * Set the opacity level of the background image
-    * valid values 0 - 100
-    */ 
-
-    private _backgroundimageopacity: number = 10;
-    public get BackgroundImageOpacity(): number {
-        return this._backgroundimageopacity;
-    }
-    public set BackgroundImageOpacity(val: number) {
-        if (val != this._backgroundimageopacity) {
-            if (val < 0) val = 0;
-            else if (val > 100) val = 100;
-            this._backgroundimageopacity = val;
-            this.draw(true);
-        }
-    }
-
 
 
     private _hedderstyle: V.HeaderStyle = V.HeaderStyle.Default;
@@ -73,7 +54,7 @@ export class VXPanel extends VXCO.VXContainer {
         }
     }
 
-    private _closebuttonvisible: boolean = true;
+    private _closebuttonvisible: boolean = false;
     public get CloseButtonVisible(): boolean {
         return this._closebuttonvisible;
     }
@@ -98,7 +79,23 @@ export class VXPanel extends VXCO.VXContainer {
     }
 
 
-    
+
+
+    private _closebuttonaligment: V.CloseButtonAlignment = V.CloseButtonAlignment.Right;
+    /*
+    * Text specify the panel header text string .
+    */
+    public get CloseButtonAlignment(): V.CloseButtonAlignment {
+        return this._closebuttonaligment;
+    }
+    public set CloseButtonAlignment(val: V.CloseButtonAlignment) {
+        if (val != this._closebuttonaligment) {
+            this._closebuttonaligment = val;
+            this.draw(false);
+        }
+    }
+
+
     private _headertext: string;
     /*
     * Text specify the panel header text string .
@@ -134,7 +131,7 @@ export class VXPanel extends VXCO.VXContainer {
             this.draw(true);
         }
     }
-    public onCloseButtonClicked: (sender : VXC.VXComponent) => void;
+    public onCloseButtonClicked: (sender: VXC.VXComponent) => void;
     public onHeaderClicked: (sender: VXC.VXComponent) => void;
 
     public create() {
@@ -160,16 +157,16 @@ export class VXPanel extends VXCO.VXContainer {
             this.jHeader.addClass('panel-header');
             this.jHeader.click(() => {
                 if (this.onHeaderClicked != null) (V.tryAndCatch(() => { this.onHeaderClicked(self); }));
-    
+            
             })
             this.jHeader.appendTo(this.jContent);
-            
+
             if (this.HeaderTextStyle == V.HeaderTextStyle.h4)
                 this.jHeaderText = $("<h4>").css('margin', '0px');
             else if (this.HeaderTextStyle == V.HeaderTextStyle.h5)
                 this.jHeaderText = $("<h5>").css('margin', '0px');
             else if (this.HeaderTextStyle == V.HeaderTextStyle.h6)
-                this.jHeaderText = $("<h6>").css('margin','0px');
+                this.jHeaderText = $("<h6>").css('margin', '0px');
             else if (this.HeaderTextStyle == V.HeaderTextStyle.lead) {
                 this.jHeaderText = $("<div>");
                 this.jComponent.addClass('lead');
@@ -183,27 +180,38 @@ export class VXPanel extends VXCO.VXContainer {
             this.jHeaderText.addClass('pull-left').css('width', '90%').css('overflow', 'hidden').css('white-space', 'nowrap');
             this.jHeaderText.appendTo(this.jHeader);
             this.jComponent.css('display', 'block');
-            this.jContent.append(this.jComponent);        
-            if (this.Width  > 0) this.jContent.width(this.Width - this.BorderWidth*2);
-            
-            this.jButton = $('<div>');
-            this.jButton.addClass('pull-right panel-button');//.css('position','absolute');
-            this.jButton.addClass(V.iconEnumToBootstrapStyle(this.ButtonIcon == null ? V.ButtonIcon.icon_remove:this.ButtonIcon));
+            this.jContent.append(this.jComponent);
+            if (this.Width > 0) this.jContent.width(this.Width - this.BorderWidth * 2);
 
-            this.jButton.appendTo(this.jHeader);
+            this.jButton = $('<div>');
+            this.jButton.addClass('panel-button');//.css('position','absolute');
+            if (this.CloseButtonAlignment == V.CloseButtonAlignment.Left) {
+                this.jButton.addClass('pull-left');
+            } else {
+                this.jButton.addClass('pull-right');
+
+            }
+            this.jButton.prependTo(this.jHeader);
+            this.jButton.addClass(V.iconEnumToBootstrapStyle(this.ButtonIcon == null ? V.ButtonIcon.icon_remove : this.ButtonIcon));
+
+
             this.jButton.click(() => {
                 if (this.onCloseButtonClicked != null) (V.tryAndCatch(() => { this.onCloseButtonClicked(self); }));
                 else this.destroy();
             })
 
-           
+
             var x = this.jComponent;
             this.jComponent = this.jContent;
             this.jContent = x;
+            this.jContent.css('overflow', 'visible');
         }
         if (this.CloseButtonVisible) this.jButton.show()
         else this.jButton.hide();
+
         this.jComponent.css('border-width', this.BorderWidth);
+        this.jHeader.css('border-top-width', this.BorderWidth);
+
 
         this.jHeader.removeClass(function (index, css) {
             return (css.match(/\panel-header-\S+/g) || []).join(' ');
@@ -216,14 +224,7 @@ export class VXPanel extends VXCO.VXContainer {
         });
 
         if (this.BackgroundImageURL != null && this.BackgroundImageURL.length > 0) {
-            if (this.jImage == null) {
-                this.jImage = $('<div>');
-                this.jImage.prependTo(this.jComponent);
-                //this.jImage.click((event) => {
-                //    event.stopPropagation();
-                //});
-            }
-            this.jImage.css('background-image', 'url(' + this.BackgroundImageURL + ')').css('background-size', 'cover').css('opacity', this.BackgroundImageOpacity / 100).css('filter', ' alpha(opacity = ' + this.BackgroundImageOpacity + ')').css('position', 'absolute').css('width', '100%').css('height', '100%');
+            this.jComponent.css('background-image', 'url(' + this.BackgroundImageURL + ')').css('background-size', 'cover');
         }
 
         switch (this.HeaderStyle) {

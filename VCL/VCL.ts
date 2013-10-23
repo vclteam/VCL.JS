@@ -48,6 +48,7 @@ export class TToggleSwitch extends VXButtonMod.VXToggleSwitch { };
 export class TInput extends VXInputMod.VXInput { };
 export class TInputDate extends VXInputDateMod.VXDateInput { };
 export class TDBInputDate extends VXInputDateMod.VXDBDateInput { };
+export class TComboItem extends VXComboboxMod.VXComboItem { };
 export class TCombobox extends VXComboboxMod.VXCombobox { };
 export class TDBCombobox extends VXComboboxMod.VXDBCombobox { };
 export class TListBox extends VXlistboxMod.VXListbox { };
@@ -155,6 +156,10 @@ export class TNavbarItem extends VXAppMod.VXNavbarItem { };
 */
 export var Application: VXAppMod.VXApplication = new VXAppMod.VXApplication();
 export var Global: any = {};
+export enum CalendarType {
+    Daily,
+    Monthly
+}
 
 export enum ButtonStyle {
     Default,
@@ -319,12 +324,17 @@ export enum ButtonIcon {
 
 
 export enum ComboStyle {
-    btn_default,
-    btn_primary,
-    btn_info,
-    btn_success,
-    btn_warning,
-    btn_danger
+    Default,
+    Primary,
+    Info,
+    Success,
+    Warning,
+    Danger
+}
+
+export enum CloseButtonAlignment {
+    Left,
+    Right
 }
 
 
@@ -338,6 +348,26 @@ export enum ItemAlignment {
     Right
 }
 
+export enum Cursor {
+    Default,
+    Auto,
+    Crosshair,
+    E_resize,
+    Help,
+    Move,
+    N_resize,
+    NE_resize,
+    NW_resize,
+    Pointer,
+    Progress,
+    S_resize,
+    Se_resize,
+    Sw_resize,
+    Text,
+    W_resize,
+    Wait,
+    Inherit
+}
 
 export enum TextAlignment {
     Left,
@@ -406,7 +436,7 @@ export enum SelectedRowStyle {
 
 
 
-export function tryAndCatch(callback: () => void ) {
+export function tryAndCatch(callback: () => void) {
     try { callback() } catch (err) { Application.raiseException(err) }
 }
 

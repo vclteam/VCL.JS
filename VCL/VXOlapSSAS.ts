@@ -126,7 +126,7 @@ export class VXOlapSSAS extends VXD.VXDataset {
 
 
     public open() {
-        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).addQuery(this); }
+        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).addQuery(this); }
         new V.TServer().callServerMethod("SSAS", {
             __FUNCTION__: "SELECT",
             __MDX__: this.MDX,
@@ -136,7 +136,7 @@ export class VXOlapSSAS extends VXD.VXDataset {
             __DB__: this.ConnectionName
 
         }, (data: any) => {
-                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).removeQuery(this); }
+            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
                 var recordSet: any[] = [];
 
                 var members: any[] = data.dictionary;
@@ -183,7 +183,7 @@ export class VXOlapSSAS extends VXD.VXDataset {
             
 
             , (errorMessage: string) => {
-                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<VXCO.VXContainer>this.owner).removeQuery(this); }
+                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
 
                 if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
            else V.Application.raiseException(errorMessage);
