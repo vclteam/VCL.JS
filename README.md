@@ -31,6 +31,9 @@ You may also load the visual studio plugin in which includes everything you need
 
 [See `CONTRIBUTING.md`](https://github.com/vclteam/VCL.JS/blob/master/CONTRIBUTING.md)
 
+# Documentation
+http://vcljs.com/components-3/
+
 # Into video
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=Hd_U3XIHh6w
 " target="_blank"><img src="http://img.youtube.com/vi/Hd_U3XIHh6w/0.jpg" 
