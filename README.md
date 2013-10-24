@@ -1,7 +1,7 @@
 WHAT IS VCL.JS?
 ======
 
-# VCL.JS a TypScript component based framework for enterprise web application.
+## VCL.JS a TypScript component based framework for enterprise web application.
 
 VCL.JS is a TypeScript framework that does all of the heavy work that you'd normally have to do by hand. 
 There are tasks that are common to every enterprise web app; 
