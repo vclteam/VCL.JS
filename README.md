@@ -27,14 +27,14 @@ For a getting started please refer to our website.
 
 You may also load the visual studio plugin in which includes everything you need to get started.
 
-# Contribution
-
-[See `CONTRIBUTING.md`](https://github.com/vclteam/VCL.JS/blob/master/CONTRIBUTING.md)
 
 # Documentation
 #### http://vcljs.com/components-3/
 
-# Inrto video
+# Contribution
+[See `CONTRIBUTING.md`](https://github.com/vclteam/VCL.JS/blob/master/CONTRIBUTING.md)
+
+# Introduction video
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=Hd_U3XIHh6w
 " target="_blank"><img src="http://img.youtube.com/vi/Hd_U3XIHh6w/0.jpg" 
 alt="IMAGE ALT TEXT HERE" width="280" height="180" border="10" /></a>
