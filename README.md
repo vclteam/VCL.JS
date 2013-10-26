@@ -27,7 +27,7 @@ For a getting started please refer to our website.
 
 You may also load the visual studio plugin in which includes everything you need to get started.
 
-Building and running the sample API application
+Building and running the sample application
 ===============================================
 - Download and install TypeScript.
 - Download and instal VCL.JS plugin from this page
