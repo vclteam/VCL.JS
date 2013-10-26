@@ -27,6 +27,18 @@ For a getting started please refer to our website.
 
 You may also load the visual studio plugin in which includes everything you need to get started.
 
+Building and running the sample API application
+===============================================
+- Download and install TypeScript.
+- Download and instal VCL.JS plugin from this page
+- Start visual studio 2012
+- Create a new project - File/New project
+- Make sure .net 4 and above are selected
+- Search for vcl template and select "VCL-SampleProject"
+- Press OK
+- Right click on defaut.html and select "set as start page"
+- Run the project.
+
 
 # Documentation
 #### http://vcljs.com/components-3/
