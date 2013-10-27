@@ -18,7 +18,28 @@ These are the features that make VCL.JS a joy to use:
 - Twitter bootstrap 
 - AMD - Module loader
 
+##Friendly APIs help you get your job done—fast.
 
+//Simple dbgrid bounded to a query
+import V = require("VCL/VCL");
+export class PageHome extends V.TPage {
+  constructor() {
+    super();
+
+    //create a backend query
+    var qur = new V.TQuery(this);
+    qur.SQL = "SELECT CustomerKey, FirstName, LastName FROM Customers";
+    qur.open();
+
+    //create a grid on the screen
+    var grd = new V.TDBGrid(this, "grid");
+    grd.Dataset = qur; //bind the grid to the dataset
+    grd.PageSize = 15;
+
+    var col = grd.createColumn(“FirstName”);
+    var col = grd.createColumn(“Lastname”,”Last Name”);
+  }
+}
 
 Getting Started
 ================
