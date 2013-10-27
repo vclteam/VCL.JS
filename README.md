@@ -18,7 +18,7 @@ These are the features that make VCL.JS a joy to use:
 - Twitter bootstrap 
 - AMD - Module loader
 
-###Friendly APIs help you get your job done—fast.
+###Friendly APIs help you get your job done faster.
 
 //Simple dbgrid bounded to a query
 import V = require("VCL/VCL");
