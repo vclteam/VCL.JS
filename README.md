@@ -19,12 +19,12 @@ These are the features that make VCL.JS a joy to use:
 - AMD - Module loader
 
 ###Friendly APIs help you get your job done faster.
-
+```javascript
 //Simple dbgrid bounded to a query
 import V = require("VCL/VCL");
 export class PageHome extends V.TPage {
   constructor() {
-    super();
+  super();
 
     //create a backend query
     var qur = new V.TQuery(this);
@@ -40,7 +40,7 @@ export class PageHome extends V.TPage {
     var col = grd.createColumn(“Lastname”,”Last Name”);
   }
 }
-
+```
 Getting Started
 ================
 For a getting started please refer to our website.
