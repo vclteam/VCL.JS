@@ -92,3 +92,4 @@ export class VXAlert extends VXC.VXComponent {
         this.jText.text(this.Text); 
     }
 }
+

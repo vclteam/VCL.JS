@@ -54,10 +54,7 @@ export class VXText extends VXT.VXTextBase {
         return this._textcolor;
     }
     public set TextColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-
+        if (V.Application.checkColorString(val)) {
             if (val != this._textcolor) {
                 this._textcolor = val;
                 this.draw(true);
@@ -312,9 +309,7 @@ export class VXTagCloud extends VXC.VXComponent {
         return this._colorstart;
     }
     public set ColorStart(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
+        if (V.Application.checkColorString(val)) {
             if (val != this._colorstart) {
                 this._colorstart = val;
                 this.draw(true);
@@ -327,9 +322,7 @@ export class VXTagCloud extends VXC.VXComponent {
         return this._colorend;
     }
     public set ColorEnd(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
+        if (V.Application.checkColorString(val)) {
             if (val != this._colorend) {
                 this._colorend = val;
                 this.draw(true);
@@ -366,9 +359,15 @@ export class VXTagCloud extends VXC.VXComponent {
             tagItem.css({ "color": this.tagColor(colorIncr, weighting) });
             tagItem.text(item.Text);
             tagItem.css('margin', "3px");
+            tagItem.attr('data-toggl', 'tooltip');
+            if (item.Tooltip) tagItem.attr('title',item.Tooltip);
+            else tagItem.attr('title', item.Value);
+            tagItem.tooltip();
+
             tagItem.click(() => {
                 if (item.onClicked != null) (V.tryAndCatch(() => { item.onClicked(); })); return false;
             })
+            
 
             tagItem.appendTo(this.jComponent);
         });
@@ -398,7 +397,7 @@ export class VXTagCloud extends VXC.VXComponent {
 export class VXTagCloudItem extends VXO.VXCollectionItem {
     public onClicked: () => void;
 
-    private _text: string;
+    private _text: string = null;
     public get Text(): string {
         return this._text;
     }
@@ -408,7 +407,7 @@ export class VXTagCloudItem extends VXO.VXCollectionItem {
         }
     }
 
-    private _value: number;
+    private _value: number = null;
     public get Value(): number {
         return this._value;
     }
@@ -417,12 +416,22 @@ export class VXTagCloudItem extends VXO.VXCollectionItem {
             this._value = val;
         }
     }
+
+    private _tooltip: string = null;
+    public get Tooltip(): string {
+        return this._tooltip;
+    }
+    public set Tooltip(val: string) {
+        if (val != this._tooltip) {
+            this._tooltip = val;
+        }
+    }
 }
 
 export class VXPillBoxItem extends VXO.VXCollectionItem {
     public onClicked: () => void;
 
-    private _value: string;
+    private _value: string = null;
     public get Value(): string {
         return this._value;
     }
@@ -434,7 +443,7 @@ export class VXPillBoxItem extends VXO.VXCollectionItem {
         }
     }
 
-    private _text: string;
+    private _text: string = null;
     public get Text(): string {
         return this._text;
     }

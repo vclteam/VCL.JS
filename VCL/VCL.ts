@@ -70,6 +70,7 @@ export class TGauge extends VXGougeMod.VXGauge { };
 export class TChartDonut extends VXDonutMod.VXChartDonut { };
 export class TDBChartDonut extends VXDonutMod.VXDBChartDonut { };
 export class TChartDot extends VXDotMod.VXChartDot { };
+export class TChartBubble extends VXDotMod.VXChartBubble { };
 export class TChartBar extends VXVXBarMod.VXChartBar { };
 export class TDBChartBar extends VXVXBarMod.VXDBChartBar { };
 export class TChartBullet extends VXVXBarMod.VXChartBullet { };
@@ -98,9 +99,11 @@ export class TNavBar extends VXSideBarMod.VXNavBar { };
 export class TImage extends VXImageMod.VXImage { };
 
 export class TWell extends VXWellMod.VXWell { };
+export class TGoogleMap extends VXWellMod.VXGoogleMap { };
 export class TPanel extends VXWellMod.VXPanel { };
 export class TCheckBox extends VXCheckboxMod.VXCheckBox { };
 export class TProgressBar extends VXProgressMod.VXProgressBar { };
+export class TRatingStar extends VXProgressMod.VXRatingStart { };
 export class TConst extends VXconstMod.VXConst { };
 
 
@@ -132,15 +135,14 @@ export class TQueryRemote extends VXQueryMod.VXQueryRemote { };
 * TDataset is the base class for all dataset components that represent data in rows and columns.
 */
 export class TDataset extends VXDatasetMod.VXDataset { };
-/**
-* TQuery represents a single record dataset.
-*/
-export class TRecord extends VXDatasetMod.VXRecord { };
+
+export class TObjectDataset extends VXDatasetMod.VXObjectDataset { };
 
 /**
 * TComponent is the base class for all components that are visible at run time.
 */
 export class TComponent extends VXCompMod.VXComponent { };
+export class TControl extends VXCompMod.VXControl { };
 export class TContainer extends VXContainMod.VXContainer { };
 export class TPage extends VXPageMod.VXPage { };
 export class TModal extends VXModalMod.VXModal { };
@@ -156,10 +158,9 @@ export class TNavbarItem extends VXAppMod.VXNavbarItem { };
 */
 export var Application: VXAppMod.VXApplication = new VXAppMod.VXApplication();
 export var Global: any = {};
-export enum CalendarType {
-    Daily,
-    Monthly
-}
+export enum CalendarType { Daily, Monthly }
+export enum PasswordStrength { LOW, MEDIUM, HIGH, EXTREME }
+
 
 export enum ButtonStyle {
     Default,
@@ -167,7 +168,8 @@ export enum ButtonStyle {
     Info,
     Success,
     Warning,
-    Danger
+    Danger,
+    Link
 }
 
 export enum HeaderStyle {
@@ -332,7 +334,7 @@ export enum ComboStyle {
     Danger
 }
 
-export enum CloseButtonAlignment {
+export enum ButtonAlignment {
     Left,
     Right
 }

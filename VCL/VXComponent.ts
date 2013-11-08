@@ -143,7 +143,17 @@ export class VXComponent extends VXO.VXObject {
         }
     }
 
+    /*
+    * Repaints the control on the screen.
+    */
     public refresh() {
+        this.draw(false);
+    }
+
+    /*
+    * Use Invalidate when the entire control needs to be fully repainted. 
+    */
+    public Invalidate() {
         this.draw(true);
     }
 
@@ -291,8 +301,18 @@ export class VXComponent extends VXO.VXObject {
     public get isPage(): boolean {
         return false;
     }
-
-
 }
 
 
+export class VXControl extends VXComponent {
+    public onClicked: () => void;
+    public create() {
+        this.jComponent.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        super.create();
+    }
+    public draw(reCreate: boolean) {
+        if (!this.showed) return;
+        if (reCreate || !this.initialized) this.create();
+        this.initialized = true;
+    }
+}

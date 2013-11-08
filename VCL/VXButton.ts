@@ -108,8 +108,7 @@ export class VXButton extends VXC.VXComponent {
         this.jText = $('<span/>');
 
         this.jBtn = $('<button/>');
-        this.jBtn.css('height', '100%');
-        this.jBtn.addClass("btn");
+        this.jBtn.css('height', '100%').css('width','100%').addClass("btn");
         this.jBtn.css('display', this.jComponent.css('display'));
         //this.jBtn.css('padding-right', '0px');
         //this.jBtn.css('padding-left', '0px');
@@ -158,6 +157,7 @@ export class VXButton extends VXC.VXComponent {
             case V.ButtonStyle.Success: this.jBtn.addClass("btn-success"); break;
             case V.ButtonStyle.Warning: this.jBtn.addClass("btn-warning"); break;
             case V.ButtonStyle.Danger: this.jBtn.addClass("btn-danger"); break;
+            case V.ButtonStyle.Link: this.jBtn.addClass("btn-link"); break;
         }
         switch (this.ButtonSize) {
             case V.ButtonSize.Large: this.jBtn.addClass("btn-large"); break;

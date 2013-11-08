@@ -5,6 +5,9 @@ import VXD = require("VCL/VXDataset");
 import VXCB = require("VCL/VXChartBase");
 
 export class VXChartBar extends VXCB.VXChartBase {
+
+
+
     private _maximumbarwidth: number = 40;
     public get MaximumBarWidth(): number {
         return this._maximumbarwidth;
@@ -131,7 +134,143 @@ export class VXChartBar extends VXCB.VXChartBase {
     }
 
 
-    public onClicked: (value: V.TBarValue) => void;
+    private _series7color: string = "#727272";
+    public get Series7Color(): string {
+        return this._series7color;
+    }
+    public set Series7Color(val: string) {
+        var isOk = /^#[0-9A-F]{7}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series7color) {
+                this._series7color = val;
+                this.draw(true);
+            }
+        }
+    }
+    private _series8color: string = "#f1595f";
+    public get Series8Color(): string {
+        return this._series8color;
+    }
+    public set Series8Color(val: string) {
+        var isOk = /^#[0-9A-F]{8}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series8color) {
+                this._series8color = val;
+                this.draw(true);
+            }
+        }
+    }
+    private _series9color: string = "#79c36a";
+    public get Series9Color(): string {
+        return this._series9color;
+    }
+    public set Series9Color(val: string) {
+        var isOk = /^#[0-9A-F]{9}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series9color) {
+                this._series9color = val;
+                this.draw(true);
+            }
+        }
+    }
+    private _series10color: string = "#599ad3";
+    public get Series10Color(): string {
+        return this._series10color;
+    }
+    public set Series10Color(val: string) {
+        var isOk = /^#[0-9A-F]{10}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series10color) {
+                this._series10color = val;
+                this.draw(true);
+            }
+        }
+    }
+
+    private _series11color: string = "#EAA83A";
+    public get Series11Color(): string {
+        return this._series11color;
+    }
+    public set Series11Color(val: string) {
+        var isOk = /^#[0-9A-F]{10}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series11color) {
+                this._series11color = val;
+                this.draw(true);
+            }
+        }
+    }
+
+
+    private _series12color: string = "#f9a65a";
+    public get Series12Color(): string {
+        return this._series12color;
+    }
+    public set Series12Color(val: string) {
+        var isOk = /^#[0-9A-F]{12}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series12color) {
+                this._series12color = val;
+                this.draw(true);
+            }
+        }
+    }
+    
+    private _series13color: string = "#9e66ab";
+    public get Series13Color(): string {
+        return this._series13color;
+    }
+    public set Series13Color(val: string) {
+        var isOk = /^#[0-9A-F]{13}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series13color) {
+                this._series13color = val;
+                this.draw(true);
+            }
+        }
+    }
+
+
+    private _series14color: string = "#cd7058";
+    public get Series14Color(): string {
+        return this._series14color;
+    }
+    public set Series14Color(val: string) {
+        var isOk = /^#[0-9A-F]{14}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series14color) {
+                this._series14color = val;
+                this.draw(true);
+            }
+        }
+    }
+
+    
+    private _series15color: string = "#d77fb3";
+    public get Series15Color(): string {
+        return this._series15color;
+    }
+    public set Series15Color(val: string) {
+        var isOk = /^#[0-9A-F]{15}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series15color) {
+                this._series15color = val;
+                this.draw(true);
+            }
+        }
+    }
+
+
+    public onClicked: (value: V.TBarValue,series : number) => void;
     private _series1name: string = "Series 1";
     public get Series1Name(): string {
         return this._series1name;
@@ -198,6 +337,119 @@ export class VXChartBar extends VXCB.VXChartBase {
         }
     }
 
+    private _series7name: string = "Series 7";
+    public get Series7Name(): string {
+        return this._series7name;
+    }
+    public set Series7Name(val: string) {
+        if (val != this._series7name) {
+            this._series7name = val;
+            this.draw(true);
+        }
+    }
+
+    
+    private _series8name: string = "Series 8";
+    public get Series8Name(): string {
+        return this._series8name;
+    }
+    public set Series8Name(val: string) {
+        if (val != this._series8name) {
+            this._series8name = val;
+            this.draw(true);
+        }
+    }
+    private _series9name: string = "Series 9";
+    public get Series9Name(): string {
+        return this._series9name;
+    }
+    public set Series9Name(val: string) {
+        if (val != this._series9name) {
+            this._series9name = val;
+            this.draw(true);
+        }
+    }
+    private _series10name: string = "Series 10";
+    public get Series10Name(): string {
+        return this._series10name;
+    }
+    public set Series10Name(val: string) {
+        if (val != this._series10name) {
+            this._series10name = val;
+            this.draw(true);
+        }
+    }
+
+    private _series11name: string = "Series 11";
+    public get Series11Name(): string {
+        return this._series11name;
+    }
+    public set Series11Name(val: string) {
+        if (val != this._series11name) {
+            this._series11name = val;
+            this.draw(true);
+        }
+    }
+
+    
+    private _series12name: string = "Series 12";
+    public get Series12Name(): string {
+        return this._series12name;
+    }
+    public set Series12Name(val: string) {
+        if (val != this._series12name) {
+            this._series12name = val;
+            this.draw(true);
+        }
+    }
+
+    
+    private _series13name: string = "Series 13";
+    public get Series13Name(): string {
+        return this._series13name;
+    }
+    public set Series13Name(val: string) {
+        if (val != this._series13name) {
+            this._series13name = val;
+            this.draw(true);
+        }
+    }
+
+    
+    private _series14name: string = "Series 14";
+    public get Series14Name(): string {
+        return this._series14name;
+    }
+    public set Series14Name(val: string) {
+        if (val != this._series14name) {
+            this._series14name = val;
+            this.draw(true);
+        }
+    }
+
+    
+    private _series15name: string = "Series 15";
+    public get Series15Name(): string {
+        return this._series15name;
+    }
+    public set Series15Name(val: string) {
+        if (val != this._series15name) {
+            this._series15name = val;
+            this.draw(true);
+        }
+    }
+
+    private _showhoverlegend: boolean = true;
+    public get ShowHoverLegend(): boolean {
+        return this._showhoverlegend;
+    }
+    public set ShowHoverLegend(val: boolean) {
+        if (val != this._showhoverlegend) {
+            this._showhoverlegend = val;
+            this.draw(true);
+        }
+    }
+
 
 
     private _stack: boolean = true;
@@ -224,7 +476,8 @@ export class VXChartBar extends VXCB.VXChartBase {
     
     public values = new VXCB.VXChartValuesCollection<VXCB.VXBarValue>();
     public createValue(label: string, value1?: number, value2?: number, value3?: number, value4?: number,
-        value5?: number, value6?: number): VXCB.VXBarValue {
+        value5?: number, value6?: number, value7?: number, value8?: number, value9?: number, value10?: number,
+        value11?: number, value12?: number, value13?: number, value14?: number, value15?:number): VXCB.VXBarValue {
         var col = new VXCB.VXBarValue();
         this.values.add(col);
         col.Value1 = value1;
@@ -233,6 +486,17 @@ export class VXChartBar extends VXCB.VXChartBase {
         col.Value4 = value4;
         col.Value5 = value5;
         col.Value6 = value6;
+        col.Value7 = value7;
+        col.Value8 = value8;
+        col.Value9 = value9;
+        col.Value10 = value10;
+        col.Value11 = value11;
+        col.Value12 = value12;
+        col.Value13 = value13;
+        col.Value14 = value14;
+        col.Value15 = value15;
+
+
         col.Label = label;
         return col;
     }
@@ -247,7 +511,16 @@ export class VXChartBar extends VXCB.VXChartBase {
                 value3: valueOfElement.Value3,
                 value4: valueOfElement.Value4,
                 value5: valueOfElement.Value5,
-                value6: valueOfElement.Value6
+                value6: valueOfElement.Value6,
+                value7: valueOfElement.Value7,
+                value8: valueOfElement.Value8,
+                value9: valueOfElement.Value9,
+                value10: valueOfElement.Value10,
+                value11: valueOfElement.Value11,
+                value12: valueOfElement.Value12,
+                value13: valueOfElement.Value13,
+                value14: valueOfElement.Value14,
+                value15: valueOfElement.Value15
             });
             return true;
         });
@@ -271,18 +544,23 @@ export class VXChartBar extends VXCB.VXChartBase {
             element: this.jComponent[0],
             //data: dataArray,
             xkey: "x",
-            ykeys: ["value1", "value2", "value3", "value4", "value5", "value6"],
-            labels: [this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name],
+            ykeys: ["value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8", "value9", "value10", "value11", "value12", "value13", "value14", "value15"],
+            labels: [this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name
+                , this.Series7Name, this.Series8Name, this.Series9Name, this.Series10Name, this.Series11Name, this.Series12Name
+                , this.Series13Name, this.Series14Name, this.Series5Name
+            ],
             barSizeRatio: 0.75,
-            barGap: 13,
-            titleX : this.TitleX,
-            paddingX: this.TitleX?40:20,
-            titleY : this.TitleY,
-            paddingY: this.TitleY?40:5,
-            hideHover: 'auto',
+            barGap: 0,
+            titleX: this.TitleX,
+            paddingX: this.TitleX ? 35 : 20,
+            titleY: this.TitleY,
+            paddingY: this.TitleY ? 25 : 5,
+            hideHover: this.ShowHoverLegend ? 'auto' : 'always',
             stacked: this.Stacked,
-            barColors: [this.Series1Color, this.Series2Color, this.Series3Color, this.Series4Color,
-                this.Series5Color, this.Series6Color],
+            barColors: [this.Series1Color, this.Series2Color, this.Series3Color, this.Series4Color, this.Series5Color, this.Series6Color,
+                this.Series7Color, this.Series8Color, this.Series9Color, this.Series10Color, this.Series11Color, this.Series12Color,
+                this.Series13Color, this.Series14Color, this.Series15Color
+            ],
             xLabelMargin: 15,
             gridTextSize: 12,
             gridTextFamily: 'sans-serif',
@@ -381,6 +659,128 @@ export class VXDBChartBar extends VXChartBar {
         }
     }
 
+    private _value7field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField7(): string {
+        return this._value7field;
+    }
+    public set ValueField7(val: string) {
+        if (val != this._value7field) {
+            this._value7field = val.toUpperCase();
+            this.draw(false);
+        }
+    }
+    private _value8field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField8(): string {
+        return this._value8field;
+    }
+    public set ValueField8(val: string) {
+        if (val != this._value8field) {
+            this._value8field = val.toUpperCase();
+            this.draw(false);
+        }
+    }
+    private _value9field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField9(): string {
+        return this._value9field;
+    }
+    public set ValueField9(val: string) {
+        if (val != this._value9field) {
+            this._value9field = val.toUpperCase();
+            this.draw(false);
+        }
+    }
+    private _value10field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField10(): string {
+        return this._value10field;
+    }
+    public set ValueField10(val: string) {
+        if (val != this._value10field) {
+            this._value10field = val.toUpperCase();
+            this.draw(false);
+        }
+    }
+    private _value11field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField11(): string {
+        return this._value11field;
+    }
+    public set ValueField11(val: string) {
+        if (val != this._value11field) {
+            this._value11field = val.toUpperCase();
+            this.draw(false);
+        }
+    }
+
+    private _value12field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField12(): string {
+        return this._value12field;
+    }
+    public set ValueField12(val: string) {
+        if (val != this._value12field) {
+            this._value12field = val.toUpperCase();
+            this.draw(false);
+        }
+    }
+
+    private _value13field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField13(): string {
+        return this._value13field;
+    }
+    public set ValueField13(val: string) {
+        if (val != this._value13field) {
+            this._value13field = val.toUpperCase();
+            this.draw(false);
+        }
+    }
+
+    private _value14field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField14(): string {
+        return this._value14field;
+    }
+    public set ValueField14(val: string) {
+        if (val != this._value14field) {
+            this._value14field = val.toUpperCase();
+            this.draw(false);
+        }
+    }
+
+    
+    private _value15field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField15(): string {
+        return this._value15field;
+    }
+    public set ValueField15(val: string) {
+        if (val != this._value15field) {
+            this._value15field = val.toUpperCase();
+            this.draw(false);
+        }
+    }
 
     private _labelfield: string;
     /**
@@ -423,7 +823,9 @@ export class VXDBChartBar extends VXChartBar {
         this.values.clear();
         var dataArray = [];
         if (this.Dataset == null || (this.ValueField1 == null && this.ValueField2 == null && this.ValueField3 == null && this.ValueField4 == null &&
-            this.ValueField5 == null && this.ValueField6 == null) || this.LabelField == null) return dataArray;
+            this.ValueField5 == null && this.ValueField6 == null && this.ValueField7 == null && this.ValueField8 == null && this.ValueField9 == null &&
+            this.ValueField10 == null && this.ValueField11 == null && this.ValueField12 == null && this.ValueField13 == null &&
+            this.ValueField14 == null && this.ValueField15) || this.LabelField == null) return dataArray;
         if (!this.Dataset.Active) return dataArray;
         this.Dataset.forEach(() => {
             var obj: any = {
@@ -434,6 +836,15 @@ export class VXDBChartBar extends VXChartBar {
                 value4: this.Dataset.getFieldValue(this.ValueField4),
                 value5: this.Dataset.getFieldValue(this.ValueField5),
                 value6: this.Dataset.getFieldValue(this.ValueField6),
+                value7: this.Dataset.getFieldValue(this.ValueField7),
+                value8: this.Dataset.getFieldValue(this.ValueField8),
+                value9: this.Dataset.getFieldValue(this.ValueField9),
+                value10: this.Dataset.getFieldValue(this.ValueField10),
+                value11: this.Dataset.getFieldValue(this.ValueField11),
+                value12: this.Dataset.getFieldValue(this.ValueField12),
+                value13: this.Dataset.getFieldValue(this.ValueField13),
+                value14: this.Dataset.getFieldValue(this.ValueField14),
+                value15: this.Dataset.getFieldValue(this.ValueField15),
             };
             dataArray.push(obj);
 
@@ -445,7 +856,16 @@ export class VXDBChartBar extends VXChartBar {
             col.Value4 = obj.value4;
             col.Value5 = obj.value5;
             col.Value6 = obj.value6;
-            col.Label = obj.label;
+            col.Value7 = obj.value7;
+            col.Value8 = obj.value8;
+            col.Value9 = obj.value9;
+            col.Value10 = obj.value10;
+            col.Value11 = obj.value11;
+            col.Value12 = obj.value12;
+            col.Value13 = obj.value13;
+            col.Value14 = obj.value14;
+            col.Value15 = obj.value15;
+            col.Label = obj.x;
             col.ID = this.Dataset.Recno.toString();
         });
 
@@ -476,6 +896,7 @@ class Bar extends VXCB.Grid {
             this.hover = new VXCB.Hover({
                 parent: this.el
             });
+
             this.on('hovermove', this.onHoverMove);
             this.on('hoverout', this.onHoverOut);
         }
@@ -532,10 +953,10 @@ class Bar extends VXCB.Grid {
         
         if (this.options.titleX) {
             var b = this.measureText(this.options.titleX);
-            var center = (this.width / 2) + (b.width / 2);
-            this.raphael.text(center, this.bottom + this.options.paddingX - this.options.gridTextSize, this.options.titleX).
-                attr('font-size', this.options.gridTextSize + 1).attr('font-family', this.options.gridTextFamily).
-                attr('font-weight', "bold").attr('fill', this.options.gridTextColor);
+            var center = (this.elementWidth / 2);
+            this.raphael.text(center, this.bottom + this.options.paddingX - this.options.gridTextSize / 2, this.options.titleX).
+                attr('font-size', this.options.gridTextSize + 1).attr('font-family', this.options.gridTextFamily-1).
+                attr('font-weight', "normal").attr('fill', this.options.gridTextColor);
         } 
        
         for (var i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -563,12 +984,26 @@ class Bar extends VXCB.Grid {
         return _results;
     }
 
+    private barNodes = [];
+
     drawSeries() {
         var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, rowold, sidx, size, top, ypos, zeroPos, _refold;
         groupWidth = this.width / this.options.data.length;
-        numBars = this.options.stacked != null ? 1 : this.options.ykeys.length;
-        barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
-        this.options.barWidth = barWidth;
+        this.barNodes = [];
+        numBars = 0;
+        if (this.options.stacked == false) {
+            for (var i = 0; i < 15; i++) {
+                for (var j = 0; j< this.data.length ; j++) {
+                    if (this.data[j].y && this.data[j].y[i]) {
+                        numBars++;
+                        break;
+                    }
+                }
+            }
+        }
+        this.options.numBars = Math.max(1,numBars);
+        barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (this.options.numBars - 1)) / this.options.numBars;
+        this.options.barWidth = Math.min(this.options.maximumbarwidth, barWidth);
         leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
         zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
         return this.bars = (function () {
@@ -609,10 +1044,12 @@ class Bar extends VXCB.Grid {
                             }
                             row._size.push(size);
                             row._top.push(top);
+                            if (!this.barNodes[idx]) this.barNodes[idx] = [];
+
                             if (rowold && rowold._size && rowold._size.length >= sidx)
-                                this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), rowold._size[sidx], rowold._top[sidx]);
+                                this.barNodes[idx].push(this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), rowold._size[sidx], rowold._top[sidx], sidx));
                             else
-                                this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), 0, 0);
+                                this.barNodes[idx].push(this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), 0, 0, sidx));
 
                             _results1.push(lastTop += size);
                         } else {
@@ -651,7 +1088,7 @@ class Bar extends VXCB.Grid {
         }
         x = Math.max(Math.min(x, this.right), this.left);
         return Math.min(this.data.length - 1, Math.floor((x - this.left) / (this.width / this.data.length)));*/
-        var r, _i, _len, _ref, wid = this.options.barWidth / 2;
+        var r, _i, _len, _ref, wid = this.options.barWidth / 2 * this.options.numBars;
         if (this.data.length === 0) {
             return null;
         }
@@ -665,30 +1102,44 @@ class Bar extends VXCB.Grid {
         return -1;
     }
 
-    onGridClick(x, y) {
-        if (!this.owner) return;
+    clickItem(idx: number, series: number) {
         var owner = <VXChartBar>this.owner;
+        if (!this.owner) return;
+        this.barNodes.forEach((item) => {
+            item.forEach((node) => {
+                node.attr('opacity', 0.7);
+            });
+        });
+        this.barNodes[idx].forEach((node) => { node.attr('opacity', 1); });
         if (!owner.onClicked) return;
-
-        var idx = this.hitTest(x, y);
         if (idx >= 0 && idx <= owner.values.length()) {
-            if (owner instanceof VXDBChartBar && (<VXDBChartBar>owner).Dataset != null) {
+            if ((owner instanceof VXDBChartBar) && (<VXDBChartBar>owner).Dataset != null) {
                 (<VXDBChartBar>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
             }
-            (V.tryAndCatch(() => { owner.onClicked(owner.values.toArray()[idx]); }));
+            (V.tryAndCatch(() => { owner.onClicked(owner.values.toArray()[idx], series) }));
         }
-    
-    
+    }
+ 
+    onGridClick(x, y, series) {
+        var idx = this.hitTest(x, y);
+        this.clickItem(idx, series);
     }
 
     onHoverMove(x, y) {
         var index, _ref;
         index = this.hitTest(x, y);
+        
         if (index == -1) return;
+        if (!this.hover || this.barNodes.length == 0 || this.barNodes.length <= index || this.barNodes[index]==null) return;
+        var bar = this.barNodes[index][0];
+        var width: number = bar.attr('width');
+        if (index < this.barNodes.length / 2) this.hover.offset = width;
+        else this.hover.offset = -width;
         return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
     }
 
     onHoverOut() {
+        if (!this.hover) return;
         if (this.options.hideHover !== false) {
             return this.hover.hide();
         }
@@ -702,7 +1153,9 @@ class Bar extends VXCB.Grid {
         _ref = row.y;
         for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
             y = _ref[j];
-            if (y != null) content += "<div class='morris-hover-point' style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y, false)) + "\n</div>";
+            var lbl: string = this.options.labels[j];
+            lbl = lbl.substring(0, 14);
+            if (y != null) content += "<div class='morris-hover-point' style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lbl + ":\n  " + (this.yLabelFormat(y, false)) + "\n</div>";
         }
         if (typeof this.options.hoverCallback === 'function') {
             content = this.options.hoverCallback(index, this.options, content);
@@ -716,23 +1169,31 @@ class Bar extends VXCB.Grid {
         return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     }
 
-    drawBar(xPos, yPos, width, height, barColor, oldheight, oldy) {
+    drawBar(xPos, yPos, width, height, barColor, oldheight, oldy,series) {
         var self = this;
         var bar;
         var maxWidth: number = Math.min(this.options.maximumbarwidth,width);
         var newXpos = xPos + ((width - maxWidth) / 2) ;
         if (oldheight > 0) {
-            bar = this.raphael.rect(newXpos, oldy, maxWidth, oldheight).attr('fill', barColor).attr('stroke-width', 0);
+            bar = this.raphael.rect(newXpos, oldy, maxWidth, oldheight).attr('fill', barColor).attr('opacity',  0.7).attr('stroke-width', 0);
             bar.animate({ height: height, y: yPos }, 500, '>');
         } else {
-            bar = this.raphael.rect(newXpos, yPos, maxWidth, height).attr('fill', barColor).attr('stroke-width', 0);
+            bar = this.raphael.rect(newXpos, yPos, maxWidth, height).attr('fill', barColor).attr('opacity',  0.7).attr('stroke-width', 0);
         }
-        
-        
-        bar.node.onclick = function (evt) {
+
+        bar.node.series = series;
+        bar.node.onclick = function (evt,x,y) {
             var offset = $(self.el).offset();
-            self.onGridClick(evt.pageX - offset.left, evt.pageY - offset.top);
+            self.onGridClick(evt.pageX - offset.left, evt.pageY - offset.top, evt.target.series);
         };
+
+        bar.node.hovermove = function (evt, x, y) {
+            self.onHoverMove(x, y);
+        }
+
+        bar.node.hoverout = function (evt, x, y) {
+            self.onHoverOut();
+        }
         
         return bar;
     }
@@ -832,8 +1293,11 @@ export class VXChartBullet extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
-        this.create();
+        require(["VCL/Scripts/jquery.bulletchart.js"], () => {
+            if (!this.showed) return;
+            this.create();
+        });
+   
     }
     public create() {
         this.jComponent.empty(); //clear all subcomponents

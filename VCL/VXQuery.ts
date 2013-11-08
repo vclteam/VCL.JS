@@ -7,7 +7,7 @@ import VXC = require("VCL/VXComponent");
 import VXCO = require("VCL/VXContainer");
 
 
-export class VXQueryBase extends VXD.VXDataset {
+export class VXQueryBase extends VXD.VXClientDataset {
     public onError: (errorMessage: string) => void;
     public onExecuteCompleted: () => void;
 
@@ -180,7 +180,7 @@ export class VXQueryRemote extends VXQueryBase {
 }
 
 export class VXQueryParam extends VXO.VXCollectionItem {
-    private _value: any;
+    private _value: any = null;
     public get Value(): any {
         return this._value;
     }

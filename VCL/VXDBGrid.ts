@@ -11,7 +11,7 @@ export class VXDBGrid extends VXC.VXComponent {
     private selectedRecordId: number;
     public onRowClicked: () => void;
 
-    public onGetRowStyle: (record: V.TRecord) => V.GridRowStyle;
+    public onGetRowStyle: (record: any) => V.GridRowStyle;
 
     constructor(aOwner: VXC.VXComponent, renderTo?: string) {
         super(aOwner, renderTo);
@@ -141,7 +141,7 @@ export class VXDBGrid extends VXC.VXComponent {
         var dataSource = new VXDBGridDataSource(this);
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'table', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass("table datagrid");
-        this.jComponent.css('table-layout', 'fixed');
+        this.jComponent.css('table-layout', 'fixed').css('cursor', 'pointer');
         if (this.Condensed) this.jComponent.addClass("table-condensed");
         if (this.Striped) this.jComponent.addClass("table-striped");
         if (this.Bordered) this.jComponent.addClass("table-bordered ");
@@ -206,7 +206,7 @@ export class VXDBGrid extends VXC.VXComponent {
 export class VXDBGridColumn extends VXO.VXCollectionItem {
     public grid: VXDBGrid;
     public onClicked: () => void;
-    public onGetValue: (record: V.TRecord) => any;
+    public onGetValue: (record: any) => any;
 
     private _dateformat: string = "";
     public get DateFormat(): string {
@@ -243,7 +243,7 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
     }
 
 
-    private _fieldname: string;
+    private _fieldname: string = null;
     public get FieldName(): string {
         return this._fieldname;
     }
@@ -277,7 +277,7 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
         }
     }
 
-    private _sortable: boolean;
+    private _sortable: boolean = false;
     public get Sortable(): boolean {
         return this._sortable;
     }
@@ -304,55 +304,62 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
 class VXDBGridDataSource {
     grid: VXDBGrid;
     self: VXDBGridDataSource;
+     _data = new Array();
     constructor(grid: VXDBGrid) {
         this.grid = grid;
         this.self = this;
     }
+
+    refreshSelection() {
+        var _grid = this.grid;
+        _grid.jComponent.find('tr').removeClass('info success error warning Default');
+        this._data.forEach((item) => {
+            var recid: string = item.___RECORDID___;
+            var color: string ;
+            if (recid == (<any>_grid).selectedRecordId) color = V.GridRowStyle[_grid.SelectedRecordStyle]
+            else if (!item.___CLASSS___) return;
+            if (!color) color = V.GridRowStyle[item.___CLASSS___];
+
+            this.grid.jComponent.find('tr').filter('*[data-record="' + recid + '"]').addClass(color.toLowerCase());
+        });
+    }
+
     data(options, callback) {
-        var _data = new Array();
+        var self = this;
+        this._data = new Array();
         if (this.self.grid.Dataset == null || !this.self.grid.Dataset.Active) {
-            callback({ data: _data, count: this.self.grid.PageSize, page: 1, pages: 1 });
+            callback({ data: this._data, count: this.self.grid.PageSize, page: 1, pages: 1 });
             return;
         }
 
-        _data = this.self.grid.Dataset.getRecords(options.pageIndex * options.pageSize,
+        this._data = this.self.grid.Dataset.getRecords(options.pageIndex * options.pageSize,
             (options.pageIndex + 1) * options.pageSize - 1,
             options.sortDirection, options.sortProperty);
 
         var mappedData: any[] = new Array();
-        var rec = new V.TRecord(null);
         var _grid = this.grid;
-        $.each(_data, function (rowIndex, item) {
-            mappedData.push({ ___CHECKED___: _data[rowIndex].___CHECKED___, ___RECORDID___: _data[rowIndex].___RECORDID___ });
-            rec.recordset = [item];
-            if (rec.Recno == -1) rec.Recno = 0;
+        $.each(this._data, function (rowIndex, item) {
+            mappedData.push({ ___CHECKED___: self._data[rowIndex].___CHECKED___, ___RECORDID___: self._data[rowIndex].___RECORDID___ });
 
             if (_grid.onGetRowStyle != null) {
-                var colorClass = _grid.onGetRowStyle(rec)
-                if (colorClass != null && colorClass != V.GridRowStyle.Default)
-                    mappedData[rowIndex]["___CLASSS___"] = V.GridRowStyle[colorClass];
-            }
-            if (_grid.ShowSelectedRecord == true) {
-                if (mappedData[rowIndex]["___RECORDID___"] == (<any>_grid).selectedRecordId) {
-                    mappedData[rowIndex]["___CLASSS___"] = _grid.SelectedRecordStyle;
+                var colorClass = _grid.onGetRowStyle(item);
+                if (colorClass != null && colorClass != V.GridRowStyle.Default) {
+                    self._data[rowIndex]["___CLASSS___"] = colorClass;
                 }
             }
-
         });
         this.self.grid.columns.forEach((columnItem: V.TDBGridColumn) => {
-            $.each(_data, function (rowIndex, item) {
+            $.each(this._data, function (rowIndex, item) {
                 var StringCellVal;
-                if (columnItem.onGetValue != null) {
-                    rec.recordset = [item];
-                    if (rec.Recno == -1) rec.Recno = 0;
-                    StringCellVal = columnItem.formatValue(columnItem.onGetValue(rec));
-                } else StringCellVal = columnItem.formatValue(_data[rowIndex][columnItem.FieldName]);
+                if (columnItem.onGetValue != null) {                   
+                    StringCellVal = columnItem.formatValue(columnItem.onGetValue(item));
+                } else StringCellVal = columnItem.formatValue(self._data[rowIndex][columnItem.FieldName]);
                 var cellClass = columnItem.ID;
                 if (columnItem.onClicked != null) {
-                    var cellStr = "<a style='cursor: pointer;white-space:nowrap' data-record='" + _data[rowIndex]["___RECORDID___"] + "'class='" + cellClass + "'>" + StringCellVal + "</a>";
+                    var cellStr = "<a style='cursor: pointer;white-space:nowrap' data-record='" + self._data[rowIndex]["___RECORDID___"] + "'class='" + cellClass + "'>" + StringCellVal + "</a>";
                     mappedData[rowIndex][columnItem.ID] = cellStr;
                 } else {
-                    mappedData[rowIndex][columnItem.ID] = "<div data-record='" + _data[rowIndex]["___RECORDID___"] + "'class='" + cellClass + "' style='white-space:nowrap'>" + StringCellVal + "</div>";;
+                    mappedData[rowIndex][columnItem.ID] = "<div data-record='" + self._data[rowIndex]["___RECORDID___"] + "'class='" + cellClass + "' style='white-space:nowrap'>" + StringCellVal + "</div>";;
                 }
             })
             return true;
@@ -361,7 +368,10 @@ class VXDBGridDataSource {
         var pages: number = (this.self.grid.Dataset.RecordCount - 1) / this.grid.PageSize;
         pages = Math.floor(pages) + 1;
 
+        //draw the html
         callback({ data: mappedData, count: this.grid.PageSize, page: options.pageIndex + 1, pages: pages });
+
+        this.refreshSelection();
 
         var _grid = this.grid;
 
@@ -370,28 +380,20 @@ class VXDBGridDataSource {
             var recNum: number = parseInt($(this).attr('data-record'));
             _grid.Dataset.Recno = recNum;
             var recId = _grid.Dataset.getRecordIndex();
-            if (_grid.ShowSelectedRecord) {
-                _grid.jComponent.find('tr').removeClass('info success error warning Default');
-
-                _grid.jComponent.find('tr').filter('*[data-record="' + recId + '"]').addClass(V.GridRowStyle[_grid.SelectedRecordStyle].toLowerCase());
-            }
-            (<any>_grid).selectedRecordId = recId
-            if (_grid.onRowClicked()) _grid.onRowClicked();
+        
+            (<any>_grid).selectedRecordId = recId;
+            if (_grid.ShowSelectedRecord) self.refreshSelection();
+            if (_grid.onRowClicked) _grid.onRowClicked();
         });
         _grid.columns.forEach((columnItem: VXDBGridColumn) => {
             if (columnItem.onClicked != null) {
                 columnItem.grid.jComponent.find("." + columnItem.ID).click(function (item) {
-                    var recNum: number = parseInt($(this).attr('data-record'));
-                    columnItem.grid.Dataset.Recno = recNum;
-                    var recId = (<any>_grid).Dataset.getRecordIndex();
-                    if (_grid.ShowSelectedRecord) {
-                        _grid.jComponent.find('tr').removeClass('info success error warning Default');
-
-                        _grid.jComponent.find('tr').filter('*[data-record="' + recId + '"]').addClass(V.GridRowStyle[_grid.SelectedRecordStyle].toLowerCase());
+                    if (columnItem.onClicked()) {
+                        var recNum: number = parseInt($(this).attr('data-record'));
+                        columnItem.grid.Dataset.Recno = recNum;
+                        (<any>_grid).selectedRecordId = (<any>_grid).Dataset.getRecordIndex()
+                        columnItem.onClicked();
                     }
-                    (<any>_grid).selectedRecordId = recId
-
-                    if (columnItem.onClicked()) columnItem.onClicked();
                 });
             }
             return true;
@@ -602,9 +604,9 @@ Datagrid.prototype = {
                 //color class
                 var rowClass = "";
                 if (_grid) rowClass = _grid.ID + "-row";
-                if (row.___CLASSS___ != null)
-                    rowHTML += '<tr data-record=' + row.___RECORDID___ + ' class="'+rowClass +" "+ V.GridRowStyle[row.___CLASSS___].toLowerCase() + '">' + LineHTML + '</tr>';
-                else
+                //if (row.___CLASSS___ != null)
+                //    rowHTML += '<tr data-record=' + row.___RECORDID___ + ' class="'+rowClass +" "+ V.GridRowStyle[row.___CLASSS___].toLowerCase() + '">' + LineHTML + '</tr>';
+                //else
                     rowHTML += '<tr data-record=' + row.___RECORDID___ + ' class="' + rowClass+'">' + LineHTML + '</tr>';
                 rowCnt--;
             });

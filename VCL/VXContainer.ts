@@ -4,8 +4,11 @@ import VXO = require("VCL/VXObject");
 import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 
+declare function Spinner(options: any): void;
+
 export class VXContainer extends VXC.VXComponent {
-    public components = new VXO.VXCollection < VXC.VXComponent>();
+    public components = new VXO.VXCollection<VXC.VXComponent>();
+
     constructor(aOwner: VXC.VXComponent, renderTo?: string) {
         super(aOwner, renderTo);
         if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
@@ -22,7 +25,7 @@ export class VXContainer extends VXC.VXComponent {
         }
         this.components.forEach((item: VXC.VXComponent) => {
             item.showed = true;
-            item.draw(false);
+            item.draw(reCreate);
             return true;
         });
     }
@@ -44,20 +47,33 @@ export class VXContainer extends VXC.VXComponent {
         }
     }
 
-    private getProgressElement() :string {
-        return "PROFRESS__" + this.ID;
-    }
-
-    private  showLoadingProgressBar() {
-       if ($("#" + this.getProgressElement()).length > 0) return; //alreay there
-        var loadingHTML = '<div id="' + this.getProgressElement() +
-            '" class="progress progress-striped active" style="top:50%;left:50%;z-index:9999;' +
-            'position: absolute;width:120px;margin-left:-60px"><div class="bar" style="width:100%;"></div></div>';
-        $(loadingHTML).appendTo($(this.jComponent));
+    private spinner;
+    private showLoadingProgressBar() {
+        var opts = {
+            lines: 13, // The number of lines to draw
+            length: 20, // The length of each line
+            width: 10, // The line thickness
+            radius: 30, // The radius of the inner circle
+            corners: 1, // Corner roundness (0..1)
+            rotate: 0, // The rotation offset
+            direction: 1, // 1: clockwise, -1: counterclockwise
+            color: '#000', // #rgb or #rrggbb or array of colors
+            speed: 1, // Rounds per second
+            trail: 60, // Afterglow percentage
+            shadow: false, // Whether to render a shadow
+            hwaccel: false, // Whether to use hardware acceleration
+            className: 'spinner', // The CSS class to assign to the spinner
+            zIndex: 2e9, // The z-index (defaults to 2000000000)
+            top: 'auto', // Top position relative to parent in px
+            left: 'auto' // Left position relative to parent in px
+        };
+        require(["VCL/Scripts/spin.js"], (Spinner) => {
+            this.spinner = new Spinner(opts).spin(document.getElementById('content'));
+        });
     }
 
     private hideLoadingProgressBar() {
-        $("#" + this.getProgressElement()).remove();
+        if (this.spinner) this.spinner.stop();
     }
 
 

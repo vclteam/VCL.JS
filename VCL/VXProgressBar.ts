@@ -93,3 +93,124 @@ export class VXProgressBar extends VXC.VXComponent {
         this.jBar.css('width', this.Value + "%");
     }
 }
+
+
+export class VXRatingStart extends VXC.VXComponent {
+    public onClicked: () => void;
+    private _starsize: number = 1.5;
+    /*
+    * specify the value from 0-5 of the rating control.
+    * Value accept value from 0 to 5
+    */
+    public get StarSize(): number {
+        return this._starsize;
+    }
+    public set StarSize(val: number) {
+        if (val != this._starsize) {
+            this._starsize = val;
+            this.draw(true);
+        }
+    }
+
+    private _starcolor: string = '#E3CF7A';
+    public get StarColor(): string {
+        return this._starcolor;
+    }
+    public set StarColor(val: string) {
+        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+
+            if (val != this._starcolor) {
+                this._starcolor = val;
+                this.draw(true);
+            }
+        }
+    }
+
+
+    private _value: number = 0;
+    /*
+    * specify the value from 0-5 of the rating control.
+    * Value accept value from 0 to 5
+    */
+    public get Value(): number {
+        return this._value;
+    }
+    public set Value(val: number) {
+        if (val != this._value) {
+            if (val > 5) val = 5;
+            if (val < 0) val = 0;
+            this._value = val;
+            this.draw(false);
+        }
+    }
+
+
+    private _readonly: boolean = true;
+    /**
+    * Set Striped to true to create a striped effect. Not available in IE7-8.
+    **/
+    public get ReadOnly(): boolean {
+        return this._readonly;
+    }
+    public set ReadOnly(val: boolean) {
+        if (val != this._readonly) {
+            this._readonly = val;
+            this.draw(true);
+        }
+    }
+
+    private RateTo(to: number) {
+        for (var i: number = 1; i <= 5; i++) {
+            if (i <= to)
+                $("#" + this.ID + '-' + i).addClass("icon-star").removeClass('icon-star-empty');
+            else
+                $("#" + this.ID + '-' + i).removeClass("icon-star").addClass('icon-star-empty');
+        }
+    }
+
+    public create() {
+        var self = this;
+        this.jComponent.empty();
+        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+        for (var i = 1; i <= 5; i++) {
+            var star: JQuery = $('<span>');
+            star.addClass('icon-star-empty ' + this.ID).attr('ID', this.ID + '-' + i).attr('data-position', i).css('cursor', 'pointer');
+            star.css('font-size', this.StarSize + "em");
+            if (this.StarColor) star.css('color', this.StarColor);
+
+            this.jComponent.append(star);
+        }
+        //fire event on mouse enter
+        $('.' + this.ID).on('mouseenter', function (e) {
+            var stars = $(this);
+            var star_position = parseInt(stars.attr("data-position"));
+            self.RateTo(star_position);
+        });
+        //mouse leave
+        $('.' + this.ID).on('mouseleave', function (e) {
+            self.RateTo(self.Value);
+        });
+        //mouse click
+        $('.' + this.ID).on('click', function (e) {
+            var stars = $(this);
+            var star_position = parseInt(stars.attr("data-position"));
+            self.Value = star_position;
+            if (self.onClicked != null) V.tryAndCatch(() => { self.onClicked(); }); 
+        });
+
+        if (!this.ReadOnly) {
+            this.RateTo(this.Value);
+        }
+        super.create();
+    }
+    public draw(reCreate: boolean) {
+        if (!this.showed) return;
+        if (reCreate || !this.initialized) this.create();
+        this.initialized = true;
+        this.RateTo(this.Value);
+    }
+
+
+}

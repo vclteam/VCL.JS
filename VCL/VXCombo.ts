@@ -428,8 +428,8 @@ export class VXComboItemCollection<T> extends VXO.VXCollection<VXComboItem> {
         this.owner = aOwner;
     }
 
-    add(item: VXComboItem, index?: number): boolean {
-        var rc = super.add(item, index);
+    add(item: VXComboItem): boolean {
+        var rc = super.add(item);
         if (!this.locked) this.owner.draw(true);
         return rc;
     }

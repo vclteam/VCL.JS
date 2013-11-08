@@ -1983,9 +1983,10 @@ export module collections {
          * invoked with one arguments: the element. To break the iteration you can 
          * optionally return false.
          */
-        forEach(callback: ILoopFunction<T>): void {
+        forEach(callback: (item: T) => any): void {
             this.dictionary.forEach(function (k, v) {
-                return callback(v);
+                if (callback(v) == false) return false;
+                return true;
             });
         }
 
@@ -2658,7 +2659,7 @@ export module collections {
 
 }// End of module 
 
-export class VXCollection<T> extends collections.Bag<T>{
+export class VXCollection<T> extends collections.Set<T>{
 
     public locked: boolean = false;
     /*

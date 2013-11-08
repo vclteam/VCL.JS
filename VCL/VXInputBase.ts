@@ -159,6 +159,7 @@ export class VXInputBase extends VXEditorBase {
                 case V.ButtonStyle.Success: this.jBtn.addClass("btn-success"); break;
                 case V.ButtonStyle.Warning: this.jBtn.addClass("btn-warning"); break;
                 case V.ButtonStyle.Danger: this.jBtn.addClass("btn-danger"); break;
+                case V.ButtonStyle.Link: this.jBtn.addClass("btn-link"); break;
             }
 
             if (this.ButtonIcon != null) {

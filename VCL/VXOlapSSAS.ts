@@ -6,7 +6,7 @@ import VXO = require("VCL/VXObject");
 import VXC = require("VCL/VXComponent");
 import VXCO = require("VCL/VXContainer");
 
-export class VXOlapSSAS extends VXD.VXDataset {
+export class VXOlapSSAS extends VXD.VXClientDataset {
     public onError: (errorMessage: string) => void;
     private _connectionname: string = "SSAS";
     public get ConnectionName(): string {
@@ -168,6 +168,7 @@ export class VXOlapSSAS extends VXD.VXDataset {
                         recordSet[key] = row;
                     }
 
+                    if (rowCount == 0) row["VALUE"] = raw.v;
                     for (var j = 0; j < rowCount; j++) {
                         row[(<string>members[raw.a[j + colCount]][1]).toUpperCase()] = raw.v;
                     }
@@ -197,7 +198,7 @@ export class VXSlicer extends VXO.VXCollectionItem {
 }
 
 export class VXMemeberSlicer extends VXSlicer {
-    private _value: string;
+    private _value: string = null;
     public get MemberUniqueName(): string {
         return this._value;
     }
@@ -210,7 +211,7 @@ export class VXMemeberSlicer extends VXSlicer {
 }
 
 export class VXDateSlicer extends VXSlicer {
-    private _dimension: string;
+    private _dimension: string = null;
     public get Dimension(): string {
         return this._dimension;
     }
@@ -222,7 +223,7 @@ export class VXDateSlicer extends VXSlicer {
     }
 
 
-    private _fromDate: Date;
+    private _fromDate: Date = null;
     public get FromDate(): Date {
         return this._fromDate;
     }
@@ -233,7 +234,7 @@ export class VXDateSlicer extends VXSlicer {
         }
     }
 
-    private _toDate: Date;
+    private _toDate: Date = null;
     public get ToDate(): Date {
         return this._toDate;
     }
@@ -248,7 +249,7 @@ export class VXDateSlicer extends VXSlicer {
 
 
 export class VXOlapMemeber extends VXO.VXCollectionItem {
-    private _uniquename: string;
+    private _uniquename: string = null;
     public get UniqueName(): string {
         return this._uniquename;
     }
@@ -259,7 +260,7 @@ export class VXOlapMemeber extends VXO.VXCollectionItem {
         }
     }
 
-    private _name: string;
+    private _name: string = null;
     public get Name(): string {
         return this._name;
     }
@@ -271,7 +272,7 @@ export class VXOlapMemeber extends VXO.VXCollectionItem {
     }
 
 
-    private _description: string;
+    private _description: string = null;
     public get Description(): string {
         return this._description;
     }

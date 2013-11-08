@@ -485,7 +485,7 @@ export class VXDBSparkLine extends VXSparkLine {
 
 
 export class VXSparkValue extends VXO.VXCollectionItem {
-    private _value: number;
+    private _value: number = null;
     public get Value(): number {
         return this._value;
     }

@@ -143,11 +143,29 @@ export class VXApplication {
 
     public navigateToPage(className: String, ConstructorArgs?: any[]) {
         var url: string = buildPageURL(className, ConstructorArgs);
-        this.navigateToURL(url);
+        this.sammy.setLocation(url);
     }
 
-    public navigateToURL(URL: string) {
+    public navigateToURL(URL : string) {
         this.sammy.setLocation(URL);
+    }
+
+    /*
+    * The windowOpenURL() method opens a new browser window.
+    */
+    public windowOpenURL(URL: string,target : string) {
+        window.open(URL, target)
+    }
+
+
+    public checkColorString(str): boolean {
+        var isOk = /^#[0-9A-F]{6}$/i.test(str);
+        if (!isOk) {
+            V.Application.raiseException("'" + str + "' is not valid hex color string");
+            return false;
+        }
+        return true;
+
     }
 
     public raiseException(errorMessage: string) {
@@ -438,7 +456,12 @@ export class VXApplication {
         }
         return str;
     }
-
+    /*
+    *  rate password strength
+    */
+    public PasswordStrength(password: string): V.PasswordStrength {
+        return new passwordStrength().analyze(password);
+    }
 
     /**
     * Creates a globally unique identifier.
@@ -456,12 +479,12 @@ export class VXApplication {
             + this.DecimalSeparator + decp;
     }
 
-    public FormatNumber(value: number): string {
+    public FormatNumber(value: number, precision : number): string {
         var intp: string = (Math.floor(value).toString());
         var decp: string = (value - Math.floor(value)).toString();
-        decp = (decp.substr(2, 1000) + '000000000').substr(0, this.CurrencyDecimals);
-        return intp.replace(/\B(?=(\d{3})+(?!\d))/g, this.ThousandSeparator)
-            + this.DecimalSeparator + decp;
+        decp = (decp.substr(2, 1000) + '000000000').substr(0, precision);
+        if (precision == 0) return intp.replace(/\B(?=(\d{3})+(?!\d))/g, this.ThousandSeparator)
+        else return intp.replace(/\B(?=(\d{3})+(?!\d))/g, this.ThousandSeparator) + this.DecimalSeparator + decp;
     }
 
 
@@ -568,7 +591,7 @@ export class VXApplication {
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
             "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
         ]
-    };
+    }
 
 
 }
@@ -657,4 +680,94 @@ function stringToHex(tmp: string): string {
 
 function d2h(d) {
     return d.toString(16);
+}
+
+
+class passwordStrength {
+    private patterns = [
+        '0123456789',
+        'abcdefghijklmnopqrstuvwxyz',
+        'qwertyuiopasdfghjklzxcvbnm',
+        'azertyuiopqsdfghjklmwxcvbn',
+        '!#$*+-.:?@^'
+    ];
+    private character = { DIGIT: 1, LOWERCASE: 2, UPPERCASE: 4, PUNCTUATION: 8 };
+    private threshold = { medium: 16, high: 22, extreme: 36 };
+    private dictionary = [];
+
+    constructor() {
+    }
+
+    analyze(password: string): V.PasswordStrength {
+        var score = Math.floor(password.length * 2);
+        var i: number = password.length;
+
+        score += this.analizePatterns(password);
+        score += this.analizeDictionary(password);
+
+        while (i--) score += this.analizeCharacter(password.charAt(i));
+
+        return this.analizeScore(score);
+    }
+
+    private analizeScore(score): V.PasswordStrength {
+        if (score >= this.threshold.extreme) return V.PasswordStrength.EXTREME;
+        if (score >= this.threshold.high) return V.PasswordStrength.HIGH;
+        if (score >= this.threshold.medium) return V.PasswordStrength.MEDIUM;
+
+        return V.PasswordStrength.LOW;
+    }
+
+    private analizePatterns(password: string) {
+        var chars = password.toLowerCase();
+        var score = 0;
+
+        for (var i in this.patterns) {
+            var pattern = this.patterns[i].toLowerCase();
+            score += this.analizePattern(chars, pattern);
+        }
+
+        // patterns are bad man!
+        return score * -5;
+    }
+
+    private analizePattern(password: string, pattern: string) {
+        var lastmatch = -1;
+        var score = -2;
+
+        for (var i = 0; i < password.length; i++) {
+            var match = pattern.indexOf(password.charAt(i));
+
+            if (lastmatch === match - 1) {
+                lastmatch = match;
+                score++;
+            }
+        }
+
+        return Math.max(0, score);
+    }
+
+    private analizeCharacter(character) {
+        var code = character.charCodeAt(0);
+
+        if (code >= 97 && code <= 122) return 1;   // lower case
+        if (code >= 48 && code <= 57) return 2;    // numeric
+        if (code >= 65 && code <= 90) return 3;    // capital
+        if (code <= 126) return 4;                 // punctuation
+        return 5;                                 // foreign characters etc
+    }
+
+    private analizeDictionary(password: string) {
+        var chars = password.toLowerCase();
+        var score = 0;
+
+        for (var i in this.dictionary) {
+            var word = this.dictionary[i].toLowerCase();
+
+            if (password.indexOf(word) >= 0) score++;
+        }
+
+        // using words are bad too!
+        return score * -5;
+    }
 }

@@ -8,6 +8,18 @@ import VXCB = require("VCL/VXChartBase");
 export class VXChartLineBase extends VXCB.VXChartBase {
     public onClicked: (value: V.TLineValue) => void;
 
+    private _showhoverlegend: boolean = true;
+    public get ShowHoverLegend(): boolean {
+        return this._showhoverlegend;
+    }
+    public set ShowHoverLegend(val: boolean) {
+        if (val != this._showhoverlegend) {
+            this._showhoverlegend = val;
+            this.draw(true);
+        }
+    }
+
+   
     private _titleX: string;
     public get TitleX(): string {
         return this._titleX;
@@ -18,6 +30,29 @@ export class VXChartLineBase extends VXCB.VXChartBase {
             this.draw(true);   
         }
     }
+
+    private _minY: number;
+    public get YMin(): number {
+        return this._minY;
+    }
+    public set YMin(val: number) {
+        if (val != this._minY) {
+            this._minY = val;
+            this.draw(true);
+        }
+    }
+
+    private _maxY: number;
+    public get YMax(): number {
+        return this._maxY;
+    }
+    public set YMax(val: number) {
+        if (val != this._maxY) {
+            this._maxY = val;
+            this.draw(true);
+        }
+    }
+
 
     private _titleY: string;
     public get TitleY(): string {
@@ -299,13 +334,13 @@ export class VXChartLine extends VXChartLineBase {
             pointWidths: [1],
             pointStrokeColors: ['#ffffff'],
             titleX : this.TitleX,
-            paddingX: this.TitleX?40:15,
+            paddingX: this.TitleX?35:20,
             titleY : this.TitleY,
-            paddingY: this.TitleY?40:5,
+            paddingY: this.TitleY?25:5,
             pointFillColors: [],
             smooth: this.Smooth,
             xLabels: 'auto',
-            hideHover: 'auto',
+            hideHover: this.ShowHoverLegend? 'auto':'always',
             xLabelFormat: null,
             xLabelMargin: 15,
             grid: this.ShowGridLines,
@@ -314,7 +349,9 @@ export class VXChartLine extends VXChartLineBase {
             postUnits: this.PostValueUnit,
             gridTextSize: 12,
             gridTextFamily: 'sans-serif',
-            gridTextWeight: 'normal'
+            gridTextWeight: 'normal',
+            ymax: this.YMax ? String(this.YMax) : 'auto',
+            ymin: this.YMin ? String(this.YMin) : 'auto 0'
         }, this);
 
         super.create();
@@ -801,7 +838,7 @@ class Line extends VXCB.Grid {
         return -1;
     }
 
-    onGridClick(x, y) {
+    onGridClick(x, y, series) {
         if (this.owner == null) return;
         var owner = <VXChartLine>this.owner;
         if (owner.onClicked == null) return;
@@ -822,6 +859,7 @@ class Line extends VXCB.Grid {
     }
 
     onHoverMove(x, y) {
+        if (!this.hover) return;
         var index;
         index = this.hitTest(x, y);
         if (index < 0) return;
@@ -830,6 +868,7 @@ class Line extends VXCB.Grid {
     }
 
     onHoverOut() {
+        if (!this.hover) return;
         if (this.options.hideHover !== false) {
             return this.displayHoverForRow(null);
         }
@@ -928,10 +967,10 @@ class Line extends VXCB.Grid {
         
         if (this.options.titleX) {
             var b = this.measureText(this.options.titleX);
-            var center = (this.width / 2) + (b.width / 2);
-            this.raphael.text(center, this.bottom + this.options.paddingX - this.options.gridTextSize, this.options.titleX).
-                attr('font-size', this.options.gridTextSize + 1).attr('font-family', this.options.gridTextFamily).
-                attr('font-weight', "bold").attr('fill', this.options.gridTextColor);
+            var center = (this.elementWidth / 2);
+            this.raphael.text(center, this.bottom + this.options.paddingX - this.options.gridTextSize / 2, this.options.titleX).
+                attr('font-size', this.options.gridTextSize + 1).attr('font-family', this.options.gridTextFamily-1).
+                attr('font-weight', "normal").attr('fill', this.options.gridTextColor);
         } 
 
         prevLabelMargin = null;
@@ -1013,7 +1052,7 @@ class Line extends VXCB.Grid {
                 circle = this.drawLinePoint(row._x, row._y[index], this.options.pointSize, this.colorFor(row, index, 'point'), index);
                 circle.node.onclick = function (evt) {
                     var offset = $(self.el).offset();
-                    self.onGridClick(evt.pageX - offset.left, evt.pageY - offset.top);
+                    self.onGridClick(evt.pageX - offset.left, evt.pageY - offset.top,-1);
                 };
             }
             _results.push(this.seriesPoints[index].push(circle));

@@ -14,13 +14,13 @@
 
         function drawAxis(ax, g) {
             //top
-            +ax[0] && (ax[0] = chartinst.axis(x + g[0], y + g[0], width - 2 * g[0], minx, maxx, opts.axisxstep || Math.floor((width - 2 * g[0]) / 20), 2, opts.axisxlabels || null, opts.axisxtype || "t", null, paper));
+            +ax[0] && (ax[0] = chartinst.axis(x, y + g[0], width - 2 * g[0], minx, maxx, opts.axisxstep || Math.floor((width - 2 * g[0]) / 20), 2, opts.axisxlabels || null, opts.axisxtype || "t", null, paper));
             //right
-            +ax[1] && (ax[1] = chartinst.axis(x + width - g[1], y + height - g[1], height - 2 * g[1], miny, maxy, opts.axisystep || Math.floor((height - 2 * g[1]) / 20), 3, opts.axisylabels || null, opts.axisytype || "t", null, paper));
+            +ax[1] && (ax[1] = chartinst.axis(x + width, y + height - g[1], height - 2 * g[1], miny, maxy, opts.axisystep || Math.floor((height - 2 * g[1]) / 20), 3, opts.axisylabels || null, opts.axisytype || "t", null, paper));
             //bottom
-            +ax[2] && (ax[2] = chartinst.axis(x + g[3], y + height - g[2] + maxR, width - 2 * g[3], minx, maxx, opts.axisxstep || Math.floor((width - 2 * g[2]) / 20), 0, opts.axisxlabels || null, opts.axisxtype || "t", null, paper));
-            //left
-            +ax[3] && (ax[3] = chartinst.axis(x + g[3] - maxR, y + height - g[2], height - 2 * g[2], miny, maxy, opts.axisystep || Math.floor((height - 2 * g[3]) / 20), 1, opts.axisylabels || null, opts.axisytype || "t", null, paper));
+            +ax[2] && (ax[2] = chartinst.axis(x + g[3], y + height - g[2] + maxR, width - g[3] - gutter -maxR, minx, maxx, opts.axisxstep || Math.floor((width - 2 * g[2]) / 20), 0, opts.axisxlabels || null, opts.axisxtype || "t", null, paper));
+            //left kx = (width  - g[3] - maxR - gutter) / ((maxx - minx) || 1),
+            +ax[3] && (ax[3] = chartinst.axis(x + g[3] - maxR, y + height - g[2], height - g[2] - gutter - maxR, miny, maxy, opts.axisystep || Math.floor((height - 2 * g[3]) / 20), 1, opts.axisylabels || null, opts.axisytype || "t", null, paper));
         }
 
         //providing defaults
@@ -30,7 +30,7 @@
         var xdim = chartinst.snapEnds(Math.min.apply(Math, valuesx), Math.max.apply(Math, valuesx), valuesx.length - 1),
             minx = xdim.from,
             maxx = xdim.to,
-            gutter = opts.gutter || 10,
+            gutter = opts.gutter || 14,
             ydim = chartinst.snapEnds(Math.min.apply(Math, valuesy), Math.max.apply(Math, valuesy), valuesy.length - 1),
             miny = ydim.from,
             maxy = ydim.to,
@@ -44,10 +44,9 @@
             k = Math.sqrt(top / Math.PI) * 2 / max;
 
         for (var i = 0; i < len; i++) {
-            R[i] = Math.min(Math.sqrt(size[i] / Math.PI) * 2 / k, max);
+            R[i] = Math.max(Math.min(Math.sqrt(size[i] / Math.PI) * 2 / k, max),3);
         }
 
-        //gutter = Math.max.apply(Math, R.concat(gutter));
 
         /*\
         * dotchart.axis
@@ -58,7 +57,7 @@
         \*/
         var axis = paper.set(),
             maxR = Math.max.apply(Math, R);
-
+        
         if (opts.axis) {
             var ax = (opts.axis + "").split(/[,\s]+/);
             var g = [gutter, gutter, gutter, gutter];
@@ -74,44 +73,52 @@
                 b[i] = bb;
             }
 
-            gutter = Math.max.apply(Math, g.concat(gutter));
+            //gutter = Math.max.apply(Math, g.concat(gutter));
 
             for (var i = 0, ii = ax.length; i < ii; i++) if (ax[i].all) {
                 ax[i].remove();
                 ax[i] = 1;
             }
 
+            if (opts.titleX) g[2] += 10;
+            if (opts.titleY) g[3] += 10;
             drawAxis.call(chartinst, ax, g);
 
+            if (opts.titleX) paper.text(width / 2, height - 5, opts.titleX).attr('font-weight', "bold").attr('font-size', 13).attr('font-family', 'sans-serif').attr('fill', '#888');
+            if (opts.titleY) paper.text(5, height / 2, opts.titleY).attr('font-weight', "bold").attr('font-size', 13).attr('font-family', 'sans-serif').attr('fill', '#888').rotate(270);
+            
             for (var i = 0, ii = ax.length; i < ii; i++) if (ax[i].all) {
                 axis.push(ax[i].all);
             }
-
             res.axis = axis;
+
         }
 
-        var gutterX = Math.max(g[1], g[3]);
-        var gutterY = Math.max(g[0], g[2]);
-        var kx = (width - gutterX * 2) / ((maxx - minx) || 1),
-            ky = (height - gutterY * 2) / ((maxy - miny) || 1);
+
+        var kx = (width  - g[3] - maxR - gutter) / ((maxx - minx) || 1),
+            ky = (height - g[2] - gutter - maxR) / ((maxy - miny) || 1);
 
         for (var i = 0, ii = valuesy.length; i < ii; i++) {
             var sym = paper.raphael.is(symbol, "array") ? symbol[i] : symbol,
-                X = x + gutterX + (valuesx[i] - minx) * kx,
-                Y = y + height - gutterY - (valuesy[i] - miny) * ky;
+                X = x + g[3] + (valuesx[i] - minx) * kx,
+                Y = y + height - g[2] - (valuesy[i] - miny) * ky;
 
-            sym && R[i] && series.push(paper[sym](X, Y, R[i]).attr({ fill: opts.heat ? colorValue(R[i], maxR) : chartinst.colors[0], "fill-opacity": opts.opacity ? R[i] / max : 1, stroke: "none" }));
+            sym && R[i] && series.push(paper[sym](X, Y, R[i]).attr({
+                fill: opts.heat ? colorValue(R[i], maxR) : chartinst.colors[0],
+                "fill-opacity": opts.opacity ? R[i] / max : 1, stroke: "none"
+            }));
         }
 
         var covers = paper.set();
 
         for (var i = 0, ii = valuesy.length; i < ii; i++) {
-            var X = x + gutterX + (valuesx[i] - minx) * kx,
-                Y = y + height - gutterY - (valuesy[i] - miny) * ky;
-
+            var X = x + g[3] + (valuesx[i] - minx) * kx,
+                Y = y + height - g[2] - (valuesy[i] - miny) * ky;
             covers.push(paper.circle(X, Y, maxR).attr(chartinst.shim));
             opts.href && opts.href[i] && covers[i].attr({ href: opts.href[i] });
-            covers[i].r = +R[i].toFixed(3);
+            var rad = +R[i].toFixed(3);
+
+            covers[i].r = rad;
             covers[i].x = +X.toFixed(3);
             covers[i].y = +Y.toFixed(3);
             covers[i].X = valuesx[i];

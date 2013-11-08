@@ -29,6 +29,30 @@ export class VXChartBase extends VC.VXComponent {
         }
     }
 
+    private image: HTMLImageElement;
+    private takeChartImage() {
+        //create an image sanpshot
+        var el = this.jComponent.children()[0];
+        if (!el) return;
+        var svgStr = new XMLSerializer().serializeToString(el);
+        //for some reason xmlns apper twice
+        svgStr = svgStr.replace('xmlns="http://www.w3.org/2000/svg"','');
+        this.image = new Image();
+        var svg = new Blob([svgStr], { type: "image/svg+xml;charset=utf-8" });
+        var url = URL.createObjectURL(svg);
+        this.image.onload = () => {
+            URL.revokeObjectURL(url);
+        };
+        this.image.src = svgStr;//url;
+    }
+
+    public exportToJPG() {
+        var canvas: HTMLCanvasElement = (<HTMLCanvasElement>$("<canvas>")[0]);
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(this.image, 0, 0);
+        //$("#cnv").attr('src',canvas.toDataURL("image/png"));//canvas.toDataURL("image/jpg");
+    }
+
 
 }
 
@@ -57,7 +81,7 @@ export class VXDountValue extends VXChartValue {
         if (val != this._label) {
             this._label = val;
         }
-    } 
+    }
 }
 
 
@@ -93,7 +117,7 @@ export class VXDotValue extends VXChartValue {
     }
 }
 
-export class VXBubleValue extends VXChartValue {
+export class VXBubbleValue extends VXChartValue {
     private _value: number;
     public get Value(): number {
         return this._value;
@@ -187,6 +211,94 @@ export class VXBarValue extends VXChartValue {
         }
     }
 
+    private _seriesvalue7: number;
+    public get Value7(): number {
+        return this._seriesvalue7;
+    }
+    public set Value7(val: number) {
+        if (val != this._seriesvalue7) {
+            this._seriesvalue7 = val;
+        }
+    }
+    private _seriesvalue8: number;
+    public get Value8(): number {
+        return this._seriesvalue8;
+    }
+    public set Value8(val: number) {
+        if (val != this._seriesvalue8) {
+            this._seriesvalue8 = val;
+        }
+    }
+    private _seriesvalue9: number;
+    public get Value9(): number {
+        return this._seriesvalue9;
+    }
+    public set Value9(val: number) {
+        if (val != this._seriesvalue9) {
+            this._seriesvalue9 = val;
+        }
+    }
+    private _seriesvalue10: number;
+    public get Value10(): number {
+        return this._seriesvalue10;
+    }
+    public set Value10(val: number) {
+        if (val != this._seriesvalue10) {
+            this._seriesvalue10 = val;
+        }
+    }
+    private _seriesvalue11: number;
+    public get Value11(): number {
+        return this._seriesvalue11;
+    }
+    public set Value11(val: number) {
+        if (val != this._seriesvalue11) {
+            this._seriesvalue11 = val;
+        }
+    }
+
+    private _seriesvalue12: number;
+    public get Value12(): number {
+        return this._seriesvalue12;
+    }
+    public set Value12(val: number) {
+        if (val != this._seriesvalue12) {
+            this._seriesvalue12 = val;
+        }
+    }
+
+
+    private _seriesvalue13: number;
+    public get Value13(): number {
+        return this._seriesvalue13;
+    }
+    public set Value13(val: number) {
+        if (val != this._seriesvalue13) {
+            this._seriesvalue13 = val;
+        }
+    }
+
+
+    private _seriesvalue14: number;
+    public get Value14(): number {
+        return this._seriesvalue14;
+    }
+    public set Value14(val: number) {
+        if (val != this._seriesvalue14) {
+            this._seriesvalue14 = val;
+        }
+    }
+
+
+    private _seriesvalue15: number;
+    public get Value15(): number {
+        return this._seriesvalue15;
+    }
+    public set Value15(val: number) {
+        if (val != this._seriesvalue15) {
+            this._seriesvalue15 = val;
+        }
+    }
 
     private _label: string = "";
     public get Label(): string {
@@ -316,8 +428,8 @@ export class Grid extends EventEmitter {
     public cumulative;
     public el;
     public raphael;
-    private elementWidth;
-    private elementHeight;
+    public elementWidth;
+    public elementHeight;
     private dirty;
     public options;
     public defaults;
@@ -394,8 +506,8 @@ export class Grid extends EventEmitter {
     draw() { }
     onHoverMove(x, y) { }
     onHoverOut() { }
-    onGridClick(x, y) { }
-  
+    onGridClick(x, y, series) { }
+    
 
     gridDefaults = {
         dateFormat: null,
@@ -411,8 +523,8 @@ export class Grid extends EventEmitter {
         yLabelFormat: null,
         xLabelAngle: 0,
         numLines: 5,
-        paddingX:15,
-        paddingY:5,
+        paddingX: 15,
+        paddingY: 5,
         parseTime: true,
         postUnits: '',
         preUnits: '',
@@ -513,7 +625,7 @@ export class Grid extends EventEmitter {
             }
             return _results;
         }).call(this);
-        
+
         if (this.options.parseTime) {
             this.data = this.data.sort(function (a, b) {
                 if (a.x > b.x) return 1;
@@ -521,10 +633,10 @@ export class Grid extends EventEmitter {
                 return 0;
             });
         }
-       
-        this.xmin = this.data[0].x;
-    
         
+        this.xmin = this.data[0].x;
+        
+
         this.xmax = this.data[this.data.length - 1].x;
         this.events = [];
         if (this.options.parseTime && this.options.events.length > 0) {
@@ -648,8 +760,8 @@ export class Grid extends EventEmitter {
             this.elementHeight = h;
             this.dirty = false;
             this.left = this.options.paddingY;
-            this.right = this.elementWidth - this.options.paddingY;
-            this.top = this.options.paddingX;
+            this.right = this.elementWidth - 15;//this.options.paddingY;
+            this.top = 15;//this.options.paddingX;
             this.bottom = this.elementHeight - this.options.paddingX;
             if (this.options.axes) {
                 yLabelWidths = (function () {
@@ -658,7 +770,7 @@ export class Grid extends EventEmitter {
                     _results = [];
                     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                         gridLine = _ref[_i];
-                        _results.push(this.measureText(this.yAxisFormat(gridLine,true),0).width);
+                        _results.push(this.measureText(this.yAxisFormat(gridLine, true), 0).width);
                     }
                     return _results;
                 }).call(this);
@@ -684,9 +796,9 @@ export class Grid extends EventEmitter {
             }
             this.width = Math.max(1, this.right - this.left);
             this.height = Math.max(1, this.bottom - this.top);
-            
+
             this.dx = this.width / (this.xmax - this.xmin);
-            
+
             this.dy = this.height / (this.ymax - this.ymin);
             if (this.calc) {
                 return this.calc();
@@ -703,7 +815,7 @@ export class Grid extends EventEmitter {
             return (this.left + this.right) / 2;
         } else {
             return this.left + (x - this.xmin) * this.dx;
-            
+        
         }
     }
 
@@ -719,14 +831,14 @@ export class Grid extends EventEmitter {
 
     measureText(text, angle = 0) {
         var ret, tt;
-        if (text == null) return {height : 0,width: 0 };
+        if (text == null) return { height: 0, width: 0 };
         tt = this.raphael.text(100, 100, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).rotate(angle);
         ret = tt.getBBox();
         tt.remove();
         return ret;
     }
 
-    yAxisFormat(label,humanFriendly : boolean) {
+    yAxisFormat(label, humanFriendly: boolean) {
         return this.yLabelFormat(label, humanFriendly);
     }
 
@@ -734,7 +846,7 @@ export class Grid extends EventEmitter {
         if (typeof this.options.yLabelFormat === 'function') {
             return this.options.yLabelFormat(label);
         } else {
-            if (label > 99999.99 && humanFriendly) return this.options.preUnits + V.humanFriendlyNumber(label, 3)+this.options.postUnits;
+            if (label > 99999.99 && humanFriendly) return this.options.preUnits + V.humanFriendlyNumber(label, 3) + this.options.postUnits;
             return "" + this.options.preUnits + (V.commaNumber(label)) + this.options.postUnits;
         }
     }
@@ -756,12 +868,12 @@ export class Grid extends EventEmitter {
             return;
         }
         if (this.options.titleY) {
-            var b = this.measureText(this.options.titleY,270);
-            var center = (this.elementHeight / 2);//- (b.height / 2);
-            this.raphael.text(this.left - this.options.paddingY, center , this.options.titleY).
-                attr('font-size', this.options.gridTextSize + 1).attr('font-family', this.options.gridTextFamily).
-                attr('font-weight', "bold").attr('fill', this.options.gridTextColor).rotate(270);
-        } 
+            var b = this.measureText(this.options.titleY, 270);
+            var center = (this.elementHeight / 2);
+            this.raphael.text(this.options.gridTextSize / 2 /*this.left - this.options.paddingY*/, center, this.options.titleY).
+                attr('font-size', this.options.gridTextSize + 1).attr('font-family', this.options.gridTextFamily - 1).
+                attr('font-weight', "normal").attr('fill', this.options.gridTextColor).rotate(270);
+        }
 
         _ref = this.grid;
         _results = [];
@@ -769,7 +881,7 @@ export class Grid extends EventEmitter {
             lineY = _ref[_i];
             y = this.transY(lineY);
             if (this.options.axes) {
-                this.drawYAxisLabel(this.left - 4, y, this.yAxisFormat(lineY,true));
+                this.drawYAxisLabel(this.left - 4, y, this.yAxisFormat(lineY, true));
             }
             if (this.options.grid) {
                 _results.push(this.drawGridLine("M" + this.left + "," + y + "H" + (this.left + this.width)));
@@ -881,7 +993,8 @@ function parseDate(date) {
 
 export class Hover {
     private options;
-    private el : JQuery;
+    private el: JQuery;
+    public offset: number;
 
 
     constructor(options) {
@@ -895,13 +1008,13 @@ export class Hover {
 
     update(html, x, y) {
         this.html(html);
-     
+        
         this.show();
         return this.moveTo(x, y);
     }
 
     html(content) {
-        this.el.html(content);     
+        this.el.html(content);
         return this.el;
     }
 
@@ -911,7 +1024,12 @@ export class Hover {
         parentHeight = this.options.parent.innerHeight();
         hoverWidth = this.el.outerWidth();
         hoverHeight = this.el.outerHeight();
-        left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth);
+        var factor: number;
+        if (this.offset > 0) factor = x  + this.offset / 2 - 5;
+        else if (this.offset < 0) factor = x + this.offset / 2 - hoverWidth + 5;
+        else factor = x - hoverWidth / 2;
+
+        left = Math.min(Math.max(0, factor), parentWidth - hoverWidth);
         if (y != null) {
             top = y - hoverHeight - 10;
             if (top < 0) {
