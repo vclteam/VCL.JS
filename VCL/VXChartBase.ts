@@ -6,7 +6,7 @@ export class VXChartBase extends VC.VXComponent {
 
     constructor(aOwner: VC.VXComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.FitToWidth = true;
+        (<any>this)._fittowidth = true;
         this.Height = 200;
     }
 
@@ -479,7 +479,7 @@ export class Grid extends EventEmitter {
         this.el.bind('mousemove', function (evt) {
             var offset;
             offset = _this.el.offset();
-            _this.onHoverMove(evt.pageX - offset.left, evt.pageY - offset.top);
+            _this.onHoverMove(evt.pageX - offset.left, evt.pageY - offset.top, evt);
         });
         this.el.bind('mouseout', function (evt) {
             return _this.onHoverOut();
@@ -504,9 +504,9 @@ export class Grid extends EventEmitter {
     calc() { }
     postInit() { }
     draw() { }
-    onHoverMove(x, y) { }
+    onHoverMove(x, y, evt) { }
     onHoverOut() { }
-    onGridClick(x, y, series) { }
+    onGridClick(x, y, evt) { }
     
 
     gridDefaults = {
@@ -846,7 +846,7 @@ export class Grid extends EventEmitter {
         if (typeof this.options.yLabelFormat === 'function') {
             return this.options.yLabelFormat(label);
         } else {
-            if (label > 99999.99 && humanFriendly) return this.options.preUnits + V.humanFriendlyNumber(label, 3) + this.options.postUnits;
+            if (label > 9999.99 && humanFriendly) return this.options.preUnits + V.humanFriendlyNumber(label, 1) + this.options.postUnits;
             return "" + this.options.preUnits + (V.commaNumber(label)) + this.options.postUnits;
         }
     }

@@ -86,7 +86,7 @@ export class VXChartDonut extends VXCB.VXChartBase {
 
     
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 

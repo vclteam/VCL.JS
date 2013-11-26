@@ -8,7 +8,7 @@ import VXB = require("VCL/VXInputBase");
 export class VXButton extends VXC.VXComponent {
     constructor(aOwner: VXC.VXComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
-        this.Text = text;
+        this._text = text;
     }
 
     private _groupindex: number = -1;
@@ -94,7 +94,7 @@ export class VXButton extends VXC.VXComponent {
     /**
     * Occurs when the user clicks the component.
     */
-    public onClicked: () => void;
+    public onClicked: (sender : VXButton) => void;
     private jText : JQuery;
     private jImage: JQuery;
     private jBtn: JQuery;
@@ -166,14 +166,18 @@ export class VXButton extends VXC.VXComponent {
        }
 
         //setup the click event
-        this.jBtn.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })) ; return false; })
-        if (!this.Enabled) this.jBtn.addClass('disabled');
+        this.jBtn.off("click").click(() => {
+            if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(this); }));
+            return true;
+        })
+        if (!this.Enabled) this.jBtn.attr('disabled', 'disabled');
+        else this.jBtn.removeAttr('disabled');
         super.create();
 
     }
 
     public draw(reCreate : boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -265,7 +269,7 @@ export class VXToggleSwitch extends VXB.VXEditorBase {
         
     }
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 

@@ -11,20 +11,7 @@ import VXD = require("VCL/VXDataset");
 export class VXPage extends VXCO.VXContainer {
     constructor() {
         super(null, null);
-
-        var x = new VXDS.VXServer(false);
-        var htmlFilename: string = (<any>this).HTMLfileName;
-        if (htmlFilename == null) htmlFilename = this.getClassName() + ".html";
-        x.getHTML(htmlFilename,
-            (htmlFile: any) => {
-                $(this.jComponent).html(htmlFile);
-                if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
-                
-            },
-            (errorMessage: string) => {
-                V.Application.raiseException(errorMessage);
-            }
-        );
+        if (!(<any>this).__HTML__) V.Application.raiseException("Error in "+this.getClassName()+" - You can't instantiate TPage directly, use V.Application.loadPage ,V.Application.createPage or V.Application.navigateToPage");
     }
 
     public show(aOwner?: V.TContainer) {

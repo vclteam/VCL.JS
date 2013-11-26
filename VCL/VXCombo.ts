@@ -122,10 +122,10 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     public items: VXComboItemCollection<VXComboItem>;
     public createItem(value: string, text?: string): VXComboItem {
         var col: VXComboItem = new VXComboItem();
-        this.items.add(col);
-
         col.Value = value;
         col.Text = text;
+        this.items.add(col);
+
         return <VXComboItem>col;
     }
 
@@ -240,17 +240,17 @@ export class VXCombobox extends VXComboboxBase {
                     newVal.push((<VXComboItem>rc).Value);
                 }
             }
-            if (self.onChanged) (V.tryAndCatch(() => { self.onChanged(); }))
+            if (self.onChanged) (V.tryAndCatch(() => { self.onChanged(self); }))
         });
     }
 
     public closeDropDown() {
-        this.jEdit.selectpicker('closeDropDown');
+        if (this.jEdit) this.jEdit.selectpicker('closeDropDown');
     }
 
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -327,6 +327,7 @@ export class VXDBCombobox extends VXComboboxBase {
 
     public create() {
         super.create();
+        var self = this;
         this.jEdit.change(() => {
             var currVal: string[] = this.jEdit.selectpicker("val").toString().split(',');
             var newVal: Array = new Array();
@@ -340,7 +341,7 @@ export class VXDBCombobox extends VXComboboxBase {
             }
             if (this.DataValue != newVal.toString()) {
                 this.DataValue = newVal.toString();
-                if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(); }))
+                if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
             }
         });
     }
@@ -350,7 +351,7 @@ export class VXDBCombobox extends VXComboboxBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -381,8 +382,8 @@ export class VXComboItem extends VXM.VXMenuItem {
     public set Value(val: string) {
         if (val != this._value) {
             this._value = val;
-            if (this.ownerCollection != null)
-                this.ownerCollection.refresh();
+            if (this.OwnerCollection != null)
+                this.OwnerCollection.refresh();
         }
     }
 

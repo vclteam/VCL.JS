@@ -6,6 +6,7 @@ import VXO = require("VCL/VXObject");
 
 export class VXText extends VXT.VXTextBase {
     public create() {
+        var self = this;
         if (this.TextStyle == V.TextStyle.h1)
             this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'h1', this.FitToWidth, this.FitToHeight);
         else if (this.TextStyle == V.TextStyle.h2)
@@ -28,8 +29,8 @@ export class VXText extends VXT.VXTextBase {
             this.jComponent.addClass('small');
         } else this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'p', this.FitToWidth, this.FitToHeight);
 
-        this.jComponent.click(() => {
-            if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false;
+        this.jComponent.off("click").click(() => {
+            if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(self); })); return false;
         })
 
 
@@ -64,7 +65,7 @@ export class VXText extends VXT.VXTextBase {
 
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized()) return;
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -82,7 +83,7 @@ export class VXDBText extends VXT.VXDBTextBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized()) return;
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -106,8 +107,9 @@ export class VXLabel extends VXT.VXTextBase {
 
 
     public create() {
+        var self = this;
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
-        this.jComponent.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(self); })); return false; })
 
         this.jComponent.addClass('label');
         if (this.LabelStyle == V.LabelStyle.Success) this.jComponent.addClass('label-success');
@@ -120,7 +122,7 @@ export class VXLabel extends VXT.VXTextBase {
 
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized()) return;
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -145,7 +147,7 @@ export class VXDBLabel extends VXT.VXDBTextBase {
     public create() {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('label');
-        this.jComponent.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
         if (this.LabelStyle == V.LabelStyle.Success) this.jComponent.addClass('label-success');
         else if (this.LabelStyle == V.LabelStyle.Warning) this.jComponent.addClass('label-warning');
         else if (this.LabelStyle == V.LabelStyle.Important) this.jComponent.addClass('label-important');
@@ -154,7 +156,7 @@ export class VXDBLabel extends VXT.VXDBTextBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized()) return;
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -175,9 +177,10 @@ export class VXBadge extends VXT.VXTextBase {
     }
 
     public create() {
+        var self = this;
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('badge');
-        this.jComponent.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(self); })); return false; })
 
         if (this.BadgeStyle == V.BadgeStyle.Success) this.jComponent.addClass('badge-success');
         else if (this.BadgeStyle == V.BadgeStyle.Warning) this.jComponent.addClass('badge-warning');
@@ -188,7 +191,7 @@ export class VXBadge extends VXT.VXTextBase {
 
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -213,7 +216,7 @@ export class VXDBBadge extends VXT.VXDBTextBase {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
 
         this.jComponent.addClass('badge');
-        this.jComponent.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
 
         if (this.BadgeStyle == V.BadgeStyle.Success) this.jComponent.addClass('badge-success');
         else if (this.BadgeStyle == V.BadgeStyle.Warning) this.jComponent.addClass('badge-warning');
@@ -224,7 +227,7 @@ export class VXDBBadge extends VXT.VXDBTextBase {
 
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -364,7 +367,7 @@ export class VXTagCloud extends VXC.VXComponent {
             else tagItem.attr('title', item.Value);
             tagItem.tooltip();
 
-            tagItem.click(() => {
+            tagItem.off("click").click(() => {
                 if (item.onClicked != null) (V.tryAndCatch(() => { item.onClicked(); })); return false;
             })
             
@@ -388,7 +391,7 @@ export class VXTagCloud extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
     }
@@ -438,8 +441,8 @@ export class VXPillBoxItem extends VXO.VXCollectionItem {
     public set Value(val: string) {
         if (val != this._value) {
             this._value = val;
-            if (this.ownerCollection != null)
-                this.ownerCollection.refresh();
+            if (this.OwnerCollection != null)
+                this.OwnerCollection.refresh();
         }
     }
 
@@ -487,7 +490,7 @@ export class VXPillBox extends VXC.VXComponent {
             jItem.text(item.Text);
             jItem.data(item);
             jItem.addClass('status-' + V.PillBoxStyle[item.PillBoxItemStyle].toLowerCase());
-            jItem.click(function (e) {
+            jItem.off("click").click(function (e) {
                 var $li = $(e.currentTarget);
                 var item = $li.data();
                 if ($li.width() - e.offsetX < 16) {
@@ -504,7 +507,7 @@ export class VXPillBox extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
     }

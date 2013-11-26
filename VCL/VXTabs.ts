@@ -11,7 +11,6 @@ export class VXTab extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 

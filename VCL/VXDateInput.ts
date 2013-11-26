@@ -98,19 +98,21 @@ export class VXDateInput extends VXDateInputBase {
 
     public create() {
         super.create();
+        var self = this;
         this.jEdit.change(() => {
-            this.Date = (<any> this.jComponent[0]).Date;
-            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(); }))
+            var dt: any = (<any> this.jComponent[0]).Date;
+            this.Date = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
+            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
     }
 
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
-        this.jComponent.datepicker("update", this.Date);
+        this.jComponent.datepicker("setDate", this.Date);
         this.setEditorWidth();
     }
 }
@@ -187,21 +189,23 @@ export class VXDBDateInput extends VXDateInputBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) {
             this.validateEnabled();
             this.create();
         }
         this.initialized = true;
-        this.jComponent.datepicker("update", this.Date);
+        this.jComponent.datepicker("setDate", this.Date);
         this.setEditorWidth();
     }
 
     public create() {
         super.create();
-        this.jEdit.change(() => {
-            this.DateValue = (<any> this.jComponent[0]).Date;
-            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(); }))
+        var self = this;
+        this.jEdit.off("change").change(() => {
+            var dt: any = (<any> this.jComponent[0]).Date;
+            this.DateValue = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
+            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
     }
 }

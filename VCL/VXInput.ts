@@ -16,17 +16,18 @@ export class VXInput extends VXB.VXInputBase {
         }
     }
 
-     
+    
     public create() {
+        var self = this;
         super.create();
         this.jEdit.on("change keyup paste",() => {
             this.Text = this.jEdit.val()
-            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(); }))
+            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -108,18 +109,19 @@ export class VXDBInput extends VXB.VXInputBase {
 
     public create() {
         super.create();
+        var self = this;
         this.jEdit.on("change keyup paste",() => {
             this.DataValue = this.jEdit.val();
-            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(); }))
+            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
         if (this.ImmidiatePost) this.jEdit.keyup(() => {
             this.DataValue = this.jEdit.val();
-            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(); }))
+            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) {
             this.validateEnabled();
             this.create();

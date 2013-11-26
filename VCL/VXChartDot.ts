@@ -10,7 +10,7 @@ export class VXChartDotBase extends VXCB.VXChartBase {
 
     constructor(aOwner: VXC.VXComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.FitToWidth = true;
+        (<any>this)._fittowidth = true;
         this.Height = 200;
     }
 
@@ -39,7 +39,7 @@ export class VXChartDotBase extends VXCB.VXChartBase {
 
     private _showselecteditem: boolean = true;
     /*
-    * whether or not to enable coloring higher value symbols with warmer hue
+    * whether or not to the selected value will appers on click
     */
     public get ShowSelectedItem(): boolean {
         return this._showselecteditem;
@@ -48,6 +48,19 @@ export class VXChartDotBase extends VXCB.VXChartBase {
         if (val != this._showselecteditem) {
             this._showselecteditem = val;
             this.draw(true);
+        }
+    }
+
+    private _Dotcolor: string;
+    public get DotColor(): string {
+        return this._Dotcolor;
+    }
+    public set TextColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._Dotcolor) {
+                this._Dotcolor = val;
+                this.draw(true);
+            }
         }
     }
 
@@ -67,7 +80,7 @@ export class VXChartDotBase extends VXCB.VXChartBase {
         }
     }
 
-    private _heatmap: boolean = true;
+    private _heatmap: boolean = false;
     /*
     * whether or not to enable coloring higher value symbols with warmer hue
     */
@@ -119,7 +132,7 @@ export class VXChartDot extends VXChartDotBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         this.create();
     }
 
@@ -210,7 +223,7 @@ export class VXChartBubble extends VXChartDotBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         this.create();
     }
 

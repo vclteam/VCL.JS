@@ -109,16 +109,16 @@ export class VXWidgetGrid extends VXCO.VXContainer {
 
     constructor(aOwner: VXC.VXComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.FitToWidth = true;
+        (<any>this)._fittowidth = true;
     }
 
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+           if (!this.parentInitialized())return;super.draw(reCreate);
+           if (reCreate || !this.initialized) this.create();
+           this.initialized = true;
 
-        super.draw(reCreate);
+           super.draw(reCreate);
     }
 
     public widgets = new VXO.VXCollection<VXWidgetPanel>();
@@ -151,6 +151,7 @@ export class VXWidgetGrid extends VXCO.VXContainer {
         item.Width = this.WidgetWidth * item.SizeX + (item.SizeX - 1) * this.MarginVertical * 2;
         item.Height = this.WidgetHeight * item.SizeY + (item.SizeY - 1) * this.MarginHorizontal * 2;
         item.widgetElment = this.jGridster.add_widget(item.jComponent, item.SizeX, item.SizeY, item.X >= 0 ? item.X : null, item.Y >= 0 ? item.Y : null);
+ 
         var paddingTop: number = parseInt(item.jContent.css("margin-top").replace("px", ""));
         var paddingBottom: number = parseInt(item.jContent.css("margin-bottom").replace("px", ""));
         var height = item.jComponent.innerHeight() - item.jHeader.outerHeight() - paddingBottom - paddingTop;
@@ -279,7 +280,7 @@ export class VXWidgetPanel extends VXP.VXPanel {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         super.draw(reCreate);
     }
 

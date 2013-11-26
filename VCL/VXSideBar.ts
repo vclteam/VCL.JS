@@ -28,7 +28,7 @@ export class VXNavBar extends VXBarBase {
 
     constructor(aOwner: VXC.VXComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.FitToWidth = true;
+        (<any>this)._fittowidth = true;
     }
 
 
@@ -55,7 +55,7 @@ export class VXNavBar extends VXBarBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -117,7 +117,7 @@ export class VXSideBar extends VXBarBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 

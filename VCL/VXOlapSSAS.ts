@@ -115,6 +115,20 @@ export class VXOlapSSAS extends VXD.VXClientDataset {
         return param;
     }
 
+    public addSlicers(selectedMember: string, clearOldSlicers: boolean = false) {
+        if (clearOldSlicers) {
+            this.slicers.clear();
+        }
+        if (selectedMember) {
+            var memArr = selectedMember.split(',');
+            for (var i = 0; i < memArr.length; i++) {
+                if (memArr[i]) {
+                    this.createSlicer(memArr[i]);
+                }
+            }
+        }
+    }
+
     public createDateRangeSlicer(dimension : string,fromDate: Date, toDate: Date): VXDateSlicer {
         var param = new VXDateSlicer();
         param.FromDate = fromDate;

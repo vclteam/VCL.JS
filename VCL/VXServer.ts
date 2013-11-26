@@ -1,5 +1,6 @@
 /// <reference path="../VCL/Scripts/jquery.d.ts" />
 import V = require("VCL/VCL");
+import VO = require("VCL/VXObject");
 export class VXServer {
     private async: boolean;
     constructor(async?: boolean) {
@@ -9,10 +10,21 @@ export class VXServer {
     }
 
     getHTML(filename: string, callback?: (data) => any, errorCallback?: (textStatus: string) => any) {
+        var key = "getHTML~" + filename + "~E31dfdf~";
+        var _data = cache.getItem(key);
+        if (_data != null) {
+            callback(_data.data);
+            return;
+        }
+
         var ajxParam: JQueryAjaxSettings = {
             async: this.async, timeout: 200000,
             url: filename, dataType: "html",
+            cache: false,
             success: (data: any, textStatus: string, jqXHR: JQueryXHR) => {
+                var myData: ServerCacheItem = new ServerCacheItem();
+                myData.data = data;
+                cache.setItem(key, myData, { expirationSliding: 3600 });
                 if (callback != null) callback(data);
             },
             error: (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => {
@@ -62,7 +74,10 @@ export class VXServer {
     }
 
     callServerMethod(method: string, param, callback?: (data) => any, errorCallback?: (textStatus: string) => any) {
-        var data: string = encodeURIComponent(JSON.stringify(param));
+        var data: string = encodeURIComponent(JSON.stringify(param, function (key, value) {
+            if (key === "__ownerCollection") return undefined;
+            return value;
+        }));
 
         var ajxParam: JQueryAjaxSettings = {
             async: this.async, timeout: 200000,

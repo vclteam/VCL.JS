@@ -53,7 +53,7 @@ export class VXEditorBase extends VXC.VXComponent {
         }
     }
 
-    public onChanged: () => void;
+    public onChanged: (sender: VXEditorBase) => void;
 
     public jLabel: JQuery;
     public jEdit: JQuery;
@@ -173,7 +173,7 @@ export class VXInputBase extends VXEditorBase {
             if (!this.Enabled) this.jBtn.addClass("disabled");
             this.jbtnText.appendTo(this.jBtn);
 
-            this.jBtn.click(() => { if (this.onButtonClicked != null) (V.tryAndCatch(() => { this.onButtonClicked(); })); return false; });
+            this.jBtn.off("click").click(() => { if (this.onButtonClicked != null) (V.tryAndCatch(() => { this.onButtonClicked(); })); return false; });
             this.jComponent.append(this.jBtn)
         }
 

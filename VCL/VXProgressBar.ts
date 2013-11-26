@@ -86,7 +86,7 @@ export class VXProgressBar extends VXC.VXComponent {
         super.create();
     }
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -96,7 +96,7 @@ export class VXProgressBar extends VXC.VXComponent {
 
 
 export class VXRatingStart extends VXC.VXComponent {
-    public onClicked: () => void;
+    public onClicked: (sender: VXRatingStart) => void;
     private _starsize: number = 1.5;
     /*
     * specify the value from 0-5 of the rating control.
@@ -197,7 +197,7 @@ export class VXRatingStart extends VXC.VXComponent {
             var stars = $(this);
             var star_position = parseInt(stars.attr("data-position"));
             self.Value = star_position;
-            if (self.onClicked != null) V.tryAndCatch(() => { self.onClicked(); }); 
+            if (self.onClicked != null) V.tryAndCatch(() => { self.onClicked(self); }); 
         });
 
         if (!this.ReadOnly) {
@@ -206,7 +206,7 @@ export class VXRatingStart extends VXC.VXComponent {
         super.create();
     }
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
         this.RateTo(this.Value);

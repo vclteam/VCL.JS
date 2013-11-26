@@ -15,7 +15,7 @@ export class VXDBGrid extends VXC.VXComponent {
 
     constructor(aOwner: VXC.VXComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.FitToWidth = true;
+        (<any>this)._fittowidth = true;
     }
 
     private _showselectedrecord: boolean = true;
@@ -178,9 +178,9 @@ export class VXDBGrid extends VXC.VXComponent {
     }
 
 
-    public draw(recreate: boolean) {
-        if (!this.showed) return;
-        if (recreate || this.needrecreate) this.create();
+    public draw(reCreate: boolean) {
+        if (!this.parentInitialized())return;super.draw(reCreate);
+        if (reCreate || this.needrecreate) this.create();
         if (this.Dataset != null) {
             this.selectedRecordId = this.Dataset.getRecordIndex();
         }

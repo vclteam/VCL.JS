@@ -15,17 +15,18 @@ export class VXMenuItem extends VXO.VXCollectionItem {
         else {
             this.jComponent.empty();
             var itemRef: JQuery = $('<a/>');
-            itemRef.click(() => {
+            itemRef.off("click").click(() => {
                 if (this.Enabled && this.onClicked != null) {
                     (V.tryAndCatch(() => { this.onClicked(self); }))
                 }
             })
             itemRef.text(this.Text);
             itemRef.appendTo(this.jComponent);
-            if (this.ButtonIcon != null) {
+            if (this.Icon != null) {
                 var imageRef: JQuery = $('<i/>');
-                imageRef.addClass(V.iconEnumToBootstrapStyle(this.ButtonIcon));
+                imageRef.addClass(V.iconEnumToBootstrapStyle(<any>this.Icon));
                 imageRef.prependTo(itemRef);
+                if (this.IconColor) imageRef.css('color', this.IconColor);
             }
         }
     }
@@ -74,14 +75,27 @@ export class VXMenuItem extends VXO.VXCollectionItem {
     }
 
 
-    private _buttonicon: V.ButtonIcon = null;
-    public get ButtonIcon(): V.ButtonIcon {
-        return this._buttonicon;
+    private _icon: V.Icon = null;
+    public get Icon(): V.Icon {
+        return this._icon;
     }
-    public set ButtonIcon(val: V.ButtonIcon) {
-        if (val != this._buttonicon) {
-            this._buttonicon = val;
+    public set Icon(val: V.Icon) {
+        if (val != this._icon) {
+            this._icon = val;
             this.create();
+        }
+    }
+
+    private _iconcolor: string = null;
+    public get IconColor(): string {
+        return this._iconcolor;
+    }
+    public set IconColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._iconcolor) {
+                this._iconcolor = val;
+                this.create();
+            }
         }
     }
 

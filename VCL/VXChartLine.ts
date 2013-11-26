@@ -20,7 +20,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     }
 
    
-    private _titleX: string;
+    private _titleX: string = null;
     public get TitleX(): string {
         return this._titleX;
     }
@@ -31,7 +31,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
         }
     }
 
-    private _minY: number;
+    private _minY: number = 0;
     public get YMin(): number {
         return this._minY;
     }
@@ -42,7 +42,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
         }
     }
 
-    private _maxY: number;
+    private _maxY: number = null;
     public get YMax(): number {
         return this._maxY;
     }
@@ -54,7 +54,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     }
 
 
-    private _titleY: string;
+    private _titleY: string = null;
     public get TitleY(): string {
         return this._titleY;
     }
@@ -293,12 +293,12 @@ export class VXChartLineBase extends VXCB.VXChartBase {
 
         this.values.forEach((valueOfElement) => {
             var obj: any = { x: valueOfElement.Date, id: valueOfElement.ID }
-            obj.value1= valueOfElement.Value1;
-            obj.value2= valueOfElement.Value2;
-            obj.value3= valueOfElement.Value3;
-            obj.value4= valueOfElement.Value4;
-            obj.value5= valueOfElement.Value5;
-            obj.value6= valueOfElement.Value6;
+            obj.value1 = !isFinite(valueOfElement.Value1) ? null : valueOfElement.Value1;
+            obj.value2 = !isFinite(valueOfElement.Value2) ? null :valueOfElement.Value2;
+            obj.value3 = !isFinite(valueOfElement.Value3) ? null :valueOfElement.Value3;
+            obj.value4 = !isFinite(valueOfElement.Value4) ? null :valueOfElement.Value4;
+            obj.value5 = !isFinite(valueOfElement.Value5) ? null :valueOfElement.Value5;
+            obj.value6 = !isFinite(valueOfElement.Value6) ? null :valueOfElement.Value6;
             dataArray.push(obj);
             return true;
         });
@@ -311,7 +311,7 @@ export class VXChartLine extends VXChartLineBase {
     private jChart: Line;
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -321,6 +321,8 @@ export class VXChartLine extends VXChartLineBase {
     public create() {
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+        var ymin = this.YMin != null? String(this.YMin) : 'auto'
+        var ymax = this.YMax != null? String(this.YMax) : 'auto'
 
         this.jChart = new Line({
             element: this.jComponent[0],
@@ -350,8 +352,8 @@ export class VXChartLine extends VXChartLineBase {
             gridTextSize: 12,
             gridTextFamily: 'sans-serif',
             gridTextWeight: 'normal',
-            ymax: this.YMax ? String(this.YMax) : 'auto',
-            ymin: this.YMin ? String(this.YMin) : 'auto 0'
+            ymax: ymax,
+            ymin: ymin
         }, this);
 
         super.create();
@@ -374,7 +376,7 @@ export class VXChartArea extends VXChartLineBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
         this.jChart.setData(this.getData());
@@ -548,15 +550,15 @@ export class VXDBChartLine extends VXChartLine {
             var dtValue: any = this.Dataset.getFieldValue(this.DateField);
             if (dtValue !== null) {
                 if (!dtValue.getMonth) V.Application.raiseException("Field " + this.DateField
-                    + " not containt date value");
+                    + " not contain date value");
 
                 var obj: any = { x: (<Date>dtValue), id: this.Dataset.Recno }
-                if (this.Dataset.getFieldValue(this.ValueField1)) obj.value1 = this.Dataset.getFieldValue(this.ValueField1);
-                if (this.Dataset.getFieldValue(this.ValueField2)) obj.value2 = this.Dataset.getFieldValue(this.ValueField2);
-                if (this.Dataset.getFieldValue(this.ValueField3)) obj.value3 = this.Dataset.getFieldValue(this.ValueField3);
-                if (this.Dataset.getFieldValue(this.ValueField4)) obj.value4 = this.Dataset.getFieldValue(this.ValueField4);
-                if (this.Dataset.getFieldValue(this.ValueField5)) obj.value5 = this.Dataset.getFieldValue(this.ValueField5);
-                if (this.Dataset.getFieldValue(this.ValueField6)) obj.value6 = this.Dataset.getFieldValue(this.ValueField6);
+                if (this.Dataset.getFieldValue(this.ValueField1) && isFinite(this.Dataset.getFieldValue(this.ValueField1))) obj.value1 = this.Dataset.getFieldValue(this.ValueField1);
+                if (this.Dataset.getFieldValue(this.ValueField2) && isFinite(this.Dataset.getFieldValue(this.ValueField2))) obj.value2 = this.Dataset.getFieldValue(this.ValueField2);
+                if (this.Dataset.getFieldValue(this.ValueField3) && isFinite(this.Dataset.getFieldValue(this.ValueField3))) obj.value3 = this.Dataset.getFieldValue(this.ValueField3);
+                if (this.Dataset.getFieldValue(this.ValueField4) && isFinite(this.Dataset.getFieldValue(this.ValueField4))) obj.value4 = this.Dataset.getFieldValue(this.ValueField4);
+                if (this.Dataset.getFieldValue(this.ValueField5) && isFinite(this.Dataset.getFieldValue(this.ValueField5))) obj.value5 = this.Dataset.getFieldValue(this.ValueField5);
+                if (this.Dataset.getFieldValue(this.ValueField6) && isFinite(this.Dataset.getFieldValue(this.ValueField6))) obj.value6 = this.Dataset.getFieldValue(this.ValueField6);
                 dataArray.push(obj);
 
                 var col = new VXCB.VXLineValue();
@@ -838,7 +840,7 @@ class Line extends VXCB.Grid {
         return -1;
     }
 
-    onGridClick(x, y, series) {
+    onGridClick(x, y, evt) {
         if (this.owner == null) return;
         var owner = <VXChartLine>this.owner;
         if (owner.onClicked == null) return;
@@ -858,7 +860,7 @@ class Line extends VXCB.Grid {
         }
     }
 
-    onHoverMove(x, y) {
+    onHoverMove(x, y, evt) {
         if (!this.hover) return;
         var index;
         index = this.hitTest(x, y);
@@ -1052,7 +1054,7 @@ class Line extends VXCB.Grid {
                 circle = this.drawLinePoint(row._x, row._y[index], this.options.pointSize, this.colorFor(row, index, 'point'), index);
                 circle.node.onclick = function (evt) {
                     var offset = $(self.el).offset();
-                    self.onGridClick(evt.pageX - offset.left, evt.pageY - offset.top,-1);
+                    self.onGridClick(evt.pageX - offset.left, evt.pageY - offset.top, evt);
                 };
             }
             _results.push(this.seriesPoints[index].push(circle));

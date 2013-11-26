@@ -6,7 +6,7 @@ import VXO = require("VCL/VXObject");
 import V = require("VCL/VCL");
 import VXM = require("VCL/VXMenu");
 import VXServer = require("VCL/VXServer");
-
+import VXDS = require("VCL/VXServer");
 
 export class VXApplication {
     private static _instance: VXApplication;
@@ -52,14 +52,24 @@ export class VXApplication {
         });
     }
 
+
+    private createPageInstance(prototype, html, __args) {
+        var instance = Object.create(prototype);
+        instance.__HTML__ = html;
+        instance.constructor.apply(instance, __args);
+        return instance;
+    }
+
     /*
-    * load page asynchronously create an return an instance as a callback
+    * create and load page & html file asynchronously  an return an object instance in a callback function
     */
-    public loadPage(classPathName: string, __args: any[], __callback: (page: V.TPage) => void ) {
+    public loadPage(classPathName: string, __args: any[], __callback?: (page: V.TPage) => void ) {
+        var self = this;
         var classes: string[] = [];
         var className = classPathName.split('/')[classPathName.split('/').length - 1];
         classes.push(classPathName);
-        require(classes, function (page) {
+        classes.push('VCL/Scripts/text.js!' + classPathName + '.html');
+        require(classes, function (page,html) {
             var classExists = true;
             try {
                 typeof (page[className].prototype);
@@ -68,13 +78,33 @@ export class VXApplication {
                 classExists = false;
             }
             if (classExists) {
-                var instance = Object.create(page[className].prototype);
-                instance.HTMLfileName = classPathName + ".html";
-                instance.constructor.apply(instance, __args);
-                __callback(instance);
+                var instance = self.createPageInstance(page[className].prototype, html, __args)
+                if (__callback) __callback(instance);
             }
         })
     }
+
+    /*
+    * create and load page & html file synchronously  an return an object instance 
+    */
+    public createPage(Class, __args: any[],htmlPath : string = "") {
+        var self = this;
+        var instance;
+        var path = htmlPath + '/' + Class.getClassName() + ".html"
+        new VXDS.VXServer(false).getHTML(path,
+            (html: any) => {
+                instance = self.createPageInstance(Class.prototype, html, __args);
+
+            },
+            (errorMessage: string) => {
+                V.Application.raiseException("cant find :"+path);
+            }
+            );
+        return instance;
+    }
+
+
+
 
     /*
     *  capture page loading if the event return false page loading will not occurred
@@ -406,7 +436,7 @@ export class VXApplication {
         this.navbaritems.forEach((item: VXNavbarItem) => {
             var baritem: JQuery = $('<a/>');
             baritem.attr('href', '#');
-            baritem.click(() => { if (item.onClick != null) V.tryAndCatch(() => { item.onClick(); }); return false; });
+            baritem.off("click").click(() => { if (item.onClick != null) V.tryAndCatch(() => { item.onClick(); }); return false; });
             if (item.Icon) {
                 $('<i/>').addClass(item.Icon).appendTo(baritem)
             }
@@ -471,15 +501,32 @@ export class VXApplication {
             this.s4() + this.s4() + this.s4() + this.s4();
     }
 
-    public FormatCurrency(value: number): string {
-        var intp: string = (Math.floor(value).toString());
-        var decp: string = (value - Math.floor(value)).toString();
-        decp = (decp.substr(2, 1000) + '000000000').substr(0, this.CurrencyDecimals);
-        return this.CurrencyString + intp.replace(/\B(?=(\d{3})+(?!\d))/g, this.ThousandSeparator)
-            + this.DecimalSeparator + decp;
+    public formatNumberK(value: number): string 
+	{
+        value = (value / 1000);
+        return this.FormatNumber(value,0) + "K";
+	}
+
+    public FormatMin(value: number, precision: number = 0): string {
+        return this.FormatNumber(value, precision) + " Min";
     }
 
-    public FormatNumber(value: number, precision : number): string {
+    public MB: string = "MB";
+    public GB: string = "GB";
+    public FormatGB(value: number, type: string = this.GB): string {
+        return this.FormatNumber(value, 0) + type;
+    }
+
+    public PERCENT: string = "%";
+    public FormatPercent(value: number, precision: number = 0): string {
+        return this.FormatNumber(value, precision) + this.PERCENT;
+    }
+
+    public FormatCurrency(value: number, precision: number = 2): string {
+        return this.CurrencyString + this.FormatNumber(value, precision);
+    }
+
+    public FormatNumber(value: number, precision : number = 2): string {
         var intp: string = (Math.floor(value).toString());
         var decp: string = (value - Math.floor(value)).toString();
         decp = (decp.substr(2, 1000) + '000000000').substr(0, precision);

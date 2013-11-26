@@ -7,9 +7,8 @@ import VXO = require("VCL/VXObject");
 export class VXComponent extends VXO.VXObject {
     private __NAME__: string;
 
-    public owner : VXComponent;
+    public owner: VXComponent;
     public jComponent: JQuery;
-    public showed: boolean = false;
     public initialized: boolean = false;
 
     public onCreate() { }
@@ -19,7 +18,7 @@ export class VXComponent extends VXO.VXObject {
         super();
         this.owner = aOwner;
 
-        if (aOwner == null && !this.isPage ) {
+        if (aOwner == null && !this.isPage) {
             V.Application.raiseException("Owner cannot be null");
             throw "Owner cannot be null";
         }
@@ -33,8 +32,8 @@ export class VXComponent extends VXO.VXObject {
             if ((<VXCO.VXContainer>aOwner).Dataset != null) {
                 try {
                     (<any>this).Dataset = (<VXCO.VXContainer>aOwner).Dataset;
-                } catch(err) {}
-                
+                } catch (err) { }
+
             }
         }
 
@@ -59,7 +58,7 @@ export class VXComponent extends VXO.VXObject {
                 throw "Cant find element '" + renderTo + "' on page " + aOwner.getClassName();
             }
             if (comp.children().length > 0 && !this.isContainer) {
-                 V.Application.raiseException("Error on element '" + renderTo + "'.Only container element can have child elmenet.On page " + aOwner.getClassName());
+                V.Application.raiseException("Error on element '" + renderTo + "'.Only container element can have child elmenet.On page " + aOwner.getClassName());
                 throw "Error on element:'" + renderTo + "' only container element can have child elmenet.On page " + aOwner.getClassName();
             }
             this.jComponent = comp;
@@ -128,7 +127,7 @@ export class VXComponent extends VXO.VXObject {
     public set Visible(val: boolean) {
         if (val != this._visible) {
             this._visible = val;
-            this.draw(true);
+            this.draw(false);
         }
     }
 
@@ -144,23 +143,23 @@ export class VXComponent extends VXO.VXObject {
     }
 
     /*
-    * Repaints the control on the screen.
+    * refresh the control on the screen.
     */
     public refresh() {
         this.draw(false);
     }
 
     /*
-    * Use Invalidate when the entire control needs to be fully repainted. 
+    * Use repaint when the entire control needs to be fully repainted. 
     */
-    public Invalidate() {
+    public repaint() {
         this.draw(true);
     }
 
     /**
     * Display the component by fading them to opaque
     */
-    public fadeIn(duration?: number, complete?: () => void ): void {
+    public fadeIn(duration?: number, complete?: () => void): void {
         this.jComponent.fadeIn(duration, function () {
             if (complete != null) complete();
         })
@@ -169,7 +168,7 @@ export class VXComponent extends VXO.VXObject {
     /**
     * Hide the matched elements by fading them to transparent.
     */
-    public fadeOut(duration?: number, complete?: () => void ): void {
+    public fadeOut(duration?: number, complete?: () => void): void {
         this.jComponent.fadeOut(duration, function () {
             if (complete != null) complete();
         })
@@ -181,8 +180,8 @@ export class VXComponent extends VXO.VXObject {
     * The margin does not have a background color, and is completely transparent.
     * Sets the left margin of an component
     */
-    public get MarginLeft() : number { return parseFloat(this.jComponent.css('margin-left')); }
-    public set MarginLeft(pixel: number) {this.jComponent.css('margin-left', pixel);}
+    public get MarginLeft(): number { return parseFloat(this.jComponent.css('margin-left')); }
+    public set MarginLeft(pixel: number) { this.jComponent.css('margin-left', pixel); }
     /**
     * The margin clears an area around an component . 
     * The margin does not have a background color, and is completely transparent.
@@ -244,7 +243,7 @@ export class VXComponent extends VXO.VXObject {
     */
     public get Width(): number { return this.jComponent.width(); }
     public set Width(pixel: number) { this.jComponent.width(pixel); }
-    public animateResize(duration : number = 400,widthPixel?: number, heightPixel?: number,completeCallBack?: () => void) {
+    public animateResize(duration: number = 400, widthPixel?: number, heightPixel?: number, completeCallBack?: () => void) {
         if (!widthPixel && !heightPixel) return;
         if (widthPixel && heightPixel) this.jComponent.animate({ width: widthPixel, height: heightPixel }, duration, completeCallBack);
         else if (widthPixel) this.jComponent.animate({ width: widthPixel }, duration, completeCallBack);
@@ -286,10 +285,12 @@ export class VXComponent extends VXO.VXObject {
 
 
     public draw(reCreate: boolean) {
+        if (!this.jComponent) return;
+        if (this.Visible) this.jComponent.show();
+        else this.jComponent.hide();
     }
 
     public show() {
-        this.showed = true;
         this.draw(true);
     }
 
@@ -301,17 +302,22 @@ export class VXComponent extends VXO.VXObject {
     public get isPage(): boolean {
         return false;
     }
+
+    public parentInitialized() {
+        if (!this.owner) return true;
+        return (this.owner).initialized;
+    }
 }
 
 
 export class VXControl extends VXComponent {
     public onClicked: () => void;
     public create() {
-        this.jComponent.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
         super.create();
     }
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized()) return;
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
     }

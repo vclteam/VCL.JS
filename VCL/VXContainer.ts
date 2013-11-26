@@ -7,10 +7,12 @@ import VXD = require("VCL/VXDataset");
 declare function Spinner(options: any): void;
 
 export class VXContainer extends VXC.VXComponent {
+    private __HTML__: string;
     public components = new VXO.VXCollection<VXC.VXComponent>();
 
     constructor(aOwner: VXC.VXComponent, renderTo?: string) {
         super(aOwner, renderTo);
+        if (this.__HTML__) $(this.jComponent).html(this.__HTML__);
         if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
     }
 
@@ -18,13 +20,15 @@ export class VXContainer extends VXC.VXComponent {
         this.components.add(component);
     }
 
+
     public draw(reCreate: boolean) {
+        this.initialized = true;
+        super.draw(reCreate);
         if (this.jComponent) {
             if (this.Visible) this.jComponent.show();//css('visibility', this.Visible ? 'visible' : 'hidden');
             else this.jComponent.hide();
         }
         this.components.forEach((item: VXC.VXComponent) => {
-            item.showed = true;
             item.draw(reCreate);
             return true;
         });
@@ -47,8 +51,9 @@ export class VXContainer extends VXC.VXComponent {
         }
     }
 
-    private spinner;
+    private spinner : any;
     private showLoadingProgressBar() {
+        if (this.spinner) return;
         var opts = {
             lines: 13, // The number of lines to draw
             length: 20, // The length of each line
@@ -67,31 +72,32 @@ export class VXContainer extends VXC.VXComponent {
             top: 'auto', // Top position relative to parent in px
             left: 'auto' // Left position relative to parent in px
         };
-        require(["VCL/Scripts/spin.js"], (Spinner) => {
-            this.spinner = new Spinner(opts).spin(document.getElementById('content'));
-        });
+        this.spinner = new Spinner(opts).spin(document.getElementById('content'));
     }
 
     private hideLoadingProgressBar() {
-        if (this.spinner) this.spinner.stop();
+        if (this.spinner) {
+            this.spinner.stop();
+            this.spinner = null;
+        }
     }
 
 
-    private activeQueries = new VXO.collections.Set<VXD.VXDatasetInt>();
+    private static activeQueries = new VXO.collections.Set<VXD.VXDatasetInt>();
     private addQuery(query: VXD.VXDatasetInt) {
         if (query == null) return;
         if (!query.ShowProgressBar) return;
-        this.activeQueries.add(query);
+        VXContainer.activeQueries.add(query);
         
-        if (this.activeQueries.length() > 0) this.showLoadingProgressBar();
+        if (VXContainer.activeQueries.length() == 1) this.showLoadingProgressBar();
     }
 
     private removeQuery(query: VXD.VXDatasetInt) {
         if (query == null) return;
         if (!query.ShowProgressBar) return;
-        this.activeQueries.remove(query);
+        VXContainer.activeQueries.remove(query);
 
-        if (this.activeQueries.length() == 0) this.hideLoadingProgressBar();
+        if (VXContainer.activeQueries.length() == 0) this.hideLoadingProgressBar();
     }
 
 }

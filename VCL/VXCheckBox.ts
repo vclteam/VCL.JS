@@ -5,7 +5,7 @@ import V = require("VCL/VCL");
 export class VXCheckBox extends VXC.VXComponent {
     constructor(aOwner: VXC.VXComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
-        this.Text = text;
+        this._text = text;
     }
 
     private _checked: boolean;
@@ -19,8 +19,8 @@ export class VXCheckBox extends VXC.VXComponent {
         }
     }
 
-    public onClicked: () => void;
-    public onChanged: () => void;
+    public onClicked: (sender: VXCheckBox) => void;
+    public onChanged: (sender: VXCheckBox) => void;
 
     private _text: string;
     /*
@@ -39,6 +39,7 @@ export class VXCheckBox extends VXC.VXComponent {
     private jCheckbox: JQuery;
     private jText: JQuery;
     public create() {
+        var self = this;
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'label', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('checkbox');
@@ -50,17 +51,17 @@ export class VXCheckBox extends VXC.VXComponent {
         this.jText = $('<span>');
         this.jText.appendTo(this.jComponent);
 
-        this.jCheckbox.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        this.jCheckbox.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(self); })); return false; })
         this.jCheckbox.change(() => {
             this.Checked = this.jCheckbox.prop('checked');
-            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(); }))
+            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); }))
         })
         if (!this.Enabled) this.jCheckbox.attr('disabled','disabled');
         super.create();
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 

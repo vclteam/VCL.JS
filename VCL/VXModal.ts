@@ -24,42 +24,33 @@ export class VXModal extends VXC.VXContainer {
 
     constructor() {
         super(null, null);
+        if (!(<any>this).__HTML__) V.Application.raiseException("Error in " + this.getClassName() + " - You can't instantiate TPage directly, use V.Application.loadPage ,V.Application.createPage or V.Application.navigateToPage");
         this.Width = 520; //bootstrap span5 as default
 
-        var x = new VXDS.VXServer(false);
-        x.getHTML(this.getClassName()+".html",
-            (htmlFile: any) => {
-                this.jBody = $("<div>");
-                this.jBody.html(htmlFile);
-                this.jComponent.empty();
-                this.jComponent.append(this.jBody);
-            },
-            (errorMessage: string) => {
-                V.Application.raiseException(errorMessage);
-            }
-            );
+        this.jBody = this.jComponent.clone(true);
+        this.jComponent.empty();
+        this.jComponent.append(this.jBody);
+
     }
 
 
     public showModal() {
-
         this.jComponent.addClass('modal');
-
         super.draw(true);
         this.jComponent.modal({
-            keyboard: false, maxHeight: this.MaxHeight, backdrop: 'static',width:this.Width,
-            attentionAnimation: null,resize : true
+            keyboard: false, maxHeight: this.MaxHeight, backdrop: 'static', width: this.Width,
+            attentionAnimation: null, resize: true
         });
     }
 
     public close() {
         this.jComponent.modal('hide');
-        if (this.onClosed != null) {(V.tryAndCatch(() => { this.onClosed(); }))}
+        if (this.onClosed != null) { (V.tryAndCatch(() => { this.onClosed(); })) }
     }
 
     public get isPage(): boolean {
         return true;
     }
-   
+
 } 
 

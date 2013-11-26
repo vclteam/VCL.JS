@@ -270,7 +270,7 @@ export class VXChartBar extends VXCB.VXChartBase {
     }
 
 
-    public onClicked: (value: V.TBarValue,series : number) => void;
+    public onClicked: (value: V.TBarValue, series : number) => void;
     private _series1name: string = "Series 1";
     public get Series1Name(): string {
         return this._series1name;
@@ -506,21 +506,21 @@ export class VXChartBar extends VXCB.VXChartBase {
         this.values.forEach((valueOfElement: VXCB.VXBarValue) => {
             dataArray.push({
                 x: valueOfElement.Label, id: valueOfElement.ID,
-                value1: valueOfElement.Value1,
-                value2: valueOfElement.Value2,
-                value3: valueOfElement.Value3,
-                value4: valueOfElement.Value4,
-                value5: valueOfElement.Value5,
-                value6: valueOfElement.Value6,
-                value7: valueOfElement.Value7,
-                value8: valueOfElement.Value8,
-                value9: valueOfElement.Value9,
-                value10: valueOfElement.Value10,
-                value11: valueOfElement.Value11,
-                value12: valueOfElement.Value12,
-                value13: valueOfElement.Value13,
-                value14: valueOfElement.Value14,
-                value15: valueOfElement.Value15
+                value1: !isFinite(valueOfElement.Value1)?null:valueOfElement.Value1,
+                value2: !isFinite(valueOfElement.Value2) ? null :valueOfElement.Value2,
+                value3: !isFinite(valueOfElement.Value3) ? null :valueOfElement.Value3,
+                value4: !isFinite(valueOfElement.Value4) ? null :valueOfElement.Value4,
+                value5: !isFinite(valueOfElement.Value5) ? null :valueOfElement.Value5,
+                value6: !isFinite(valueOfElement.Value6) ? null :valueOfElement.Value6,
+                value7: !isFinite(valueOfElement.Value7) ? null :valueOfElement.Value7,
+                value8: !isFinite(valueOfElement.Value8) ? null :valueOfElement.Value8,
+                value9: !isFinite(valueOfElement.Value9) ? null :valueOfElement.Value9,
+                value10: !isFinite(valueOfElement.Value10) ? null :valueOfElement.Value10,
+                value11: !isFinite(valueOfElement.Value11) ? null :valueOfElement.Value11,
+                value12: !isFinite(valueOfElement.Value12) ? null :valueOfElement.Value12,
+                value13: !isFinite(valueOfElement.Value13) ? null :valueOfElement.Value13,
+                value14: !isFinite(valueOfElement.Value14) ? null :valueOfElement.Value14,
+                value15: !isFinite(valueOfElement.Value15) ? null :valueOfElement.Value15
             });
             return true;
         });
@@ -528,7 +528,7 @@ export class VXChartBar extends VXCB.VXChartBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -563,6 +563,8 @@ export class VXChartBar extends VXCB.VXChartBase {
             ],
             xLabelMargin: 15,
             gridTextSize: 12,
+            preUnits: this.PreValueUnit,
+            postUnits: this.PostValueUnit,
             gridTextFamily: 'sans-serif',
             gridTextWeight: 'normal',
             maximumbarwidth: this.MaximumBarWidth,
@@ -830,21 +832,21 @@ export class VXDBChartBar extends VXChartBar {
         this.Dataset.forEach(() => {
             var obj: any = {
                 x: this.Dataset.getFieldValue(this.LabelField),
-                value1: this.Dataset.getFieldValue(this.ValueField1),
-                value2: this.Dataset.getFieldValue(this.ValueField2),
-                value3: this.Dataset.getFieldValue(this.ValueField3),
-                value4: this.Dataset.getFieldValue(this.ValueField4),
-                value5: this.Dataset.getFieldValue(this.ValueField5),
-                value6: this.Dataset.getFieldValue(this.ValueField6),
-                value7: this.Dataset.getFieldValue(this.ValueField7),
-                value8: this.Dataset.getFieldValue(this.ValueField8),
-                value9: this.Dataset.getFieldValue(this.ValueField9),
-                value10: this.Dataset.getFieldValue(this.ValueField10),
-                value11: this.Dataset.getFieldValue(this.ValueField11),
-                value12: this.Dataset.getFieldValue(this.ValueField12),
-                value13: this.Dataset.getFieldValue(this.ValueField13),
-                value14: this.Dataset.getFieldValue(this.ValueField14),
-                value15: this.Dataset.getFieldValue(this.ValueField15),
+                value1: !isFinite(this.Dataset.getFieldValue(this.ValueField1)) ? null : this.Dataset.getFieldValue(this.ValueField1),
+                value2: !isFinite(this.Dataset.getFieldValue(this.ValueField2)) ? null : this.Dataset.getFieldValue(this.ValueField2),
+                value3: !isFinite(this.Dataset.getFieldValue(this.ValueField3)) ? null : this.Dataset.getFieldValue(this.ValueField3),
+                value4: !isFinite(this.Dataset.getFieldValue(this.ValueField4)) ? null : this.Dataset.getFieldValue(this.ValueField4),
+                value5: !isFinite(this.Dataset.getFieldValue(this.ValueField5)) ? null : this.Dataset.getFieldValue(this.ValueField5),
+                value6: !isFinite(this.Dataset.getFieldValue(this.ValueField6)) ? null : this.Dataset.getFieldValue(this.ValueField6),
+                value7: !isFinite(this.Dataset.getFieldValue(this.ValueField7)) ? null : this.Dataset.getFieldValue(this.ValueField7),
+                value8: !isFinite(this.Dataset.getFieldValue(this.ValueField8)) ? null : this.Dataset.getFieldValue(this.ValueField8),
+                value9: !isFinite(this.Dataset.getFieldValue(this.ValueField9)) ? null : this.Dataset.getFieldValue(this.ValueField9),
+                value10: !isFinite(this.Dataset.getFieldValue(this.ValueField10)) ? null : this.Dataset.getFieldValue(this.ValueField10),
+                value11: !isFinite(this.Dataset.getFieldValue(this.ValueField11)) ? null : this.Dataset.getFieldValue(this.ValueField11),
+                value12: !isFinite(this.Dataset.getFieldValue(this.ValueField12)) ? null : this.Dataset.getFieldValue(this.ValueField12),
+                value13: !isFinite(this.Dataset.getFieldValue(this.ValueField13)) ? null : this.Dataset.getFieldValue(this.ValueField13),
+                value14: !isFinite(this.Dataset.getFieldValue(this.ValueField14)) ? null : this.Dataset.getFieldValue(this.ValueField14),
+                value15: !isFinite(this.Dataset.getFieldValue(this.ValueField15)) ? null : this.Dataset.getFieldValue(this.ValueField15),
             };
             dataArray.push(obj);
 
@@ -906,7 +908,7 @@ class Bar extends VXCB.Grid {
         var _ref;
         this.calcBars();
         if (this.options.hideHover === false) {
-            return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(this.data.length - 1));
+            return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(this.data.length - 1, -1));
         }
     }
 
@@ -1102,12 +1104,31 @@ class Bar extends VXCB.Grid {
         return -1;
     }
 
+    hitSeries(x, y) {
+        var r, _i, _len, _ref;
+        if (this.data.length === 0) {
+            return null;
+        }
+
+        var indexX = this.hitTest(x, y);
+        _ref = this.data.slice(indexX);
+        _ref = _ref[0];
+        _ref = _ref._top;
+        for (var index = _i = 0, _len = _ref.length; _i <= _len; index = ++_i) {
+            r = _ref[index];
+            if (r < y) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
     clickItem(idx: number, series: number) {
         var owner = <VXChartBar>this.owner;
         if (!this.owner) return;
         this.barNodes.forEach((item) => {
             item.forEach((node) => {
-                node.attr('opacity', 0.7);
+                node.attr('opacity', 0.6);
             });
         });
         this.barNodes[idx].forEach((node) => { node.attr('opacity', 1); });
@@ -1120,22 +1141,28 @@ class Bar extends VXCB.Grid {
         }
     }
  
-    onGridClick(x, y, series) {
+    onGridClick(x, y, evt) {
         var idx = this.hitTest(x, y);
-        this.clickItem(idx, series);
+        this.clickItem(idx, evt.target.series);
     }
 
-    onHoverMove(x, y) {
-        var index, _ref;
-        index = this.hitTest(x, y);
+    onHoverMove(x, y, evt) {
+        var indexX, inxY, _ref;
+        indexX = this.hitTest(x, y);
         
-        if (index == -1) return;
-        if (!this.hover || this.barNodes.length == 0 || this.barNodes.length <= index || this.barNodes[index]==null) return;
-        var bar = this.barNodes[index][0];
+        if (indexX == -1)
+            return;
+        if (!this.hover || this.barNodes.length == 0 || this.barNodes.length <= indexX || this.barNodes[indexX] == null)
+            return;
+        var bar = this.barNodes[indexX][0];
         var width: number = bar.attr('width');
-        if (index < this.barNodes.length / 2) this.hover.offset = width;
-        else this.hover.offset = -width;
-        return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
+        if (indexX < this.barNodes.length / 2)
+            this.hover.offset = width;
+        else
+            this.hover.offset = -width;
+        var series = evt.target.series;
+        var indexY = this.hitSeries(x, y);
+        return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(indexX, series));
     }
 
     onHoverOut() {
@@ -1145,17 +1172,19 @@ class Bar extends VXCB.Grid {
         }
     }
 
-    hoverContentForRow(index) {
+    hoverContentForRow(index, series) {
         var content, j, row, x, y, _i, _len, _ref;
         row = this.data[index];
         if (row == null) return null;
         content = "<div style='pointer-events: none;' class='morris-hover-row-label'>" + row.label + "</div>";
         _ref = row.y;
         for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-            y = _ref[j];
-            var lbl: string = this.options.labels[j];
-            lbl = lbl.substring(0, 14);
-            if (y != null) content += "<div class='morris-hover-point' style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lbl + ":\n  " + (this.yLabelFormat(y, false)) + "\n</div>";
+            if (series == j) {
+                y = _ref[j];
+                var lbl: string = this.options.labels[j];
+                lbl = lbl.substring(0, 14);
+                if (y != null) content += "<div class='morris-hover-point' style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lbl + ":\n  " + (this.yLabelFormat(y, false)) + "\n</div>";
+            }
         }
         if (typeof this.options.hoverCallback === 'function') {
             content = this.options.hoverCallback(index, this.options, content);
@@ -1184,11 +1213,11 @@ class Bar extends VXCB.Grid {
         bar.node.series = series;
         bar.node.onclick = function (evt,x,y) {
             var offset = $(self.el).offset();
-            self.onGridClick(evt.pageX - offset.left, evt.pageY - offset.top, evt.target.series);
+            self.onGridClick(evt.pageX - offset.left, evt.pageY - offset.top, evt);
         };
 
         bar.node.hovermove = function (evt, x, y) {
-            self.onHoverMove(x, y);
+            self.onHoverMove(x, y, evt);
         }
 
         bar.node.hoverout = function (evt, x, y) {
@@ -1294,7 +1323,7 @@ export class VXChartBullet extends VXC.VXComponent {
 
     public draw(reCreate: boolean) {
         require(["VCL/Scripts/jquery.bulletchart.js"], () => {
-            if (!this.showed) return;
+            if (!this.parentInitialized())return;super.draw(reCreate);
             this.create();
         });
    

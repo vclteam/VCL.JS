@@ -16,7 +16,7 @@ export class VXSparkBase extends VXC.VXComponent {
     }
     public canvas: JQuery;
     public context: CanvasRenderingContext2D;
-    public onClicked: () => void;
+    public onClicked: (sender: VXSparkBase ) => void;
 
     private _labelVisible: boolean = false;
     public get LabelVisible(): boolean {
@@ -130,7 +130,7 @@ export class VXSparkBase extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -150,7 +150,7 @@ export class VXSparkPie extends VXSparkBase {
     public create() {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.empty();
-        this.jComponent.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false;  })
+        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(this); })); return false;  })
         var values : number[] =  this.getData();
 
         var length = values.length;
@@ -235,7 +235,7 @@ export class VXSparkLine extends VXSparkBase {
     public create() {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.empty();
-        this.jComponent.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false;  })
+        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(this); })); return false;  })
         var values: number[] = this.getData();
 
         if (values.length == 1) values.push(values[0]);
@@ -295,7 +295,7 @@ export class VXSparkBar extends VXSparkBase {
     public create() {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.empty();
-        this.jComponent.click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false;  })
+        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(this); })); return false;  })
         var values: number[] = this.getData();
 
         var max = Math.max.apply(Math, values.concat([null]));

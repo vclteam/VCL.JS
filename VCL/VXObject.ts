@@ -1,4 +1,4 @@
-export class VXObject  {
+export class VXObject {
 
     private _tag: any;
 
@@ -19,11 +19,17 @@ export class VXObject  {
     /**
     * Returns a string indicating the type of the object instance.
     */
+    public static getClassName(): string {
+        var funcNameRegex = /function (.{1,})\(/;
+        var results = (funcNameRegex).exec((<any> this).toString());
+        return (results && results.length > 1) ? results[1] : "";
+    }
     public getClassName(): string {
         var funcNameRegex = /function (.{1,})\(/;
         var results = (funcNameRegex).exec(this["constructor"].toString());
         return (results && results.length > 1) ? results[1] : "";
     }
+
     public ID: string = VXObject.genGUID();
     private static genGUID(): string {
         return VXObject.s4() + VXObject.s4() + VXObject.s4() + VXObject.s4() + VXObject.s4() + VXObject.s4() + VXObject.s4() + VXObject.s4();
@@ -37,7 +43,7 @@ export class VXObject  {
         if (obj == null) {
             obj = new eventObject(type, target, listener);
             this.listeners.setValue(obj.toString(), obj);
-        } else obj.listener = listener;        
+        } else obj.listener = listener;
     }
 
     private removeEventListener(type, target) {
@@ -48,16 +54,12 @@ export class VXObject  {
     private triggerEvent(type, target?, ...a: any[]): void {
         if (this.listeners == null) this.listeners = new collections.Dictionary<String, eventObject>();
         this.listeners.forEach((key: string, value: eventObject) => {
-            var context = {};       
-            if ((value.type == type) && (target == null || target == value.target)) {         
+            var context = {};
+            if ((value.type == type) && (target == null || target == value.target)) {
                 value.listener.apply(context, a || []);
             }
         });
-       
-        
     }
-
-
 }
 
 class eventObject {
@@ -75,8 +77,18 @@ class eventObject {
 }
 
 
-export class VXCollectionItem extends VXObject{
-    public ownerCollection: VXCollection<VXCollectionItem>;
+export class VXCollectionItem extends VXObject {
+    public __ownerCollection: VXCollection<VXCollectionItem>;
+
+    public get OwnerCollection(): VXCollection<VXCollectionItem> {
+        return this.__ownerCollection;
+    }
+
+    public set OwnerCollection(val: VXCollection<VXCollectionItem>) {
+        if (val != this.__ownerCollection) {
+            this.__ownerCollection = val;
+        }
+    }
     constructor() {
         super();
     }
@@ -87,12 +99,12 @@ export class VXCollectionItem extends VXObject{
 export class VXTimer {
     private action: () => void;
     private active: boolean = false;
-    private timeoutObject : number;
-    constructor(callback: () => void  ) {
-        this.action = callback;         
+    private timeoutObject: number;
+    constructor(callback: () => void ) {
+        this.action = callback;
     }
 
-    once(milliSeconds : number) : void{
+    once(milliSeconds: number): void {
         if (isNaN(milliSeconds)) { milliSeconds = 0; }
         this.timeoutObject = window.setTimeout(function () { this.action(); }, milliSeconds);
     }
@@ -109,7 +121,7 @@ export class VXTimer {
     reset() {
         clearTimeout(this.timeoutObject);
     }
- 
+
 }
 
 
@@ -1006,7 +1018,7 @@ export module collections {
         * invoked with two arguments: key and value. To break the iteration you can 
         * optionally return false.
         */
-        forEach(callback: (key: K, value: V) => any): void {       
+        forEach(callback: (key: K, value: V) => any): void {
             for (var name in this.table) {
                 if (this.table.hasOwnProperty(name)) {
                     var pair: IDicitonaryPair<K, V> = this.table[name];
@@ -1893,6 +1905,7 @@ export module collections {
          * @return {boolean} true if this set did not already contain the specified element.
          */
         add(element: T): boolean {
+            if (element instanceof VXCollectionItem) (<any>element).OwnerCollection = this;
             if (this.contains(element) || collections.isUndefined(element)) {
                 return false;
             } else {
@@ -1990,12 +2003,26 @@ export module collections {
             });
         }
 
+        private removeOwnerCollections(data) {
+            for (var key in data) {
+                var item = data[key];
+                // see if this item is an array
+                if (key == "__ownerCollection") {
+                    delete data[key];
+                } else if (typeof item == "object") {
+                    this.removeOwnerCollections(item);
+                }
+            }
+        }
+
         /**
          * Returns an array containing all of the elements in this set in arbitrary order.
          * @return {Array} an array containing all of the elements in this set.
          */
         toArray(): T[] {
-            return this.dictionary.values();
+            var rc = this.dictionary.values();
+            this.removeOwnerCollections(rc);
+            return rc;
         }
 
         /**
@@ -2073,7 +2100,7 @@ export module collections {
             if (collections.isUndefined(element) || nCopies <= 0) {
                 return false;
             }
-            if (element instanceof VXCollectionItem) (<any>element).ownerCollection = this;
+            if (element instanceof VXCollectionItem) (<any>element).OwnerCollection = this;
 
             if (!this.contains(element)) {
                 var node = {
@@ -2141,13 +2168,13 @@ export module collections {
             var vl = values.length;
             for (var i = 0; i < vl; i++) {
                 var node = values[i];
-                var element :any =  clone(node.value);
-                if (element.hasOwnProperty("ownerCollection") && element.ownerCollection == this) {
+                var element: any = clone(node.value);
+                if (element.hasOwnProperty("__ownerCollection") && element.ownerCollection == this) {
                     delete element.ownerCollection;
-                } 
+                }
                 var copies = node.copies;
                 for (var j = 0; j < copies; j++) {
-                    
+
                     a.push(element);
                 }
             }
@@ -2169,7 +2196,7 @@ export module collections {
             return toret;
         }
 
-      
+        
         /**
          * Executes the provided function once for each element 
          * present in this bag, including multiple copies.
@@ -2177,7 +2204,7 @@ export module collections {
          * invoked with one argument: the element. To break the iteration you can 
          * optionally return false.
          */
-        forEach(callback : (item : T)=>any) {
+        forEach(callback: (item: T) => any) {
             this.dictionary.forEach(function (k, v) {
                 var value = v.value;
                 var copies = v.copies;

@@ -228,7 +228,7 @@ export class VXGauge extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         else refreshGage(this.Value, null, this.justGage);
         this.initialized = true;

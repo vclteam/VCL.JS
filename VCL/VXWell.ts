@@ -5,6 +5,7 @@ import VXCO = require("VCL/VXContainer");
 import VXU = require("VCL/VXUtils");
 import V = require("VCL/VCL");
 import VXO = require("VCL/VXObject");
+import VXM = require("VCL/VXMenu");
 
 export class VXWell extends VXCO.VXContainer {
     public create() {
@@ -14,7 +15,7 @@ export class VXWell extends VXCO.VXContainer {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;super.draw(reCreate);
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
@@ -24,8 +25,10 @@ export class VXWell extends VXCO.VXContainer {
 
 export class VXPanelButton {
     private owner: VXPanel;
-    constructor(owner: VXPanel) {
+    constructor(owner: VXPanel, icon?: V.Icon ) {
         this.owner = owner;
+        if(icon) this._icon = icon;
+
     }
     private _visible: boolean = false;
     public get Visible(): boolean {
@@ -34,17 +37,6 @@ export class VXPanelButton {
     public set Visible(val: boolean) {
         if (val != this._visible) {
             this._visible = val;
-            this.owner.draw(false);
-        }
-    }
-
-    private _size: number = 1;
-    public get Size(): number {
-        return this._size;
-    }
-    public set Size(val: number) {
-        if (val != this._size) {
-            this._size = val;
             this.owner.draw(false);
         }
     }
@@ -62,11 +54,11 @@ export class VXPanelButton {
         }
     }
 
-    private _icon: V.ButtonIcon = V.ButtonIcon.icon_align_justify;
-    public get Icon(): V.ButtonIcon {
+    private _icon: V.Icon = V.Icon.icon_align_justify;
+    public get Icon(): V.Icon {
         return this._icon;
     }
-    public set Icon(val: V.ButtonIcon) {
+    public set Icon(val: V.Icon) {
         if (val != this._icon) {
             this._icon = val;
             this.owner.draw(false);
@@ -74,27 +66,39 @@ export class VXPanelButton {
     }
     public onClicked: () => void;
     public jButton: JQuery;
+    public jGroupButton: JQuery;
+    public jMenu: JQuery;
+
+    public menuItems = new VXM.VXMenuItemCollection<VXM.VXMenuItem>();
+    public createMenuItem(text: string, onClicked?: () => void ): VXM.VXMenuItem {
+        var menuItem = new VXM.VXMenuItem();
+        menuItem.Text = text;
+        menuItem.onClicked = onClicked;
+        this.menuItems.add(menuItem);
+        return menuItem;
+    }
 }
 
 export class VXPanel extends VXCO.VXContainer {
     public jHeader: JQuery;
     private jHeaderText: JQuery;
     public jContent: JQuery;
+    public jOverlayText: JQuery;
 
     public CloseButton: VXPanelButton;
     public Button1: VXPanelButton;
     public Button2: VXPanelButton;
     public Button3: VXPanelButton;
+    private jButtons: JQuery; 
 
     constructor(aOwner: VXC.VXComponent, renderTo?: string, headerText?: string) {
         super(aOwner, renderTo);
-        this.CloseButton = new VXPanelButton(this);
-        this.CloseButton.Icon = V.ButtonIcon.icon_remove;
+        this.CloseButton = new VXPanelButton(this,V.Icon.icon_remove);
         this.Button1 = new VXPanelButton(this);
         this.Button2 = new VXPanelButton(this);
         this.Button3 = new VXPanelButton(this);
 
-        if (headerText != null) this.HeaderText = headerText;
+        if (headerText != null) this._headertext = headerText;
     }
 
 
@@ -105,7 +109,7 @@ export class VXPanel extends VXCO.VXContainer {
     public set HeaderVisible(val: boolean) {
         if (val != this._headevisible) {
             this._headevisible = val;
-            this.owner.draw(false);
+            this.draw(false);
         }
     }
 
@@ -211,10 +215,7 @@ export class VXPanel extends VXCO.VXContainer {
 
             this.jHeader = $("<div>");
             this.jHeader.addClass('panel-header');
-            this.jHeader.click(() => {
-                if (this.onHeaderClicked != null) (V.tryAndCatch(() => { this.onHeaderClicked(self); }));
-
-            })
+  
             this.jHeader.appendTo(this.jContent);
 
             if (this.HeaderTextStyle == V.HeaderTextStyle.h4)
@@ -237,7 +238,18 @@ export class VXPanel extends VXCO.VXContainer {
             this.jHeaderText.appendTo(this.jHeader);
             this.jComponent.css('display', 'block');
             this.jContent.append(this.jComponent);
-            if (this.Width > 0) this.jContent.width(this.Width - this.BorderWidth * 2);
+            if (this.Width > 0) this.jContent.width(this.Width - this.BorderWidth * 2 - 1);
+
+            this.jButtons = $("<div>");
+            this.jButtons.prependTo(this.jHeader);
+            if (this.ButtonAlignment == V.ButtonAlignment.Left) {
+                this.jButtons.addClass('pull-left');
+                this.jButtons.removeClass('pull-right');
+            } else {
+                this.jButtons.addClass('pull-right');
+                this.jButtons.removeClass('pull-left');
+            }
+
 
             this.createButton(this.Button3, null);
             this.createButton(this.Button2, null);
@@ -250,12 +262,12 @@ export class VXPanel extends VXCO.VXContainer {
             this.jComponent = this.jContent;
             this.jContent = x;
             this.jContent.css('overflow', 'visible');
+
+            this.jOverlayText = $("<div>");
         }
 
         this.jComponent.css('border-width', this.BorderWidth);
         this.jHeader.css('border-top-width', this.BorderWidth);
-
-
         this.jHeader.removeClass(function (index, css) {
             return (css.match(/\panel-header-\S+/g) || []).join(' ');
         });
@@ -267,7 +279,7 @@ export class VXPanel extends VXCO.VXContainer {
         });
 
         if (this.BackgroundImageURL != null && this.BackgroundImageURL.length > 0) {
-            this.jComponent.css('background-image', 'url(' + this.BackgroundImageURL + ')').css('background-size', 'contain').css('background-repeat', 'no-repeat');
+            this.jComponent.css('background-image', 'url(' + this.BackgroundImageURL + ')').css('background-size', 'cover').css('background-repeat', 'no-repeat');
         }
 
         switch (this.HeaderStyle) {
@@ -300,42 +312,55 @@ export class VXPanel extends VXCO.VXContainer {
                 this.jHeaderText.addClass('panel-header-transparent');
                 this.jContent.addClass('panel-transparent panel-content '); break;
         }
-
+        this.jHeader.off("click").click(() => {
+            if (this.onHeaderClicked != null) (V.tryAndCatch(() => { this.onHeaderClicked(self); }));
+        })
         super.create();
     }
 
     private createButton(button: VXPanelButton, clickEvent: () => void ) {
         if (!button.jButton) {
-            button.jButton = $('<div>');
-            button.jButton.addClass('panel-button');
-            if (clickEvent) button.jButton.click(clickEvent)
-            else button.jButton.click(() => {
+            button.jButton = $('<a>');
+            button.jButton.css('padding', '0px')
+            button.jButton.css('background-color', 'transparent');
+            button.jButton.css('box-shadow', 'none')
+            button.jButton.css('border', 'none')
+            button.jButton.addClass('btn icon');
+            button.jGroupButton = $('<div>');
+            button.jGroupButton.css('display', 'inline-block').addClass('btn-group');
+           ;
+
+            if (clickEvent) button.jButton.off("click").click(clickEvent)
+            else button.jButton.off("click").click(() => {
+                if (button.menuItems.length() > 0) button.jGroupButton.dropdown();
                 if (button.onClicked != null) (V.tryAndCatch(() => { button.onClicked(); }));
             })
-            button.jButton.prependTo(this.jHeader);
-        }
-        if (this.ButtonAlignment == V.ButtonAlignment.Left) {
-            button.jButton.addClass('pull-left');
-            button.jButton.removeClass('pull-right');
-        } else {
-            button.jButton.addClass('pull-right');
-            button.jButton.removeClass('pull-left');
-
+            button.jGroupButton.prependTo(this.jButtons);
+            button.jButton.prependTo(button.jGroupButton);
         }
         if (button.Color) button.jButton.css('color', button.Color);
-        button.jButton.css('font-size', button.Size + "em");
-        button.jButton.addClass(V.iconEnumToBootstrapStyle(button.Icon));
+        button.jButton.addClass(V.iconEnumToBootstrapStyle(<any>button.Icon));
+
+        if (button.jMenu) button.jMenu.remove();
+        if (button.menuItems.length() > 0) {
+            button.jButton.attr('data-toggle', "dropdown");
+            button.jButton.addClass('dropdown-toggle');
+            button.jMenu = button.menuItems.createmenu('dropdown-menu');
+            button.jMenu.data('open', false);
+            button.jMenu.appendTo(button.jGroupButton);
+            $('.dropdown-toggle').dropdown()
+        }
         button.Visible ? button.jButton.show() : button.jButton.hide();
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+        if (!this.parentInitialized())return;
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
 
         super.draw(reCreate);
         this.jHeaderText.text(this.HeaderText);
-        this.HeaderVisible ? this.jHeader.show() : this.jHeader.hide();
+        this.HeaderVisible ? this.jHeader.show() : this.jHeader.hide().attr('min-height','0px');
         this.createButton(this.Button3, null);
         this.createButton(this.Button2, null);
         this.createButton(this.Button1, null);
@@ -390,8 +415,9 @@ export class VXGoogleMap extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.showed) return;
+
         require(["VCL/Scripts/async!http://maps.google.com/maps/api/js?sensor=false&key=" + this.GoogleAPIKey], () => {
+            if (!this.parentInitialized())return;super.draw(reCreate);
             if (reCreate || !this.initialized) this.create();
             this.initialized = true;
             super.draw(reCreate);

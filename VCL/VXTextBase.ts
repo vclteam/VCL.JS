@@ -2,7 +2,7 @@ import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 
 export class VXTextBase extends VXC.VXComponent {
-    public onClicked: () => void;
+    public onClicked: (sender: VXTextBase) => void;
 
     private _text: string;
     /*
