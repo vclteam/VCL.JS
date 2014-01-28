@@ -7,7 +7,7 @@ export interface VXDatasetInt {
     ShowProgressBar: boolean;
 }
 
-export class VXDataset extends VXO.VXObject {
+export class TDataset extends VXO.TObject {
     public recordset: any[] = [];
     public onDataChanged: () => void;
 
@@ -48,7 +48,7 @@ export class VXDataset extends VXO.VXObject {
 
     private dataChanged() {
         if (this.onDataChanged != null) this.onDataChanged();
-        (<any>this).triggerEvent(VXDataset.EVENT_DATA_CHANGED);
+        (<any>this).triggerEvent(TDataset.EVENT_DATA_CHANGED);
     }
 
     /**
@@ -88,16 +88,37 @@ export class VXDataset extends VXO.VXObject {
     public get Readonly(): boolean {
         return false;
     }
-
+    /*
+    * return an object with the content of the currnt record
+    */
     public getCurrentRecord(): any {
         if (this.Recno < 0) return null;
         return this.recordset[this.Recno];
     }
 
+    /*
+    * return a unique indentifier of the record
+    */
     public getRecordIndex(): number {
         if (this.Recno < 0) return -1;
         return this.recordset[this.Recno]["___RECORDID___"];
     }
+
+    /*
+    * return the record number of specfix recordIndex
+    */
+    public getRecordIndexRecNo(recordIndex): number {
+        if (!this.recordset) return -1;
+        var rc = -1;
+        for (var i = 0, len = this.recordset.length; i < len; i++) {
+            if (this.recordset[i].___RECORDID___ == recordIndex) {
+                rc = i;
+                break;
+            }
+        }
+        return rc;
+    }
+
 
     public getRecords(start: number, end: number, sortDirection: string, sortProperty: string): any {
         return this.recordset.slice(start, end + 1);
@@ -113,9 +134,8 @@ export class VXDataset extends VXO.VXObject {
         this.recordset[this.Recno]['___CHECKED___'] = false;
     }
     /**
-* Moves to the next record in the dataset.
-**/
-
+    * Moves to the next record in the dataset.
+    **/
     public next(): boolean {
         if ((this.RecordCount - 1) > this.Recno) {
             this.Recno++;
@@ -138,24 +158,28 @@ export class VXDataset extends VXO.VXObject {
     * Moves to the first record in the dataset.
     **/
 
-    public first(): void {
-        this.Recno = 0;
+    public first(): boolean {
+        if (this.RecordCount > 0) {
+            this.Recno = 0;
+            return true;
+        } else return false;
     }
 
     /**
     * Moves to the last record in the dataset.
     **/
-    public last(): void {
-        this.Recno = this.RecordCount;
+    public last(): boolean {
+        if (this.RecordCount > 0) {
+            this.Recno = this.RecordCount - 1;
+            return true;
+        } else return false;
     }
-
-
 
 }
 
-export class VXObjectDataset extends VXDataset {
+export class TObjectDataset extends TDataset {
     bind() {
-        var self = this;        
+        var self = this;
         self.recordset = [];
         self.recordset.push({});
         for (var property in this) {
@@ -188,29 +212,29 @@ export class VXObjectDataset extends VXDataset {
 
 }
 
-export class VXClientDataset extends VXDataset implements VXDatasetInt {
+export class TClientDataset extends TDataset implements VXDatasetInt {
     private tempRecordset: Object[];
     private sourceRecordset: Object[];
     private sortProperty: string;
     private sortDirection: string;
 
-    public onBeforeOpen: (dataset: VXClientDataset) => void;
-    public onAfterOpen: (dataset: VXClientDataset) => void;
+    public onBeforeOpen: (dataset: TClientDataset) => void;
+    public onAfterOpen: (dataset: TClientDataset) => void;
 
-    public owner: VXC.VXComponent;
-    constructor(aOwner: VXC.VXComponent) {
+    public owner: VXC.TComponent;
+    constructor(aOwner: VXC.TComponent) {
         super();
         this.owner = aOwner;
     }
 
     private selectionChanged() {
         if (this.onSelectionChanged != null) this.onSelectionChanged();
-        (<any>this).triggerEvent(VXDataset.EVENT_SELECTION_CHANGED);
+        (<any>this).triggerEvent(TDataset.EVENT_SELECTION_CHANGED);
     }
 
     private stateChanged() {
         if (this.onStateChanged != null) this.onStateChanged();
-        (<any>this).triggerEvent(VXDataset.EVENT_STATE_CHANGED);
+        (<any>this).triggerEvent(TDataset.EVENT_STATE_CHANGED);
     }
 
 
@@ -219,7 +243,6 @@ export class VXClientDataset extends VXDataset implements VXDatasetInt {
     * Use applyFilter to specify a dataset filter. When filtering is applied to a dataset, only those records that meet a filter's conditions are available.
     */
     public applyFilter(filterCallback: () => boolean) {
-        this.tempRecordset = null;
         if (this.sourceRecordset == null) this.sourceRecordset = this.recordset;
         else this.recordset = this.sourceRecordset;
 
@@ -247,7 +270,6 @@ export class VXClientDataset extends VXDataset implements VXDatasetInt {
     * Clear the filter for a dataset.
     */
     public clearFilter() {
-        this.tempRecordset = null;
         this.recordset = this.sourceRecordset;
         this.first();
         this.stateChanged();
@@ -300,10 +322,67 @@ export class VXClientDataset extends VXDataset implements VXDatasetInt {
         return this._active;
     }
 
+    public set Active(val: boolean) {
+        if (val != this._active) {
+            this._active = val;
+        }
+    }
+
+    /*
+    * Adds a new records to the end of the dataset. the method return the new record number
+    */
+    public appendRecords(data: any[], disableEvents: boolean = false): number {
+        if (!this.Active) this.setData([]);
+        for (var i = 0; i < data.length; i++) {
+            this.appendRecord(data[i], true);
+        }
+        if ((<any>this)._enabledControl && !disableEvents) (<any>this).dataChanged();
+        return this.RecordCount - 1;
+    }
+
+    /*
+    * Adds a new record to the end of the dataset. the method return the new record number
+    */
+    public appendRecord(data: any, disableEvents: boolean = false): number {
+        if (!this.Active) this.setData([]);
+        if (data instanceof Array) {
+            this.appendRecords(data);
+            return;
+        }
+        var maxid = 0;
+        for (var i = 0; i < this.recordset.length; i++) {
+            maxid = Math.max(maxid, this.recordset[i].___RECORDID___);
+        }
+
+        var obj: any = {};
+        obj.___RECORDID___ = maxid + 1;
+        obj.___CHECKED___ = false;
+        for (var key in data) {
+            obj[key.toUpperCase()] = data[key];
+        }
+        this.recordset.push(obj);
+        this.Recno = this.RecordCount - 1;
+        if ((<any>this)._enabledControl && !disableEvents) (<any>this).dataChanged();
+        return this.RecordCount - 1;
+    }
+
+    /*
+    * delete the current record
+    */
+    public deleteRecord(): number {
+        if (!this.Active) return;
+        if (this.Recno == -1) return;
+        var rec = this.Recno;
+        this.recordset.splice(this.Recno, 1);
+        this.Recno = rec;
+        if ((<any>this)._enabledControl) (<any>this).dataChanged();
+    }
+
 
     public setData(data: any[]) {
         this.recordset = [];
         this.sourceRecordset = null;
+        this.tempRecordset = null;
         if (data == null) {
             this._active = false;
             this.Recno = -1;
@@ -324,30 +403,34 @@ export class VXClientDataset extends VXDataset implements VXDatasetInt {
         this.stateChanged();
     }
 
+    private sort(columnName: string, ascending: boolean = true) {
+        this.tempRecordset = this.recordset.slice(0);
+        if (ascending) {
+            this.tempRecordset.sort(function (a, b) {
+                if (a[columnName] > b[columnName]) return 1;
+                else if (a[columnName] < b[columnName]) return -1
+                    else return 0;
+            })
+            } else {
+            this.tempRecordset.sort(function (a, b) {
+                if (a[columnName] < b[columnName]) return 1;
+                else if (a[columnName] > b[columnName]) return -1
+                    else return 0;
+            })
+            }
+        this.sortProperty = columnName;
+        this.sortDirection = ascending ? "ASC" : "DESC";
+        this.recordset = this.tempRecordset;
+    }
 
     public getRecords(start: number, end: number, sortDirection: string, sortProperty: string): any {
-        if (sortDirection == null) return this.recordset.slice(start, end + 1); //not sort was mentions
+        if (sortProperty == null || sortProperty == "") return this.recordset.slice(start, end + 1); //not sort was mentions
         sortProperty = sortProperty.toUpperCase();
         sortDirection = sortDirection.toUpperCase();
         if (this.tempRecordset == null || sortDirection != this.sortDirection || sortProperty != this.sortProperty) {
-            this.tempRecordset = this.recordset.slice(0);
-            if (sortDirection == "ASC") {
-                this.tempRecordset.sort(function (a, b) {
-                    if (a[sortProperty] > b[sortProperty]) return 1;
-                    else if (a[sortProperty] < b[sortProperty]) return -1
-                    else return 0;
-                })
-            } else {
-                this.tempRecordset.sort(function (a, b) {
-                    if (a[sortProperty] < b[sortProperty]) return 1;
-                    else if (a[sortProperty] > b[sortProperty]) return -1
-                    else return 0;
-                })
-            }
-            this.sortProperty = sortProperty;
-            this.sortDirection = sortDirection;
+            this.sort(sortProperty, sortDirection == "ASC");
         }
-        return this.tempRecordset.slice(start, end + 1);
+        return this.recordset.slice(start, end + 1);
     }
 
 

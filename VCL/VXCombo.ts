@@ -7,7 +7,7 @@ import VXD = require("VCL/VXDataset");
 import VXU = require("VCL/VXUtils");
 import VXM = require("VCL/VXMenu");
 
-export class VXComboboxBase extends VXB.VXEditorBase {
+export class TComboboxBase extends VXB.TEditorBase {
     private _maxvisibleLines: number = 8;
     public get MaxVisibleLines(): number {
         return this._maxvisibleLines;
@@ -15,7 +15,7 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     public set MaxVisibleLines(val: number) {
         if (val != this._maxvisibleLines) {
             this._maxvisibleLines = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -26,7 +26,7 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     public set ShowSearchBox(val: boolean) {
         if (val != this._showsearch) {
             this._showsearch = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -38,7 +38,7 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     public set DropUp(val: boolean) {
         if (val != this._dropup) {
             this._dropup = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -53,7 +53,7 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     public set NoneSelectedText(val: string) {
         if (val != this._noneselectedtext) {
             this._noneselectedtext = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -69,7 +69,7 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     public set ShowSelectionCount(val: number) {
         if (val != this._showselectioncount) {
             this._showselectioncount = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -81,7 +81,7 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     public set MultipleSelect(val: any) {
         if (val != this._multipleselect) {
             this._multipleselect = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -93,7 +93,7 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     public set ComboStyle(val: V.ComboStyle) {
         if (val != this._combostyle) {
             this._combostyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -104,13 +104,14 @@ export class VXComboboxBase extends VXB.VXEditorBase {
     public set TextAlgnment(val: V.TextAlignment) {
         if (val != this._textaligment) {
             this._textaligment = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.items = new VXComboItemCollection<VXComboItem>(this);
+        if(!this.Width) this.Width = 200;
+        this.items = new TComboItemCollection<TComboItem>(this);
 
         jQuery.expr[":"].icontains = jQuery.expr.createPseudo(function (arg) {
             return function (elem) {
@@ -119,14 +120,14 @@ export class VXComboboxBase extends VXB.VXEditorBase {
         });
     }
 
-    public items: VXComboItemCollection<VXComboItem>;
-    public createItem(value: string, text?: string): VXComboItem {
-        var col: VXComboItem = new VXComboItem();
+    public items: TComboItemCollection<TComboItem>;
+    public createItem(value: string, text?: string): TComboItem {
+        var col: TComboItem = new TComboItem();
         col.Value = value;
         col.Text = text;
         this.items.add(col);
 
-        return <VXComboItem>col;
+        return <TComboItem>col;
     }
 
 
@@ -159,7 +160,7 @@ export class VXComboboxBase extends VXB.VXEditorBase {
             case V.ComboStyle.Danger: options.style = "btn-danger"; break;
         }
 
-        this.items.forEach((item: VXComboItem) => {
+        this.items.forEach((item: TComboItem) => {
             var itm: JQuery = $('<option/>');
             if (!item.Enabled) itm.attr('disabled', "disabled");
             itm.val(item.ID);
@@ -202,28 +203,28 @@ export class VXComboboxBase extends VXB.VXEditorBase {
         }
         this.draw(false);
     }
-
-    public draw(reCreate: boolean) {
-    }
 }
 
 
-export class VXCombobox extends VXComboboxBase {
+export class TCombobox extends TComboboxBase {
     public get Text(): string {
         var arr = [];
         this.items.forEach((item) => { if (item.Checked) arr.push(item.Value) });
         return arr.toString();
     }
     public set Text(val: string) {
-        var arr = val.split(',');
         this.items.forEach((item) => { item.Checked = false });
-        for (var i = 0; i < arr.length; i++) {
-            var rc = this.items.FindItemByValue(arr[i]);
-            if (rc) {
-                rc.Checked = true;
-                if (!this.MultipleSelect) break;
+        if (val) {
+            var arr = val.split(',');
+            for (var i = 0; i < arr.length; i++) {
+                var rc = this.items.FindItemByValue(arr[i]);
+                if (rc) {
+                    rc.Checked = true;
+                    if (!this.MultipleSelect) break;
+                }
             }
         }
+        this.draw(true);
     }
 
     public create() {
@@ -231,16 +232,17 @@ export class VXCombobox extends VXComboboxBase {
         var self = this;
         this.jEdit.change((item) => {
             var currVal: string[] = this.jEdit.selectpicker("val").toString().split(',');
-            var newVal: Array = new Array();
+            var newVal = new Array();
             this.items.forEach((item) => { item.Checked = false; });
             for (var i = 0; i < currVal.length; i++) {
                 var rc = this.items.FindItemByID(currVal[i]);
                 if (rc) {
                     rc.Checked = true;
-                    newVal.push((<VXComboItem>rc).Value);
+                    newVal.push((<TComboItem>rc).ID);
                 }
             }
-            if (self.onChanged) (V.tryAndCatch(() => { self.onChanged(self); }))
+
+            if (self.onChanged && currVal != newVal) (V.tryAndCatch(() => { self.onChanged(self); }))
         });
     }
 
@@ -250,11 +252,10 @@ export class VXCombobox extends VXComboboxBase {
 
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
 
-        var Value: Array = new Array();
+        var Value = new Array();
         if (this.Text != null) {
             var currVal: string[] = this.Text.split(',');
             for (var i = 0; i < currVal.length; i++) {
@@ -267,26 +268,26 @@ export class VXCombobox extends VXComboboxBase {
 
 }
 
-export class VXDBCombobox extends VXComboboxBase {
-    private _dataset: VXD.VXDataset;
+export class TDBCombobox extends TComboboxBase {
+    private _dataset: VXD.TDataset;
     /*
     * Specifies the dataset that contains the field it represents.
     */
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
-    public set Dataset(val: VXD.VXDataset) {
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (this._dataset) {
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
             }
             this._dataset = val;
             if (this._dataset != null) {
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(false); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => {
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => {
                     if (this.Dataset == null) this.Enabled = false;
                     else if (this.Dataset.Readonly) this.Enabled = true;
                     else this.Enabled = this.Dataset.Active;
@@ -321,7 +322,7 @@ export class VXDBCombobox extends VXComboboxBase {
 
         if (val != this._datafield) {
             this.Dataset.setFieldValue(this.DataField.toString(), val);
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -330,7 +331,7 @@ export class VXDBCombobox extends VXComboboxBase {
         var self = this;
         this.jEdit.change(() => {
             var currVal: string[] = this.jEdit.selectpicker("val").toString().split(',');
-            var newVal: Array = new Array();
+            var newVal = new Array();
             this.items.forEach((item) => { item.Checked = false; });
             for (var i = 0; i < currVal.length; i++) {
                 var rc = this.items.FindItemByID(currVal[i]);
@@ -339,7 +340,7 @@ export class VXDBCombobox extends VXComboboxBase {
                     rc.Checked = true;
                 }
             }
-            if (this.DataValue != newVal.toString()) {
+            if (this.DataValue != newVal.toString() && rc) {
                 this.DataValue = newVal.toString();
                 if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
             }
@@ -351,12 +352,10 @@ export class VXDBCombobox extends VXComboboxBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
 
-
-        var Value: Array = new Array();
+        var Value = new Array();
         var rc = this.DataValue; 
         if (rc != null) {            
             var currVal = rc.split(',');
@@ -373,7 +372,7 @@ export class VXDBCombobox extends VXComboboxBase {
 
 
 
-export class VXComboItem extends VXM.VXMenuItem {
+export class TComboItem extends VXM.TMenuItem {
 
     private _value: string;
     public get Value(): string {
@@ -409,12 +408,12 @@ export class VXComboItem extends VXM.VXMenuItem {
 
 }
 
-export class VXComboItemCollection<T> extends VXO.VXCollection<VXComboItem> {
-    private owner: VXComboboxBase;
+export class TComboItemCollection<T> extends VXO.TCollection<TComboItem> {
+    private owner: TComboboxBase;
 
-    FindItemByValue(value: string): VXComboItem {
-        var rc: VXComboItem = null;
-        this.forEach((item: VXComboItem) => {
+    FindItemByValue(value: string): TComboItem {
+        var rc: TComboItem = null;
+        this.forEach((item: TComboItem) => {
             if (item.Value == value) {
                 rc = item;
                 return false;
@@ -424,12 +423,12 @@ export class VXComboItemCollection<T> extends VXO.VXCollection<VXComboItem> {
         return rc;
     }
 
-    constructor(aOwner: VXComboboxBase) {
+    constructor(aOwner: TComboboxBase) {
         super();
         this.owner = aOwner;
     }
 
-    add(item: VXComboItem): boolean {
+    add(item: TComboItem): boolean {
         var rc = super.add(item);
         if (!this.locked) this.owner.draw(true);
         return rc;

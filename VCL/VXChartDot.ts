@@ -5,10 +5,10 @@ import VXD = require("VCL/VXDataset");
 import VXCB = require("VCL/VXChartBase");
 
 declare var Raphael;
-export class VXChartDotBase extends VXCB.VXChartBase {
+export class TChartDotBase extends VXCB.TChartBase {
     private selectednode: any;
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         (<any>this)._fittowidth = true;
         this.Height = 200;
@@ -22,7 +22,7 @@ export class VXChartDotBase extends VXCB.VXChartBase {
     public set TitleX(val: string) {
         if (val != this._titleX) {
             this._titleX = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -33,7 +33,7 @@ export class VXChartDotBase extends VXCB.VXChartBase {
     public set TitleY(val: string) {
         if (val != this._titleY) {
             this._titleY = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -47,7 +47,7 @@ export class VXChartDotBase extends VXCB.VXChartBase {
     public set ShowSelectedItem(val: boolean) {
         if (val != this._showselecteditem) {
             this._showselecteditem = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -59,12 +59,49 @@ export class VXChartDotBase extends VXCB.VXChartBase {
         if (V.Application.checkColorString(val)) {
             if (val != this._Dotcolor) {
                 this._Dotcolor = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
 
 
+    private _horizontalgridline: number = 0;
+    public get HorizontalGridLineWidth(): number {
+        return this._horizontalgridline;
+    }
+    public set HorizontalGridLineWidth(val: number) {
+        if (val != this._horizontalgridline) {
+            this._horizontalgridline = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _gridcolor: string = "#EEE";
+    public get GridLineColor(): string {
+        return this._gridcolor;
+    }
+    public set GridLineColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._gridcolor) {
+                this._gridcolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
+    private _vertgridline: number = 0;
+    public get VerticalGridLineWidth(): number {
+        return this._vertgridline;
+    }
+    public set VerticalGridLineWidth(val: number) {
+        if (val != this._vertgridline) {
+            this._vertgridline = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    
 
     private _dotmaxsize: number = 10;
     /*
@@ -76,7 +113,7 @@ export class VXChartDotBase extends VXCB.VXChartBase {
     public set DotMaxSize(val: number) {
         if (val != this._dotmaxsize) {
             this._dotmaxsize = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -90,7 +127,7 @@ export class VXChartDotBase extends VXCB.VXChartBase {
     public set HeatMap(val: boolean) {
         if (val != this._heatmap) {
             this._heatmap = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -105,15 +142,15 @@ export class VXChartDotBase extends VXCB.VXChartBase {
     public set Opacity(val: number) {
         if (val != this._opacity) {
             this._opacity = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 }
-export class VXChartDot extends VXChartDotBase {
+export class TChartDot extends TChartDotBase {
     public onGetLabelText: (item: V.TDotValue) => string;
     public onClicked: (item: V.TDotValue) => void;
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         this.onGetLabelText = (item: V.TDotValue) => {
             return item.Value + "\n" + item.LabelX + "\n" + item.LabelY;
@@ -121,9 +158,9 @@ export class VXChartDot extends VXChartDotBase {
     }
 
 
-    public values = new VXCB.VXChartValuesCollection<VXCB.VXDotValue>();
-    public createValue(labelX: string, labelY: string, value: number): VXCB.VXDotValue {
-        var col = new VXCB.VXDotValue();
+    public values = new VXCB.TChartValuesCollection<VXCB.TDotValue>();
+    public createValue(labelX: string, labelY: string, value: number): VXCB.TDotValue {
+        var col = new VXCB.TDotValue();
         this.values.add(col);
         col.Value = value;
         col.LabelX = labelX;
@@ -132,8 +169,9 @@ export class VXChartDot extends VXChartDotBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        this.create();
+        if (!this.parentInitialized()) return;
+        super.draw(true);//new do repaint
+
     }
 
     private raphael: any;
@@ -173,7 +211,8 @@ export class VXChartDot extends VXChartDotBase {
         var self = this;
         this.dotchart = this.raphael.dotchart(0, 0, this.Width, this.Height, xs, ys, data,ids, {
             symbol: "o", max: this.DotMaxSize, heat: this.HeatMap,
-            axis: "0 0 1 1",
+            axis: "0 0 1 1", horizgridline: this.HorizontalGridLineWidth,
+            vertgridline: this.VerticalGridLineWidth, gridlinecolor: this.GridLineColor,
             axisxstep: axisx.length - 1, axisystep: axisy.length - 1,
             axisxlabels: axisx, axisylabels: axisy,
             axisxtype: " ", axisytype: " ", opacity: this.Opacity,titleX : this.TitleX,titleY : this.TitleY
@@ -205,16 +244,16 @@ export class VXChartDot extends VXChartDotBase {
 
 
 
-export class VXChartBubble extends VXChartDotBase {
+export class TChartBubble extends TChartDotBase {
     private raphael: any;
     private dotchart: any;
-    public onGetLabelText: (item : VXCB.VXBubbleValue) => string;
-    public onClicked: (item: VXCB.VXBubbleValue) => void;
+    public onGetLabelText: (item : VXCB.TBubbleValue) => string;
+    public onClicked: (item: VXCB.TBubbleValue) => void;
 
 
-    public values = new VXCB.VXChartValuesCollection<VXCB.VXBubbleValue>();
-    public createValue(valueX: number, valueY: number, value: number): VXCB.VXBubbleValue {
-        var col = new VXCB.VXBubbleValue();
+    public values = new VXCB.TChartValuesCollection<VXCB.TBubbleValue>();
+    public createValue(valueX: number, valueY: number, value: number): VXCB.TBubbleValue {
+        var col = new VXCB.TBubbleValue();
         this.values.add(col);
         col.Value = value;
         col.ValueX = valueX;
@@ -223,13 +262,13 @@ export class VXChartBubble extends VXChartDotBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        this.create();
+        if (!this.parentInitialized()) return;
+        super.draw(true);
     }
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.onGetLabelText = (item: VXCB.VXBubbleValue) => {
+        this.onGetLabelText = (item: VXCB.TBubbleValue) => {
             return item.Value + "\n" + item.ValueX + "\n" + item.ValueY;
         }
     }

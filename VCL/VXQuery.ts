@@ -7,14 +7,14 @@ import VXC = require("VCL/VXComponent");
 import VXCO = require("VCL/VXContainer");
 
 
-export class VXQueryBase extends VXD.VXClientDataset {
+export class TQueryBase extends VXD.TClientDataset {
     public onError: (errorMessage: string) => void;
     public onExecuteCompleted: () => void;
 
     public paramAsJSON() {
         var paramJSON = {};
         var index = 0;
-        this.params.forEach((item: VXQueryParam) => {
+        this.params.forEach((item: TQueryParam) => {
             if (item.Value != null && item.Value.getMonth) {
                 paramJSON[index] = "!~@!" + item.Value.toJSON();
             } else {
@@ -26,9 +26,9 @@ export class VXQueryBase extends VXD.VXClientDataset {
         });
         return paramJSON;
     }
-    public params = new VXO.VXCollection<VXQueryParam>();
-    public createParam(value: any): VXQueryParam {
-        var param = new VXQueryParam();
+    public params = new VXO.TCollection<TQueryParam>();
+    public createParam(value: any): TQueryParam {
+        var param = new TQueryParam();
         param.Value = value;
         this.params.add(param);
         return param;
@@ -36,24 +36,27 @@ export class VXQueryBase extends VXD.VXClientDataset {
 
     public loadRemoteResults(data: any) {
         //replace the dates with JS dates
-        for (var i = 0, l = data.META.length; i < l; i++) {
-            if (data.META[i].TYPE != 'date') continue;
-            for (var j = 0; j < data.DATA.length; j++) {
-                if (data.DATA[j][data.META[i].NAME] != null)
-                    data.DATA[j][data.META[i].NAME] = new Date(data.DATA[j][data.META[i].NAME]);
+        if (data.META) {
+            for (var i = 0, l = data.META.length; i < l; i++) {
+                if (data.META[i].TYPE != 'date') continue;
+                for (var j = 0; j < data.DATA.length; j++) {
+                    if (data.DATA[j][data.META[i].NAME] != null)
+                        data.DATA[j][data.META[i].NAME] = new Date(data.DATA[j][data.META[i].NAME]);
+                }
             }
         }
         this.setData(data.DATA);
 
         if (this.onAfterOpen != null) (V.tryAndCatch(() => { this.onAfterOpen(this); }))
     }
+
     public close() {
         this.setData(null);
+        this.Active = false;
     }
-
 }
 
-export class VXQuery extends VXQueryBase {
+export class TQuery extends TQueryBase {
     private _SQL: string;
     /*
     * Contains the text of the SQL statement to execute for the ADO query.
@@ -82,7 +85,7 @@ export class VXQuery extends VXQueryBase {
 
 
 
-    constructor(aOwner: VXC.VXComponent, SQL?: string, connectionName?: string) {
+    constructor(aOwner: VXC.TComponent, SQL?: string, connectionName?: string) {
         super(aOwner);
         if (SQL != null) this.SQL = SQL;
         if (connectionName != null) this.ConnectionName = connectionName;
@@ -104,15 +107,15 @@ export class VXQuery extends VXQueryBase {
     */
     public open() {
         if (this.onBeforeOpen != null) (V.tryAndCatch(() => { this.onBeforeOpen(this); }))
-        var server = new VXDS.VXServer();
+        var server = new VXDS.TServer();
         var paramJSON = this.paramAsJSON();
-        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).addQuery(this); }
+        if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         server.send("Query", { __EXECUTE__: false, __SQL__: this.SQL, __SQLPARAM__: paramJSON, __DB__: this.ConnectionName }, (data) => {
             this.loadRemoteResults(data);
-            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
+            if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
         },
             (errorMessage: string) => {
-                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
+                if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
 
                 if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
             else V.Application.raiseException(errorMessage);
@@ -123,16 +126,17 @@ export class VXQuery extends VXQueryBase {
     /*
     * Call ExecSQL to execute the SQL statement currently assigned to the SQL property. Use ExecSQL to execute queries that do not return a cursor to data (such as INSERT, UPDATE, DELETE, and CREATE TABLE).
     */
-    public ExecSQL(onComplete?: (data) => {}) {
-        var server = new VXDS.VXServer();
+    public ExecSQL(onComplete?: (data) => void) {
+        var server = new VXDS.TServer();
         var paramJSON = this.paramAsJSON();
-        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).addQuery(this); }
+        if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         server.send("Query", { __EXECUTE__: true, __SQL__: this.SQL, __SQLPARAM__: paramJSON, __DB__: this.ConnectionName }, (data) => {
             if (this.onExecuteCompleted != null) (V.tryAndCatch(() => { this.onExecuteCompleted(); }))
-            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
+            if (onComplete != null) (V.tryAndCatch(() => { onComplete(data); }));
+            if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
         },
             (errorMessage: string) => {
-                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
+                if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
 
                 if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
             else V.Application.raiseException(errorMessage);
@@ -142,7 +146,7 @@ export class VXQuery extends VXQueryBase {
     }
 }
 
-export class VXQueryRemote extends VXQueryBase {
+export class TQueryRemote extends TQueryBase {
     private _queryid: string;
     public get QueryID(): string {
         return this._queryid;
@@ -154,32 +158,53 @@ export class VXQueryRemote extends VXQueryBase {
         }
     }
 
-    constructor(aOwner: VXC.VXComponent, queryID?: string) {
+    constructor(aOwner: VXC.TComponent, queryID?: string) {
         super(aOwner);
         this.QueryID = queryID;
     }
 
     public open() {
         if (this.onBeforeOpen != null) (V.tryAndCatch(() => { this.onBeforeOpen(this); }))
-        var server = new VXDS.VXServer();
+        var server = new VXDS.TServer();
         var paramJSON = this.paramAsJSON();
 
-        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).addQuery(this); }
+        if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         server.send("RemoteQuery", { __QUERYID__: this.QueryID, __SQLPARAM__: paramJSON }, (data) => {
-            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
+            if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
             this.loadRemoteResults(data);
         },
             (errorMessage: string) => {
-                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
+                if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
 
                 if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
            else V.Application.raiseException(errorMessage);
             }
             );
     }
+
+    /*
+    * Call ExecSQL to execute the SQL statement currently assigned to the SQL property. Use ExecSQL to execute queries that do not return a cursor to data (such as INSERT, UPDATE, DELETE, and CREATE TABLE).
+    */
+    public ExecSQL(onComplete?: (data) => void) {
+        var server = new VXDS.TServer();
+        var paramJSON = this.paramAsJSON();
+        if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
+        server.send("RemoteQuery", { __EXECUTE__: true, __QUERYID__: this.QueryID, __SQLPARAM__: paramJSON }, (data) => {
+            if (this.onExecuteCompleted != null) (V.tryAndCatch(() => { this.onExecuteCompleted(); }));
+            if (onComplete != null) (V.tryAndCatch(() => { onComplete(data); }));
+            if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
+        },
+            (errorMessage: string) => {
+                if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
+
+                if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
+            else V.Application.raiseException(errorMessage);
+            }
+            );
+    }
 }
 
-export class VXQueryParam extends VXO.VXCollectionItem {
+export class TQueryParam extends VXO.TCollectionItem {
     private _value: any = null;
     public get Value(): any {
         return this._value;

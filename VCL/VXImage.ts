@@ -1,13 +1,16 @@
 import VXC = require("VCL/VXComponent");
 import VXU = require("VCL/VXUtils");
 import V = require("VCL/VCL");
+import VXM = require("VCL/VXMenu");
 
-export class VXGraphic extends VXC.VXComponent {
+export class TGraphic extends VXC.TComponent {
     public onClicked: () => void;
     public ondblclicked: () => void;
 }
 
-export class VXImage extends VXGraphic {
+export class TImage extends TGraphic {
+    private jImage: JQuery;
+
     private _url: string;
     public get Url(): string {
         return this._url;
@@ -16,7 +19,7 @@ export class VXImage extends VXGraphic {
     public set Url(val: string) {
         if (val != this._url) {
             this._url = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -29,29 +32,62 @@ export class VXImage extends VXGraphic {
     public set Src(val: string) {
         if (val != this._url) {
             this._url = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
     public create() {
-        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'image', this.FitToWidth, this.FitToHeight);
-        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
-        this.jComponent.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(); })); return false; })
+        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+        this.jComponent.empty();
+        this.jComponent.addClass('btn-group');
+        this.jImage = $("<img>");
+        this.jImage.appendTo(this.jComponent);
+
+        this.jImage.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        this.jImage.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(); })); return false; })
         
-        this.jComponent.attr('src', this.Url);
+        this.jImage.attr('src', this.Url);
+
+        if (this.menuItems.length() > 0) {
+            this.reBuildMenu();
+        }
+
         super.create();
     }
 
 
+    private reBuildMenu(showMenu: boolean = false) {
+        this.jComponent.find(".dropdown-menu").empty();
+        if (!this.menuItems.length()) return;
+
+        this.jImage.attr('data-toggle', "dropdown");
+        this.jImage.addClass('dropdown-toggle');
+
+        this.menuItems.createmenu('dropdown-menu').appendTo(this.jComponent);
+        $('.dropdown-toggle').dropdown()
+        if (showMenu) {
+            this.jComponent.addClass('open');
+        }
+    }
+
+
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
+    }
+
+    public menuItems = new VXM.TMenuItemCollection<VXM.TMenuItem>();
+    public createMenuItem(text: string, onClicked?: () => void): VXM.TMenuItem {
+        var menuItem = new VXM.TMenuItem();
+        menuItem.Text = text;
+        menuItem.onClicked = onClicked;
+        this.menuItems.add(menuItem);
+        return menuItem;
     }
 }
 
 
-export class VXIcon extends VXGraphic {
+export class TIcon extends TGraphic {
     private _icon: V.Icon = null;
     public get Icon(): V.Icon {
         return this._icon;
@@ -59,7 +95,7 @@ export class VXIcon extends VXGraphic {
     public set Icon(val: V.Icon) {
         if (val != this._icon) {
             this._icon = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -70,7 +106,7 @@ export class VXIcon extends VXGraphic {
     public set Size(val: number) {
         if (val != this._size) {
             this._size = val;
-            this.draw(false);
+            this.drawDelayed(true);
         }
     }
 
@@ -79,6 +115,13 @@ export class VXIcon extends VXGraphic {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'i', this.FitToWidth, this.FitToHeight);
         this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
         this.jComponent.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(); })); return false; })
+
+        if (this.jComponent.attr("class")) {
+            var classes = this.jComponent.attr("class").split(" ").filter(function (c) {
+                return c.lastIndexOf("icon_", 0) !== 0;
+            });
+            this.jComponent.removeClass(classes.join(" "));
+        }
 
         this.jComponent.addClass(V.iconEnumToBootstrapStyle(<any>this.Icon));
         if (this.Color) this.jComponent.css('color', this.Color);
@@ -95,7 +138,7 @@ export class VXIcon extends VXGraphic {
         if (V.Application.checkColorString(val)) {
             if (val != this._color) {
                 this._color = val;
-                this.draw(false);
+                this.drawDelayed(true);
             }
         }
     }
@@ -103,8 +146,7 @@ export class VXIcon extends VXGraphic {
 
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
     }
 }

@@ -4,11 +4,11 @@ import VXU = require("VCL/VXUtils");
 import VXM = require("VCL/VXMenu");
 import V = require("VCL/VCL");
 
-export class VXListbox extends VXC.VXComponent {
+export class TListbox extends VXC.TComponent {
 
-    public items = new VXO.VXCollection<VXListboxItem>()
-    public createItem(value: string, text?: string): VXListboxItem {
-        var col: VXListboxItem = new VXListboxItem();
+    public items = new VXO.TCollection<TListboxItem>()
+    public createItem(value: string, text?: string): TListboxItem {
+        var col: TListboxItem = new TListboxItem();
         this.items.add(col);
 
         col.Value = value;
@@ -17,7 +17,7 @@ export class VXListbox extends VXC.VXComponent {
     }
 
 
-    public onChanged: (sender: VXListbox) => void;
+    public onChanged: (sender: TListbox) => void;
     private jListBox: JQuery;
     public create() {
         this.jComponent.empty(); //clear all subcomponents
@@ -30,7 +30,7 @@ export class VXListbox extends VXC.VXComponent {
         this.jListBox.css('margin-bottom', '0px');
         this.jListBox.css('width', '100%');
         this.jListBox.attr('multiple', 'multiple');
-        this.items.forEach((item: VXListboxItem) => {
+        this.items.forEach((item: TListboxItem) => {
             var itm: JQuery = $('<option/>');
             if (!item.Enabled) itm.attr('disabled', "disabled");
             itm.val(item.ID);
@@ -46,14 +46,13 @@ export class VXListbox extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized()) return; super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
 
     }
 }
 
-export class VXListboxItem extends VXM.VXMenuItem {
+export class TListboxItem extends VXM.TMenuItem {
     constructor() {
         super();
     }
@@ -68,7 +67,7 @@ export class VXListboxItem extends VXM.VXMenuItem {
     }
 }
 
-export class VXTreeNodeItem extends VXM.VXMenuItem {
+export class TTreeNodeItem extends VXM.TMenuItem {
     constructor() {
         super();
     }
@@ -78,7 +77,7 @@ export class VXTreeNodeItem extends VXM.VXMenuItem {
 
     private showChilds(): number {
         var childCnt = 0;
-        this.OwnerCollection.forEach((item: VXTreeNodeItem) => {
+        this.OwnerCollection.forEach((item: TTreeNodeItem) => {
             if (item.ParentNode != this || !item.jItemLI) return true;
 
             item.jItemLI.show('fast');
@@ -90,7 +89,7 @@ export class VXTreeNodeItem extends VXM.VXMenuItem {
 
     private hideChilds(): number {
         var childCnt = 0;
-        this.OwnerCollection.forEach((item: VXTreeNodeItem) => {
+        this.OwnerCollection.forEach((item: TTreeNodeItem) => {
             if (item.ParentNode != this || !item.jItemLI) return true;
 
             item.jItemLI.hide('fast');
@@ -105,7 +104,7 @@ export class VXTreeNodeItem extends VXM.VXMenuItem {
 
 
     public create(): void {
-        var _self: VXTreeNodeItem = this;
+        var _self: TTreeNodeItem = this;
         if (this.OwnerCollection.locked) return;
         var childCnt = 0;
         if (!this.jItemLI) {
@@ -171,11 +170,11 @@ export class VXTreeNodeItem extends VXM.VXMenuItem {
     }
 
 
-    private parentNode: VXTreeNodeItem;
-    public get ParentNode(): VXTreeNodeItem {
+    private parentNode: TTreeNodeItem;
+    public get ParentNode(): TTreeNodeItem {
         return this.parentNode;
     }
-    public set ParentNode(val: VXTreeNodeItem) {
+    public set ParentNode(val: TTreeNodeItem) {
         if (val != this.parentNode) {
             this.parentNode = val;
         }
@@ -197,15 +196,15 @@ export class VXTreeNodeItem extends VXM.VXMenuItem {
     private jItemI: JQuery;
     private jItemSPAN: JQuery;
     private jItemTEXT: JQuery;
-    private tree: VXTree;
+    private tree: TTree;
 
 }
 
 
-export class VXTree extends VXC.VXComponent {
-    public items = new VXO.VXCollection<VXTreeNodeItem>();
-    public createNode(parentNode: VXTreeNodeItem, value: string, text?: string): V.TTreeNodeItem {
-        var col: VXTreeNodeItem = new VXTreeNodeItem();
+export class TTree extends VXC.TComponent {
+    public items = new VXO.TCollection<TTreeNodeItem>();
+    public createNode(parentNode: TTreeNodeItem, value: string, text?: string): V.TTreeNodeItem {
+        var col: TTreeNodeItem = new TTreeNodeItem();
         this.items.add(col);
 
         col.Value = value;
@@ -216,11 +215,11 @@ export class VXTree extends VXC.VXComponent {
     }
 
 
-    private _selectednNode: VXTreeNodeItem = null;
-    public get SelectedNode(): VXTreeNodeItem {
+    private _selectednNode: TTreeNodeItem = null;
+    public get SelectedNode(): TTreeNodeItem {
         return this._selectednNode;
     }
-    public set SelectedNode(val: VXTreeNodeItem) {
+    public set SelectedNode(val: TTreeNodeItem) {
         if (val != this._selectednNode) {
             var oldNode = this._selectednNode;
             this._selectednNode = val;
@@ -230,26 +229,26 @@ export class VXTree extends VXC.VXComponent {
         }
     }
 
-    public onChanged: (sender: VXTree) => void;
+    public onChanged: (sender: TTree) => void;
 
     public collapseAll() {
-        this.items.forEach((item: VXTreeNodeItem) => {
+        this.items.forEach((item: TTreeNodeItem) => {
             item.Expanded = false;
         });
         this.draw(false);
     }
 
     public expandAll() {
-        this.items.forEach((item: VXTreeNodeItem) => {
+        this.items.forEach((item: TTreeNodeItem) => {
             item.Expanded = true;
         });
         this.draw(false);
     }
 
 
-    private createChilds(prnt: VXTreeNodeItem): number {
+    private createChilds(prnt: TTreeNodeItem): number {
         var cnt = 0;
-        this.items.forEach((item: VXTreeNodeItem) => {
+        this.items.forEach((item: TTreeNodeItem) => {
             if (item.ParentNode != prnt) return true;
             item.create();
             if (!(<any>prnt).jItemUL) {
@@ -275,7 +274,7 @@ export class VXTree extends VXC.VXComponent {
 
         this.jComponent.addClass('tree');
         //create all parents
-        this.items.forEach((item: VXTreeNodeItem) => {
+        this.items.forEach((item: TTreeNodeItem) => {
             if (item.ParentNode) return true;
             item.create();
             this.createChilds(item);
@@ -287,10 +286,10 @@ export class VXTree extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized()) return; super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
-        this.items.forEach((item: VXTreeNodeItem) => {
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
+
+        this.items.forEach((item: TTreeNodeItem) => {
             item.create();
         });
 

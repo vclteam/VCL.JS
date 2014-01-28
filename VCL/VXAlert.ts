@@ -2,8 +2,8 @@ import VXC = require("VCL/VXComponent");
 import VXU = require("VCL/VXUtils");
 import V = require("VCL/VCL");
 
-export class VXAlert extends VXC.VXComponent {
-    constructor(aOwner: VXC.VXComponent, renderTo?: string, text?: string) {
+export class TAlert extends VXC.TComponent {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
         this._text = text;
         (<any>this)._fittowidth = true;
@@ -45,7 +45,7 @@ export class VXAlert extends VXC.VXComponent {
         }
     }
 
-    public onClicked: (sender: VXAlert) => void;
+    public onClicked: (sender: TAlert) => void;
     private jAlert: JQuery;
     private jBtn: JQuery;
     private jText: JQuery;
@@ -64,7 +64,7 @@ export class VXAlert extends VXC.VXComponent {
             case V.AlertStyle.Info: this.jAlert.addClass("alert-info"); break;
             case V.AlertStyle.Success: this.jAlert.addClass("alert-success"); break;
             case V.AlertStyle.Danger: this.jAlert.addClass("alert-danger"); break;
-            case V.AlertStyle.Error: this.jComponent.addClass("alert-error"); break;
+            case V.AlertStyle.Error: this.jAlert.addClass("alert-error"); break;
         }
 
         this.jBtn = $('<button />');
@@ -87,19 +87,19 @@ export class VXAlert extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
+       
         this.jText.html(this.Text); 
     }
 }
 
 
 
-export class VXNotification extends VXC.VXComponent {
+export class TNotification extends VXC.TComponent {
     public onClosed: () => void;
 
-    constructor(aOwner: VXC.VXComponent) {
+    constructor(aOwner: VXC.TComponent) {
         super(aOwner, null);
         (<any>this)._fittowidth = true;
     }
@@ -217,9 +217,8 @@ export class VXNotification extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
     }
 
 }

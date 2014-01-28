@@ -4,21 +4,22 @@ import VXC = require("VCL/VXContainer");
 import VXDS = require("VCL/VXServer");
 import VXD = require("VCL/VXDataset");
 import VXU = require("VCL/VXUtils");
+import VXCO = require("VCL/VXComponent");
 
-export class VXPopup extends VXC.VXContainer {
+export class TPopup extends VXC.TContainer {
     public onCreate() { }
 
     public onClosed: () => void;
     private jBody: JQuery;
 
-    private _popupplacement: V.PopupPlacement = V.PopupPlacement.Right;
-    public get PopupPlacement(): V.PopupPlacement {
+    private _popupplacement: V.PopoverPlacement = V.PopoverPlacement.Right;
+    public get PopupPlacement(): V.PopoverPlacement {
         return this._popupplacement;
     }
-    public set PopupPlacement(val: V.PopupPlacement) {
+    public set PopupPlacement(val: V.PopoverPlacement) {
         if (val != this._popupplacement) {
             this._popupplacement = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -29,7 +30,7 @@ export class VXPopup extends VXC.VXContainer {
     public set Title(val: string) {
         if (val != this._title) {
             this._title = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -39,8 +40,8 @@ export class VXPopup extends VXC.VXContainer {
         this.Width = 520; //bootstrap span5 as default
     }
 
-    private target: V.TComponent;
-    public popup(target: V.TComponent) {
+    private target: VXCO.TComponent;
+    public popup(target: VXCO.TComponent) {
         if (target.jComponent == null) return;
         this.target = target;
         super.draw(true);
@@ -48,7 +49,7 @@ export class VXPopup extends VXC.VXContainer {
         target.jComponent.clickover({
             template: '<div class="popover popover2"><div class="arrow"></div><div class="popover-inner"><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>',
             html: true, title: this.Title, content: this.jComponent.html(),
-            placement: V.PopupPlacement[this.PopupPlacement]
+            placement: V.PopoverPlacement[this.PopupPlacement]
         });
         target.jComponent.clickover("show");
     }

@@ -5,7 +5,19 @@ import VXCO = require("VCL/VXContainer");
 import V = require("VCL/VCL");
 import VXP = require("VCL/VXWell");
 
-export class VXWidgetGrid extends VXCO.VXContainer {
+export class TWidgetGrid extends VXCO.TContainer {
+    private _minmum_column: number = 2;
+    public get MinimumColumns(): number {
+        return this._minmum_column;
+    }
+    public set MinimumColumns(val: number) {
+        if (val != this._minmum_column) {
+            this._minmum_column = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
     private _margingorizontal: number = 4;
     public get MarginHorizontal(): number {
         return this._margingorizontal;
@@ -13,7 +25,7 @@ export class VXWidgetGrid extends VXCO.VXContainer {
     public set MarginHorizontal(val: number) {
         if (val != this._margingorizontal) {
             this._margingorizontal = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -24,7 +36,7 @@ export class VXWidgetGrid extends VXCO.VXContainer {
     public set MarginVertical(val: number) {
         if (val != this._marginvertical) {
             this._marginvertical = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -35,7 +47,7 @@ export class VXWidgetGrid extends VXCO.VXContainer {
     public set MaxColumns(val: number) {
         if (val != this._maxcolumns) {
             this._maxcolumns = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -49,7 +61,7 @@ export class VXWidgetGrid extends VXCO.VXContainer {
     public set WidgetWidth(val: number) {
         if (val != this._widgetwidth) {
             this._widgetwidth = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
     private _widgetheight: number = 88;
@@ -59,7 +71,7 @@ export class VXWidgetGrid extends VXCO.VXContainer {
     public set WidgetHeight(val: number) {
         if (val != this._widgetheight) {
             this._widgetheight = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -71,18 +83,18 @@ export class VXWidgetGrid extends VXCO.VXContainer {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('gridster');
 
-        var ul: any = $('<ul>');
+        var ul: JQuery = $('<ul>');
         this.jComponent.append(ul);
 
         ul.gridster({
             widget_margins: [this.MarginHorizontal, this.MarginVertical],
             widget_base_dimensions: [this.WidgetWidth, this.WidgetHeight],
             //max_cols: this.MaxColumns,
-            //min_cols: this.MaxColumns,
+            min_cols: this.MinimumColumns,
             //max_size_x: 1,
             draggable: {
                 stop: function (event, ui) {
-                    self.updateWidgetsPositions();
+                    self.updateWidgetsPositions(true);
                 }
             },
             serialize_params: function ($w, wgd) {
@@ -99,31 +111,29 @@ export class VXWidgetGrid extends VXCO.VXContainer {
         });
         this.jGridster = ul.gridster().data('gridster');
         this.jGridster.init();
-        this.widgets.forEach((item: VXWidgetPanel) => {
+        this.jGridster.generate_stylesheet();
+        this.widgets.forEach((item: TWdgetPanel) => {
             this._addWidget(item, true);
         })
-        this.updateWidgetsPositions();
+        this.updateWidgetsPositions(false);
         if (!this.Enabled) this.jGridster.disable()
 
     }
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         (<any>this)._fittowidth = true;
     }
 
 
     public draw(reCreate: boolean) {
-           if (!this.parentInitialized())return;super.draw(reCreate);
-           if (reCreate || !this.initialized) this.create();
-           this.initialized = true;
-
-           super.draw(reCreate);
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
     }
 
-    public widgets = new VXO.VXCollection<VXWidgetPanel>();
-    public createWidget(renderTo: string, headerText: string, sizeX?: number, sizeY?: number, X?: number, Y?: number): VXWidgetPanel {
-        var item = new VXWidgetPanel(this, renderTo);
+    public widgets = new VXO.TCollection<TWdgetPanel>();
+    public createWidget(renderTo: string, headerText: string, sizeX?: number, sizeY?: number, X?: number, Y?: number): TWdgetPanel {
+        var item = new TWdgetPanel(this, renderTo);
         item.parentGrid = this;
         if (sizeX != null) item.SizeX = sizeX;
         if (sizeY != null) item.SizeY = sizeY;
@@ -135,7 +145,7 @@ export class VXWidgetGrid extends VXCO.VXContainer {
         return item;
     }
 
-    public addWidget(widget: VXWidgetPanel) {
+    public addWidget(widget: TWdgetPanel) {
         if (this.widgets.FindItemByID(widget.ID)) {
             V.Application.raiseException("You c'ant enter the same widget twice");
         } else {
@@ -146,12 +156,12 @@ export class VXWidgetGrid extends VXCO.VXContainer {
     }
 
 
-    private _addWidget(item: VXWidgetPanel, fast = false) {
-        item.show();
+    private _addWidget(item: TWdgetPanel, fast = false) {
+        item.create();
         item.Width = this.WidgetWidth * item.SizeX + (item.SizeX - 1) * this.MarginVertical * 2;
         item.Height = this.WidgetHeight * item.SizeY + (item.SizeY - 1) * this.MarginHorizontal * 2;
         item.widgetElment = this.jGridster.add_widget(item.jComponent, item.SizeX, item.SizeY, item.X >= 0 ? item.X : null, item.Y >= 0 ? item.Y : null);
- 
+
         var paddingTop: number = parseInt(item.jContent.css("margin-top").replace("px", ""));
         var paddingBottom: number = parseInt(item.jContent.css("margin-bottom").replace("px", ""));
         var height = item.jComponent.innerHeight() - item.jHeader.outerHeight() - paddingBottom - paddingTop;
@@ -159,13 +169,14 @@ export class VXWidgetGrid extends VXCO.VXContainer {
         item.jContent.css('max-height', height + "px");
         item.widgetElment.data('widgetID', item.WidgetID);
         item.widgetElment.data('componentID', item.ID);
-        if (!fast) this.updateWidgetsPositions();
+        if (!fast) this.updateWidgetsPositions(fast);
     }
 
     public get WidgetsLayout(): string {
+        var widgetsSet = this.jGridster.serialize();
         var widgetsPos: any[] = [];
-        this.widgets.forEach((item: VXWidgetPanel) => {
-            widgetsPos.push({ X: item.X, Y: item.Y, widgetID: item.WidgetID, componentID: item.ID });
+        widgetsSet.forEach((item) => {
+            widgetsPos.push({ X: item.col, Y: item.row, widgetID: item.widgetID, componentID: item.componentID });
             return true;
         })
         return JSON.stringify(widgetsPos);
@@ -173,22 +184,44 @@ export class VXWidgetGrid extends VXCO.VXContainer {
 
     public set WidgetsLayout(val: string) {
         var widgets: any[] = JSON.parse(val);
+        widgets.sort((a, b) => {
+            if (a.Y > b.Y) return 1;
+            if (a.Y < b.Y) return -1;
+            if (a.X > b.X) return 1;
+            if (a.X < b.X) return -1;
+
+            return 0;
+        });
+        this.widgets.forEach((item) => { item.Tag = 0; });
         for (var i = 0; i < widgets.length; i++) {
-            var widgetID, WidgetComp: VXWidgetPanel;
-            this.widgets.forEach((item: VXWidgetPanel) => {
+            var widgetID: TWdgetPanel;
+            var WidgetComp: TWdgetPanel;
+            this.widgets.forEach((item: TWdgetPanel) => {
                 if (item.ID == widgets[i].componentID) WidgetComp = item;
                 if (item.WidgetID == widgets[i].widgetID) widgetID = item;
                 return true;
             });
             if (widgetID == null) widgetID = WidgetComp;
             if (widgetID == null) continue;
+            widgetID.Tag = 1;
             widgetID.X = widgets[i].X;
             widgetID.Y = widgets[i].Y;
+            widgetID.jComponent.attr('data-row', widgets[i].Y);
+            widgetID.jComponent.attr('data-col', widgets[i].X);
         }
+        //handle all new wigets
+        this.widgets.forEach((item) => {
+            if (item.Tag == 0) {
+                var obj = this.jGridster.next_position(item.SizeX, item.SizeY);
+
+            }
+        });
+
     }
 
-
-    private updateWidgetsPositions() {
+    public onLayoutChanged: () => void;
+    private updateWidgetsPositions(notifyEvent: boolean) {
+        //update widgets structure
         var widgets: any[] = this.jGridster.serialize();
         for (var i = 0; i < widgets.length; i++) {
             var widget = this.widgets.FindItemByID(widgets[i].componentID);
@@ -197,13 +230,14 @@ export class VXWidgetGrid extends VXCO.VXContainer {
                 widget.Y = widgets[i].row;
             }
         }
+        if (this.onLayoutChanged != null && notifyEvent) (V.tryAndCatch(() => { this.onLayoutChanged(); }));
     }
 
 }
 
-export class VXWidgetPanel extends VXP.VXPanel {
+export class TWdgetPanel extends VXP.TPanel {
     public widgetElment: JQuery;
-    public parentGrid: VXWidgetGrid;
+    public parentGrid: TWidgetGrid;
 
     private _widgetID: string;
     public get WidgetID(): string {
@@ -258,7 +292,7 @@ export class VXWidgetPanel extends VXP.VXPanel {
         }
     }
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string, sizeX?: number, sizeY?: number, headerText?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, sizeX?: number, sizeY?: number, headerText?: string) {
         super(aOwner, renderTo, headerText);
         if (sizeX != null) this.SizeX = sizeX;
         if (sizeY != null) this.SizeY = sizeY;
@@ -280,20 +314,16 @@ export class VXWidgetPanel extends VXP.VXPanel {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
+        if (!this.parentInitialized()) return;
         super.draw(reCreate);
+
     }
 
     public destroy() {
-        var selfSuper = super;
         if (this.parentGrid != null) {
-            (<VXWidgetGrid>this.parentGrid).jGridster.remove_widget(this.widgetElment,
-                function () {
-                    //selfSuper.destroy();
-                
-                });
+            this.parentGrid.widgets.remove(this);
+            (<TWidgetGrid>this.parentGrid).jGridster.remove_widget(this.widgetElment, false);
         }
-    
-    }
 
+    }
 }

@@ -1,220 +1,3 @@
-import VXC = require("VCL/VXComponent");
-import VXU = require("VCL/VXUtils");
-import V = require("VCL/VCL");
-
-export class TProgressBar extends VXC.TComponent {
-    private jBar: JQuery;
-
-    private _value: number = 0;
-    /*
-    * specify the value in percentage of the progress control.
-    * Value accept value from 0 to 100
-    */
-    public get Value(): number {
-        return this._value;
-    }
-    public set Value(val: number) {
-        if (val != this._value) {
-            if (val > 100) val = 100;
-            if (val < 0) val = 0;
-            this._value = val;
-            this.drawDelayed(false);
-        }
-    }
-
-
-    private _striped: boolean = true;
-    /**
-    * Set Striped to true to create a striped effect. Not available in IE7-8.
-    **/
-    public get Striped(): boolean {
-        return this._striped;
-    }
-    public set Striped(val: boolean) {
-        if (val != this._striped) {
-            this._striped = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _animate: boolean = false;
-    /**
-    * Set animate to true the stripes right to left. Not available in all versions of IE.
-    **/
-    public get Animate(): boolean {
-        return this._animate;
-    }
-    public set Animate(val: boolean) {
-        if (val != this._animate) {
-            this._animate = val;
-            this.drawDelayed(true);
-        }
-    }
-
-
-
-    private _progressbarStyle: V.ProgressBarStyle = V.ProgressBarStyle.Default;
-    public get PrgoressBarStyle(): V.ProgressBarStyle {
-        return this._progressbarStyle;
-    }
-    public set ButtonStyle(val: V.ProgressBarStyle) {
-        if (val != this._progressbarStyle) {
-            this._progressbarStyle = val;
-            this.drawDelayed(true);
-        }
-    }
-
-
-    public create() {
-        super.create();
-
-        this.jComponent.empty();
-        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
-        this.jComponent.addClass("progress");
-        if (this.Striped) this.jComponent.addClass('progress-striped');
-        if (this.Animate) this.jComponent.addClass('active');
-        this.jBar = $("<div>");
-        this.jBar.addClass("bar");
-        switch (this.PrgoressBarStyle) {
-            case V.ProgressBarStyle.Default: break;
-            case V.ProgressBarStyle.Primary: this.jBar.addClass("bar-primary"); break;
-            case V.ProgressBarStyle.Info: this.jBar.addClass("bar-info"); break;
-            case V.ProgressBarStyle.Success: this.jBar.addClass("bar-success"); break;
-            case V.ProgressBarStyle.Warning: this.jBar.addClass("bar-warning"); break;
-            case V.ProgressBarStyle.Danger: this.jBar.addClass("bar-danger"); break;
-        }
-
-        this.jBar.appendTo(this.jComponent);
-
-    }
-    public draw(reCreate: boolean) {
-        if (!this.parentInitialized()) return; super.draw(reCreate);
-
-        this.jBar.css('width', this.Value + "%");
-    }
-}
-
-
-export class TRatingStart extends VXC.TComponent {
-    public onClicked: (sender: TRatingStart) => void;
-    private _starsize: number = 1.5;
-    /*
-    * specify the value from 0-5 of the rating control.
-    * Value accept value from 0 to 5
-    */
-    public get StarSize(): number {
-        return this._starsize;
-    }
-    public set StarSize(val: number) {
-        if (val != this._starsize) {
-            this._starsize = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _starcolor: string = '#E3CF7A';
-    public get StarColor(): string {
-        return this._starcolor;
-    }
-    public set StarColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-
-            if (val != this._starcolor) {
-                this._starcolor = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-
-    private _value: number = 0;
-    /*
-    * specify the value from 0-5 of the rating control.
-    * Value accept value from 0 to 5
-    */
-    public get Value(): number {
-        return this._value;
-    }
-    public set Value(val: number) {
-        if (val != this._value) {
-            if (val > 5) val = 5;
-            if (val < 0) val = 0;
-            this._value = val;
-            this.drawDelayed(false);
-        }
-    }
-
-
-    private _readonly: boolean = true;
-    /**
-    * Set Striped to true to create a striped effect. Not available in IE7-8.
-    **/
-    public get ReadOnly(): boolean {
-        return this._readonly;
-    }
-    public set ReadOnly(val: boolean) {
-        if (val != this._readonly) {
-            this._readonly = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private RateTo(to: number) {
-        for (var i: number = 1; i <= 5; i++) {
-            if (i <= to)
-                $("#" + this.ID + '-' + i).addClass("icon-star").removeClass('icon-star-empty');
-            else
-                $("#" + this.ID + '-' + i).removeClass("icon-star").addClass('icon-star-empty');
-        }
-    }
-
-    public create() {
-        super.create();
-        var self = this;
-        this.jComponent.empty();
-        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
-        for (var i = 1; i <= 5; i++) {
-            var star: JQuery = $('<span>');
-            star.addClass('icon-star-empty ' + this.ID).attr('ID', this.ID + '-' + i).attr('data-position', i).css('cursor', 'pointer');
-            star.css('font-size', this.StarSize + "em");
-            if (this.StarColor) star.css('color', this.StarColor);
-
-            this.jComponent.append(star);
-        }
-        //fire event on mouse enter
-        $('.' + this.ID).on('mouseenter', function (e) {
-            var stars = $(this);
-            var star_position = parseInt(stars.attr("data-position"));
-            self.RateTo(star_position);
-        });
-        //mouse leave
-        $('.' + this.ID).on('mouseleave', function (e) {
-            self.RateTo(self.Value);
-        });
-        //mouse click
-        $('.' + this.ID).on('click', function (e) {
-            var stars = $(this);
-            var star_position = parseInt(stars.attr("data-position"));
-            self.Value = star_position;
-            if (self.onClicked != null) V.tryAndCatch(() => { self.onClicked(self); });
-        });
-
-        if (!this.ReadOnly) {
-            this.RateTo(this.Value);
-        }
-    }
-
-    public draw(reCreate: boolean) {
-        if (!this.parentInitialized()) return; super.draw(reCreate);
-
-        this.RateTo(this.Value);
-    }
-}
-
-
-
 /*!
  * Slider for Bootstrap
  *
@@ -223,12 +6,23 @@ export class TRatingStart extends VXC.TComponent {
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  */
+import VXC = require("VCL/VXComponent");
+import VXU = require("VCL/VXUtils");
+import V = require("VCL/VCL");
+
+
+
+
 export class TSliderBase extends VXC.TComponent {
 
 
     public constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
+        //this.Width = 200;
+        //this.Height = 200;
     }
+
+
 
     private _min: number = 0;
     public get MinValue(): number {
@@ -237,7 +31,7 @@ export class TSliderBase extends VXC.TComponent {
     public set MinValue(val: number) {
         if (val != this._min) {
             this._min = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
     private _max: number = 10;
@@ -247,7 +41,7 @@ export class TSliderBase extends VXC.TComponent {
     public set MaxValue(val: number) {
         if (val != this._max) {
             this._max = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
     private _step: number = 1;
@@ -257,7 +51,7 @@ export class TSliderBase extends VXC.TComponent {
     public set StepValue(val: number) {
         if (val != this._step) {
             this._step = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
 
@@ -268,7 +62,7 @@ export class TSliderBase extends VXC.TComponent {
     public set ShowToolTip(val: boolean) {
         if (val != this._showTooltip) {
             this._showTooltip = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
 
@@ -279,7 +73,7 @@ export class TSliderBase extends VXC.TComponent {
     public set ShowLabels(val: boolean) {
         if (val != this._showLabels) {
             this._showLabels = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
 
@@ -290,7 +84,7 @@ export class TSliderBase extends VXC.TComponent {
     public set SliderOrientation(val: V.SliderOrientation) {
         if (val != this._orientation) {
             this._orientation = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
 
@@ -301,22 +95,61 @@ export class TSliderBase extends VXC.TComponent {
     public set SliderHandle(val: V.SliderHandle) {
         if (val != this._handle) {
             this._handle = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
 
 
 
     private _selection: V.SliderSelection = V.SliderSelection.before;
+    /*public get SliderSelection(): V.SliderSelection {
+        return this._selection;
+    }
+    public set SliderSelection(val: V.SliderSelection) {
+        if (val != this._selection) {
+            this._selection = val;
+            this.draw(true);
+        }
+    }*/
+
     private _value: number[] = [5];
 
 
+
+
+    /*
+
+      private  arraycompare(array1: number[], array2: number[]):boolean {
+          if (!array1 || !array2)
+              return false;
+          if (array1.length != array2.length)
+              return false;
+
+          for (var i = 0, l = array1.length; i < l; i++) {
+              if (array1[i] != array2[i]) {
+                  return false;
+              }
+          }
+          return true;
+      }
+          */
     public onFormatValue: (value: string) => string = (value: string) => {
         return value;
     };
     public onFormatLabel: (value: string) => string = (value: string) => {
         return value;
     };
+    //private _formater: (value: string) => string = function (value: string) { return value; };
+    /*public get onFormatValue(): (value: string) => string {
+        return value;
+    }
+    public set onFormatValue(val: (value: string) => string) {
+        if (val != this._formater) {
+            this._formater = val;
+            this.draw(true);
+        }
+        //   this.jComponent.remove(); 
+    }*/
 
     private _slider: any;
 
@@ -336,14 +169,21 @@ export class TSliderBase extends VXC.TComponent {
             formater: me.onFormatValue,
             enabled: me.Enabled,
             formatlabel: me.onFormatLabel,
-            showLabels: me.ShowLabels
+            showlabels: me.ShowLabels
         }
+
        this._slider = new Slider(this.jComponent, options);
+
+
+
+
     }
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
+        //Slider.prototype.layout.call(this._slider);
+
     }
 
 }
@@ -352,13 +192,13 @@ export class TSliderBase extends VXC.TComponent {
 export class TSlider extends TSliderBase {
     public get Value(): number {
         return (<any>this)._value[0];
-    }
+    } 
 
 
     public set Value(val: number) {
         if (val != (<any>this)._value[0]) {
             (<any>this)._value[0] = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
 
@@ -405,6 +245,7 @@ export class TSlider extends TSliderBase {
         });
 
 
+
         super.create();
     }
 
@@ -420,7 +261,7 @@ export class TRangeSlider extends TSliderBase {
     public set FirstValue(val: number) {
         if (val != (<any>this)._value[0]) {
             (<any>this)._value[0] = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
 
@@ -433,7 +274,7 @@ export class TRangeSlider extends TSliderBase {
     public set SecondValue(val: number) {
         if (val != (<any>this)._value[1]) {
             (<any>this)._value[1] = val;
-            this.drawDelayed(true);
+            this.draw(true);
         }
     }
 
@@ -444,7 +285,6 @@ export class TRangeSlider extends TSliderBase {
 
 
     public create() {
-
         this.jComponent.empty();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
 
@@ -490,6 +330,10 @@ export class TRangeSlider extends TSliderBase {
             };
             return true;
         });
+
+
+
+
         super.create();
     }
 
@@ -516,14 +360,15 @@ function Slider(element: JQuery, options) {
 
     this.enabled = options.enabled;
 
-    this.showLabels = options.showLabels;
+    this.showlabels = options.showlabels;
 
     this.orientation = this.element.data('slider-orientation') || options.orientation;
 
     this.picker = $(
         ' <div> ' +
-        (this.showLabels ? '<div class="slider-label"  ' + ((this.orientation != 'vertical') ? ' style = "float: left; margin-right: 8px;" ' : ' style = "margin-bottom: 8px;" ') + ' > '
-        + options.formatlabel(options.min) + ' </div >' : '') +
+        (this.showlabels?
+        '<div class="slider-label"  ' + ((this.orientation != 'vertical') ? ' style = "float: left; margin-right: 8px;" ' : ' style = "margin-bottom: 8px;" ') + ' > '
+        + options.formatlabel(options.min) + ' </div >':'') +
         '<div class="slider" > ' +
         '<div class="slider-track">' +
         '<div class="slider-selection"></div>' +
@@ -535,8 +380,9 @@ function Slider(element: JQuery, options) {
         '<div class="tooltip-inner"></div>' +
         '</div>' +
         '</div>' +
+        (this.showlabels?
         '<div class="slider-label" '
-        + (this.showLabels ? ((this.orientation != 'vertical') ? 'style = "float: right; margin-left: 8px;" ' : ' style = "margin-top: 8px;" ') + '>'
+        + ((this.orientation != 'vertical') ? 'style = "float: right; margin-left: 8px;" ' : ' style = "margin-top: 8px;" ') + '>'
         + options.formatlabel(options.max) + '</div>' : '') +
         + '</div>');
     element.append(this.picker);
@@ -547,13 +393,14 @@ function Slider(element: JQuery, options) {
     this.slider = this.picker.find('.slider');
     this.sliderlabel = this.picker.find('.slider-label');
 
-
     var firstlabel: JQuery = $(' ');
     var secondlabel: JQuery = $(' ');
-    if (this.showLabels) {
+
+    if (this.showlabels) { 
         firstlabel = this.picker.find('.slider-label:first');
         secondlabel = this.picker.find('.slider-label:last');
     }
+
     firstlabel.css('width', textWidth(firstlabel));
     secondlabel.css('width', textWidth(secondlabel));
 
@@ -672,6 +519,7 @@ Slider.prototype = {
     over: false,
     inDrag: false,
     enabled: true,
+    showlabels:true,
 
     showTooltip: function () {
         this.tooltip.addClass('in');
@@ -975,7 +823,7 @@ $.fn.slider.defaults = {
     formatlabel: function (value) {
         return value;
     },
-    showLabels: true
+    showlabels: true
 };
 
 $.fn.slider.Constructor = Slider;

@@ -4,10 +4,11 @@ import VXC = require("VCL/VXContainer");
 import VXDS = require("VCL/VXServer");
 import VXD = require("VCL/VXDataset");
 
-export class VXModal extends VXC.VXContainer {
+export class TModal extends VXC.TContainer {
     public onCreate() { }
 
     public onClosed: () => void;
+    public onCancel: () => void;
     private jBody: JQuery;
 
     private _maxheight: number = 400;
@@ -24,8 +25,7 @@ export class VXModal extends VXC.VXContainer {
 
     constructor() {
         super(null, null);
-        if (!(<any>this).__HTML__) V.Application.raiseException("Error in " + this.getClassName() + " - You can't instantiate TPage directly, use V.Application.loadPage ,V.Application.createPage or V.Application.navigateToPage");
-        this.Width = 520; //bootstrap span5 as default
+        if (!(<any>this).__HTML__) V.Application.raiseException("Error in " + this.getClassName() + " - You can't instantiate TPage directly, use V.Application.loadPage ,V.Application.createPage");
 
         this.jBody = this.jComponent.clone(true);
         this.jComponent.empty();
@@ -47,10 +47,15 @@ export class VXModal extends VXC.VXContainer {
         this.jComponent.modal('hide');
         if (this.onClosed != null) { (V.tryAndCatch(() => { this.onClosed(); })) }
     }
+    public cancel() {
+        this.jComponent.modal('hide');
+        if (this.onCancel != null) { (V.tryAndCatch(() => { this.onCancel(); })) }
+    }
+
 
     public get isPage(): boolean {
         return true;
     }
 
-} 
+}
 

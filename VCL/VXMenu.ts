@@ -2,7 +2,7 @@ import V = require("VCL/VCL");
 import VXO = require("VCL/VXObject");
 import VXU = require("VCL/VXUtils");
 
-export class VXMenuItem extends VXO.VXCollectionItem {
+export class TMenuItem extends VXO.TCollectionItem {
     public jComponent: JQuery;
     public create() {
         var self = this;
@@ -99,8 +99,6 @@ export class VXMenuItem extends VXO.VXCollectionItem {
         }
     }
 
-
-
     private _text: string = "";
     public get Text(): string {
         return this._text;
@@ -127,11 +125,11 @@ export class VXMenuItem extends VXO.VXCollectionItem {
 }
 
 
-export class VXMenuItemCollection<T> extends VXO.VXCollection<VXMenuItem> {
+export class TMenuItemCollection<T> extends VXO.TCollection<TMenuItem> {
     public createmenu(headerClass : string): JQuery {
         var menu: JQuery = $('<ul>');
         menu.addClass(headerClass);
-        this.forEach((menuItem: VXMenuItem) => {
+        this.forEach((menuItem: TMenuItem) => {
             menuItem.create();
             menuItem.jComponent.appendTo(menu);
             return true;

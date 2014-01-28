@@ -4,13 +4,13 @@ import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 import VXCB = require("VCL/VXChartBase");
 
-export class VXChartDonut extends VXCB.VXChartBase {
+export class TChartDonut extends VXCB.TChartBase {
     public onSelectionchanged: (value: V.TDountValue) => void;
     public onClicked: (value: V.TDountValue) => void;
 
-    public values = new VXCB.VXChartValuesCollection<VXCB.VXDountValue>();
-    public createValue(label: string, value: number): VXCB.VXDountValue {
-        var col = new VXCB.VXDountValue();
+    public values = new VXCB.TChartValuesCollection<VXCB.TDountValue>();
+    public createValue(label: string, value: number): VXCB.TDountValue {
+        var col = new VXCB.TDountValue();
         this.values.add(col);
         col.Value = value;
         col.Label = label;
@@ -43,7 +43,7 @@ export class VXChartDonut extends VXCB.VXChartBase {
 
     public getData(): any[] {
         var dataArray = [];
-        this.values.forEach((valueOfElement: VXCB.VXDountValue) => {
+        this.values.forEach((valueOfElement: VXCB.TDountValue) => {
             var obj: any = { label: valueOfElement.Label, value: valueOfElement.Value, id: valueOfElement.ID };
             dataArray.push(obj);
             return true;
@@ -86,14 +86,13 @@ export class VXChartDonut extends VXCB.VXChartBase {
 
     
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
 
     }
 }
 
-export class VXDBChartDonut extends VXChartDonut {
+export class TDBChartDonut extends TChartDonut {
     private _valuefield: string;
     /**
     * Specifies the field from which the edit control displays data.
@@ -121,26 +120,26 @@ export class VXDBChartDonut extends VXChartDonut {
     }
 
 
-    private _dataset: VXD.VXDataset;
+    private _dataset: VXD.TDataset;
     /*
       * Specifies the dataset that contains the field it represents.
       */
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
-    public set Dataset(val: VXD.VXDataset) {
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (val != this._dataset) {
                 if (this._dataset != null) {
-                    (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                    (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                    (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                    (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
                 }
                 this._dataset = val;
                 if (this._dataset) {
-                    (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => {
+                    (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => {
                         this.draw(true);
                     });
-                    (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => {
+                    (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => {
                         this.draw(true);
                     });
                 }
@@ -162,7 +161,7 @@ export class VXDBChartDonut extends VXChartDonut {
             var obj: any = { label: lbl, value: val, id: this.Dataset.ID };
             dataArray.push(obj);
 
-            var col = new VXCB.VXDountValue();
+            var col = new VXCB.TDountValue();
             this.values.add(col);
             col.Value = val;
             col.Label = lbl;
@@ -191,6 +190,7 @@ class Donut extends VXCB.EventEmitter {
     public  segments: DonutSegment[];
     private text2;
     private text1;
+    private timeoutId;
 
     defaults = {
         colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
@@ -203,7 +203,7 @@ class Donut extends VXCB.EventEmitter {
         super();
         this.owner = owner;
         this.select = __bind(this.select, this);
-
+        this.unselect = __bind(this.unselect, this);
         this.click = __bind(this.click, this);
 
         var row;
@@ -236,10 +236,25 @@ class Donut extends VXCB.EventEmitter {
         this.redraw();
     }
 
+    resizeHandler(self: Donut) {
+        self.timeoutId = null;
+        self.raphael.setSize(self.el.width(), self.el.height());
+        return self.redraw();
+    }
+
+
     redraw() {
         var C, cx, cy, i, idx, last, max_value, min, next, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
         this.el.empty();
         this.raphael = new Raphael(this.el[0]);
+        var self = this;
+        $(window).bind('resize', function (evt) {
+            if (self.timeoutId != null) {
+                window.clearTimeout(self.timeoutId);
+            }
+            return self.timeoutId = window.setTimeout(self.resizeHandler, 30, self);
+        });
+
         cx = this.el.width() / 2;
         cy = this.el.height() / 2;
         w = (Math.min(cx, cy) - 10) / 3;
@@ -264,7 +279,13 @@ class Donut extends VXCB.EventEmitter {
             seg.ID = this.data[i].id;
             seg.render();
             this.segments.push(seg);
+<<<<<<< .mine
             seg.on('hover', this.select);
+            seg.on('unhover', this.unhover);
+=======
+            seg.on('unhover', this.unselect);
+            seg.on('hover', this.select);
+>>>>>>> .r1374
             seg.on('click', this.click);
             last = next;
             idx += 1;
@@ -296,16 +317,45 @@ class Donut extends VXCB.EventEmitter {
     }
 
     click(idx) {
+        var self = this;
         var y = this.fire('click', idx, this.data[idx]);
         if (this.owner) {
-            var owner = <VXChartDonut>this.owner;
-
+            var owner = <TChartDonut>this.owner;
+            (<any>owner).__currrntSelected = idx;
             if (owner.onClicked != null && idx <= owner.values.length()) (V.tryAndCatch(() => { owner.onClicked(owner.values.toArray()[idx]); }));
         }
+<<<<<<< .mine
+        
+       
+=======
+        self.clickedSelect = idx;
+>>>>>>> .r1374
         return y;
     }
 
+<<<<<<< .mine
+    unhover(idx: number) {
+        var self = this;
+        if (this.owner) {
+            var owner = <TChartDonut>this.owner;
+
+            var rc = (<any>owner).__currrntSelected;
+        }
+=======
+    private clickedSelect : number;
+    unselect(idx: number) {
+        var self = this;
+        if (self.clickedSelect != null) self.select(self.clickedSelect);
+>>>>>>> .r1374
+    }
+
     select(idx: number) {
+<<<<<<< .mine
+        var self = this;
+=======
+        var self = this;
+        if (self.clickedSelect == null) self.clickedSelect = idx;
+>>>>>>> .r1374
         var oldidx: number = -1;
         var row, s, segment, _i, _len, _ref;
         _ref = this.segments;
@@ -319,9 +369,9 @@ class Donut extends VXCB.EventEmitter {
         row = this.data[idx];
         var y = this.setLabels(row.label, this.options.formatter(row.value, row));
         if (oldidx != idx && this.owner) {
-            var owner = <VXChartDonut>this.owner;
-            if (owner instanceof VXDBChartDonut && (<VXDBChartDonut>owner).Dataset != null){
-                (<VXDBChartDonut>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
+            var owner = <TChartDonut>this.owner;
+            if (owner instanceof TDBChartDonut && (<TDBChartDonut>owner).Dataset != null){
+                (<TDBChartDonut>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
             }
             if (owner.onSelectionchanged != null && idx <= owner.values.length()) {
                 (V.tryAndCatch(() => { owner.onSelectionchanged(owner.values.toArray()[idx]); }));
@@ -433,13 +483,30 @@ class DonutSegment extends VXCB.EventEmitter {
     }
 
     render() {
-        var _this = this;
+        var self = this;
         this.arc = this.drawDonutArc(this.hilight, this.color);
+<<<<<<< .mine
         return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor, function () {
-            return _this.fire('hover', _this.index);
-        }, function () {
-                return _this.fire('click', _this.index);
-            });
+            return self.fire('hover', self.index);
+        },
+        function () {
+            return self.fire('unhover', self.index);
+        },
+        function () {
+            return self.fire('click', self.index);
+        });
+=======
+        return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor,
+        function () {
+            return self.fire('hover', self.index);
+        },
+        function () {
+            return self.fire('unhover', self.index);
+        },
+        function () {
+            return self.fire('click', self.index);
+        });
+>>>>>>> .r1374
     }
 
     drawDonutArc(path, color) {
@@ -450,12 +517,16 @@ class DonutSegment extends VXCB.EventEmitter {
         });
     }
 
-    drawDonutSegment(path, fillColor, strokeColor, hoverFunction, clickFunction) {
+<<<<<<< .mine
+    drawDonutSegment(path, fillColor, strokeColor, hoverFunction, unhoverFunction,clickFunction) {
+=======
+    drawDonutSegment(path, fillColor, strokeColor, hoverFunction, unhoverFunction, clickFunction) {
+>>>>>>> .r1374
         return this.raphael.path(path).attr({
             fill: fillColor,
             stroke: strokeColor,
             'stroke-width': 3
-        }).hover(hoverFunction).click(clickFunction);
+        }).hover(hoverFunction, unhoverFunction).click(clickFunction);
     }
 
     select() {

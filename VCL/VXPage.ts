@@ -8,7 +8,7 @@ import VXCO = require("VCL/VXContainer");
 import VXD = require("VCL/VXDataset");
 
 
-export class VXPage extends VXCO.VXContainer {
+export class TPage extends VXCO.TContainer {
     constructor() {
         super(null, null);
         if (!(<any>this).__HTML__) V.Application.raiseException("Error in "+this.getClassName()+" - You can't instantiate TPage directly, use V.Application.loadPage ,V.Application.createPage or V.Application.navigateToPage");
@@ -25,7 +25,8 @@ export class VXPage extends VXCO.VXContainer {
             V.Application.raiseException("Cant find element '" + renderTo.attr('ID') + "' for page '" + this.getClassName() + "'");
 
         renderTo.empty();
-        renderTo.append($(this.jComponent))
+        //on some components (tpanel) the content of the control cab be under jContent
+        renderTo.append($((<any>this).jContent ? (<any>this).jContent : this.jComponent));
         super.draw(true);
         if (this.onShow != null) (V.tryAndCatch(() => { this.onShow(); }))
     }

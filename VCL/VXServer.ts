@@ -1,7 +1,7 @@
 /// <reference path="../VCL/Scripts/jquery.d.ts" />
 import V = require("VCL/VCL");
 import VO = require("VCL/VXObject");
-export class VXServer {
+export class TServer {
     private async: boolean;
     constructor(async?: boolean) {
         this.async = true;
@@ -37,40 +37,56 @@ export class VXServer {
         $.ajax(ajxParam);
     }
 
+    ping(okCallback? : ()=>void,errorCallback?: (textStatus: string) => any) {
+        var ajxParam: JQueryAjaxSettings = {
+            async: this.async, timeout: 1000, cache: false,
+            url: V.Application.serverURL, dataType: "json",
+            success: (data: any) => {
+                if (okCallback) okCallback();
+            },
+            error: (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => {
+                if (errorCallback != null) {
+                    var responseText = jqXHR.responseText;
+                    errorCallback(responseText)
+               }
+            }
+        }
+    }
+
     send(method: string, param, callback?: (data) => any, errorCallback?: (textStatus: string) => any, cacheTimeOut: number = -1): JQueryXHR {
         var data: string = encodeURIComponent(JSON.stringify(param));
 
         if (cacheTimeOut > 0) {
-           var key = crc32(method + "~" + data + "~");
-           var _data = cache.getItem(key);
-           if (_data != null && _data.method == method) {
-              callback(_data.data);
-              return;
-           }
-       }
+            var key = crc32(method + "~" + data + "~");
+            var _data = cache.getItem(key);
+            if (_data != null && _data.method == method) {
+                callback(_data.data);
+                return;
+            }
+        }
 
-       var ajxParam: JQueryAjaxSettings = {
-           async: this.async, timeout: 200000,
-           url: "backEnd", dataType: "json",
-           data: { PARAMS: data,METHOD: method},
-           success: (data: any) => {
-               if (cacheTimeOut > 0 ) {
-                   var myData: ServerCacheItem = new ServerCacheItem();
+        var ajxParam: JQueryAjaxSettings = {
+            async: this.async, timeout: 200000, cache: false,
+            url: V.Application.serverURL, dataType: "json",
+            data: { PARAMS: data, METHOD: method },
+            success: (data: any) => {
+                if (cacheTimeOut > 0) {
+                    var myData: ServerCacheItem = new ServerCacheItem();
 
-                   myData.data = data;
-                   myData.method = method;
-                   cache.setItem(key, myData, { expirationSliding: cacheTimeOut });
+                    myData.data = data;
+                    myData.method = method;
+                    cache.setItem(key, myData, { expirationSliding: cacheTimeOut });
+                }
+                if (callback != null) callback(data);
+            },
+            error: (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => {
+                if (errorCallback != null) {
+                    var responseText = jqXHR.responseText;
+                    errorCallback(responseText)
                }
-               if (callback!=null) callback(data);
-           },
-           error: (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => {
-               if (errorCallback != null) {
-                   var responseText = jqXHR.responseText;
-                   errorCallback(responseText)
-               }
-           }
-       };
-       return $.ajax(ajxParam);
+            }
+        };
+        return $.ajax(ajxParam);
     }
 
     callServerMethod(method: string, param, callback?: (data) => any, errorCallback?: (textStatus: string) => any) {
@@ -80,8 +96,8 @@ export class VXServer {
         }));
 
         var ajxParam: JQueryAjaxSettings = {
-            async: this.async, timeout: 200000,
-            url: "backEnd", dataType: "json",
+            async: this.async, timeout: 200000, cache: false,
+            url: V.Application.serverURL, dataType: "json",
             data: { PARAMS: data, METHOD: method },
             success: (data: any) => {
                 if (callback != null) callback(data);
@@ -91,7 +107,7 @@ export class VXServer {
                 if (errorCallback != null) {
                     errorCallback(responseText)
                } else {
-                   V.Application.raiseException(responseText);
+                    V.Application.raiseException(responseText);
                 }
             }
         };
@@ -321,7 +337,7 @@ function crc32(s/*, polynomial = 0x04C11DB7, initialValue = 0xFFFFFFFF, finalXOR
         initialValue = arguments.length < 3 ? 0xFFFFFFFF : arguments[2],
         finalXORValue = arguments.length < 4 ? 0xFFFFFFFF : arguments[3],
         crc = initialValue,
-        table = [],  j, c;
+        table = [], j, c;
 
     function reverse(x, n) {
         var b = 0;

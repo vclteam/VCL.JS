@@ -1,20 +1,17 @@
-/// <reference path="../VCL/Scripts/jquery.d.ts" />
 import VXCO = require("VCL/VXContainer");
 import V = require("VCL/VCL");
 import VXO = require("VCL/VXObject");
 
 
-export class VXComponent extends VXO.VXObject {
-    private __NAME__: string;
-
-    public owner: VXComponent;
+export class TComponent extends VXO.TObject {
+    public owner: TComponent;
     public jComponent: JQuery;
     public initialized: boolean = false;
 
     public onCreate() { }
     public onShow() { }
 
-    constructor(aOwner: VXComponent, renderTo?: string) {
+    constructor(aOwner: TComponent, renderTo?: string) {
         super();
         this.owner = aOwner;
 
@@ -27,22 +24,13 @@ export class VXComponent extends VXO.VXObject {
             throw "only container components can own components";
 
         }
-        if (aOwner != null) {
-            //set dataset of dbelements
-            if ((<VXCO.VXContainer>aOwner).Dataset != null) {
-                try {
-                    (<any>this).Dataset = (<VXCO.VXContainer>aOwner).Dataset;
-                } catch (err) { }
-
-            }
-        }
-
-
         if (renderTo == null) {
             this.jComponent = $("<div>");
-            this.__NAME__ = this.ID;
-            if (aOwner != null) aOwner.jComponent.append(this.jComponent);
-            this.jComponent[0].id = this.__NAME__;
+            if (aOwner != null) {
+                if ((<any>aOwner).jContent) (<any>aOwner).jContent.append(this.jComponent);
+                else aOwner.jComponent.append(this.jComponent);
+            }
+            this.jComponent[0].id = this.ID;
         } else {
             var comp: JQuery;
             comp = $(aOwner.jComponent).find("[id=" + renderTo + "]");
@@ -62,17 +50,44 @@ export class VXComponent extends VXO.VXObject {
                 throw "Error on element:'" + renderTo + "' only container element can have child elmenet.On page " + aOwner.getClassName();
             }
             this.jComponent = comp;
-            this.__NAME__ = aOwner.ID + renderTo;
-            this.jComponent[0].id = this.__NAME__;
+            this.jComponent[0].id = this.ID;
+            this.jComponent.attr("DATA-ID", renderTo);
         }
-        if (aOwner != null) (<VXCO.VXContainer>aOwner).addComponent(this);
+        if (aOwner != null) (<any>aOwner).addComponent(this);
     }
 
     public destroy() {
         if (this.owner != null) {
-            var a = (<VXCO.VXContainer>this.owner).components.remove(this);
+            var a = (<VXCO.TContainer>this.owner).components.remove(this);
         }
         this.jComponent.remove();
+    }
+
+    private __clickover;
+    public popover(popupContainer: VXCO.TContainer, popoverplacement: V.PopoverPlacement = V.PopoverPlacement.Bottom, title?: string, 
+        autoClose: number = 0) {
+            this.__clickover = this.jComponent.data('clickover');
+            if (!this.__clickover) {
+                this.jComponent.clickover({
+                    html: true, content: popupContainer.jComponent, title: title,
+                    placement: popoverplacement != null ? V.PopoverPlacement[popoverplacement].toLocaleLowerCase() : "right",
+                    auto_close: autoClose
+                    
+                });
+                this.__clickover = this.jComponent.data('clickover');
+                this.__clickover['show']();
+            }
+            if (popupContainer.Visible) {
+                popupContainer.Visible = false;
+                this.__clickover.$tip.hide();
+                this.__clickover.$element.trigger('hidden');
+            } else {
+                popupContainer.Visible = true;
+                this.__clickover.$tip.show();
+                this.__clickover.$element.trigger('shown');
+                this.__clickover.resetPosition();
+
+            } 
     }
 
     private _fittowidth: boolean = false;
@@ -242,7 +257,7 @@ export class VXComponent extends VXO.VXObject {
     * Specifies the width of the component in pixels.
     */
     public get Width(): number { return this.jComponent.width(); }
-    public set Width(pixel: number) { this.jComponent.width(pixel); }
+    public set Width(pixel: number) { if (pixel != this.Width) this.jComponent.width(pixel); }
     public animateResize(duration: number = 400, widthPixel?: number, heightPixel?: number, completeCallBack?: () => void) {
         if (!widthPixel && !heightPixel) return;
         if (widthPixel && heightPixel) this.jComponent.animate({ width: widthPixel, height: heightPixel }, duration, completeCallBack);
@@ -254,7 +269,7 @@ export class VXComponent extends VXO.VXObject {
     * Specifies the height of the component in pixels.
     */
     public get Height(): number { return parseFloat(this.jComponent.css('height')); }
-    public set Height(pixel: number) { this.jComponent.css('height', pixel); }
+    public set Height(pixel: number) { if (pixel != this.Height) this.jComponent.css('height', pixel); }
 
     /**
     * Makes the control invisible.
@@ -283,11 +298,32 @@ export class VXComponent extends VXO.VXObject {
         this.jComponent.focus();
     }
 
+    private __drawdelayed = false;
+    private __drawdelayedType: boolean = false;
+    public drawDelayed(reCreate: boolean) {
+        if (reCreate) this.__drawdelayedType = true;
+        if (this.__drawdelayed) return; //alread in
+        this.__drawdelayed = true;
+        setTimeout(() => {
+            try {
+                if (this.__drawdelayed)
+                    this.draw(this.__drawdelayedType);
+            } finally {
+                this.__drawdelayedType = false;
+                this.__drawdelayed = false;
+            }
+        }, 50);
+    }
 
     public draw(reCreate: boolean) {
         if (!this.jComponent) return;
+        if (reCreate) this.__drawdelayed = false;
+
         if (this.Visible) this.jComponent.show();
         else this.jComponent.hide();
+
+        if (reCreate || !this.initialized) this.create();
+        this.initialized = true;
     }
 
     public show() {
@@ -310,7 +346,7 @@ export class VXComponent extends VXO.VXObject {
 }
 
 
-export class VXControl extends VXComponent {
+export class TControl extends TComponent {
     public onClicked: () => void;
     public create() {
         this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
@@ -318,7 +354,187 @@ export class VXControl extends VXComponent {
     }
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        super.draw(reCreate);
     }
 }
+
+
+var Clickover = function (element, options) {
+    // local init
+    this.cinit('clickover', element, options);
+    //this.clickery();
+}
+
+Clickover.prototype = $.extend({}, $.fn.popover.Constructor.prototype, {
+
+    constructor: Clickover
+
+       , cinit: function (type, element, options) {
+        this.attr = {};
+
+        // choose random attrs instead of timestamp ones
+        this.attr.me = ((Math.random() * 10) + "").replace(/\D/g, '');
+        this.attr.click_event_ns = "click." + this.attr.me + " touchstart." + this.attr.me;
+
+        if (!options) options = {};
+
+        options.trigger = 'manual';
+
+        // call parent
+        this.init(type, element, options);
+
+        // setup our own handlers
+        //this.$element.on('click', this.options.selector, $.proxy(this.clickery, this));
+
+        // soon add click hanlder to body to close this element
+        // will need custom handler inside here
+
+    }
+       , clickery: function (e) {
+        // clickery isn't only run by event handlers can be called by timeout or manually
+        // only run our click handler and  
+        // need to stop progration or body click handler would fire right away
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // set popover's tip 'id' for greater control of rendering or css rules
+        this.options.tip_id && this.tip().attr('id', this.options.tip_id);
+
+        // add a custom class
+        this.options.class_name && this.tip().addClass(this.options.class_name);
+
+        // we could override this to provide show and hide hooks 
+        //this[this.isShown() ? 'hide' : 'show']();
+
+        // if shown add global click closer
+        if (this.isShown()) {
+            this.$element.css('dispaly', 'block').addClass('in');
+            var that = this;
+
+            // close on global request, exclude clicks inside clickover
+            this.options.global_close &&
+            $('body').on(this.attr.click_event_ns, function (e) {
+                if (!that.tip().has(e.target).length) { that.clickery(); }
+            });
+
+            this.options.esc_close && $(document).bind('keyup.clickery', function (e) {
+                if (e.keyCode == 27) { that.clickery(); }
+                return;
+            });
+
+            // first check for others that might be open
+            // wanted to use 'click' but might accidently trigger other custom click handlers
+            // on clickover elements 
+            !this.options.allow_multiple &&
+            $('[data-clickover-open=1]').each(function () {
+                $(this).data('clickover') && $(this).data('clickover').clickery();
+            });
+
+            // help us track elements w/ open clickovers using html5
+            this.$element.attr('data-clickover-open', 1);
+
+            // if element has close button then make that work, like to
+            // add option close_selector
+            this.tip().on('click', '[data-dismiss="clickover"]', $.proxy(this.clickery, this));
+
+            // trigger timeout hide
+            if (this.options.auto_close && this.options.auto_close > 0) {
+                this.attr.tid = setTimeout($.proxy(this.clickery, this), this.options.auto_close);
+            }
+
+            // provide callback hooks for post shown event
+            typeof this.options.onShown == 'function' && this.options.onShown.call(this);
+            this.$element.trigger('shown');
+        }
+        else {
+            this.$element.css('dispaly', 'none').removeClass('in');
+            this.$element.removeAttr('data-clickover-open');
+            this.options.esc_close && $(document).unbind('keyup.clickery');
+            $('body').off(this.attr.click_event_ns);
+
+            if (typeof this.attr.tid == "number") {
+                clearTimeout(this.attr.tid);
+                delete this.attr.tid;
+            }
+
+            this.$element.trigger('hidden');
+        }
+    }
+       , isShown: function () {
+        return this.tip().hasClass('in');
+    }, resetPosition: function () {
+        var $tip
+            , inside
+            , pos
+            , actualWidth
+            , actualHeight
+            , placement
+            , tp
+
+      if (this.hasContent() && this.enabled) {
+            $tip = this.tip()
+
+        placement = typeof this.options.placement == 'function' ?
+            this.options.placement.call(this, $tip[0], this.$element[0]) :
+            this.options.placement
+
+        inside = /in/.test(placement)
+
+        pos = this.getPosition(inside)
+
+        actualWidth = $tip[0].offsetWidth
+        actualHeight = $tip[0].offsetHeight
+
+        switch (inside ? placement.split(' ')[1] : placement) {
+                case 'bottom':
+                    tp = { top: pos.top + pos.height, left: pos.left + pos.width / 2 - actualWidth / 2 }
+            break
+          case 'top':
+                    tp = { top: pos.top - actualHeight, left: pos.left + pos.width / 2 - actualWidth / 2 }
+            break
+          case 'left':
+                    tp = { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth }
+            break
+          case 'right':
+                    tp = { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width }
+            break
+        }
+
+            $tip.css(tp)
+      }
+    }
+      
+})
+
+  /* plugin definition */
+  /* stolen from bootstrap tooltip.js */
+  $.fn.clickover = function (option) {
+    return this.each(function () {
+        var $this = $(this)
+            , data = $this.data('clickover')
+            , options = typeof option == 'object' && option
+
+      if (!data) $this.data('clickover', (data = new Clickover(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  $.fn.clickover.Constructor = Clickover
+
+  // these defaults are passed directly to parent classes
+  $.fn.clickover.defaults = $.extend({}, $.fn.popover.defaults, {
+    trigger: 'manual',
+    auto_close: 0, /* ms to auto close clickover, 0 means none */
+    global_close: 1, /* allow close when clicked away from clickover */
+    esc_close: 1, /* allow clickover to close when esc key is pressed */
+    onShown: null,  /* function to be run once clickover has been shown */
+    onHidden: null,  /* function to be run once clickover has been hidden */
+    width: null, /* number is px (don't add px), null or 0 - don't set anything */
+    height: null, /* number is px (don't add px), null or 0 - don't set anything */
+    tip_id: null,  /* id of popover container */
+    class_name: 'clickover', /* default class name in addition to other classes */
+    allow_multiple: 0 /* enable to allow for multiple clickovers to be open at the same time */
+})
+

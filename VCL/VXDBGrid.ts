@@ -5,15 +5,15 @@ import VXD = require("VCL/VXDataset");
 import VXO = require("VCL/VXObject");
 import VXU = require("VCL/VXUtils");
 
-export class VXDBGrid extends VXC.VXComponent {
-    public needrecreate: boolean = false;
-    private _dataset: VXD.VXDataset;
-    private selectedRecordId: number;
+export class TDBGrid extends VXC.TComponent {
     public onRowClicked: () => void;
-
     public onGetRowStyle: (record: any) => V.GridRowStyle;
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    private needrecreate: boolean = false;
+    private _dataset: VXD.TDataset;
+    private selectedRecordId: number;
+
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         (<any>this)._fittowidth = true;
     }
@@ -28,7 +28,7 @@ export class VXDBGrid extends VXC.VXComponent {
     public set ShowSelectedRecord(val: boolean) {
         if (val != this._striped) {
             this._showselectedrecord = val;
-            this.needrecreate = true;
+            this.drawDelayed(true);
         }
     }
 
@@ -42,10 +42,31 @@ export class VXDBGrid extends VXC.VXComponent {
     public set SelectedRecordStyle(val: V.SelectedRowStyle) {
         if (val != this._selectedrecordstyle) {
             this._selectedrecordstyle = val;
-            this.needrecreate = true;
+            this.drawDelayed(true);
         }
     }
 
+    private _sortcolumn: TBGridColumn = null;
+    public get SortColumn(): TBGridColumn {
+        return this._sortcolumn;
+    }
+    public set SortColumn(val: TBGridColumn) {
+        if (val != this._sortcolumn) {
+            this._sortcolumn = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _sortcolumnOrder: V.SortColumnOrder = V.SortColumnOrder.Ascending;
+    public get SortColumnOrder(): V.SortColumnOrder {
+        return this._sortcolumnOrder;
+    }
+    public set SortColumnOrder(val: V.SortColumnOrder) {
+        if (val != this._sortcolumnOrder) {
+            this._sortcolumnOrder = val;
+            this.drawDelayed(true);
+        }
+    }
 
 
     private _striped: boolean = false;
@@ -58,7 +79,65 @@ export class VXDBGrid extends VXC.VXComponent {
     public set Striped(val: boolean) {
         if (val != this._striped) {
             this._striped = val;
-            this.needrecreate = true;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _pagerVisible: boolean = true;
+    public get PagerVisible(): boolean {
+        return this._pagerVisible;
+    }
+    public set PagerVisible(val: boolean) {
+        if (val != this._pagerVisible) {
+            this._pagerVisible = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _footerVisible: boolean = true;
+    public get FooterVisible(): boolean {
+        return this._footerVisible;
+    }
+    public set FooterVisible(val: boolean) {
+        if (val != this._footerVisible) {
+            this._footerVisible = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _showvertlines: boolean = true;
+    public get ShowVertLines(): boolean {
+        return this._showvertlines;
+    }
+    public set ShowVertLines(val: boolean) {
+        if (val != this._showvertlines) {
+            this._showvertlines = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _showhorzlines: boolean = true;
+    public get ShowHorzLines(): boolean {
+        return this._showhorzlines;
+    }
+    public set ShowHorzLines(val: boolean) {
+        if (val != this._showhorzlines) {
+            this._showhorzlines = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+
+    private _headerVisible: boolean = true;
+    public get HeaderVisible(): boolean {
+        return this._headerVisible;
+    }
+    public set HeaderVisible(val: boolean) {
+        if (val != this._headerVisible) {
+            this._headerVisible = val;
+            this.drawDelayed(true);
         }
     }
 
@@ -73,7 +152,7 @@ export class VXDBGrid extends VXC.VXComponent {
     public set Bordered(val: boolean) {
         if (val != this._bordered) {
             this._bordered = val;
-            this.needrecreate = true;
+            this.drawDelayed(true);
         }
     }
 
@@ -88,7 +167,7 @@ export class VXDBGrid extends VXC.VXComponent {
     public set Condensed(val: boolean) {
         if (val != this._condensed) {
             this._condensed = val;
-            this.needrecreate = true;
+            this.drawDelayed(true);
         }
     }
 
@@ -100,23 +179,27 @@ export class VXDBGrid extends VXC.VXComponent {
     public set ShowSelectCheckbox(val: boolean) {
         if (val != this._showselectcheckbox) {
             this._showselectcheckbox = val;
-            this.needrecreate = true;
+            this.drawDelayed(true);
         }
     }
 
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
-    public set Dataset(val: VXD.VXDataset) {
+
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (this._dataset) {
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this);
+                
             }
             this._dataset = val;
             if (this._dataset) {
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => { this.refreshRecord(); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.refreshRecord(); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { this.selectionChanged(); });
             }
         
         }
@@ -131,14 +214,15 @@ export class VXDBGrid extends VXC.VXComponent {
         if (val != this._pagesize) {
             this._pagesize = Math.floor(val);
             if (this._pagesize < 1) this._pagesize = 1;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-
+    
+    private jGrid: JQuery;
     public create() {
         this.jComponent.empty(); //clear all subcomponents
-        var dataSource = new VXDBGridDataSource(this);
+        var dataSource = new TDBGridDataSource(this);
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'table', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass("table datagrid");
         this.jComponent.css('table-layout', 'fixed').css('cursor', 'pointer');
@@ -146,24 +230,40 @@ export class VXDBGrid extends VXC.VXComponent {
         if (this.Striped) this.jComponent.addClass("table-striped");
         if (this.Bordered) this.jComponent.addClass("table-bordered ");
 
-
-
         this.jComponent.append($("<thead></thead>"));
         this.jComponent.append($('<tfoot><tr><th>' +
             '<div class="datagrid-footer-right" style="display:none;>' +
             '<div class="grid-pager"><button type="button" class="btn grid-prevpage"><i class="icon-chevron-left"></i></button>' +
             '<button type="button" class="btn grid-nextpage" style="margin-left:10px"><i class="icon-chevron-right"></i></button>' +
             '</div></th></tr></tfoot>'));
-        this.jComponent.datagrid({
-            dataSource: dataSource, stretchHeight: false,
-            dataOptions: { pageSize: this.PageSize }
+        this.jGrid = this.jComponent.datagrid({
+            dataSource: dataSource, stretchHeight: false, 
+            dataOptions: {
+                pageSize: this.PageSize, sortProperty: this.SortColumn ? this.SortColumn.ID : null,
+                sortDirection: this.SortColumnOrder == V.SortColumnOrder.Ascending ? 'asc' : 'desc' }
         })
         this.jComponent.css('display', 'inline-table');
+        if (!this.FooterVisible) this.jComponent.find('tfoot').hide();
+        if (!this.HeaderVisible) this.jComponent.find('thead').hide();;
+        if (!this.PagerVisible) this.jComponent.find('.datagrid-footer-right').hide();
         super.create();
     }
 
+    private selectionChanged() {
+        if (!this.Dataset) return;
+        if (!this.Dataset.Active) return;
+        if (this.Dataset.Recno == -1) return;
+        if (this.selectedRecordId != this.Dataset.recordset[this.Dataset.Recno].___RECORDID___) {
+            this.selectedRecordId = this.Dataset.recordset[this.Dataset.Recno].___RECORDID___;
+            this.jComponent.datagrid("renderData")
+        }
+
+    }
+
+
     private refreshRecord() {
-        var self = this;
+        this.jComponent.datagrid("renderData")
+        /*var self = this;
         if (this.Dataset == null) return;
         if (!this.Dataset.Active) return;
         this.columns.forEach((columnItem: VXDBGridColumn) => {
@@ -174,13 +274,13 @@ export class VXDBGrid extends VXC.VXComponent {
 
             $('.' + columnItem.ID).filter('*[data-record="' + self.Dataset.Recno + '"]').text(StringCellVal);
             return true;
-        });
+        });*/
     }
 
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || this.needrecreate) this.create();
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
         if (this.Dataset != null) {
             this.selectedRecordId = this.Dataset.getRecordIndex();
         }
@@ -189,9 +289,9 @@ export class VXDBGrid extends VXC.VXComponent {
         this.needrecreate = false;
     }
 
-    public columns = new VXO.VXCollection<V.TDBGridColumn>();
+    public columns = new VXO.TCollection<V.TDBGridColumn>();
     public createColumn(fieldname?: string, header?: string): V.TDBGridColumn {
-        var col: VXDBGridColumn = new VXDBGridColumn();
+        var col: TBGridColumn = new TBGridColumn();
         col.grid = this;
         this.columns.add(col);
 
@@ -203,10 +303,11 @@ export class VXDBGrid extends VXC.VXComponent {
 
 }
 
-export class VXDBGridColumn extends VXO.VXCollectionItem {
-    public grid: VXDBGrid;
+export class TBGridColumn extends VXO.TCollectionItem {
+    public grid: TDBGrid;
     public onClicked: () => void;
     public onGetValue: (record: any) => any;
+    public onGetIcon: (record: any) => V.Icon;
 
     private _dateformat: string = "";
     public get DateFormat(): string {
@@ -215,7 +316,7 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
     public set DateFormat(val: string) {
         if (val != this._fieldname) {
             this._dateformat = val;
-            this.grid.needrecreate = true;
+            (<any>this.grid).needrecreate = true;
         }
     }
 
@@ -226,7 +327,7 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
     public set Currency(val: boolean) {
         if (val != this._currency) {
             this._currency = val;
-            this.grid.needrecreate = true;
+            (<any>this.grid).needrecreate = true;
         }
     }
 
@@ -238,7 +339,7 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
     public set Width(val: number) {
         if (val != this._width) {
             this._width = val;
-            this.grid.needrecreate = true;
+            (<any>this.grid).needrecreate = true;
         }
     }
 
@@ -251,7 +352,7 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
         if (val == null || val.toUpperCase() != this._fieldname) {
             if (val == null) this._fieldname = '';
             else this._fieldname = val.toUpperCase();
-            this.grid.needrecreate = true;
+            (<any>this.grid).needrecreate = true;
         }
     }
 
@@ -262,7 +363,7 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
     public set TextAlgnment(val: V.TextAlignment) {
         if (val != this._textaligment) {
             this._textaligment = val;
-            this.grid.needrecreate = true;
+            (<any>this.grid).needrecreate = true;
         }
     }
 
@@ -273,7 +374,7 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
     public set Header(val: string) {
         if (val != this._header) {
             this._header = val;
-            this.grid.needrecreate = true;
+            (<any>this.grid).needrecreate = true;
         }
     }
 
@@ -289,8 +390,8 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
         if (value == null) return "";
 
         if (value.getMonth) {
-            if (this.DateFormat != "" && this.DateFormat != null) return V.Application.FormatDateTime(value, this.DateFormat);
-            if (V.Application.DateFormat != "" && V.Application.DateFormat != null) return V.Application.FormatDateTime(value, V.Application.DateFormat);
+            if (this.DateFormat != "" && this.DateFormat != null) return V.Application.formatDateTime(value, this.DateFormat);
+            if (V.Application.DateFormat != "" && V.Application.DateFormat != null) return V.Application.formatDateTime(value, V.Application.DateFormat);
             return value;
         }
         else if (!isNaN(parseFloat(value)) && isFinite(value)) { //number
@@ -301,11 +402,11 @@ export class VXDBGridColumn extends VXO.VXCollectionItem {
     }
 }
 
-class VXDBGridDataSource {
-    grid: VXDBGrid;
-    self: VXDBGridDataSource;
+class TDBGridDataSource {
+    grid: TDBGrid;
+    self: TDBGridDataSource;
      _data = new Array();
-    constructor(grid: VXDBGrid) {
+    constructor(grid: TDBGrid) {
         this.grid = grid;
         this.self = this;
     }
@@ -332,9 +433,13 @@ class VXDBGridDataSource {
             return;
         }
 
+        var columnname = "";
+        if (options.sortProperty) {
+            columnname = this.self.grid.columns.FindItemByID(options.sortProperty).FieldName;
+        }
         this._data = this.self.grid.Dataset.getRecords(options.pageIndex * options.pageSize,
             (options.pageIndex + 1) * options.pageSize - 1,
-            options.sortDirection, options.sortProperty);
+            options.sortDirection, columnname);
 
         var mappedData: any[] = new Array();
         var _grid = this.grid;
@@ -351,10 +456,15 @@ class VXDBGridDataSource {
         this.self.grid.columns.forEach((columnItem: V.TDBGridColumn) => {
             $.each(this._data, function (rowIndex, item) {
                 var StringCellVal;
+                var icon: V.Icon = null;
                 if (columnItem.onGetValue != null) {                   
                     StringCellVal = columnItem.formatValue(columnItem.onGetValue(item));
                 } else StringCellVal = columnItem.formatValue(self._data[rowIndex][columnItem.FieldName]);
                 var cellClass = columnItem.ID;
+                if (columnItem.onGetIcon != null) {
+                    var icon = columnItem.onGetIcon(item);
+                    if (icon) { cellClass = cellClass + " " + V.iconEnumToBootstrapStyle(<any>icon) };
+                }
                 if (columnItem.onClicked != null) {
                     var cellStr = "<a style='cursor: pointer;white-space:nowrap' data-record='" + self._data[rowIndex]["___RECORDID___"] + "'class='" + cellClass + "'>" + StringCellVal + "</a>";
                     mappedData[rowIndex][columnItem.ID] = cellStr;
@@ -377,20 +487,18 @@ class VXDBGridDataSource {
 
         //bind the clicked eventes
         _grid.jComponent.find("." + _grid.ID + "-row").click(function (item) {
-            var recNum: number = parseInt($(this).attr('data-record'));
-            _grid.Dataset.Recno = recNum;
-            var recId = _grid.Dataset.getRecordIndex();
-        
+            var recId: number = parseInt($(this).attr('data-record'));
             (<any>_grid).selectedRecordId = recId;
+            _grid.Dataset.Recno = _grid.Dataset.getRecordIndexRecNo(recId);
             if (_grid.ShowSelectedRecord) self.refreshSelection();
             if (_grid.onRowClicked) _grid.onRowClicked();
         });
-        _grid.columns.forEach((columnItem: VXDBGridColumn) => {
+        _grid.columns.forEach((columnItem: TBGridColumn) => {
             if (columnItem.onClicked != null) {
                 columnItem.grid.jComponent.find("." + columnItem.ID).click(function (item) {
-                    if (columnItem.onClicked()) {
-                        var recNum: number = parseInt($(this).attr('data-record'));
-                        columnItem.grid.Dataset.Recno = recNum;
+                    if (columnItem.onClicked) {
+                        var recId: number = parseInt($(this).attr('data-record'));
+                        columnItem.grid.Dataset.Recno = _grid.Dataset.getRecordIndexRecNo(recId);;
                         (<any>_grid).selectedRecordId = (<any>_grid).Dataset.getRecordIndex()
                         columnItem.onClicked();
                     }
@@ -400,13 +508,9 @@ class VXDBGridDataSource {
         });
         _grid.jComponent.find(".___CHECKED___").change(function (item) {
             if (_grid.Dataset != null) {
-                var recNum: number = parseInt($(this).attr('data-record'));
-
-                _grid.Dataset.Recno = recNum;
-                if ($(this).is(':checked')) {
-                    _grid.Dataset.checkRecord();
-                } else {
-                    _grid.Dataset.uncheckRecord();
+                if ($(this).attr('data-record')) {
+                    var recNum: number = parseInt($(this).attr('data-record'));
+                    _grid.Dataset.recordset[recNum]['___CHECKED___'] = $(this).is(':checked');
                 }
             }
         });
@@ -420,7 +524,7 @@ class VXDBGridDataSource {
                 property: "___CHECKED___", label: "*", sortable: false, width: 15, align: "c"
             });
         }
-        this.grid.columns.forEach((item: VXDBGridColumn) => {
+        this.grid.columns.forEach((item: TBGridColumn) => {
             var label: string = item.Header;
             if (label == "" || label == null) label = item.FieldName;
             var align: string;
@@ -548,13 +652,13 @@ Datagrid.prototype = {
     },
 
     updatePageButtons: function (data) {
-        if (data.page === 1) {
+        if (data.page === 1 || data.pages == 0) {
             this.$prevpagebtn.attr('disabled', 'disabled');
         } else {
             this.$prevpagebtn.removeAttr('disabled');
         }
 
-        if (data.page === data.pages) {
+        if (data.page >= data.pages || data.pages == 0) {
             this.$nextpagebtn.attr('disabled', 'disabled');
         } else {
             this.$nextpagebtn.removeAttr('disabled');
@@ -563,10 +667,12 @@ Datagrid.prototype = {
 
     renderData: function () {
         var self = this;
-        var _grid : VXDBGrid = this.options.dataSource.grid;
+        var _grid : TDBGrid = this.options.dataSource.grid;
 
         this.$tbody.html(this.placeholderRowHTML(this.options.loadingHTML));
 
+        var trg: JQuery = this.$thead.find("th[data-property='" + this.options.dataOptions.sortProperty + "']");
+        if (trg.length > 0) this.updateColumns(trg, this.options.dataOptions.sortDirection);
         this.options.dataSource.data(this.options.dataOptions, function (data) {
             var itemdesc = (data.count === 1) ? self.options.itemText : self.options.itemsText;
             var rowHTML = '';
@@ -591,14 +697,24 @@ Datagrid.prototype = {
                 var LineHTML: string = "";
                 //checked
                 $.each(self.columns, function (index, column) {
+                    var cls = _grid.ShowVertLines || index == 0 ? "" : "border-left :  none;";
                     if (column.property == '___CHECKED___') {
-                        LineHTML += '<td style="text-align:center;overflow:hidden">  <input type="checkbox" class="___CHECKED___" ';
-                        if (row.___CHECKED___) LineHTML += 'checked';
+                        cls += _grid.ShowHorzLines ? "" : "border-top: none;";
+                        cls += "overflow:hidden;";
+                        if (column.width > 0) cls += ' width:' + column.width + "px;";
+                        cls += "text-align:center;";
+                        LineHTML += '<td style="'+cls+'">  <input type="checkbox" class="___CHECKED___" ';
+                        if (row.___CHECKED___) {LineHTML += 'checked';}
                         LineHTML += " data-record=" + row.___RECORDID___ + '"/></td>';
                     } else {
-                        if (column.align == 'l') LineHTML += '<td style="text-align: left;overflow:hidden">' + row[column.property] + '</td>';
-                        else if (column.align == 'r') LineHTML += '<td style="text-align:right;overflow:hidden">' + row[column.property] + '</td>';
-                        else if (column.align == 'c') LineHTML += '<td style="text-align:center;overflow:hidden">' + row[column.property] + '</td>';
+                        cls += _grid.ShowHorzLines ? "" : "border-top: none;";
+                        cls += "overflow:hidden;";
+                        if (column.align == 'l') cls += "text-align: left;";
+                        else if (column.align == 'r') cls += "text-align:right;";
+                        else if (column.align == 'c') cls += "text-align:center;";
+                        LineHTML += '<td style="' + cls;
+                        if (column.width > 0) LineHTML += ' width:' + column.width + "px;";
+                        LineHTML += '">' + row[column.property]+'</td>';
                     }
                 });
                 //color class
@@ -618,6 +734,7 @@ Datagrid.prototype = {
                 $.each(self.columns, function (index, column) {
                     var style: string = "border-right:0px;";
                     if (row > 0) style = "border-top-color:transparent;";
+                    style += _grid.ShowVertLines || index == 0 ? "" : "border-left :  none;";
                     rowHTML += '<td style="' + style + '">&nbsp;</td>';
                 });
                 rowHTML += '</tr>';
@@ -654,6 +771,18 @@ Datagrid.prototype = {
         } else {
             this.options.dataOptions.sortDirection = 'asc';
             this.options.dataOptions.sortProperty = property;
+        }
+
+        var _grid: TDBGrid = this.options.dataSource.grid;
+        if (_grid) {
+            if (this.options.dataOptions.sortDirection == "asc") _grid.SortColumnOrder = V.SortColumnOrder.Ascending;
+            else _grid.SortColumnOrder = V.SortColumnOrder.Descending;
+            _grid.columns.forEach((column) => {
+                if (column.ID == this.options.dataOptions.sortProperty) {
+                    _grid.SortColumn = column;
+                }
+            })
+            
         }
 
         this.options.dataOptions.pageIndex = 0;

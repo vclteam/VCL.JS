@@ -5,7 +5,7 @@ import VXU = require("VCL/VXUtils");
 import VXI = require("VCL/VXInputBase");
 import VXD = require("VCL/VXDataset");
 
-export class VXDateInputBase extends VXI.VXEditorBase {
+export class TDateInputBase extends VXI.TEditorBase {
     private _dateformat: string;
     public get DateFormat(): string {
         return this._dateformat;
@@ -13,7 +13,7 @@ export class VXDateInputBase extends VXI.VXEditorBase {
     public set DateFormat(val: string) {
         if (val != this._dateformat) {
             this._dateformat = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -24,7 +24,7 @@ export class VXDateInputBase extends VXI.VXEditorBase {
     public set CalendarType(val: V.CalendarType) {
         if (val != this._calendartype) {
             this._calendartype = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -67,9 +67,10 @@ export class VXDateInputBase extends VXI.VXEditorBase {
             this.jButton.attr("disabled", "disabled");
         }
         var df = this.DateFormat == null ? V.Application.DateFormat : this.DateFormat;
-        this.jComponent.datepicker({ format: df, autoclose: this.AutoClose, minViewMode: this.CalendarType == V.CalendarType.Daily ? 0 : 1 }).on('changeDate', function (ev) {
-            this.Date = ev.date;
-        });
+        this.jComponent.datepicker({ format: df, autoclose: this.AutoClose, minViewMode: this.CalendarType == V.CalendarType.Daily ? 0 : 1 });
+        //.on('changeDate', function (ev) {
+        //    this.Date = ev.data; //change 0.95
+        //});
 
         super.create();
     }
@@ -79,53 +80,47 @@ export class VXDateInputBase extends VXI.VXEditorBase {
     }
 }
 
-export class VXDateInput extends VXDateInputBase {
-    private _date: Date;
+export class TDateInput extends TDateInputBase {
+    private _date: Date = new Date();
     public get Date(): Date {
         return this._date;
     }
     public set Date(val: Date) {
         if (val != this._date) {
             this._date = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
-    }
-
-
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
-        super(aOwner, renderTo);
     }
 
     public create() {
         super.create();
         var self = this;
-        this.jEdit.change(() => {
-            var dt: any = (<any> this.jComponent[0]).Date;
-            this.Date = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
-            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
+        this.jComponent.on('changeDate', function (ev: any) {
+            var dt: any = ev.date;
+            self.Date = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
+            if (this.onChanged != null) (V.tryAndCatch(() => { self.onChanged(self); }))
         });
     }
 
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
 
         this.jComponent.datepicker("setDate", this.Date);
         this.setEditorWidth();
     }
 }
 
-export class VXDBDateInput extends VXDateInputBase {
-    
+export class TDBDateInput extends TDateInputBase {
+
     public get Date(): Date {
         return this.DateValue;
     }
     public set Date(val: Date) {
         if (val != this.DateValue) {
             this.DateValue = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -148,7 +143,7 @@ export class VXDBDateInput extends VXDateInputBase {
 
         return this.Dataset.getFieldValue(this._datafield);
     }
-    private set DateValue(val: any) {
+    private set DateValue(val: Date) {
         if (this.Dataset == null || this.Dataset.Active == false) return;
         if (this.DataField == null || this.DataField.toString() == "") return;
 
@@ -156,27 +151,27 @@ export class VXDBDateInput extends VXDateInputBase {
         this.draw(false);
     }
 
-    
 
-    private _dataset: VXD.VXDataset;
+
+    private _dataset: VXD.TDataset;
     /*
       * Specifies the dataset that contains the field it represents.
       */
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
-    public set Dataset(val: VXD.VXDataset) {
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (this._dataset != null) {
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
             }
             this._dataset = val;
             if (this._dataset != null) {
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(false); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => { this.validateEnabled(); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.validateEnabled(); });
             }
 
         }
@@ -189,12 +184,12 @@ export class VXDBDateInput extends VXDateInputBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
+        if (!this.parentInitialized()) return;
+
         if (reCreate || !this.initialized) {
             this.validateEnabled();
-            this.create();
+            super.draw(reCreate);
         }
-        this.initialized = true;
         this.jComponent.datepicker("setDate", this.Date);
         this.setEditorWidth();
     }
@@ -202,8 +197,8 @@ export class VXDBDateInput extends VXDateInputBase {
     public create() {
         super.create();
         var self = this;
-        this.jEdit.off("change").change(() => {
-            var dt: any = (<any> this.jComponent[0]).Date;
+        this.jComponent.on('changeDate', function (ev: any) {
+            var dt: any = ev.date;
             this.DateValue = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
             if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
@@ -1078,7 +1073,7 @@ var DPGlobal: any = {
             return UTCDate(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0);
         }
         var parts = date && date.match(this.nonpunctuation) || [],
-            date = new Date(),
+            date: any = new Date(),
             parsed = {},
             setters_order = ['yyyy', 'yy', 'M', 'MM', 'm', 'mm', 'd', 'dd'],
             setters_map = {
@@ -1154,14 +1149,14 @@ var DPGlobal: any = {
         };
         val.dd = (val.d < 10 ? '0' : '') + val.d;
         val.mm = (val.m < 10 ? '0' : '') + val.m;
-        var date = [];
+        var date1 = [];
         var seps: any = $.extend([], format.separators);
         for (var i = 0, cnt = format.parts.length; i < cnt; i++) {
             if (seps.length)
-                date.push(seps.shift());
-            date.push(val[format.parts[i]]);
+                date1.push(seps.shift());
+            date1.push(val[format.parts[i]]);
         }
-        return date.join('');
+        return date1.join('');
     },
     headTemplate: '<thead>' + '<tr>' + '<th class="prev"><i class="icon-arrow-left"/></th>' + '<th colspan="5" class="switch"></th>' +
     '<th class="next"><i class="icon-arrow-right"/></th>' + '</tr>' + '</thead>',

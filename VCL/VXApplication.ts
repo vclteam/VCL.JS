@@ -8,13 +8,14 @@ import VXM = require("VCL/VXMenu");
 import VXServer = require("VCL/VXServer");
 import VXDS = require("VCL/VXServer");
 
-export class VXApplication {
-    private static _instance: VXApplication;
+declare var bootbox;
+export class TApplication {
+    private static _instance: TApplication;
     private sammy: any;
-    public navbaritems = new VXO.VXCollection<VXNavbarItem>();
+    public navbaritems = new VXO.TCollection<TNavbarItem>();
 
     public initialize() {
-        var self: VXApplication = this;
+        var self: TApplication = this;
         $('head').append('<style type = "text/css" > .no-space [class*="span"] {    margin-left: 0;}</style>');
 
         this.sammy = Sammy(function () {
@@ -52,7 +53,17 @@ export class VXApplication {
         });
     }
 
+    /*public checkServerConnectionStatus() {
+        var svr: V.TServer = new V.TServer();
+        window.setTimeout(()=>{
+            svr.ping(() => {
+                //everthing OK
+            }, () => {
+                });
+        }, 2000);
+    }*/
 
+    public serverURL: string = "backEnd";
     private createPageInstance(prototype, html, __args) {
         var instance = Object.create(prototype);
         instance.__HTML__ = html;
@@ -60,16 +71,23 @@ export class VXApplication {
         return instance;
     }
 
+    
+    public loadJSLibrary(moduleName: string,callBack : (moduleObject : any)=> void) {
+        require([moduleName], function (modl) {
+            if (callBack) callBack(modl);
+        });
+    }
+
     /*
     * create and load page & html file asynchronously  an return an object instance in a callback function
     */
-    public loadPage(classPathName: string, __args: any[], __callback?: (page: V.TPage) => void ) {
+    public loadPage(classPathName: string, __args: any[], __callback?: (page: V.TPage) => void) {
         var self = this;
         var classes: string[] = [];
         var className = classPathName.split('/')[classPathName.split('/').length - 1];
         classes.push(classPathName);
         classes.push('VCL/Scripts/text.js!' + classPathName + '.html');
-        require(classes, function (page,html) {
+        require(classes, function (page, html) {
             var classExists = true;
             try {
                 typeof (page[className].prototype);
@@ -87,17 +105,17 @@ export class VXApplication {
     /*
     * create and load page & html file synchronously  an return an object instance 
     */
-    public createPage(Class, __args: any[],htmlPath : string = "") {
+    public createPage(Class, __args: any[], htmlPath?: string) {
         var self = this;
         var instance;
-        var path = htmlPath + '/' + Class.getClassName() + ".html"
-        new VXDS.VXServer(false).getHTML(path,
+        var path = (htmlPath ? htmlPath + '/' : "") + Class.getClassName() + ".html"
+        new VXDS.TServer(false).getHTML(path,
             (html: any) => {
                 instance = self.createPageInstance(Class.prototype, html, __args);
 
             },
             (errorMessage: string) => {
-                V.Application.raiseException("cant find :"+path);
+                V.Application.raiseException("cant find :" + path);
             }
             );
         return instance;
@@ -129,6 +147,34 @@ export class VXApplication {
         this.sammy.local("VCL", session);
     }
 
+    /*
+    * The showMessage procedure displays a string of Text in a simple dialog with an OK button. with an optional callback
+    */
+    public showMessage(message: string, callback? : ()=> void) {
+        (<any>bootbox).alert(message, callback)
+    }
+
+    /*
+    * The MessageDlg function is used to display messages to the user. These messages may be informational, or warnings or whatever.  
+    */
+    public messageDlg(message: string, title: string, buttons: Array<string>, callback: (results : string) => void) {
+        var json: any = {};
+        json.message = message;
+        json.title = title;
+        json.buttons = new Array<any>();
+        buttons.forEach((item) => {
+            var btn: any = {};
+            btn.label = item;
+            btn.callback = (rc : BaseJQueryEventObject) => {
+                if (callback) callback((<any>rc.currentTarget).innerText);
+            }
+            json.buttons.push(btn);
+        });
+        (<any>bootbox).dialog(json);
+
+    }
+
+
 
     public getSessionValue(name: string, defaultValue?: any) {
         var session = this.sammy.session("VCL", function () {
@@ -139,6 +185,7 @@ export class VXApplication {
         }
         return session[name];
     }
+
 
     public setSessionValue(name: string, value: any) {
         var session = this.sammy.session("VCL", function () {
@@ -153,9 +200,9 @@ export class VXApplication {
         this.sammy.run(buildPageURL(this.MainPage));
     }
 
-    public login(email: string, password: string, onSuccuess: () => void ,
-        onFail?: (errorMessage: string) => void ) {
-        var server = new VXServer.VXServer();
+    public login(email: string, password: string, onSuccuess: () => void,
+        onFail?: (errorMessage: string) => void) {
+        var server = new VXServer.TServer();
         server.send("LOGIN", { USER: email, PASS: password }, (data) => {
             if (data.STATUS == "OK") {
                 this.UserRole = data.ROLE;
@@ -176,14 +223,14 @@ export class VXApplication {
         this.sammy.setLocation(url);
     }
 
-    public navigateToURL(URL : string) {
+    public navigateToURL(URL: string) {
         this.sammy.setLocation(URL);
     }
 
     /*
     * The windowOpenURL() method opens a new browser window.
     */
-    public windowOpenURL(URL: string,target : string) {
+    public windowOpenURL(URL: string, target: string) {
         window.open(URL, target)
     }
 
@@ -206,8 +253,8 @@ export class VXApplication {
     }
 
 
-    public addNavbarItem(text: string, icon: string, onClick: () => void ): VXNavbarItem {
-        var item: VXNavbarItem = new VXNavbarItem(text, icon, onClick);
+    public addNavbarItem(text: string, icon: string, onClick: () => void): TNavbarItem {
+        var item: TNavbarItem = new TNavbarItem(text, icon, onClick);
         this.navbaritems.add(item);
         return item;
     }
@@ -433,15 +480,17 @@ export class VXApplication {
         var navRight: JQuery = $('#NavRight');
         navLeft.empty();
         navRight.empty();
-        this.navbaritems.forEach((item: VXNavbarItem) => {
+        this.navbaritems.forEach((item: TNavbarItem) => {
             var baritem: JQuery = $('<a/>');
             baritem.attr('href', '#');
             baritem.off("click").click(() => { if (item.onClick != null) V.tryAndCatch(() => { item.onClick(); }); return false; });
             if (item.Icon) {
                 $('<i/>').addClass(item.Icon).appendTo(baritem)
+            } else if (item.ImageURL && item.ImageURL != "") {
+                $('<img/>').attr('src', item.ImageURL).appendTo(baritem);
             }
 
-            $("<span/>").text(item.Text).appendTo(baritem);
+            if (item.Text) $("<span/>").text(item.Text).appendTo(baritem);
             var lineItem: JQuery = $('<li>/');
             baritem.appendTo(lineItem);
             if (item.menu.length() > 0) {
@@ -501,11 +550,10 @@ export class VXApplication {
             this.s4() + this.s4() + this.s4() + this.s4();
     }
 
-    public formatNumberK(value: number): string 
-	{
+    public formatNumberK(value: number): string {
         value = (value / 1000);
-        return this.FormatNumber(value,0) + "K";
-	}
+        return this.FormatNumber(value, 0) + "K";
+    }
 
     public FormatMin(value: number, precision: number = 0): string {
         return this.FormatNumber(value, precision) + " Min";
@@ -513,8 +561,8 @@ export class VXApplication {
 
     public MB: string = "MB";
     public GB: string = "GB";
-    public FormatGB(value: number, type: string = this.GB): string {
-        return this.FormatNumber(value, 0) + type;
+    public FormatGB(value: number, precision: number = 0, type: string = this.GB): string {
+        return this.FormatNumber(value, precision) + type;
     }
 
     public PERCENT: string = "%";
@@ -526,12 +574,48 @@ export class VXApplication {
         return this.CurrencyString + this.FormatNumber(value, precision);
     }
 
-    public FormatNumber(value: number, precision : number = 2): string {
+    public formatHumanFriendly(value, roundfactor): string {
+        var p, d2, i, s;
+
+        p = Math.pow;
+        d2 = p(10, roundfactor);
+        i = 7;
+        var found = false;
+        while (i) {
+            s = p(10, i-- * 3);
+            if (s <= value) {
+                value = Math.round(value * d2 / s) / d2 + "KMGTPE"[i];
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            value = this.FormatNumber(value, roundfactor);
+        return value;
+    }
+
+
+    public FormatNumber(value: number, precision: number = 2, removeExtraZeros: boolean = false): string {
         var intp: string = (Math.floor(value).toString());
         var decp: string = (value - Math.floor(value)).toString();
         decp = (decp.substr(2, 1000) + '000000000').substr(0, precision);
-        if (precision == 0) return intp.replace(/\B(?=(\d{3})+(?!\d))/g, this.ThousandSeparator)
-        else return intp.replace(/\B(?=(\d{3})+(?!\d))/g, this.ThousandSeparator) + this.DecimalSeparator + decp;
+        var res: string = "";
+        if (precision == 0)
+            res = intp.replace(/\B(?=(\d{3})+(?!\d))/g, this.ThousandSeparator)
+        else {
+            res = intp.replace(/\B(?=(\d{3})+(?!\d))/g, this.ThousandSeparator) + this.DecimalSeparator + decp;
+            //remove extra zeros
+            if (removeExtraZeros) {
+                while (res.charAt(res.length - 1) == "0") {
+                    //res = res.replace(new RegExp("0+$"), ""); - also working
+                    res = res.substring(0, res.length - 1);
+                }
+                if (res.charAt(res.length - 1) == this.DecimalSeparator) {
+                    res = res.substring(0, res.length - 1);
+                }
+            }
+        }
+        return res;
     }
 
 
@@ -564,7 +648,7 @@ export class VXApplication {
     // Z	US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500No equivalent in CF.
     // o	GMT/UTC timezone offset, e.g. -0500 or +0230.No equivalent in CF.
     */
-    public FormatDateTime(date: Date, mask?: string, utc?: any): any {
+    public formatDateTime(date: Date, mask?: string, utc?: any): any {
         var token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
             timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
             timezoneClip = /[^-+\dA-Z]/g,
@@ -643,17 +727,17 @@ export class VXApplication {
 
 }
 
-export class VXNavbarItem extends VXO.VXCollectionItem {
-    constructor(text?: string, icon?: string, onClick?: () => void ) {
+export class TNavbarItem extends VXO.TCollectionItem {
+    constructor(text?: string, icon?: string, onClick?: () => void) {
         super();
         this._text = text;
         this._icon = icon;
         this.onClick = onClick;
     }
 
-    public menu = new VXM.VXMenuItemCollection<VXM.VXMenuItem>();
-    public addMenuItem(text: string): VXM.VXMenuItem {
-        var menuItem = new VXM.VXMenuItem();
+    public menu = new VXM.TMenuItemCollection<VXM.TMenuItem>();
+    public addMenuItem(text: string): VXM.TMenuItem {
+        var menuItem = new VXM.TMenuItem();
         menuItem.Text = text;
         this.menu.add(menuItem);
         return menuItem;
@@ -670,6 +754,18 @@ export class VXNavbarItem extends VXO.VXCollectionItem {
         }
     }
 
+    private _imageURL: string = null;
+    /*
+    * Text specify the text string that labels the control.
+    */
+    public get ImageURL(): string {
+        return this._imageURL;
+    }
+    public set ImageURL(val: string) {
+        if (val != this._imageURL) {
+            this._imageURL = val;
+        }
+    }
 
 
     private _text: string;
@@ -817,4 +913,6 @@ class passwordStrength {
         // using words are bad too!
         return score * -5;
     }
+
+
 }

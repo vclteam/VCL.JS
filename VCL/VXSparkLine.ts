@@ -5,10 +5,10 @@ import VXU = require("VCL/VXUtils");
 import VXO = require("VCL/VXObject");
 import VXD = require("VCL/VXDataset");
 
-export class VXSparkBase extends VXC.VXComponent {
-    public values = new VXO.VXCollection<VXSparkValue>();
-    public createValue(value: number): VXSparkValue {
-        var col: VXSparkValue = new VXSparkValue();
+export class TSparkBase extends VXC.TComponent {
+    public values = new VXO.TCollection<TSparkValue>();
+    public createValue(value: number): TSparkValue {
+        var col: TSparkValue = new TSparkValue();
         col.Value = value;
         this.values.add(col);
         this.draw(true);
@@ -16,7 +16,7 @@ export class VXSparkBase extends VXC.VXComponent {
     }
     public canvas: JQuery;
     public context: CanvasRenderingContext2D;
-    public onClicked: (sender: VXSparkBase ) => void;
+    public onClicked: (sender: TSparkBase ) => void;
 
     private _labelVisible: boolean = false;
     public get LabelVisible(): boolean {
@@ -25,7 +25,7 @@ export class VXSparkBase extends VXC.VXComponent {
     public set LabelVisible(val: boolean) {
         if (val != this._labelVisible) {
             this._labelVisible = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -41,7 +41,7 @@ export class VXSparkBase extends VXC.VXComponent {
 
             if (val != this._labetextcolor) {
                 this._labetextcolor = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -56,7 +56,7 @@ export class VXSparkBase extends VXC.VXComponent {
         if (val != this._labeltext) {
             this._labeltext = val;
             this.LabelVisible = true;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
     private _labelposition: V.LabelPosition = V.LabelPosition.BottomCenter;
@@ -86,7 +86,7 @@ export class VXSparkBase extends VXC.VXComponent {
 
     public getData(): number[] {
         var values: number[] = [];
-        this.values.forEach((item : VXSparkValue) => { values.push(item.Value); return true;});
+        this.values.forEach((item : TSparkValue) => { values.push(item.Value); return true;});
         return values;
     }
 
@@ -131,17 +131,16 @@ export class VXSparkBase extends VXC.VXComponent {
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+
 
     }
 }
 
 
-export class VXSparkPie extends VXSparkBase {
+export class TSparkPie extends TSparkBase {
     public colours = ["#ff9900", "#fff4dd", "#ffc66e", "#4D4D4D", "#5DA5DA", "#FAA43A", "#60BD68", "#F17CB0", "#B2912F", "#B276B2", "#DECF3F", "#F15854"];
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         this.Height = 40;
         this.Width = 40;
@@ -181,7 +180,7 @@ export class VXSparkPie extends VXSparkBase {
 
 
 
-export class VXSparkLine extends VXSparkBase {
+export class TSparkLine extends TSparkBase {
     private _strokewidth: number = 1;
     public get StrokeWidth(): number {
         return this._strokewidth;
@@ -189,10 +188,10 @@ export class VXSparkLine extends VXSparkBase {
     public set StrokeWidth(val: number) {
         if (val != this._strokewidth) {
             this._strokewidth = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         this.Height = 20;
         this.Width = 40;
@@ -209,7 +208,7 @@ export class VXSparkLine extends VXSparkBase {
         else {
             if (val != this._strokecolor) {
                 this._strokecolor = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -225,7 +224,7 @@ export class VXSparkLine extends VXSparkBase {
 
             if (val != this._color) {
                 this._color = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -273,7 +272,7 @@ export class VXSparkLine extends VXSparkBase {
     }
 }
 
-export class VXSparkBar extends VXSparkBase {
+export class TSparkBar extends TSparkBase {
     public colours = ["#4d89f9"];
     private _spacing: number = 1;
     public get Spacing(): number {
@@ -285,7 +284,7 @@ export class VXSparkBar extends VXSparkBase {
             this.draw(true);
         }
     }
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner,renderTo);
         this.Height = 20;
         this.Width = 40;
@@ -327,27 +326,27 @@ export class VXSparkBar extends VXSparkBase {
 }
 
 
-export class VXDBSparkBar extends VXSparkBar {
-    private _dataset: VXD.VXDataset;
+export class TDBSparkBar extends TSparkBar {
+    private _dataset: VXD.TDataset;
     /*
     * Specifies the dataset that contains the field it represents.
     */
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
 
-    public set Dataset(val: VXD.VXDataset) {
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (this._dataset) {
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
             }
             this._dataset = val;
             if (this._dataset) {
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => { this.draw(true); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(true); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => { this.draw(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.drawDelayed(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { this.drawDelayed(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.drawDelayed(true); });
             }       
         }
     }
@@ -379,27 +378,27 @@ export class VXDBSparkBar extends VXSparkBar {
 }
 
 
-export class VXDBSparkPie extends VXSparkPie {
-    private _dataset: VXD.VXDataset;
+export class TDBSparkPie extends TSparkPie {
+    private _dataset: VXD.TDataset;
     /*
     * Specifies the dataset that contains the field it represents.
     */
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
 
-    public set Dataset(val: VXD.VXDataset) {
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (this._dataset) {
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
             }
             this._dataset = val;
             if (this._dataset) {
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => { this.draw(true); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(true); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => { this.draw(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.drawDelayed(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { this.drawDelayed(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.drawDelayed(true); });
             }       
             
         }
@@ -431,27 +430,27 @@ export class VXDBSparkPie extends VXSparkPie {
     }
 }
 
-export class VXDBSparkLine extends VXSparkLine {
-    private _dataset: VXD.VXDataset;
+export class TDBSparkLine extends TSparkLine {
+    private _dataset: VXD.TDataset;
     /*
     * Specifies the dataset that contains the field it represents.
     */
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
 
-    public set Dataset(val: VXD.VXDataset) {
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (this._dataset) {
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
             }
             this._dataset = val;
             if (this._dataset) {
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => { this.draw(true); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(true); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => { this.draw(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.drawDelayed(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { this.drawDelayed(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.drawDelayed(true); });
             }         
         }
     }
@@ -484,7 +483,7 @@ export class VXDBSparkLine extends VXSparkLine {
 
 
 
-export class VXSparkValue extends VXO.VXCollectionItem {
+export class TSparkValue extends VXO.TCollectionItem {
     private _value: number = null;
     public get Value(): number {
         return this._value;

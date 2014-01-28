@@ -5,8 +5,8 @@ import VXU = require("VCL/VXUtils");
 import V = require("VCL/VCL");
 import VXB = require("VCL/VXInputBase");
 
-export class VXButton extends VXC.VXComponent {
-    constructor(aOwner: VXC.VXComponent, renderTo?: string, text?: string) {
+export class TButton extends VXC.TComponent {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
         this._text = text;
     }
@@ -18,7 +18,7 @@ export class VXButton extends VXC.VXComponent {
     public set GroupIndex(val: number) {
         if (val != this._groupindex) {
             this._groupindex = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -32,7 +32,7 @@ export class VXButton extends VXC.VXComponent {
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -44,7 +44,7 @@ export class VXButton extends VXC.VXComponent {
     public set ButtonSize(val: V.ButtonSize) {
         if (val != this._buttonsize) {
             this._buttonsize = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -55,13 +55,13 @@ export class VXButton extends VXC.VXComponent {
     public set ButtonStyle(val: V.ButtonStyle) {
         if (val != this._buttonstyle) {
             this._buttonstyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    public menuItems = new VXM.VXMenuItemCollection<VXM.VXMenuItem>();
-    public createMenuItem(text : string,onClicked?:()=>void): VXM.VXMenuItem {
-        var menuItem = new VXM.VXMenuItem();
+    public menuItems = new VXM.TMenuItemCollection<VXM.TMenuItem>();
+    public createMenuItem(text : string,onClicked?:()=>void): VXM.TMenuItem {
+        var menuItem = new VXM.TMenuItem();
         menuItem.Text = text;
         menuItem.onClicked = onClicked;
         this.menuItems.add(menuItem);
@@ -76,7 +76,7 @@ export class VXButton extends VXC.VXComponent {
     public set ButtonIcon(val: V.ButtonIcon) {
         if (val != this._buttonicon) {
             this._buttonicon= val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -87,14 +87,15 @@ export class VXButton extends VXC.VXComponent {
     public set IconAlignment(val: V.IconAlignment) {
         if (val != this._iconalignment) {
             this._iconalignment = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
     /**
     * Occurs when the user clicks the component.
     */
-    public onClicked: (sender : VXButton) => void;
+    public onClicked: (sender: TButton) => void;
+
     private jText : JQuery;
     private jImage: JQuery;
     private jBtn: JQuery;
@@ -139,14 +140,9 @@ export class VXButton extends VXC.VXComponent {
             else this.jImage.addClass('pull-right');
         }
 
-        
-        
         if (this.menuItems.length() > 0) {
             this.jBtn.append($('<span class="caret"/>'));
-            this.jBtn.attr('data-toggle', "dropdown");
-            this.jBtn.addClass('dropdown-toggle');
-            this.menuItems.createmenu('dropdown-menu').appendTo(this.jComponent);
-            $('.dropdown-toggle').dropdown()
+            this.reBuildMenu();
         }
         this.jBtn.append(this.jText);
 
@@ -168,7 +164,7 @@ export class VXButton extends VXC.VXComponent {
         //setup the click event
         this.jBtn.off("click").click(() => {
             if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(this); }));
-            return true;
+            return true; //hadeling the menu
         })
         if (!this.Enabled) this.jBtn.attr('disabled', 'disabled');
         else this.jBtn.removeAttr('disabled');
@@ -176,10 +172,20 @@ export class VXButton extends VXC.VXComponent {
 
     }
 
+    private reBuildMenu(showMenu: boolean = false) {
+        this.jBtn.attr('data-toggle', "dropdown");
+        this.jBtn.addClass('dropdown-toggle');
+        this.jComponent.find(".dropdown-menu").empty();
+        this.menuItems.createmenu('dropdown-menu').appendTo(this.jComponent);
+        $('.dropdown-toggle').dropdown()
+        if (showMenu) {
+            this.jComponent.addClass('open');
+        }
+    }
+
     public draw(reCreate : boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
 
         $(this.jText).text(this.Text);
     
@@ -187,7 +193,7 @@ export class VXButton extends VXC.VXComponent {
 }
 
 
-export class VXToggleSwitch extends VXB.VXEditorBase {
+export class TToggleSwitch extends VXB.TEditorBase {
     private _value: boolean = false;
     public get Value(): boolean {
         return this._value;
@@ -195,7 +201,7 @@ export class VXToggleSwitch extends VXB.VXEditorBase {
     public set Value(val: boolean) {
         if (val != this._value) {
             this._value = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -206,7 +212,7 @@ export class VXToggleSwitch extends VXB.VXEditorBase {
     public set TextTrue(val: string) {
         if (val != this._textTrue) {
             this._textTrue = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -217,7 +223,7 @@ export class VXToggleSwitch extends VXB.VXEditorBase {
     public set TextFalse(val: string) {
         if (val != this._textfalse) {
             this._textfalse = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -229,7 +235,7 @@ export class VXToggleSwitch extends VXB.VXEditorBase {
     public set SwitchSize(val: V.SwitchSize) {
         if (val != this._switchsize) {
             this._switchsize = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -260,8 +266,8 @@ export class VXToggleSwitch extends VXB.VXEditorBase {
 
         
         var self = this;
-        this.jEdit.on('switch-change', function (e, data) {
-            self.Value = data.value;
+        this.jEdit.on('switch-change', function (e) {
+            self.Value = e.data.value;  //change for 0.95
             if (self.onChanged != null) (V.tryAndCatch(() => { self.onChanged(); })); 
         });
         this.jComponent.append(this.jEdit);
@@ -269,9 +275,8 @@ export class VXToggleSwitch extends VXB.VXEditorBase {
         
     }
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
 
         this.jEdit.bootstrapSwitch('setState', this.Value);
     }
@@ -404,13 +409,14 @@ $.fn['bootstrapSwitch'] = function (method) {
                     changeStatus($(this));
                 });
 
-                $element.find(inputSelector).on('change', function (e, skipOnChange) {
+                $element.find(inputSelector).change(function (e, skipOnChange) { //0.95
                     var $this = $(this)
                         , $element = $this.parent()
                         , thisState = $this.is(':checked')
                         , state = $element.is('.switch-off');
 
                     e.preventDefault();
+                   
 
                     $element.css('left', '');
 
@@ -446,7 +452,7 @@ $.fn['bootstrapSwitch'] = function (method) {
                     } else {
                         $this.on('mousemove touchmove', function (e) {
                             var $element = $(this).closest('.make-switch')
-                                , relativeX = (e.pageX || e.originalEvent.targetTouches[0].pageX) - $element.offset().left
+                                , relativeX = (e.pageX /*|| e.originalEvent.targetTouches[0].pageX*/) - $element.offset().left  //0.95
                                 , percent = (relativeX / $element.width()) * 100
                                 , left = 25
                                 , right = 75;

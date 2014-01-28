@@ -7,7 +7,7 @@ import V = require("VCL/VCL");
 import VXO = require("VCL/VXObject");
 import VXM = require("VCL/VXMenu");
 
-export class VXWell extends VXCO.VXContainer {
+export class TWell extends VXCO.TContainer {
     public create() {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('well');
@@ -15,19 +15,51 @@ export class VXWell extends VXCO.VXContainer {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
-
+        if (!this.parentInitialized()) return;
         super.draw(reCreate);
     }
 }
 
-export class VXPanelButton {
-    private owner: VXPanel;
-    constructor(owner: VXPanel, icon?: V.Icon ) {
+export class TPanelButton {
+
+    /**
+    * The margin clears an area around an component . 
+    * The margin does not have a background color, and is completely transparent.
+    * Sets the left margin of an component
+    */
+    private _marginLeft: number = 0;
+    private _marginRight: number = 0;
+    private _marginTop: number = 0;
+    private _marginBottom: number = 0;
+    public get MarginLeft(): number { return this._marginBottom; }
+    public set MarginLeft(pixel: number) { if (pixel != this._marginLeft) { this._marginLeft = pixel; this.owner.drawDelayed(false); } }
+    /**
+    * The margin clears an area around an component . 
+    * The margin does not have a background color, and is completely transparent.
+    *  Sets the right margin of an component
+    */
+    public get MarginRight(): number { return this._marginRight; }
+    public set MarginRight(pixel: number) { if (pixel != this._marginRight) { this._marginRight = pixel; this.owner.drawDelayed(false); } }
+    /**
+    * The margin clears an area around an component . 
+    * The margin does not have a background color, and is completely transparent.
+    * Sets the top margin of an component
+    */
+    public get MarginTop(): number { return this._marginTop; }
+    public set MarginTop(pixel: number) { if (pixel != this._marginTop) { this._marginTop = pixel; this.owner.drawDelayed(false); } }
+    /**
+    * The margin clears an area around an component . 
+    * The margin does not have a background color, and is completely transparent.
+    * Sets the bottom margin of an component
+    */
+    public get MarginBottom(): number { return this._marginBottom; }
+    public set MarginBottom(pixel: number) { if (pixel != this._marginBottom) { this._marginBottom = pixel; this.owner.drawDelayed(false); } }
+
+
+    private owner: TPanel;
+    constructor(owner: TPanel, icon?: V.Icon) {
         this.owner = owner;
-        if(icon) this._icon = icon;
+        if (icon) this._icon = icon;
 
     }
     private _visible: boolean = false;
@@ -37,7 +69,7 @@ export class VXPanelButton {
     public set Visible(val: boolean) {
         if (val != this._visible) {
             this._visible = val;
-            this.owner.draw(false);
+            this.owner.drawDelayed(false);
         }
     }
 
@@ -49,7 +81,7 @@ export class VXPanelButton {
         if (V.Application.checkColorString(val)) {
             if (val != this._color) {
                 this._color = val;
-                this.owner.draw(false);
+                this.owner.drawDelayed(false);
             }
         }
     }
@@ -61,17 +93,31 @@ export class VXPanelButton {
     public set Icon(val: V.Icon) {
         if (val != this._icon) {
             this._icon = val;
-            this.owner.draw(false);
+            this.Visible = true;
+            this.owner.drawDelayed(false);
         }
     }
+
+    private _text: string = "";
+    public get Text(): string {
+        return this._text;
+    }
+    public set Text(val: string) {
+        if (val != this._text) {
+            this._text = val;
+            this.Visible = true;
+            this.owner.drawDelayed(false);
+        }
+    }
+
     public onClicked: () => void;
     public jButton: JQuery;
     public jGroupButton: JQuery;
     public jMenu: JQuery;
 
-    public menuItems = new VXM.VXMenuItemCollection<VXM.VXMenuItem>();
-    public createMenuItem(text: string, onClicked?: () => void ): VXM.VXMenuItem {
-        var menuItem = new VXM.VXMenuItem();
+    public menuItems = new VXM.TMenuItemCollection<VXM.TMenuItem>();
+    public createMenuItem(text: string, onClicked?: () => void): VXM.TMenuItem {
+        var menuItem = new VXM.TMenuItem();
         menuItem.Text = text;
         menuItem.onClicked = onClicked;
         this.menuItems.add(menuItem);
@@ -79,24 +125,24 @@ export class VXPanelButton {
     }
 }
 
-export class VXPanel extends VXCO.VXContainer {
+export class TPanel extends VXCO.TContainer {
     public jHeader: JQuery;
     private jHeaderText: JQuery;
     public jContent: JQuery;
     public jOverlayText: JQuery;
 
-    public CloseButton: VXPanelButton;
-    public Button1: VXPanelButton;
-    public Button2: VXPanelButton;
-    public Button3: VXPanelButton;
-    private jButtons: JQuery; 
+    public CloseButton: TPanelButton;
+    public Button1: TPanelButton;
+    public Button2: TPanelButton;
+    public Button3: TPanelButton;
+    private jButtons: JQuery;
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string, headerText?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, headerText?: string) {
         super(aOwner, renderTo);
-        this.CloseButton = new VXPanelButton(this,V.Icon.icon_remove);
-        this.Button1 = new VXPanelButton(this);
-        this.Button2 = new VXPanelButton(this);
-        this.Button3 = new VXPanelButton(this);
+        this.CloseButton = new TPanelButton(this, V.Icon.icon_remove);
+        this.Button1 = new TPanelButton(this);
+        this.Button2 = new TPanelButton(this);
+        this.Button3 = new TPanelButton(this);
 
         if (headerText != null) this._headertext = headerText;
     }
@@ -109,11 +155,24 @@ export class VXPanel extends VXCO.VXContainer {
     public set HeaderVisible(val: boolean) {
         if (val != this._headevisible) {
             this._headevisible = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
+  
 
+    private _borderradius: number = 0;
+    public get BorderRadius(): number {
+        return this._borderradius;
+    }
+    public set BorderRadius(val: number) {
+        if (val != this._borderradius) {
+            this._borderradius = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    
 
     private _backgroundimageurl: string;
     public get BackgroundImageURL(): string {
@@ -122,7 +181,7 @@ export class VXPanel extends VXCO.VXContainer {
     public set BackgroundImageURL(val: string) {
         if (val != this._backgroundimageurl) {
             this._backgroundimageurl = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -134,11 +193,26 @@ export class VXPanel extends VXCO.VXContainer {
     public set HeaderStyle(val: V.HeaderStyle) {
         if (val != this._hedderstyle) {
             this._hedderstyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    
+
+    private _largeheaderbutton: boolean = false;
+    /*
+    * specify the size of the panel header button.
+    */
+    public get LargeHeaderButton(): boolean {
+        return this._largeheaderbutton;
+    }
+    public set LargeHeaderButton(val: boolean) {
+        if (val != this._largeheaderbutton) {
+            this._largeheaderbutton = val;
+            this.drawDelayed(false);
+        }
+    }
+
+
 
     private _buttonaligment: V.ButtonAlignment = V.ButtonAlignment.Right;
     /*
@@ -150,7 +224,7 @@ export class VXPanel extends VXCO.VXContainer {
     public set ButtonAlignment(val: V.ButtonAlignment) {
         if (val != this._buttonaligment) {
             this._buttonaligment = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -165,7 +239,7 @@ export class VXPanel extends VXCO.VXContainer {
     public set HeaderText(val: string) {
         if (val != this._headertext) {
             this._headertext = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -176,23 +250,24 @@ export class VXPanel extends VXCO.VXContainer {
     public set BorderWidth(val: number) {
         if (val != this._borderwidth) {
             this._borderwidth = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    private _textstyle: V.HeaderTextStyle = V.HeaderTextStyle.default;
+    private _textstyle: V.HeaderTextStyle = V.HeaderTextStyle.Default;
     public get HeaderTextStyle(): V.HeaderTextStyle {
         return this._textstyle;
     }
     public set HeaderTextStyle(val: V.HeaderTextStyle) {
         if (val != this._textstyle) {
             this._textstyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
 
-    public onHeaderClicked: (sender: VXC.VXComponent) => void;
+    public onHeaderClicked: (sender: VXC.TComponent) => void;
+    public onContentClicked: (sender: VXC.TComponent) => void;
 
     public create() {
         var self = this;
@@ -211,34 +286,32 @@ export class VXPanel extends VXCO.VXContainer {
 
             this.jContent = $("<div>", attrs);
             this.jContent.addClass('panel');
+            if (this.BorderRadius > 0) this.jContent.css("border-radius", this.BorderRadius + "px");
             this.jContent.insertBefore(this.jComponent);
 
             this.jHeader = $("<div>");
             this.jHeader.addClass('panel-header');
-  
+
             this.jHeader.appendTo(this.jContent);
 
-            if (this.HeaderTextStyle == V.HeaderTextStyle.h4)
-                this.jHeaderText = $("<h4>").css('margin', '0px');
-            else if (this.HeaderTextStyle == V.HeaderTextStyle.h5)
-                this.jHeaderText = $("<h5>").css('margin', '0px');
-            else if (this.HeaderTextStyle == V.HeaderTextStyle.h6)
-                this.jHeaderText = $("<h6>").css('margin', '0px');
-            else if (this.HeaderTextStyle == V.HeaderTextStyle.lead) {
-                this.jHeaderText = $("<div>");
-                this.jComponent.addClass('lead');
-            } else if (this.HeaderTextStyle == V.HeaderTextStyle.small) {
-                this.jHeaderText = $("<div>");
-                this.jHeaderText.addClass('small');
+            
+            if (this.HeaderTextStyle == V.HeaderTextStyle.Strong) {
+                this.jHeaderText = $("<strong>");
+            } else if (this.HeaderTextStyle == V.HeaderTextStyle.Small) {
+                this.jHeaderText = $("<small>");                
             } else {
                 this.jHeaderText = $("<div>");
-                this.jHeaderText.addClass('muted');
             }
-            this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '90%');
+
+            if (this.BorderRadius > 0) {
+                this.jHeader.css("border-top-left-radius", this.BorderRadius);
+                this.jHeader.css("border-top-right-radius", this.BorderRadius);
+            }
+            this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '80%');
             this.jHeaderText.appendTo(this.jHeader);
             this.jComponent.css('display', 'block');
             this.jContent.append(this.jComponent);
-            if (this.Width > 0) this.jContent.width(this.Width - this.BorderWidth * 2 - 1);
+         
 
             this.jButtons = $("<div>");
             this.jButtons.prependTo(this.jHeader);
@@ -251,23 +324,41 @@ export class VXPanel extends VXCO.VXContainer {
             }
 
 
-            this.createButton(this.Button3, null);
-            this.createButton(this.Button2, null);
-            this.createButton(this.Button1, null);
             this.createButton(this.CloseButton, () => {
                 if (this.CloseButton.onClicked != null) (V.tryAndCatch(() => { this.CloseButton.onClicked(); }));
                 else this.destroy();
             });
+            this.CloseButton.jButton.css('padding-right', '4px');
+            this.createButton(this.Button1, null);
+            this.createButton(this.Button2, null);
+            this.createButton(this.Button3, null);
+
+
+
             var x = this.jComponent;
             this.jComponent = this.jContent;
             this.jContent = x;
             this.jContent.css('overflow', 'visible');
-
+            this.jContent.off("click").click(() => {
+                if (this.onContentClicked != null) (V.tryAndCatch(() => { this.onContentClicked(self); }));
+            })
             this.jOverlayText = $("<div>");
         }
 
+        //fix some issues with change of width and height
+        if (!this.FitToWidth) {
+            this.jComponent.css('display', 'inline-block');
+        } else {
+            this.jComponent.css('display', 'block');
+            this.jComponent.css('width', '100%');
+        }
+        if (!this.FitToHeight);
+        else {
+            this.jComponent.css('position', 'absolute');
+            this.jComponent.css('height', '100%');
+        }
+
         this.jComponent.css('border-width', this.BorderWidth);
-        this.jHeader.css('border-top-width', this.BorderWidth);
         this.jHeader.removeClass(function (index, css) {
             return (css.match(/\panel-header-\S+/g) || []).join(' ');
         });
@@ -312,23 +403,22 @@ export class VXPanel extends VXCO.VXContainer {
                 this.jHeaderText.addClass('panel-header-transparent');
                 this.jContent.addClass('panel-transparent panel-content '); break;
         }
+        //this.jContent.css('height', '100%');
         this.jHeader.off("click").click(() => {
             if (this.onHeaderClicked != null) (V.tryAndCatch(() => { this.onHeaderClicked(self); }));
         })
         super.create();
     }
 
-    private createButton(button: VXPanelButton, clickEvent: () => void ) {
+    private createButton(button: TPanelButton, clickEvent: () => void) {
         if (!button.jButton) {
             button.jButton = $('<a>');
-            button.jButton.css('padding', '0px')
-            button.jButton.css('background-color', 'transparent');
+            button.jButton.css('padding', '0px').css('background-color', 'transparent').css('vertical-align','middle')   ;
             button.jButton.css('box-shadow', 'none')
             button.jButton.css('border', 'none')
             button.jButton.addClass('btn icon');
             button.jGroupButton = $('<div>');
             button.jGroupButton.css('display', 'inline-block').addClass('btn-group');
-           ;
 
             if (clickEvent) button.jButton.off("click").click(clickEvent)
             else button.jButton.off("click").click(() => {
@@ -337,9 +427,17 @@ export class VXPanel extends VXCO.VXContainer {
             })
             button.jGroupButton.prependTo(this.jButtons);
             button.jButton.prependTo(button.jGroupButton);
+            if (this.LargeHeaderButton) button.jButton.addClass('icon-large');
         }
+
+        if (button.MarginBottom) button.jButton.css('margin-bottom', button.MarginBottom + "px");
+        if (button.MarginTop) button.jButton.css('margin-top', button.MarginTop + "px");
+        if (button.MarginLeft) button.jButton.css('margin-left', button.MarginLeft + "px");
+        if (button.MarginRight) button.jButton.css('margin-right', button.MarginRight+"px");
         if (button.Color) button.jButton.css('color', button.Color);
-        button.jButton.addClass(V.iconEnumToBootstrapStyle(<any>button.Icon));
+        
+        if (button.Text != null && button.Text!="") button.jButton.text(button.Text).addClass('btn-link');
+        else button.jButton.addClass(V.iconEnumToBootstrapStyle(<any>button.Icon)).text('');
 
         if (button.jMenu) button.jMenu.remove();
         if (button.menuItems.length() > 0) {
@@ -354,13 +452,10 @@ export class VXPanel extends VXCO.VXContainer {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
-
+        if (!this.parentInitialized()) return;
         super.draw(reCreate);
         this.jHeaderText.text(this.HeaderText);
-        this.HeaderVisible ? this.jHeader.show() : this.jHeader.hide().attr('min-height','0px');
+        this.HeaderVisible ? this.jHeader.show().css('border-top','0px') : this.jHeader.hide().attr('min-height', '0px');
         this.createButton(this.Button3, null);
         this.createButton(this.Button2, null);
         this.createButton(this.Button1, null);
@@ -370,8 +465,8 @@ export class VXPanel extends VXCO.VXContainer {
 
 
 
-export class VXGoogleMap extends VXC.VXComponent {
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+export class TGoogleMap extends VXC.TComponent {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
     }
 
@@ -417,9 +512,7 @@ export class VXGoogleMap extends VXC.VXComponent {
     public draw(reCreate: boolean) {
 
         require(["VCL/Scripts/async!http://maps.google.com/maps/api/js?sensor=false&key=" + this.GoogleAPIKey], () => {
-            if (!this.parentInitialized())return;super.draw(reCreate);
-            if (reCreate || !this.initialized) this.create();
-            this.initialized = true;
+            if (!this.parentInitialized()) return;
             super.draw(reCreate);
             this.refreshMarkers();
         });
@@ -432,10 +525,10 @@ export class VXGoogleMap extends VXC.VXComponent {
             this.tmpMarkers[i].setMap(null);
         }
         this.tmpMarkers = [];
-        this.markerItems.forEach((item: VXGoogleMapMarker) => { item.marker = null });
+        this.markerItems.forEach((item: TGoogleMapMarker) => { item.marker = null });
 
         var self = this;
-        this.markerItems.forEach((item: VXGoogleMapMarker) => {
+        this.markerItems.forEach((item: TGoogleMapMarker) => {
             if (item.marker) return;
             if (item.Lat) {
                 var myLatlng = new google.maps.LatLng(item.Lat, item.Lng);
@@ -451,14 +544,14 @@ export class VXGoogleMap extends VXC.VXComponent {
             if (item.Address) this.decodeAddress(item.Address, item);
         });
 
-        this.markerItems.forEach((item: VXGoogleMapMarker) => {
+        this.markerItems.forEach((item: TGoogleMapMarker) => {
             if (item.marker && item.Visible) item.marker.setMap(this.map);
             if (item.marker && !item.Visible) item.marker.setMap(null);
         });
         this.optimizeZoomLevel();
     }
 
-    private setMarkerClick(item: VXGoogleMapMarker) {
+    private setMarkerClick(item: TGoogleMapMarker) {
         var self = this;
         google.maps.event.addListener(item.marker, 'click', function (a) {
             self.markerItems.forEach((item) => {
@@ -476,8 +569,8 @@ export class VXGoogleMap extends VXC.VXComponent {
     }
 
 
-    private decodeAddress(address: string, selectedItem: VXGoogleMapMarker) {
-        var myItem: VXGoogleMapMarker = selectedItem;
+    private decodeAddress(address: string, selectedItem: TGoogleMapMarker) {
+        var myItem: TGoogleMapMarker = selectedItem;
         var geocoder = new google.maps.Geocoder();
         geocoder.geocode({ 'address': myItem.Address }, (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
             if (status == google.maps.GeocoderStatus.OK) {
@@ -526,7 +619,7 @@ export class VXGoogleMap extends VXC.VXComponent {
     private optimizeZoomLevel() {
         var bounds = new google.maps.LatLngBounds();
         var found = false;
-        this.markerItems.forEach((item: VXGoogleMapMarker) => {
+        this.markerItems.forEach((item: TGoogleMapMarker) => {
             if (!item.Lat || !item.Lng || !item.Visible) return;
             found = true;
             var point = new google.maps.LatLng(item.Lat, item.Lng);
@@ -537,17 +630,17 @@ export class VXGoogleMap extends VXC.VXComponent {
         this.map.setCenter(bounds.getCenter());
     }
 
-    public markerItems: VXO.VXCollection<VXGoogleMapMarker> = new VXO.VXCollection<VXGoogleMapMarker>();
-    createMarker(lat: number, lng: number): VXGoogleMapMarker {
-        var col: VXGoogleMapMarker = new VXGoogleMapMarker();
+    public markerItems: VXO.TCollection<TGoogleMapMarker> = new VXO.TCollection<TGoogleMapMarker>();
+    createMarker(lat: number, lng: number): TGoogleMapMarker {
+        var col: TGoogleMapMarker = new TGoogleMapMarker();
         this.markerItems.add(col);
         col.Lat = lat;
         col.Lng = lng;
         return col;
     }
 
-    createMarkerFromAddress(address: string): VXGoogleMapMarker {
-        var col: VXGoogleMapMarker = new VXGoogleMapMarker();
+    createMarkerFromAddress(address: string): TGoogleMapMarker {
+        var col: TGoogleMapMarker = new TGoogleMapMarker();
         this.markerItems.add(col);
         col.Address = address;
         return col;
@@ -558,7 +651,7 @@ export class VXGoogleMap extends VXC.VXComponent {
 
 }
 
-export class VXGoogleMapMarker extends VXO.VXCollectionItem {
+export class TGoogleMapMarker extends VXO.TCollectionItem {
     public marker: any;
     private _lat: number = null;
     public get Lat(): number {

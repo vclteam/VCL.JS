@@ -2,7 +2,7 @@ import VXC = require("VCL/VXComponent");
 import V = require("VCL/VCL");
 import VXU = require("VCL/VXUtils");
 
-export class VXEditorBase extends VXC.VXComponent {
+export class TEditorBase extends VXC.TComponent {
     private _labelVisible: boolean = false;
     public get LabelVisible(): boolean {
         return this._labelVisible;
@@ -10,7 +10,7 @@ export class VXEditorBase extends VXC.VXComponent {
     public set LabelVisible(val: boolean) {
         if (val != this._labelVisible) {
             this._labelVisible = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -25,7 +25,7 @@ export class VXEditorBase extends VXC.VXComponent {
 
             if (val != this._labetextcolor) {
                 this._labetextcolor = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -39,7 +39,7 @@ export class VXEditorBase extends VXC.VXComponent {
         if (val != this._labeltext) {
             this._labeltext = val;
             this.LabelVisible = true;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
     private _labelposition: V.LabelPosition = V.LabelPosition.TopLeft;
@@ -49,11 +49,11 @@ export class VXEditorBase extends VXC.VXComponent {
     public set LabelPosition(val: V.LabelPosition) {
         if (val != this._labelposition) {
             this._labelposition = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    public onChanged: (sender: VXEditorBase) => void;
+    public onChanged: (sender: TEditorBase) => void;
 
     public jLabel: JQuery;
     public jEdit: JQuery;
@@ -98,7 +98,7 @@ export class VXEditorBase extends VXC.VXComponent {
 
 }
 
-export class VXInputBase extends VXEditorBase {
+export class TInputBase extends TEditorBase {
     private _maxlength: number;
     public get MaxLength(): number {
         return this._maxlength;
@@ -107,7 +107,7 @@ export class VXInputBase extends VXEditorBase {
         if (val != this._maxlength) {
             this._maxlength = Math.floor(val);
             if (this._maxlength < 0) this._maxlength = 0;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -121,15 +121,25 @@ export class VXInputBase extends VXEditorBase {
     private jBtn: JQuery;
     private jImage: JQuery;
     private jbtnText: JQuery;
+    private jinternalSpan: JQuery;
 
     public create() {
         this.jComponent.empty();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('input-append control-group');
 
-        var span = $("<span>").css('display', 'block').css('overflow', 'hidden').css('padding-right', '15px');
-        this.jEdit = $('<input/>');
+        //this.jinternalSpan = $("<span>").css('display', 'block').css('overflow', 'hidden').css('padding-right', '15px').css('width', '100%');
+        this.jinternalSpan = $("<span>").css('display', 'block').css('overflow', 'hidden').css('padding-right', '15px');
+        if ((<any>this).textarea) {
+            this.jEdit = $('<textarea/>').attr('rows', (<V.TTextArea>this).Rows).css('resize','none');
+            if ((<V.TTextArea>this).Wrap) this.jEdit.attr('Wrap', 'Wrap');
+
+        } else {
+            this.jEdit = $('<input/>');
+        }
+
         this.jEdit.attr("type", 'text').attr('id', V.Application.genGUID()).css('width', '100%');
+        if ((<any>this)._readonly) this.jEdit.attr("readonly", "readonly");
 
         if (this.ButtonClickOnEnter) {
             this.jEdit.keydown((eventObject: JQueryKeyEventObject) => {
@@ -145,13 +155,13 @@ export class VXInputBase extends VXEditorBase {
         if (this.TextAlgnment == V.TextAlignment.Center) this.jEdit.css('text-align', 'center');
         if (this.MaxLength > 0) this.jEdit.attr("maxlength", this.MaxLength);
         if (this.Placeholder != null) this.jEdit.attr("placeholder", this.Placeholder);
-        span.append(this.jEdit);
-        this.jComponent.append(span)
+        this.jinternalSpan.append(this.jEdit);
+       
 
         if (this.ButtonVisible) {
-            this.jBtn = $('<button/>');
+            this.jBtn = $('<button/>').attr('tab-index','-1').css('outline','none');
             this.jBtn.addClass('btn');
-            this.jBtn.attr('type', "button");
+            this.jBtn.attr('type', "button").css('float','right');
             switch (this.ButtonStyle) {
                 case V.ButtonStyle.Default: break;
                 case V.ButtonStyle.Primary: this.jBtn.addClass("btn-primary"); break;
@@ -176,6 +186,7 @@ export class VXInputBase extends VXEditorBase {
             this.jBtn.off("click").click(() => { if (this.onButtonClicked != null) (V.tryAndCatch(() => { this.onButtonClicked(); })); return false; });
             this.jComponent.append(this.jBtn)
         }
+        this.jComponent.append(this.jinternalSpan)
 
         super.create();
     }
@@ -187,7 +198,7 @@ export class VXInputBase extends VXEditorBase {
     public set TextAlgnment(val: V.TextAlignment) {
         if (val != this._textaligment) {
             this._textaligment = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -199,7 +210,7 @@ export class VXInputBase extends VXEditorBase {
     public set Placeholder(val: string) {
         if (val != this._placeholder) {
             this._placeholder = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -211,7 +222,7 @@ export class VXInputBase extends VXEditorBase {
     public set Password(val: boolean) {
         if (val != this._password) {
             this._password = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -222,7 +233,7 @@ export class VXInputBase extends VXEditorBase {
     public set ButtonClickOnEnter(val: boolean) {
         if (val != this._buttonclickonenter) {
             this._buttonclickonenter = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -234,7 +245,8 @@ export class VXInputBase extends VXEditorBase {
     public set ButtonIcon(val: V.ButtonIcon) {
         if (val != this._buttonicon) {
             this._buttonicon = val;
-            this.draw(true);
+            this.ButtonVisible = true;
+            this.drawDelayed(true);
         }
     }
 
@@ -245,7 +257,7 @@ export class VXInputBase extends VXEditorBase {
     public set ButtonStyle(val: V.ButtonStyle) {
         if (val != this._buttonstyle) {
             this._buttonstyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -256,7 +268,7 @@ export class VXInputBase extends VXEditorBase {
     public set ButtonVisible(val: boolean) {
         if (val != this._buttonVisible) {
             this._buttonVisible = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -268,7 +280,8 @@ export class VXInputBase extends VXEditorBase {
     public set ButtonText(val: string) {
         if (val != this._buttontext) {
             this._buttontext = val;
-            this.draw(true);
+            this.ButtonVisible = true;
+            this.drawDelayed(true);
         }
     }
 

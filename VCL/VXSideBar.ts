@@ -2,11 +2,11 @@ import VXC = require("VCL/VXComponent");
 import VXU = require("VCL/VXUtils");
 import VXM = require("VCL/VXMenu");
 
-export class VXBarBase extends VXC.VXComponent {
+export class TBarBase extends VXC.TComponent {
 
-    public items = new VXM.VXMenuItemCollection<VXM.VXMenuItem>();
-    public createItem(text: string, onClicked?: () => void ): VXM.VXMenuItem {
-        var menuItem = new VXM.VXMenuItem();
+    public items = new VXM.TMenuItemCollection<VXM.TMenuItem>();
+    public createItem(text: string, onClicked?: () => void ): VXM.TMenuItem {
+        var menuItem = new VXM.TMenuItem();
         menuItem.Text = text;
         menuItem.onClicked = onClicked;
         this.items.add(menuItem);
@@ -14,7 +14,7 @@ export class VXBarBase extends VXC.VXComponent {
     }
 }
 
-export class VXNavBar extends VXBarBase {
+export class TNavBar extends TBarBase {
     private _piils: boolean = false;
     public get Pills(): boolean {
         return this._piils;
@@ -22,11 +22,11 @@ export class VXNavBar extends VXBarBase {
     public set Pills(val: boolean) {
         if (val != this._piils) {
             this._piils = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         (<any>this)._fittowidth = true;
     }
@@ -56,13 +56,11 @@ export class VXNavBar extends VXBarBase {
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
 
     }
 }
 
-export class VXSideBar extends VXBarBase {
+export class TSideBar extends TBarBase {
     private _transparent: boolean = false;
     public get Transparent(): boolean {
         return this._transparent;
@@ -70,7 +68,7 @@ export class VXSideBar extends VXBarBase {
     public set Transparent(val: boolean) {
         if (val != this._transparent) {
             this._transparent = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -117,9 +115,8 @@ export class VXSideBar extends VXBarBase {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
 
     }
 }

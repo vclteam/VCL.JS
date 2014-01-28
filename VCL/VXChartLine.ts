@@ -5,7 +5,7 @@ import VXD = require("VCL/VXDataset");
 import VXCB = require("VCL/VXChartBase");
 
 
-export class VXChartLineBase extends VXCB.VXChartBase {
+export class TChartLineBase extends VXCB.TGridChartBase {
     public onClicked: (value: V.TLineValue) => void;
 
     private _showhoverlegend: boolean = true;
@@ -15,21 +15,11 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     public set ShowHoverLegend(val: boolean) {
         if (val != this._showhoverlegend) {
             this._showhoverlegend = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-   
-    private _titleX: string = null;
-    public get TitleX(): string {
-        return this._titleX;
-    }
-    public set TitleX(val: string) {     
-        if (val != this._titleX) {
-            this._titleX = val;
-            this.draw(true);   
-        }
-    }
+
 
     private _minY: number = 0;
     public get YMin(): number {
@@ -38,7 +28,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     public set YMin(val: number) {
         if (val != this._minY) {
             this._minY = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -49,19 +39,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     public set YMax(val: number) {
         if (val != this._maxY) {
             this._maxY = val;
-            this.draw(true);
-        }
-    }
-
-
-    private _titleY: string = null;
-    public get TitleY(): string {
-        return this._titleY;
-    }
-    public set TitleY(val: string) {     
-        if (val != this._titleY) {
-            this._titleY = val;
-            this.draw(true);   
+            this.drawDelayed(true);
         }
     }
 
@@ -75,7 +53,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
         else {
             if (val != this._series1color) {
                 this._series1color = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -91,7 +69,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
         else {
             if (val != this._series2color) {
                 this._series2color = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -106,7 +84,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
         else {
             if (val != this._series3color) {
                 this._series3color = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -121,7 +99,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
         else {
             if (val != this._series4color) {
                 this._series4color = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -136,7 +114,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
         else {
             if (val != this._series5color) {
                 this._series5color = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -151,19 +129,19 @@ export class VXChartLineBase extends VXCB.VXChartBase {
         else {
             if (val != this._series6color) {
                 this._series6color = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
 
-    private _series1name: string = "Series 1";
+    private _series1name: string = null;
     public get Series1Name(): string {
         return this._series1name;
     }
     public set Series1Name(val: string) {
         if (val != this._series1name) {
             this._series1name = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -177,7 +155,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     public set ContinuousLine(val: boolean) {
         if (val != this._continuousine) {
             this._continuousine = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -191,7 +169,7 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     public set Smooth(val: boolean) {
         if (val != this._smooth) {
             this._smooth = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -202,62 +180,62 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     public set LineWidth(val: number) {
         if (val != this._linewidth) {
             this._linewidth = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
-    private _series2name: string = "Series 2";
+    private _series2name: string = null;
     public get Series2Name(): string {
         return this._series2name;
     }
     public set Series2Name(val: string) {
         if (val != this._series2name) {
             this._series2name = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    private _series3name: string = "Series 3";
+    private _series3name: string = null;
     public get Series3Name(): string {
         return this._series3name;
     }
     public set Series3Name(val: string) {
         if (val != this._series3name) {
             this._series3name = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    private _series4name: string = "Series 4";
+    private _series4name: string = null;
     public get Series4Name(): string {
         return this._series4name;
     }
     public set Series4Name(val: string) {
         if (val != this._series4name) {
             this._series4name = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    private _series5name: string = "Series 5";
+    private _series5name: string = null;
     public get Series5Name(): string {
         return this._series5name;
     }
     public set Series5Name(val: string) {
         if (val != this._series5name) {
             this._series5name = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    private _series6name: string = "Series 6";
+    private _series6name: string = null;
     public get Series6Name(): string {
         return this._series6name;
     }
     public set Series6Name(val: string) {
         if (val != this._series6name) {
             this._series6name = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
     private _showgridlines: boolean = true;
@@ -267,14 +245,14 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     public set ShowGridLines(val: boolean) {
         if (val != this._showgridlines) {
             this._showgridlines = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
-    public values = new VXCB.VXChartValuesCollection<VXCB.VXLineValue>();
+    public values = new VXCB.TChartValuesCollection<VXCB.TLineValue>();
     public createValue(date: Date, value1?: number, value2?: number, value3?: number,
-        value4?: number, value5?: number, value6?: number): VXCB.VXLineValue {
-        var col = new VXCB.VXLineValue();
-      
+        value4?: number, value5?: number, value6?: number): VXCB.TLineValue {
+        var col = new VXCB.TLineValue();
+
         col.Date = new Date(date.getTime());
         col.Value1 = value1;
         col.Value2 = value2;
@@ -288,17 +266,17 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     }
 
 
-    public getData(): any[]{
+    public getData(): any[] {
         var dataArray = [];
 
         this.values.forEach((valueOfElement) => {
             var obj: any = { x: valueOfElement.Date, id: valueOfElement.ID }
             obj.value1 = !isFinite(valueOfElement.Value1) ? null : valueOfElement.Value1;
-            obj.value2 = !isFinite(valueOfElement.Value2) ? null :valueOfElement.Value2;
-            obj.value3 = !isFinite(valueOfElement.Value3) ? null :valueOfElement.Value3;
-            obj.value4 = !isFinite(valueOfElement.Value4) ? null :valueOfElement.Value4;
-            obj.value5 = !isFinite(valueOfElement.Value5) ? null :valueOfElement.Value5;
-            obj.value6 = !isFinite(valueOfElement.Value6) ? null :valueOfElement.Value6;
+            obj.value2 = !isFinite(valueOfElement.Value2) ? null : valueOfElement.Value2;
+            obj.value3 = !isFinite(valueOfElement.Value3) ? null : valueOfElement.Value3;
+            obj.value4 = !isFinite(valueOfElement.Value4) ? null : valueOfElement.Value4;
+            obj.value5 = !isFinite(valueOfElement.Value5) ? null : valueOfElement.Value5;
+            obj.value6 = !isFinite(valueOfElement.Value6) ? null : valueOfElement.Value6;
             dataArray.push(obj);
             return true;
         });
@@ -307,13 +285,12 @@ export class VXChartLineBase extends VXCB.VXChartBase {
     }
 }
 
-export class VXChartLine extends VXChartLineBase {
+export class TChartLine extends TChartLineBase {
     private jChart: Line;
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
 
         this.jChart.setData(this.getData());
     }
@@ -321,8 +298,8 @@ export class VXChartLine extends VXChartLineBase {
     public create() {
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
-        var ymin = this.YMin != null? String(this.YMin) : 'auto'
-        var ymax = this.YMax != null? String(this.YMax) : 'auto'
+        var ymin = this.YMin != null ? String(this.YMin) : 'auto'
+        var ymax = this.YMax != null ? String(this.YMax) : 'auto'
 
         this.jChart = new Line({
             element: this.jComponent[0],
@@ -335,22 +312,28 @@ export class VXChartLine extends VXChartLineBase {
                 this.Series5Color, this.Series6Color],
             pointWidths: [1],
             pointStrokeColors: ['#ffffff'],
-            titleX : this.TitleX,
-            paddingX: this.TitleX?35:20,
-            titleY : this.TitleY,
-            paddingY: this.TitleY?25:5,
+            titleX: this.TitleX,
+            paddingX: this.TitleX ? 35 : 20,
+            titleXTip: this.TitleXTip,
+            titleY: this.TitleY,
+            paddingY: this.TitleY ? 25 : 5,
+            titleYTip: this.TitleYTip,
             pointFillColors: [],
             smooth: this.Smooth,
             xLabels: 'auto',
-            hideHover: this.ShowHoverLegend? 'auto':'always',
-            xLabelFormat: null,
+            hideHover: this.ShowHoverLegend ? 'auto' : 'always',
+            xLabelFormat: this.XLabelFormat,
+            yLabelFormat: this.YLabelFormat,
             xLabelMargin: 15,
             grid: this.ShowGridLines,
             continuousLine: this.ContinuousLine,
             preUnits: this.PreValueUnit,
             postUnits: this.PostValueUnit,
-            gridTextSize: 12,
-            gridTextFamily: 'sans-serif',
+            gridTextSize: this.GridTextSize,
+            gridTextColor: this.GridTextColor,
+            titleTextColor: this.TitleTextColor,
+            titleTextSize: this.TitleTextSize,
+            gridTextFamily: this.Font,
             gridTextWeight: 'normal',
             ymax: ymax,
             ymin: ymin
@@ -360,10 +343,10 @@ export class VXChartLine extends VXChartLineBase {
     }
 }
 
-export class VXChartArea extends VXChartLineBase {
+export class TChartArea extends TChartLineBase {
     private jChart: Area;
 
-   
+
     private _fillopacity: number = 0.1;
     public get FillOpacity(): number {
         return this._fillopacity;
@@ -371,20 +354,22 @@ export class VXChartArea extends VXChartLineBase {
     public set FillOpacity(val: number) {
         if (val != this._fillopacity) {
             this._fillopacity = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
         this.jChart.setData(this.getData());
     }
 
     public create() {
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+        var ymin = this.YMin != null ? String(this.YMin) : 'auto'
+        var ymax = this.YMax != null ? String(this.YMax) : 'auto'
+
 
         this.jChart = new Area({
             element: this.jComponent[0],
@@ -397,18 +382,34 @@ export class VXChartArea extends VXChartLineBase {
                 this.Series5Color, this.Series6Color],
             pointWidths: [1],
             pointStrokeColors: ['#ffffff'],
+            titleX: this.TitleX,
+            paddingX: this.TitleX ? 35 : 20,
+            titleXTip: this.TitleXTip,
+            titleY: this.TitleY,
+            paddingY: this.TitleY ? 25 : 5,
+            titleYTip: this.TitleYTip,
             pointFillColors: [],
             smooth: this.Smooth,
             xLabels: 'auto',
             hideHover: 'auto',
-            xLabelFormat: null,
+            xLabelFormat: this.XLabelFormat,
+            yLabelFormat: this.YLabelFormat,
             xLabelMargin: 24,
             grid: this.ShowGridLines,
             continuousLine: this.ContinuousLine,
             preUnits: this.PreValueUnit,
             postUnits: this.PostValueUnit,
+            gridTextSize: this.GridTextSize,
+            gridTextColor: this.GridTextColor,
+            titleTextColor: this.TitleTextColor,
+            titleTextSize: this.TitleTextSize,
+            gridTextFamily: this.Font,
+            gridTextWeight: 'normal',
+            ymax: ymax,
+            ymin: ymin,
             fillOpacity: this.FillOpacity,
             behaveLikeLine: false
+
         }, this);
 
         super.create();
@@ -416,7 +417,7 @@ export class VXChartArea extends VXChartLineBase {
 }
 
 
-export class VXDBChartLine extends VXChartLine {
+export class TDBChartLine extends TChartLine {
     private _value1field: string;
     /**
     * Specifies the field from which the edit control displays data.
@@ -427,7 +428,7 @@ export class VXDBChartLine extends VXChartLine {
     public set ValueField1(val: string) {
         if (val != this._value1field) {
             this._value1field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -441,7 +442,7 @@ export class VXDBChartLine extends VXChartLine {
     public set ValueField2(val: string) {
         if (val != this._value2field) {
             this._value2field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -470,7 +471,7 @@ export class VXDBChartLine extends VXChartLine {
     public set ValueField4(val: string) {
         if (val != this._value4field) {
             this._value4field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -484,7 +485,7 @@ export class VXDBChartLine extends VXChartLine {
     public set ValueField5(val: string) {
         if (val != this._value5field) {
             this._value5field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -498,7 +499,7 @@ export class VXDBChartLine extends VXChartLine {
     public set ValueField6(val: string) {
         if (val != this._value6field) {
             this._value6field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -513,30 +514,30 @@ export class VXDBChartLine extends VXChartLine {
     public set DateField(val: string) {
         if (val != this._datefield) {
             this._datefield = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
 
-    private _dataset: VXD.VXDataset;
+    private _dataset: VXD.TDataset;
     /*
      * Specifies the dataset that contains the field it represents.
      */
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
-    public set Dataset(val: VXD.VXDataset) {
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (this._dataset) {
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
             }
             this._dataset = val;
             if (this._dataset) {
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.drawDelayed(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.drawDelayed(false); });
             }
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -561,7 +562,7 @@ export class VXDBChartLine extends VXChartLine {
                 if (this.Dataset.getFieldValue(this.ValueField6) && isFinite(this.Dataset.getFieldValue(this.ValueField6))) obj.value6 = this.Dataset.getFieldValue(this.ValueField6);
                 dataArray.push(obj);
 
-                var col = new VXCB.VXLineValue();
+                var col = new VXCB.TLineValue();
                 this.values.add(col);
                 col.Value1 = obj.value1;
                 col.Value2 = obj.value2;
@@ -573,12 +574,12 @@ export class VXDBChartLine extends VXChartLine {
                 col.ID = this.Dataset.Recno.toString();
             }
         });
- 
+
         return dataArray;
     }
 }
 
-export class VXDBChartArea extends VXChartArea {
+export class TDBChartArea extends TChartArea {
     private _value1field: string;
     /**
     * Specifies the field from which the edit control displays data.
@@ -603,7 +604,7 @@ export class VXDBChartArea extends VXChartArea {
     public set ValueField2(val: string) {
         if (val != this._value2field) {
             this._value2field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -632,7 +633,7 @@ export class VXDBChartArea extends VXChartArea {
     public set ValueField4(val: string) {
         if (val != this._value4field) {
             this._value4field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -646,7 +647,7 @@ export class VXDBChartArea extends VXChartArea {
     public set ValueField5(val: string) {
         if (val != this._value5field) {
             this._value5field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -660,7 +661,7 @@ export class VXDBChartArea extends VXChartArea {
     public set ValueField6(val: string) {
         if (val != this._value6field) {
             this._value6field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -675,28 +676,28 @@ export class VXDBChartArea extends VXChartArea {
     public set DateField(val: string) {
         if (val != this._datefield) {
             this._datefield = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
 
-    private _dataset: VXD.VXDataset;
+    private _dataset: VXD.TDataset;
     /*
      * Specifies the dataset that contains the field it represents.
      */
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
-    public set Dataset(val: VXD.VXDataset) {
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (this._dataset) {
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
             }
             this._dataset = val;
             if (this._dataset) {
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.draw(false); });
             }
             this.draw(true);
         }
@@ -726,7 +727,7 @@ export class VXDBChartArea extends VXChartArea {
 
                 dataArray.push(obj);
 
-                var col = new VXCB.VXLineValue();
+                var col = new VXCB.TLineValue();
                 this.values.add(col);
                 col.Value1 = obj.value1;
                 col.Value2 = obj.value2;
@@ -738,7 +739,7 @@ export class VXDBChartArea extends VXChartArea {
                 col.ID = this.Dataset.Recno.toString();
             }
         });
-        
+
         return dataArray;
     }
 }
@@ -751,7 +752,7 @@ class Line extends VXCB.Grid {
     public seriesPoints;
     private pointGrow;
     private pointShrink;
-    public  paths;
+    public paths;
 
 
     constructor(options, owner) {
@@ -772,16 +773,17 @@ class Line extends VXCB.Grid {
             r: this.options.pointSize
         }, 25, 'linear');
         if (this.options.hideHover !== 'always') {
-            this.hover = new Hover({
+            this.hover = new VXCB.Hover({
                 parent: this.el
             });
+            this.hover.animation = false;
             this.on('hovermove', this.onHoverMove);
             this.on('hoverout', this.onHoverOut);
             return this.on('gridclick', this.onGridClick);
         }
     }
 
-  
+
     calc() {
         this.calcPoints();
         return this.generatePaths();
@@ -842,7 +844,7 @@ class Line extends VXCB.Grid {
 
     onGridClick(x, y, evt) {
         if (this.owner == null) return;
-        var owner = <VXChartLine>this.owner;
+        var owner = <TChartLine>this.owner;
         if (owner.onClicked == null) return;
 
         var index = this.hitTest(x, y);
@@ -851,8 +853,8 @@ class Line extends VXCB.Grid {
             var item = owner.values.FindItemByID(id);
 
             if (item != null) (V.tryAndCatch(() => {
-                if (owner instanceof VXDBChartLine && (<VXDBChartLine>owner).Dataset != null) {
-                    (<VXDBChartLine>owner).Dataset.Recno = parseInt(id);
+                if (owner instanceof TDBChartLine && (<TDBChartLine>owner).Dataset != null) {
+                    (<TDBChartLine>owner).Dataset.Recno = parseInt(id);
                 }
 
                 owner.onClicked(item);
@@ -888,20 +890,35 @@ class Line extends VXCB.Grid {
     }
 
     hoverContentForRow(index) {
-        var content, j, row, y, _i, _len, _ref;
+        var content, j, row, x, y, _i, _len, _ref;
         row = this.data[index];
-        content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
-        _ref = row.y;
-        for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-            y = _ref[j];
-            if (y != null) {
-
-                content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y, false)) + "\n</div>";
-            }
+        if (row == null) {
+            return null;
         }
+
+        //user have data to put on
         if (typeof this.options.hoverCallback === 'function') {
             content = this.options.hoverCallback(index, this.options, content);
         }
+        //generate hover div
+        else {
+            var lblX: string = this.options.titleXTip;
+            content = "<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + lblX + ":\n  " + row.label + "\n</div>";
+            _ref = row.y;
+            for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+                y = _ref[j];
+                if (y != null) {
+                    var lblY: string = this.options.labels[j];
+                    if (lblY == null) {
+                        lblY = this.options.titleYTip;
+                    }
+                    //lbl = lbl.substring(0, 14);
+                    content += "<div class='morris-hover-point' style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lblY + ":\n  " + (this.yLabelFormat(y, false)) + "\n</div>";
+                }
+            }
+        }
+
+        //draw location
         return [content, row._x, row._ymax];
     }
 
@@ -964,16 +981,16 @@ class Line extends VXCB.Grid {
         var drawLabel, l, labels, prevAngleMargin, prevLabelMargin, row, ypos, _i, _len, _results,
             _this = this;
 
-         ypos = this.bottom + 3;
+        ypos = this.bottom + 3;
 
-        
+
         if (this.options.titleX) {
             var b = this.measureText(this.options.titleX);
             var center = (this.elementWidth / 2);
-            this.raphael.text(center, this.bottom + this.options.paddingX - this.options.gridTextSize / 2, this.options.titleX).
-                attr('font-size', this.options.gridTextSize + 1).attr('font-family', this.options.gridTextFamily-1).
-                attr('font-weight', "normal").attr('fill', this.options.gridTextColor);
-        } 
+            this.raphael.text(center, this.bottom + this.options.paddingX - this.options.titleTextSize / 2, this.options.titleX).
+                attr('font-size', this.options.titleTextSize).attr('font-family', this.options.gridTextFamily).
+                attr('font-weight', "normal").attr('fill', this.options.titleTextColor);
+        }
 
         prevLabelMargin = null;
         prevAngleMargin = null;
@@ -999,7 +1016,7 @@ class Line extends VXCB.Grid {
                 return label.remove();
             }
         };
-        if (this.options.parseTime) {
+        if (this.options.parseTime && this.options.xLabelFormat == null) {
             if (this.data.length === 1 && this.options.xLabels === 'auto') {
                 labels = [[this.data[0].label, this.data[0].x]];
             } else {
@@ -1193,7 +1210,7 @@ class Line extends VXCB.Grid {
 
 function labelSeries(dmin, dmax, pxwidth, specName, xLabelFormat) {
     var d, d0, ddensity, name, ret, s, spec, t, _i, _len, _ref;
-    ddensity = 130 * (dmax - dmin) / pxwidth;
+    ddensity = 110 * (dmax - dmin) / pxwidth;
     d0 = new Date(dmin);
     spec = LABEL_SPECS[specName];
     if (spec === void 0) {
@@ -1324,60 +1341,6 @@ function secondsSpecHelper(interval) {
 function pad2(number) {
     return (number < 10 ? '0' : '') + number;
 }
-
-class Hover {
-    private options;
-    private el;
-    constructor(options) {
-        this.options = $.extend({}, { "class": 'morris-hover morris-default-style' }, options == null ? {} : options);
-        this.el = $("<div class='" + this.options["class"] + "'></div>");
-        this.el.hide();
-        this.options.parent.append(this.el);
-    }
-
-    update(html, x, y) {
-        this.html(html);
-        this.show();
-        return this.moveTo(x, y);
-    }
-
-    html(content) {
-        return this.el.html(content);
-    }
-
-    moveTo(x, y) {
-        var hoverHeight, hoverWidth, left, parentHeight, parentWidth, top;
-        parentWidth = this.options.parent.innerWidth();
-        parentHeight = this.options.parent.innerHeight();
-        hoverWidth = this.el.outerWidth();
-        hoverHeight = this.el.outerHeight();
-        left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth);
-        if (y != null) {
-            top = y - hoverHeight - 10;
-            if (top < 0) {
-                top = y + 10;
-                if (top + hoverHeight > parentHeight) {
-                    top = parentHeight / 2 - hoverHeight / 2;
-                }
-            }
-        } else {
-            top = parentHeight / 2 - hoverHeight / 2;
-        }
-        return this.el.css({
-            left: left + "px",
-            top: parseInt(top) + "px"
-        });
-    }
-
-    show() {
-        return this.el.show();
-    }
-
-    hide() {
-        return this.el.hide();
-    }
-}
-
 
 class Area extends Line {
     calcPoints() {

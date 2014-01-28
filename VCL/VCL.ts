@@ -1,170 +1,240 @@
+﻿import VXObjectMod = require("VCL/VXObject");
+export class TObject extends VXObjectMod.TObject { };
+export class TTimer extends VXObjectMod.TTimer { };
+export class TCollectionItem extends VXObjectMod.TCollectionItem { };
+export class TCollection<T> extends VXObjectMod.TCollection<T>  { };
+export class TList<T> extends VXObjectMod.TList<T>  { };
+
+
+
 import VXCompMod = require("VCL/VXComponent");
+/**
+* TComponent is the base class for all components that are visible at run time.
+*/
+export class TComponent extends VXCompMod.TComponent { };
+export class TControl extends VXCompMod.TControl { };
+
 import VXContainMod = require("VCL/VXContainer");
-import VXPageMod = require("VCL/VXPage");
-import VXModalMod = require("VCL/VXModal");
-import VXPopupMod = require("VCL/VXPopup");
-import VXTextMod = require("VCL/VXText");
-import VXInputMod = require("VCL/VXInput");
-import VXObjectMod = require("VCL/VXObject");
-import VXImageMod = require("VCL/VXImage");
-import VXMenuMod = require("VCL/VXMenu");
-import VXQueryMod = require("VCL/VXQuery");
-import VXSSASMod = require("VCL/VXOlapSSAS");
-import VXButtonMod = require("VCL/VXButton");
+export class TContainer extends VXContainMod.TContainer { };
+export class TBootstrapRow extends VXContainMod.TBootstrapRow { };
+export class TBootstrapRowFluid extends VXContainMod.TBootstrapRowFluid { };
+export class TBootstrapSpan extends VXContainMod.TBootstrapSpan { };
+
 import VXAppMod = require("VCL/VXApplication");
-import VXDBGridMod = require("VCL/VXDBGrid");
-import VXDatasetMod = require("VCL/VXDataset");
-import VXComboboxMod = require("VCL/VXCombo");
-import VXlistboxMod = require("VCL/VXListBox");
-import VXSideBarMod = require("VCL/VXSideBar");
-import VXWellMod = require("VCL/VXWell");
-import VXCheckboxMod = require("VCL/VXCheckBox");
-import VXProgressMod = require("VCL/VXProgressBar");
-import VXAlertMod = require("VCL/VXAlert");
-import VXGougeMod = require("VCL/VXGauge");
-import VXVXBarMod = require("VCL/VXChartBar");
-import VXLineMod = require("VCL/VXChartLine");
-import VXDonutMod = require("VCL/VXChartDonut");
-import VXChartMod = require("VCL/VXChartBase");
-import VXDotMod = require("VCL/VXChartDot");
-import VXconstMod = require("VCL/VXConst");
-import VXInputDateMod = require("VCL/VXDateInput");
-import VXSparkMod = require("VCL/VXSparkLine");
-import VXGridSterMod = require("VCL/VXGridSter");
+export class TApplication extends VXAppMod.TApplication { };
+export class TNavbarItem extends VXAppMod.TNavbarItem { };
+
 import VXServerMod = require("VCL/VXServer");
+export class TServer extends VXServerMod.TServer { };
+
+import VXPageMod = require("VCL/VXPage");
+export class TPage extends VXPageMod.TPage { };
+
+import VXModalMod = require("VCL/VXModal");
+export class TModal extends VXModalMod.TModal { };
+
+import VXTabMod = require("VCL/VXTab");
+export class TTabSheet extends VXTabMod.TTabSheet { };
+export class TTabPage extends VXTabMod.TTabPage { };
+export class TTabPanel extends VXTabMod.TTabPanel { };
+
+//import VXPopupMod = require("VCL/VXPopup");
+
+import VXTextMod = require("VCL/VXText");
+export class TLabel extends VXTextMod.TLabel { };
+export class TTagCloud extends VXTextMod.TTagCloud { };
+export class TTagCloudItem extends VXTextMod.TTagCloudItem { };
+export class TPillBox extends VXTextMod.TPillBox { };
+export class TPillBoxItem extends VXTextMod.TPillBoxItem { };
+export class TBreadCrumb extends VXTextMod.TBreadCrumb { };
+export class TBreadCrumbItem extends VXTextMod.TBreadCrumbItem { }
+export class TPagination extends VXTextMod.TPagination { };
+export class TPaginationItem extends VXTextMod.TPaginationItem { }
+export class TDBLabel extends VXTextMod.TDBLabel { };
+export class TBadge extends VXTextMod.TBadge { };
+export class TDBBadge extends VXTextMod.TDBBadge { };
+export class TText extends VXTextMod.TText { };
+export class TDBText extends VXTextMod.TDBText { };
+
+import VXInputMod = require("VCL/VXInput");
+export class TDBInput extends VXInputMod.TDBInput { };
+export class TInput extends VXInputMod.TInput { };
+export class TTextArea extends VXInputMod.TTextArea { };
+export class TDBTextArea extends VXInputMod.TDBTextArea { };
+export class TInputNumeric extends VXInputMod.TInputNumeric { };
+
+import VXImageMod = require("VCL/VXImage");
+export class TImage extends VXImageMod.TImage { };
+export class TIcon extends VXImageMod.TIcon { };
+
+import VXMenuMod = require("VCL/VXMenu");
+export class TMenuItem extends VXMenuMod.TMenuItem { };
+export class TMenuItemCollection<TMenuItem> extends VXMenuMod.TMenuItemCollection<TMenuItem> { };
 
 
-export class TObject extends VXObjectMod.VXObject { };
-export class TTimer extends VXObjectMod.VXTimer { };
-export class TCollectionItem extends VXObjectMod.VXCollectionItem { };
-export class TCollection<T> extends VXObjectMod.VXCollection<T> { };
-export class TList<T> extends VXObjectMod.VXList<T> { };
-export class TButton extends VXButtonMod.VXButton { };
-/**
-* Button is a push button control.
-* Use TButton to put a standard push button on a page or modalform
-*/
-export class TToggleSwitch extends VXButtonMod.VXToggleSwitch { };
-export class TInput extends VXInputMod.VXInput { };
-export class TInputDate extends VXInputDateMod.VXDateInput { };
-export class TDBInputDate extends VXInputDateMod.VXDBDateInput { };
-export class TComboItem extends VXComboboxMod.VXComboItem { };
-export class TCombobox extends VXComboboxMod.VXCombobox { };
-export class TDBCombobox extends VXComboboxMod.VXDBCombobox { };
-export class TListBox extends VXlistboxMod.VXListbox { };
-export class TTree extends VXlistboxMod.VXTree { };
-export class TTreeNodeItem extends VXlistboxMod.VXTreeNodeItem { };
-
-export class TSparkBar extends VXSparkMod.VXSparkBar { };
-export class TSparkLine extends VXSparkMod.VXSparkLine { };
-export class TSparkPie extends VXSparkMod.VXSparkPie { };
-export class TDBSparkBar extends VXSparkMod.VXDBSparkBar { };
-export class TDBSparkLine extends VXSparkMod.VXDBSparkLine { };
-export class TDBSparkPie extends VXSparkMod.VXDBSparkPie { };
-export class TWidgetGrid extends VXGridSterMod.VXWidgetGrid { };
-export class TWidgetPanel extends VXGridSterMod.VXWidgetPanel { };
-/**
-* Wrap any text and an optional dismiss button for a basic warning alert message.
-*/
-export class TAlert extends VXAlertMod.VXAlert { };
-
-export class TNotification extends VXAlertMod.VXNotification { };
-
-export class TGauge extends VXGougeMod.VXGauge { };
-
-export class TChartDonut extends VXDonutMod.VXChartDonut { };
-export class TDBChartDonut extends VXDonutMod.VXDBChartDonut { };
-export class TChartDot extends VXDotMod.VXChartDot { };
-export class TChartBubble extends VXDotMod.VXChartBubble { };
-export class TChartBar extends VXVXBarMod.VXChartBar { };
-export class TDBChartBar extends VXVXBarMod.VXDBChartBar { };
-export class TChartBullet extends VXVXBarMod.VXChartBullet { };
-export class TChartLine extends VXLineMod.VXChartLine { };
-export class TDBChartLine extends VXLineMod.VXDBChartLine { };
-export class TChartArea extends VXLineMod.VXChartArea { };
-export class TDBChartArea extends VXLineMod.VXDBChartArea { };
-
-
-export class TDountValue extends VXChartMod.VXDountValue { };
-export class TBarValue extends VXChartMod.VXBarValue { };
-export class TLineValue extends VXChartMod.VXLineValue { };
-export class TDotValue extends VXChartMod.VXDotValue { };
-
-export class TDBInput extends VXInputMod.VXDBInput { };
-export class TDBGrid extends VXDBGridMod.VXDBGrid { };
-export class TDBGridColumn extends VXDBGridMod.VXDBGridColumn { };
-export class TLabel extends VXTextMod.VXLabel { };
-export class TTagCloud extends VXTextMod.VXTagCloud { };
-export class TPillBox extends VXTextMod.VXPillBox { };
-export class TDBLabel extends VXTextMod.VXDBLabel { };
-export class TBadge extends VXTextMod.VXBadge { };
-export class TDBBadge extends VXTextMod.VXDBBadge { };
-export class TSideBar extends VXSideBarMod.VXSideBar { };
-export class TNavBar extends VXSideBarMod.VXNavBar { };
-export class TImage extends VXImageMod.VXImage { };
-export class TIcon extends VXImageMod.VXIcon { };
-
-export class TWell extends VXWellMod.VXWell { };
-export class TGoogleMap extends VXWellMod.VXGoogleMap { };
-export class TPanel extends VXWellMod.VXPanel { };
-export class TCheckBox extends VXCheckboxMod.VXCheckBox { };
-export class TProgressBar extends VXProgressMod.VXProgressBar { };
-export class TRatingStar extends VXProgressMod.VXRatingStart { };
-export class TConst extends VXconstMod.VXConst { };
-
-export class TText extends VXTextMod.VXText { };
-export class TDBText extends VXTextMod.VXDBText { };
-export class TMenuItem extends VXMenuMod.VXMenuItem { };
-
+import VXQueryMod = require("VCL/VXQuery");
 /**
 * TQuery represents a dataset with a result set that is based on an SQL statement.
 */
-export class TQuery extends VXQueryMod.VXQuery { };
-
-/**
-* TQuery represents a dataset with a result set that is based on an SQL statement.
-*/
-export class TOlapSSAS extends VXSSASMod.VXOlapSSAS { };
-
-
-
-export class TServer extends VXServerMod.VXServer { };
+export class TQuery extends VXQueryMod.TQuery { };
 
 /**
 * TQuery represents a dataset with a result set that is based on a remoteSQL statement.
 */
-export class TQueryRemote extends VXQueryMod.VXQueryRemote { };
+export class TQueryRemote extends VXQueryMod.TQueryRemote { };
+export class TQueryParam extends VXQueryMod.TQueryParam { };
 
+
+import VXSSASMod = require("VCL/VXOlapSSAS");
+export class TOlapSSAS extends VXSSASMod.TOlapSSAS { };
+
+
+import VXButtonMod = require("VCL/VXButton");
+/**
+* Button is a push button control.
+* Use TButton to put a standard push button on a page or modalform
+*/
+export class TButton extends VXButtonMod.TButton { };
+export class TToggleSwitch extends VXButtonMod.TToggleSwitch { };
+
+
+import VXDBGridMod = require("VCL/VXDBGrid");
+export class TDBGrid extends VXDBGridMod.TDBGrid { };
+export class TDBGridColumn extends VXDBGridMod.TBGridColumn { };
+
+
+import VXDatasetMod = require("VCL/VXDataset");
 /**
 * TDataset is the base class for all dataset components that represent data in rows and columns.
 */
-export class TDataset extends VXDatasetMod.VXDataset { };
+export class TDataset extends VXDatasetMod.TDataset { };
+export class TClientDataset extends VXDatasetMod.TClientDataset { };
+//export class TObjectDataset extends VXDatasetMod.TObjectDataset { }; not read yet
 
-export class TObjectDataset extends VXDatasetMod.VXObjectDataset { };
 
+import VXComboboxMod = require("VCL/VXCombo");
+export class TComboItem extends VXComboboxMod.TComboItem { };
+export class TCombobox extends VXComboboxMod.TCombobox { };
+export class TDBCombobox extends VXComboboxMod.TDBCombobox { };
+
+
+import VXlistboxMod = require("VCL/VXListBox");
+export class TListBox extends VXlistboxMod.TListbox { };
+export class TTree extends VXlistboxMod.TTree { };
+export class TTreeNodeItem extends VXlistboxMod.TTreeNodeItem { };
+
+import VXSideBarMod = require("VCL/VXSideBar");
+export class TSideBar extends VXSideBarMod.TSideBar { };
+export class TNavBar extends VXSideBarMod.TNavBar { };
+
+
+import VXWellMod = require("VCL/VXWell");
+export class TWell extends VXWellMod.TWell { };
+export class TGoogleMap extends VXWellMod.TGoogleMap { };
+export class TPanel extends VXWellMod.TPanel { };
+export class TPanelButton extends VXWellMod.TPanelButton { };
+
+
+import VXCheckboxMod = require("VCL/VXCheckBox");
+export class TCheckBox extends VXCheckboxMod.TCheckBox { };
+
+import VXProgressMod = require("VCL/VXProgressBar");
+export class TProgressBar extends VXProgressMod.TProgressBar { };
+export class TRatingStar extends VXProgressMod.TRatingStart { };
+export class TSlider extends VXProgressMod.TSlider { };
+export class TRangeSlider extends VXProgressMod.TRangeSlider { };
+
+
+
+
+
+import VXAlertMod = require("VCL/VXAlert");
 /**
-* TComponent is the base class for all components that are visible at run time.
+* Wrap any text and an optional dismiss button for a basic warning alert message.
 */
-export class TComponent extends VXCompMod.VXComponent { };
-export class TControl extends VXCompMod.VXControl { };
-export class TContainer extends VXContainMod.VXContainer { };
-export class TPage extends VXPageMod.VXPage { };
-export class TModal extends VXModalMod.VXModal { };
-export class TPopup extends VXPopupMod.VXPopup { };
-export class TApplication extends VXAppMod.VXApplication { };
-export class TNavbarItem extends VXAppMod.VXNavbarItem { };
+export class TAlert extends VXAlertMod.TAlert { };
+export class TNotification extends VXAlertMod.TNotification { };
 
+
+import VXGougeMod = require("VCL/VXGauge");
+export class TGauge extends VXGougeMod.TGauge { };
+
+
+
+import VXVXBarMod = require("VCL/VXChartBar");
+export class TChartBar extends VXVXBarMod.TChartBar { };
+export class TDBChartBar extends VXVXBarMod.TDBChartBar { };
+export class TChartBullet extends VXVXBarMod.TChartBullet { };
+
+
+import VXVXBarVVMod = require("VCL/VXChartBarH");
+export class TChartBarH extends VXVXBarVVMod.TChartBarH { };
+export class TDBChartBarH extends VXVXBarVVMod.TDBChartBarH { };
+
+import VXLineMod = require("VCL/VXChartLine");
+export class TChartLine extends VXLineMod.TChartLine { };
+export class TDBChartLine extends VXLineMod.TDBChartLine { };
+export class TChartArea extends VXLineMod.TChartArea { };
+export class TDBChartArea extends VXLineMod.TDBChartArea { };
+
+import VXDonutMod = require("VCL/VXChartDonut");
+export class TChartDonut extends VXDonutMod.TChartDonut { };
+export class TDBChartDonut extends VXDonutMod.TDBChartDonut { };
+
+
+import VXChartMod = require("VCL/VXChartBase");
+export class TDountValue extends VXChartMod.TDountValue { };
+export class TBarValue extends VXChartMod.TBarValue { };
+export class TLineValue extends VXChartMod.TLineValue { };
+export class TDotValue extends VXChartMod.TDotValue { };
+
+
+import VXDotMod = require("VCL/VXChartDot");
+export class TChartDot extends VXDotMod.TChartDot { };
+export class TChartBubble extends VXDotMod.TChartBubble { };
+
+import VXconstMod = require("VCL/VXConst");
+
+import VXInputDateMod = require("VCL/VXDateInput");
+export class TInputDate extends VXInputDateMod.TDateInput { };
+export class TDBInputDate extends VXInputDateMod.TDBDateInput { };
+
+
+import VXSparkMod = require("VCL/VXSparkLine");
+export class TSparkBar extends VXSparkMod.TSparkBar { };
+export class TSparkLine extends VXSparkMod.TSparkLine { };
+export class TSparkPie extends VXSparkMod.TSparkPie { };
+export class TDBSparkBar extends VXSparkMod.TDBSparkBar { };
+export class TDBSparkLine extends VXSparkMod.TDBSparkLine { };
+export class TDBSparkPie extends VXSparkMod.TDBSparkPie { };
+
+import VXGridSterMod = require("VCL/VXGridSter");
+export class TWidgetGrid extends VXGridSterMod.TWidgetGrid { };
+export class TWidgetPanel extends VXGridSterMod.TWdgetPanel { };
+
+export class TConst extends VXconstMod.TConst { };
+//export class TPopup extends VXPopupMod.TPopup { };
+
+
+//import VXCIT = require("VCL/VXS3Tree");
+//export class TD3Tree extends VXCIT.TD3Tree { };
 
 /**
 * Represents application-level information.
 * By default, when a new project is created, VCL.JS constructs an TApplication object and assigns it to the Application variable in the VCL module. 
 * Application has several properties that can be used to get information about an application while it runs.
 */
-export var Application: VXAppMod.VXApplication = new VXAppMod.VXApplication();
+export var Application: TApplication = new TApplication();
 export var Global: any = {};
 export enum CalendarType { Daily, Monthly }
 export enum PasswordStrength { LOW, MEDIUM, HIGH, EXTREME }
+export enum SortColumnOrder { Ascending, Descending }
 
+export enum SliderOrientation { vertical, horizontal };
+
+export enum SliderHandle { round, triangle, square };
+
+export enum SliderSelection { before, after, none };
 
 export enum ButtonStyle {
     Default,
@@ -215,12 +285,9 @@ export enum TextStyle {
 }
 
 export enum HeaderTextStyle {
-    default,
-    h4,
-    h5,
-    h6,
-    lead,
-    small,
+    Default,
+    Strong,
+    Small,
 }
 
 export enum AlertStyle {
@@ -260,6 +327,13 @@ export enum ProgressBarStyle {
 
 
 export enum ButtonSize {
+    Default,
+    Large,
+    Small,
+    Mini,
+}
+
+export enum PaginationSize {
     Default,
     Large,
     Small,
@@ -425,6 +499,18 @@ export enum IconAlignment {
     Right
 }
 
+
+export enum PaginationAlignment {
+    Left,
+    Center,
+    Right
+}
+
+export enum TabStyle {
+    Tab,
+    Pill
+}
+
 export enum ItemAlignment {
     Left,
     Right
@@ -491,8 +577,22 @@ export enum NotificationPosition {
     BottomRight
 }
 
+export enum Language {
+    Afar, Afrikaans, Albanian, Amharic, Arabic, Aragonese, Armenian, Assamese, Aymara, Azerbaijani, Bashkir, Basque, Bengali,
+    Bhutani, Bihari, Bislama, Breton, Bulgarian, Burmese, Byelorussian, Cambodian, Catalan, Cherokee, Chewa, Chinese,
+    Chinese_Simplified, Chinese_Traditional, Corsican, Croatian, Czech, Danish, Divehi, Dutch, Edo, English, Esperanto,
+    Estonian, Faeroese, Farsi, Fiji, Finnish, Flemish, French, Frisian, Fulfulde, Galician, Gaelic_Scottish, Gaelic_Manx,
+    Georgian, German, Greek, Greenlandic, Guarani, Gujarati, Hausa, Hawaiian, Hebrew, Hindi, Hungarian, Ibibio, Icelandic,
+    Idoio, Igbo, Indonesian, Interlingua, Interlingue, Inuktitut, Inupiak, Irish, Italian, Japanese, Javanese, Kannada,
+    Kanuri, Kashmiri, Kazakh, Kirghiz, Kirundi, Konkani, Korean, Kurdish, Laothian, Latin, Latvian, Limburgish, Lingala,
+    Lithuanian, Macedonian, Malagasy, Malay, Malayalam, Maltese, Maori, Marathi, Moldavian, Mongolian, Nauru, Nepali, Norwegian,
+    Occitan, Oriya, Oromo, Papiamentu, Pashto, Polish, Portuguese, Punjabi, Quechua, Romanian, Russian, Sami, Samoan, Sangro,
+    Sanskrit, Serbian, Serbo_Croatian, Sesotho, Setswana, Shona, Sichuan, Sindhi, Sinhalese, Siswati, Slovak, Slovenian, Somali,
+    Spanish, Sundanese, Swahili, Swedish, Syriac, Tagalog, Tajik, Tamazight, Tamil, Tatar, Telugu, Thai, Tibetan, Tigrinya, Tonga,
+    Tsonga, Turkish, Turkmen, Twi, Uighur, Ukrainian, Urdu, Uzbek, Venda, Vietnamese, Wallon, Welsh, Wolof, Xhosa, Yoruba, Zulu
+}
 
-export enum PopupPlacement {
+export enum PopoverPlacement {
     Left,
     Right,
     Top,
@@ -532,6 +632,7 @@ export function tryAndCatch(callback: () => void) {
 
 
 export function iconEnumToBootstrapStyle(icon: ButtonIcon): string {
+    if (!icon) return "";
     return ButtonIcon[icon].replace(/_/gi, "-");
 }
 
@@ -546,34 +647,39 @@ export function getClassStyleHexColor(selector, style: string): string {
 }
 
 
-export function humanFriendlyNumber(value, roundfactor): string {
-    var p, d2, i, s;
 
-    p = Math.pow;
-    d2 = p(10, roundfactor);
-    i = 7;
-    while (i) {
-        s = p(10, i-- * 3);
-        if (s <= value) {
-            value = Math.round(value * d2 / s) / d2 + "KMGTPE"[i];
-        }
-    }
-    return value;
-}
-
-export function commaNumber(value: number, roundfactor=2): string {
-    var absnum, intnum, ret, strabsnum;
-    if (value != null) {
-        ret = value < 0 ? "-" : "";
-        absnum = Math.abs(value);
-        intnum = Math.floor(absnum).toFixed(0);
-        ret += intnum.replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
-        strabsnum = absnum.toString();
-        if (strabsnum.length > intnum.length) {
-            ret += "."+strabsnum.substring(0, roundfactor);
-        }
-        return ret;
-    } else {
-        return '-';
-    }
+function dummy() {
+    new VXCompMod.TComponent(null);
+    new VXObjectMod.TObject();
+    new VXContainMod.TContainer(null);
+    new VXAppMod.TApplication();
+    new VXServerMod.TServer();
+    new VXButtonMod.TButton(null);
+    new VXTextMod.TDBText(null)
+    new VXSparkMod.TSparkBar(null);
+    new VXInputMod.TDBInput(null);
+    new VXImageMod.TImage(null);
+    new VXQueryMod.TQuery(null);
+    new VXGridSterMod.TWidgetGrid(null);
+    new VXComboboxMod.TCombobox(null);
+    new VXWellMod.TPanel(null);
+    new VXVXBarVVMod.TChartBarH(null);
+    new VXDBGridMod.TBGridColumn();
+    new VXLineMod.TChartLine(null);
+    new VXChartMod.TDountValue();
+    new VXlistboxMod.TTreeNodeItem();
+    new VXProgressMod.TRatingStart(null);
+    new VXAlertMod.TNotification(null);
+    new VXGougeMod.TGauge(null);
+    new VXSSASMod.TOlapSSAS(null);
+    new VXInputDateMod.TDBDateInput(null);
+    new VXPageMod.TPage();
+    new VXDatasetMod.TObjectDataset();
+    new VXSideBarMod.TSideBar(null);
+    new VXCheckboxMod.TCheckBox(null);
+    new VXDonutMod.TChartDonut(null);
+    new VXMenuMod.TMenuItem();
+    new VXModalMod.TModal();
+    new VXDotMod.TChartBubble(null);
+    new VXVXBarMod.TChartBar(null);
 }

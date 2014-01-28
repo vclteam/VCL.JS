@@ -3,53 +3,47 @@ import V = require("VCL/VCL");
 import VXO = require("VCL/VXObject");
 import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
+import VXU = require("VCL/VXUtils");
 
 declare function Spinner(options: any): void;
 
-export class VXContainer extends VXC.VXComponent {
+export class TContainer extends VXC.TComponent {
     private __HTML__: string;
-    public components = new VXO.VXCollection<VXC.VXComponent>();
+    public components = new VXO.TCollection<VXC.TComponent>();
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         if (this.__HTML__) $(this.jComponent).html(this.__HTML__);
         if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
     }
 
-    public addComponent(component: VXC.VXComponent): void {
+    private addComponent(component: VXC.TComponent): void {
         this.components.add(component);
     }
 
 
-    public draw(reCreate: boolean) {
-        this.initialized = true;
+    public draw(reCreate: boolean,drawChilds : boolean = true) {
         super.draw(reCreate);
-        if (this.jComponent) {
-            if (this.Visible) this.jComponent.show();//css('visibility', this.Visible ? 'visible' : 'hidden');
-            else this.jComponent.hide();
+        if (drawChilds) {
+            this.components.forEach((item: VXC.TComponent) => {
+                item.draw(reCreate);
+                return true;
+            });
         }
-        this.components.forEach((item: VXC.VXComponent) => {
-            item.draw(reCreate);
-            return true;
-        });
     }
 
     public get isContainer(): boolean {
         return true;
     }
 
-    private _dataset: VXD.VXDataset;
-    /*
-      * Specifies the dataset thfor the container,all sub component will bind to this dataset by default.
-      */
-    public get Dataset(): VXD.VXDataset {
-        return this._dataset;
+    public createBootstrapRow(): TBootstrapRow {
+        return new TBootstrapRow(this);
     }
-    public set Dataset(val: VXD.VXDataset) {
-        if (val != this._dataset) {  
-            this._dataset = val;
-        }
+
+    public createBootstrapRowFluid(): TBootstrapRowFluid {
+        return new TBootstrapRowFluid(this);
     }
+
 
     private spinner : any;
     private showLoadingProgressBar() {
@@ -87,17 +81,48 @@ export class VXContainer extends VXC.VXComponent {
     private addQuery(query: VXD.VXDatasetInt) {
         if (query == null) return;
         if (!query.ShowProgressBar) return;
-        VXContainer.activeQueries.add(query);
+        TContainer.activeQueries.add(query);
         
-        if (VXContainer.activeQueries.length() == 1) this.showLoadingProgressBar();
+        if (TContainer.activeQueries.length() == 1) this.showLoadingProgressBar();
     }
 
     private removeQuery(query: VXD.VXDatasetInt) {
         if (query == null) return;
         if (!query.ShowProgressBar) return;
-        VXContainer.activeQueries.remove(query);
+        TContainer.activeQueries.remove(query);
 
-        if (VXContainer.activeQueries.length() == 0) this.hideLoadingProgressBar();
+        if (TContainer.activeQueries.length() == 0) this.hideLoadingProgressBar();
+    }
+
+}
+
+export class TBootstrapRow extends TContainer {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+        super(aOwner, renderTo);
+        this.jComponent.addClass('row');
+    }
+
+    public createBootstrapSpan(spanSize: number): TBootstrapSpan {
+        return new TBootstrapSpan(this, null, spanSize);
+    }
+}
+
+export class TBootstrapRowFluid extends TContainer {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+        super(aOwner, renderTo);
+        this.jComponent.addClass('row-fluid');
+    }
+
+    public createBootstrapSpan(spanSize: number): TBootstrapSpan {
+        return new TBootstrapSpan(this, null, spanSize);
+    }
+}
+
+
+export class TBootstrapSpan extends TContainer {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, spanSize: number = 1 ) {
+        super(aOwner, renderTo);
+        this.jComponent.addClass('span' + spanSize);
     }
 
 }

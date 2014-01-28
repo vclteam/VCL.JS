@@ -2,14 +2,37 @@ import V = require("VCL/VCL");
 import VC = require("VCL/VXComponent");
 import VXO = require("VCL/VXObject");
 
-export class VXChartBase extends VC.VXComponent {
+export class TChartBase extends VC.TComponent {
 
-    constructor(aOwner: VC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         (<any>this)._fittowidth = true;
         this.Height = 200;
     }
 
+    private _xLabelFormat: any = null;
+    public get XLabelFormat(): any {
+        return this._xLabelFormat;
+    }
+    public set XLabelFormat(val: any) {
+        if (val != this._xLabelFormat) {
+            this._xLabelFormat = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _yLabelFormat: any = null;
+    public get YLabelFormat(): any {
+        return this._yLabelFormat;
+    }
+    public set YLabelFormat(val: any) {
+        if (val != this._yLabelFormat) {
+            this._yLabelFormat = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    //@depricated - use YLabelFormat instead
     private _prevalueunit: string;
     public get PreValueUnit(): string {
         return this._prevalueunit;
@@ -19,6 +42,8 @@ export class VXChartBase extends VC.VXComponent {
             this._prevalueunit = val;
         }
     }
+
+    //@depricated - use YLabelFormat instead
     private _postvalueunit: string;
     public get PostValueUnit(): string {
         return this._postvalueunit;
@@ -36,7 +61,7 @@ export class VXChartBase extends VC.VXComponent {
         if (!el) return;
         var svgStr = new XMLSerializer().serializeToString(el);
         //for some reason xmlns apper twice
-        svgStr = svgStr.replace('xmlns="http://www.w3.org/2000/svg"','');
+        svgStr = svgStr.replace('xmlns="http://www.w3.org/2000/svg"', '');
         this.image = new Image();
         var svg = new Blob([svgStr], { type: "image/svg+xml;charset=utf-8" });
         var url = URL.createObjectURL(svg);
@@ -52,17 +77,141 @@ export class VXChartBase extends VC.VXComponent {
         ctx.drawImage(this.image, 0, 0);
         //$("#cnv").attr('src',canvas.toDataURL("image/png"));//canvas.toDataURL("image/jpg");
     }
-
-
 }
 
-export class VXChartValue extends VXO.VXCollectionItem {
+export class TGridChartBase extends TChartBase {
+    private _titleX: string = null;
+    public get TitleX(): string {
+        return this._titleX;
+    }
+    public set TitleX(val: string) {
+        if (val != this._titleX) {
+            this._titleX = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    /**
+        Support titleXTip & titleYTip
+        ToolTip will show
+        titleXTip : x xvalue 
+        titleYTip : y yvalue *(only if SeriesXName is empty)
+        Note: if they empty it will take the titleX & titleY istead
+    */
+    private _titleXTip: string = null;
+    public get TitleXTip(): string {
+        var res = this._titleXTip;
+        if (res == null)
+            res = this.TitleX;
+        if (res == null)
+            res = "";
+        return res;
+    }
+    public set TitleXTip(val: string) {
+        if (val != this._titleXTip) {
+            this._titleXTip = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _titleY: string;
+    public get TitleY(): string {
+        return this._titleY;
+    }
+    public set TitleY(val: string) {
+        if (val != this._titleY) {
+            this._titleY = val;
+            this.drawDelayed(true);
+        }
+    }
+    /* see TitleXTip for help */
+    private _titleYTip: string;
+    public get TitleYTip(): string {
+        var res = this._titleYTip;
+        if (res == null)
+            res = this.TitleY;
+        if (res == null)
+            res = "";
+        return res;
+    }
+    public set TitleYTip(val: string) {
+        if (val != this._titleYTip) {
+            this._titleYTip = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _gridtextsize: number = 12;
+    public get GridTextSize(): number {
+        return this._gridtextsize;
+    }
+    public set GridTextSize(val: number) {
+        if (val != this._gridtextsize) {
+            this._gridtextsize = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _titletextsize: number = 12;
+    public get TitleTextSize(): number {
+        return this._titletextsize;
+    }
+    public set TitleTextSize(val: number) {
+        if (val != this._titletextsize) {
+            this._titletextsize = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _font: string = 'sans-serif';
+    public get Font(): string {
+        return this._font;
+    }
+    public set Font(val: string) {
+        if (val != this._font) {
+            this._font = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _gridtextcolor: string = "#888";
+    public get GridTextColor(): string {
+        return this._gridtextcolor;
+    }
+    public set GridTextColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._gridtextcolor) {
+                this._gridtextcolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _titletextcolor: string = "#888";
+    public get TitleTextColor(): string {
+        return this._titletextcolor;
+    }
+    public set TitleTextColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._titletextcolor) {
+                this._titletextcolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    public create() {
+        super.create();
+    }
+}
+
+export class TChartValue extends VXO.TCollectionItem {
     constructor() {
         super();
     }
 }
 
-export class VXDountValue extends VXChartValue {
+export class TDountValue extends TChartValue {
     private _value: number;
     public get Value(): number {
         return this._value;
@@ -85,7 +234,7 @@ export class VXDountValue extends VXChartValue {
 }
 
 
-export class VXDotValue extends VXChartValue {
+export class TDotValue extends TChartValue {
     private _value: number;
     public get Value(): number {
         return this._value;
@@ -117,7 +266,7 @@ export class VXDotValue extends VXChartValue {
     }
 }
 
-export class VXBubbleValue extends VXChartValue {
+export class TBubbleValue extends TChartValue {
     private _value: number;
     public get Value(): number {
         return this._value;
@@ -150,7 +299,7 @@ export class VXBubbleValue extends VXChartValue {
 }
 
 
-export class VXBarValue extends VXChartValue {
+export class TBarValue extends TChartValue {
     private _seriesvalue1: number;
     public get Value1(): number {
         return this._seriesvalue1;
@@ -312,7 +461,7 @@ export class VXBarValue extends VXChartValue {
 }
 
 
-export class VXLineValue extends VXChartValue {
+export class TLineValue extends TChartValue {
     private _seriesvalue1: number;
     public get Value1(): number {
         return this._seriesvalue1;
@@ -386,7 +535,7 @@ export class VXLineValue extends VXChartValue {
 }
 
 
-export class VXChartValuesCollection<T> extends VXO.VXCollection<T> {
+export class TChartValuesCollection<T> extends VXO.TCollection<T> {
 }
 
 var __slice = [].slice;
@@ -394,7 +543,7 @@ var __slice = [].slice;
 
 export class EventEmitter {
     private handlers;
-    public owner: VXChartBase;
+    public owner: TChartBase;
 
     on(name, handler) {
         if (this.handlers == null) {
@@ -414,8 +563,10 @@ export class EventEmitter {
             _ref = this.handlers[name];
             _results = [];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                handler = _ref[_i];
-                _results.push(handler.apply(null, args));
+                if (_ref[_i]) {
+                    handler = _ref[_i];
+                    _results.push(handler.apply(null, args));
+                }
             }
             return _results;
         }
@@ -430,7 +581,7 @@ export class Grid extends EventEmitter {
     public raphael;
     public elementWidth;
     public elementHeight;
-    private dirty;
+    public dirty;
     public options;
     public defaults;
     public data;
@@ -438,18 +589,19 @@ export class Grid extends EventEmitter {
     public hover;
     public xmin;
     public xmax;
-    private events;
+    public events;
     public left;
     public right;
     public top;
     public bottom;
-    private grid;
+    public grid;
     public ymax;
     public ymin;
-    private dy;
-    private dx;
+    public dy;
+    public dx;
     public width;
-    private height;
+    public height;
+    private timeoutId;
 
 
     constructor(options) {
@@ -471,6 +623,14 @@ export class Grid extends EventEmitter {
             this.options.postUnits = options.units;
         }
         this.raphael = new Raphael(this.el[0]);
+        var self = this;
+        $(window).bind('resize', function (evt) {
+            if (self.timeoutId != null) {
+                window.clearTimeout(self.timeoutId);
+            }
+            return self.timeoutId = window.setTimeout(self.resizeHandler, 30,self);
+        });
+
         this.elementWidth = null;
         this.elementHeight = null;
         this.dirty = false;
@@ -507,7 +667,7 @@ export class Grid extends EventEmitter {
     onHoverMove(x, y, evt) { }
     onHoverOut() { }
     onGridClick(x, y, evt) { }
-    
+
 
     gridDefaults = {
         dateFormat: null,
@@ -520,7 +680,8 @@ export class Grid extends EventEmitter {
         gridTextFamily: 'sans-serif',
         gridTextWeight: 'normal',
         hideHover: false,
-        yLabelFormat: null,
+        xLabelFormat: null, //can be function or text
+        yLabelFormat: null, //can be function or text
         xLabelAngle: 0,
         numLines: 5,
         paddingX: 15,
@@ -535,8 +696,17 @@ export class Grid extends EventEmitter {
         goalLineColors: ['#666633', '#999966', '#cc6666', '#663333'],
         events: [],
         eventStrokeWidth: 1.0,
-        eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502']
+        eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502'],
+        selectedOpacity: 1,
+        unselectOpacity: 0.7
     }
+
+    resizeHandler(self: Grid)  {
+        self.timeoutId = null;
+        self.raphael.setSize(self.el.width(), self.el.height());
+        return self.redraw();
+    }
+
 
     setData(data, redraw?) {
         var e, idx, index, maxGoal, minGoal, ret, row, step, total, y, ykey, ymax, ymin, yval;
@@ -568,25 +738,28 @@ export class Grid extends EventEmitter {
                 ret = {};
                 ret.label = row[this.options.xkey];
                 ret.id = row["id"];
-                if (this.options.parseTime && ret.label.getMonth)
-                {
-                    ret.x = ret.label.getTime();
-                    if (this.options.dateFormat) {
-                        ret.label = this.options.dateFormat(ret.x);
-                    } else {
-                        var dt: Date = new Date(ret.x);
-                        if (dt.getHours() == 0 && dt.getMinutes() == 0 && dt.getSeconds() == 0)
-                            ret.label = V.Application.FormatDateTime(dt, V.Application.DateFormat);
-                        else
-                            ret.label = V.Application.FormatDateTime(dt, V.Application.LongDateFormat);
-                        //ret.label = new Date(ret.label).toString();
-                    }
-                } else {
+                if (typeof this.options.xLabelFormat === 'function') {
                     ret.x = index;
-                    if (this.options.xLabelFormat) {
-                        ret.label = this.options.xLabelFormat(ret);
-                    }
+                    ret.label = this.options.xLabelFormat(ret);
                 }
+                else
+                    if (this.options.parseTime && ret.label.getMonth) {
+                        ret.x = ret.label.getTime();
+                        if (this.options.dateFormat) {
+                            ret.label = this.options.dateFormat(ret.x);
+                        } else {
+                            var dt: Date = new Date(ret.x);
+                            if (dt.getHours() == 0 && dt.getMinutes() == 0 && dt.getSeconds() == 0)
+                                ret.label = V.Application.formatDateTime(dt, V.Application.DateFormat);
+                            else
+                                ret.label = V.Application.formatDateTime(dt, V.Application.LongDateFormat);
+                            //ret.label = new Date(ret.label).toString();
+                        }
+                    }
+                    else {
+                        ret.x = index;
+                    }
+
                 total = 0;
                 ret.y = (function () {
                     var _j, _len1, _ref, _results1;
@@ -617,6 +790,7 @@ export class Grid extends EventEmitter {
                             ymax = Math.max(total, ymax);
                             ymin = Math.min(total, ymin);
                         }
+
                         _results1.push(yval);
                     }
                     return _results1;
@@ -633,9 +807,9 @@ export class Grid extends EventEmitter {
                 return 0;
             });
         }
-        
+
         this.xmin = this.data[0].x;
-        
+
 
         this.xmax = this.data[this.data.length - 1].x;
         this.events = [];
@@ -770,7 +944,7 @@ export class Grid extends EventEmitter {
                     _results = [];
                     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                         gridLine = _ref[_i];
-                        _results.push(this.measureText(this.yAxisFormat(gridLine, true), 0).width);
+                        _results.push(this.measureText(this.yLabelFormat(gridLine, true), 0).width);
                     }
                     return _results;
                 }).call(this);
@@ -815,7 +989,7 @@ export class Grid extends EventEmitter {
             return (this.left + this.right) / 2;
         } else {
             return this.left + (x - this.xmin) * this.dx;
-        
+
         }
     }
 
@@ -838,16 +1012,33 @@ export class Grid extends EventEmitter {
         return ret;
     }
 
-    yAxisFormat(label, humanFriendly: boolean) {
-        return this.yLabelFormat(label, humanFriendly);
+    xLabelFormat(label, humanFriendly: boolean) {
+        if (typeof this.options.xLabelFormat === 'function') {
+            return this.options.xLabelFormat(label);
+        } else {
+            if (typeof label === 'number') {
+                if (humanFriendly)
+                    return V.Application.formatHumanFriendly(label, 2);
+                else
+                    return V.Application.FormatNumber(label, 2);
+            }
+            else
+                return "" + label;
+        }
     }
 
     yLabelFormat(label, humanFriendly: boolean) {
         if (typeof this.options.yLabelFormat === 'function') {
             return this.options.yLabelFormat(label);
         } else {
-            if (label > 9999.99 && humanFriendly) return this.options.preUnits + V.humanFriendlyNumber(label, 1) + this.options.postUnits;
-            return "" + this.options.preUnits + (V.commaNumber(label)) + this.options.postUnits;
+            if (typeof label === 'number') {
+                if (humanFriendly)
+                    return V.Application.formatHumanFriendly(label, 2);
+                else
+                    return V.Application.FormatNumber(label, 2);
+            }
+            else
+                return "" + label;
         }
     }
 
@@ -870,21 +1061,31 @@ export class Grid extends EventEmitter {
         if (this.options.titleY) {
             var b = this.measureText(this.options.titleY, 270);
             var center = (this.elementHeight / 2);
-            this.raphael.text(this.options.gridTextSize / 2 /*this.left - this.options.paddingY*/, center, this.options.titleY).
-                attr('font-size', this.options.gridTextSize + 1).attr('font-family', this.options.gridTextFamily - 1).
-                attr('font-weight', "normal").attr('fill', this.options.gridTextColor).rotate(270);
+            this.raphael.text(this.options.titleTextSize / 2 /*this.left - this.options.paddingY*/, center, this.options.titleY).
+                attr('font-size', this.options.titleTextSize).attr('font-family', this.options.gridTextFamily).
+                attr('font-weight', "normal").attr('fill', this.options.titleTextColor).rotate(270);
         }
 
         _ref = this.grid;
         _results = [];
+        if (this.options.grid) {
+            lineY = _ref[0];
+            var y1 = this.transY(lineY);
+            lineY = _ref[_ref.length - 1];
+            var y2 = this.transY(lineY);
+
+            this.drawGridLine("M" + this.left + "," + y1 + "L" + this.left + "," + y2);
+        }
+
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             lineY = _ref[_i];
             y = this.transY(lineY);
             if (this.options.axes) {
-                this.drawYAxisLabel(this.left - 4, y, this.yAxisFormat(lineY, true));
+                this.drawYAxisLabel(this.left - 4, y, this.yLabelFormat(lineY, true));
             }
             if (this.options.grid) {
                 _results.push(this.drawGridLine("M" + this.left + "," + y + "H" + (this.left + this.width)));
+                this.drawGridLine("M" + this.left + "," + y + "H" + (this.left + this.width));
             } else {
                 _results.push(void 0);
             }
@@ -915,7 +1116,7 @@ export class Grid extends EventEmitter {
         }
         return _results;
     }
-    a
+
     drawGoal(goal, color) {
         return this.raphael.path("M" + this.left + "," + (this.transY(goal)) + "H" + this.right).attr('stroke', color).attr('stroke-width', this.options.goalStrokeWidth);
     }
@@ -995,7 +1196,7 @@ export class Hover {
     private options;
     private el: JQuery;
     public offset: number;
-
+    public animation = true;
 
     constructor(options) {
         if (options == null) { options = {}; }
@@ -1008,7 +1209,7 @@ export class Hover {
 
     update(html, x, y) {
         this.html(html);
-        
+
         this.show();
         return this.moveTo(x, y);
     }
@@ -1025,7 +1226,7 @@ export class Hover {
         hoverWidth = this.el.outerWidth();
         hoverHeight = this.el.outerHeight();
         var factor: number;
-        if (this.offset > 0) factor = x  + this.offset / 2 - 5;
+        if (this.offset > 0) factor = x + this.offset / 2 - 5;
         else if (this.offset < 0) factor = x + this.offset / 2 - hoverWidth + 5;
         else factor = x - hoverWidth / 2;
 
@@ -1048,11 +1249,19 @@ export class Hover {
     }
 
     show() {
-        return this.el.show();
+        if (this.animation)
+            this.el.fadeIn(200, this.doMe());
+        this.el.show();
     }
 
     hide() {
-        return this.el.hide();
+        if (this.animation)
+            this.el.stop(true, true);
+        this.el.hide();
+        return 0;
     }
+
+    doMe()
+    { }
 }
 

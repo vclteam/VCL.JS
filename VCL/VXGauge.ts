@@ -3,7 +3,7 @@ import VXU = require("VCL/VXUtils");
 import V = require("VCL/VCL");
 
 
-export class VXGauge extends VXC.VXComponent {
+export class TGauge extends VXC.TComponent {
     private _value: number = 50;
     public get Value(): number {
         return this._value;
@@ -33,7 +33,7 @@ export class VXGauge extends VXC.VXComponent {
     public set MinValue(val: number) {
         if (val != this._minvalue) {
             this._minvalue = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -44,7 +44,7 @@ export class VXGauge extends VXC.VXComponent {
     public set Title(val: string) {
         if (val != this._title) {
             this._title = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -58,7 +58,7 @@ export class VXGauge extends VXC.VXComponent {
     public set Label(val: string) {
         if (val != this._label) {
             this._label = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -104,7 +104,7 @@ export class VXGauge extends VXC.VXComponent {
 
             if (val != this._labelcolor) {
                 this._labelcolor = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -121,7 +121,7 @@ export class VXGauge extends VXC.VXComponent {
 
             if (val != this._levelcolor1) {
                 this._levelcolor1 = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -138,7 +138,7 @@ export class VXGauge extends VXC.VXComponent {
 
             if (val != this._levelcolor2) {
                 this._levelcolor2 = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -169,7 +169,7 @@ export class VXGauge extends VXC.VXComponent {
     public set HumanFriendly(val: boolean) {
         if (val != this._humanFriendly) {
             this._humanFriendly = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -183,12 +183,12 @@ export class VXGauge extends VXC.VXComponent {
     public set Shadow(val: boolean) {
         if (val != this._shadow) {
             this._shadow = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string, text?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
         
     }
@@ -228,10 +228,10 @@ export class VXGauge extends VXC.VXComponent {
     }
 
     public draw(reCreate: boolean) {
-        if (!this.parentInitialized())return;super.draw(reCreate);
-        if (reCreate || !this.initialized) this.create();
-        else refreshGage(this.Value, null, this.justGage);
-        this.initialized = true;
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
+        refreshGage(this.Value, null, this.justGage);
+
     }
 }
 
@@ -737,7 +737,7 @@ function  JustGage (config) {
 
     // min
     obj.txtMinimum = obj.config.min;
-    if (obj.config.humanFriendly) obj.txtMinimum = V.humanFriendlyNumber(obj.config.min, obj.config.humanFriendlyDecimal);
+    if (obj.config.humanFriendly) obj.txtMinimum = V.Application.formatHumanFriendly(obj.config.min, obj.config.humanFriendlyDecimal);
     obj.txtMin = obj.canvas.text(obj.params.minX, obj.params.minY, obj.txtMinimum);
     obj.txtMin.attr({
         "font-size": obj.params.minFontSize,
@@ -750,7 +750,7 @@ function  JustGage (config) {
 
     // max
     obj.txtMaximum = obj.config.max;
-    if (obj.config.humanFriendly) obj.txtMaximum = V.humanFriendlyNumber(obj.config.max, obj.config.humanFriendlyDecimal);
+    if (obj.config.humanFriendly) obj.txtMaximum = V.Application.formatHumanFriendly(obj.config.max, obj.config.humanFriendlyDecimal);
     obj.txtMax = obj.canvas.text(obj.params.maxX, obj.params.maxY, obj.txtMaximum);
     obj.txtMax.attr({
         "font-size": obj.params.maxFontSize,
@@ -831,7 +831,7 @@ function  JustGage (config) {
     if (obj.config.textRenderer) {
         obj.originalValue = obj.config.textRenderer(obj.originalValue);
     } else if (obj.config.humanFriendly) {
-        obj.originalValue = V.humanFriendlyNumber(obj.originalValue, obj.config.humanFriendlyDecimal) + obj.config.symbol;
+        obj.originalValue = V.Application.formatHumanFriendly(obj.originalValue, obj.config.humanFriendlyDecimal) + obj.config.symbol;
     } else {
         obj.originalValue = (obj.originalValue * 1).toFixed(obj.config.decimals) + obj.config.symbol;
     }
@@ -843,7 +843,7 @@ function  JustGage (config) {
             if (obj.config.textRenderer) {
                 obj.txtValue.attr("text", obj.config.textRenderer(Math.floor(currentValue[0])));
             } else if (obj.config.humanFriendly) {
-                obj.txtValue.attr("text", V.humanFriendlyNumber(Math.floor(currentValue[0]), obj.config.humanFriendlyDecimal) + obj.config.symbol);
+                obj.txtValue.attr("text", V.Application.formatHumanFriendly(Math.floor(currentValue[0]), obj.config.humanFriendlyDecimal) + obj.config.symbol);
             } else {
                 obj.txtValue.attr("text", (currentValue[0] * 1).toFixed(obj.config.decimals) + obj.config.symbol);
             }
@@ -891,7 +891,7 @@ function refreshGage (val, max,obj) {
         obj.config.max = max;
 
         obj.txtMaximum = obj.config.max;
-        if (obj.config.humanFriendly) obj.txtMaximum = V.humanFriendlyNumber(obj.config.max, obj.config.humanFriendlyDecimal);
+        if (obj.config.humanFriendly) obj.txtMaximum = V.Application.formatHumanFriendly(obj.config.max, obj.config.humanFriendlyDecimal);
         obj.txtMax.attr({ "text": obj.txtMaximum });
         setDy(obj.txtMax, obj.params.maxFontSize, obj.params.maxY);
     }
@@ -906,7 +906,7 @@ function refreshGage (val, max,obj) {
     if (obj.config.textRenderer) {
         displayVal = obj.config.textRenderer(displayVal);
     } else if (obj.config.humanFriendly) {
-        displayVal = V.humanFriendlyNumber(displayVal, obj.config.humanFriendlyDecimal) + obj.config.symbol;
+        displayVal = V.Application.formatHumanFriendly(displayVal, obj.config.humanFriendlyDecimal) + obj.config.symbol;
     } else {
         displayVal = (displayVal * 1).toFixed(obj.config.decimals) + obj.config.symbol;
     }

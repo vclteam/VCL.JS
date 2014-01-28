@@ -14,7 +14,7 @@ export class VXUtils {
         if (!fit2Width) rep.css('display', 'inline-block');
         else {
             rep.css('display', 'block');
-            //rep.css('width', '100%');
+            rep.css('width', '100%');
         }
         if (!fit2Height);
         else {

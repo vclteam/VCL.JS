@@ -6,7 +6,7 @@ import VXO = require("VCL/VXObject");
 import VXC = require("VCL/VXComponent");
 import VXCO = require("VCL/VXContainer");
 
-export class VXOlapSSAS extends VXD.VXClientDataset {
+export class TOlapSSAS extends VXD.TClientDataset {
     public onError: (errorMessage: string) => void;
     private _connectionname: string = "SSAS";
     public get ConnectionName(): string {
@@ -52,8 +52,8 @@ export class VXOlapSSAS extends VXD.VXClientDataset {
         }
     }
 
-    public owner: VXC.VXComponent;
-    constructor(aOwner: VXC.VXComponent, connectionName?: string, databaseName?: string) {
+    public owner: VXC.TComponent;
+    constructor(aOwner: VXC.TComponent, connectionName?: string, databaseName?: string) {
         super(aOwner);
         this.owner = aOwner;
         if (connectionName != null) this.ConnectionName = connectionName;
@@ -73,19 +73,22 @@ export class VXOlapSSAS extends VXD.VXClientDataset {
     }
 
     public getDimensionMembers(dimensionName: string, levelName: string,
-        callback: (items: V.TCollection<VXOlapMemeber>) => void ) {
+        callback: (items: V.TCollection<TOlapMemeber>) => void ) {
+
         this.checkRequiredParams();
-            new V.TServer().callServerMethod("SSAS", {
-                __FUNCTION__: "MEMBERS",
-                __DIMNAME__: dimensionName,
-                __HIERARCHNAME__: levelName,
-                __LEVELNAME__: levelName,
-                __CUBENAME__: this.CubeName,
-                __DATABASENAME__: this.DatabaseName,
-                __DB__: this.ConnectionName
+        if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
+        new V.TServer().callServerMethod("SSAS", {
+            __FUNCTION__: "MEMBERS",
+            __DIMNAME__: dimensionName,
+            __HIERARCHNAME__: levelName,
+            __LEVELNAME__: levelName,
+            __CUBENAME__: this.CubeName,
+            __DATABASENAME__: this.DatabaseName,
+            __DB__: this.ConnectionName
 
         }, (data: any) => {
-                var results = new V.TCollection<VXOlapMemeber>();
+                if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
+                var results = new V.TCollection<TOlapMemeber>();
                 if (results != null) {
                     (<any[]>data).sort((a, b) => {
                         if (a.Name > b.Name) return 1;
@@ -93,7 +96,7 @@ export class VXOlapSSAS extends VXD.VXClientDataset {
                         return 0;
                     });
                     for (var i = 0; i < data.length; i++) {
-                        var item = new VXOlapMemeber();
+                        var item = new TOlapMemeber();
                         item.Name = data[i].Name;
                         item.UniqueName = data[i].ID;
                         item.Description = data[i].Description == null ? "" : data[i].Description;
@@ -104,12 +107,15 @@ export class VXOlapSSAS extends VXD.VXClientDataset {
                 if (callback != null) callback(results);
 
 
-            });
+            }, (errorMessage: string) => {
+                if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
+                if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
+                });
     }
 
-    public slicers = new VXO.VXCollection<VXSlicer>();
-    public createSlicer(memberUniqueName: any): VXMemeberSlicer {
-        var param = new VXMemeberSlicer();
+    public slicers = new VXO.TCollection<TSlicer>();
+    public createSlicer(memberUniqueName: any): TMemeberSlicer {
+        var param = new TMemeberSlicer();
         param.MemberUniqueName = memberUniqueName;
         this.slicers.add(param);
         return param;
@@ -129,8 +135,8 @@ export class VXOlapSSAS extends VXD.VXClientDataset {
         }
     }
 
-    public createDateRangeSlicer(dimension : string,fromDate: Date, toDate: Date): VXDateSlicer {
-        var param = new VXDateSlicer();
+    public createDateRangeSlicer(dimension: string, fromDate: Date, toDate: Date): TDateSlicer {
+        var param = new TDateSlicer();
         param.FromDate = fromDate;
         param.ToDate = toDate;
         param.Dimension = dimension;
@@ -140,7 +146,7 @@ export class VXOlapSSAS extends VXD.VXClientDataset {
 
 
     public open() {
-        if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).addQuery(this); }
+        if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         new V.TServer().callServerMethod("SSAS", {
             __FUNCTION__: "SELECT",
             __MDX__: this.MDX,
@@ -150,7 +156,7 @@ export class VXOlapSSAS extends VXD.VXClientDataset {
             __DB__: this.ConnectionName
 
         }, (data: any) => {
-            if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
+                if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
                 var recordSet: any[] = [];
 
                 var members: any[] = data.dictionary;
@@ -187,31 +193,31 @@ export class VXOlapSSAS extends VXD.VXClientDataset {
                         row[(<string>members[raw.a[j + colCount]][1]).toUpperCase()] = raw.v;
                     }
                 }
-                var data: any[] = [];
+                var data4: any[] = [];
                 for (var item in recordSet)
                     if (recordSet.hasOwnProperty(item))
-                        data.push(recordSet[item]);
+                        data4.push(recordSet[item]);
 
-                this.setData(data);
+                this.setData(data4);
                 if (this.onAfterOpen != null) (V.tryAndCatch(() => { this.onAfterOpen(this); }))
             }
-            
+
 
             , (errorMessage: string) => {
-                if (this.owner != null && (this.owner instanceof VXCO.VXContainer)) { (<any>this.owner).removeQuery(this); }
+                if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
 
                 if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
            else V.Application.raiseException(errorMessage);
             });
-    
+
 
     }
 }
 
-export class VXSlicer extends VXO.VXCollectionItem {
+export class TSlicer extends VXO.TCollectionItem {
 }
 
-export class VXMemeberSlicer extends VXSlicer {
+export class TMemeberSlicer extends TSlicer {
     private _value: string = null;
     public get MemberUniqueName(): string {
         return this._value;
@@ -224,7 +230,7 @@ export class VXMemeberSlicer extends VXSlicer {
     }
 }
 
-export class VXDateSlicer extends VXSlicer {
+export class TDateSlicer extends TSlicer {
     private _dimension: string = null;
     public get Dimension(): string {
         return this._dimension;
@@ -262,7 +268,7 @@ export class VXDateSlicer extends VXSlicer {
 }
 
 
-export class VXOlapMemeber extends VXO.VXCollectionItem {
+export class TOlapMemeber extends VXO.TCollectionItem {
     private _uniquename: string = null;
     public get UniqueName(): string {
         return this._uniquename;

@@ -1,8 +1,8 @@
 import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 
-export class VXTextBase extends VXC.VXComponent {
-    public onClicked: (sender: VXTextBase) => void;
+export class TTextBase extends VXC.TComponent {
+    public onClicked: (sender: TTextBase) => void;
 
     private _text: string;
     /*
@@ -14,11 +14,11 @@ export class VXTextBase extends VXC.VXComponent {
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string, text?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
         this.Text = text;
     }
@@ -29,32 +29,32 @@ export class VXTextBase extends VXC.VXComponent {
 
 }
 
-export class VXDBTextBase extends VXC.VXComponent {
+export class TDBTextBase extends VXC.TComponent {
     public onClicked: () => void;
 
-    constructor(aOwner: VXC.VXComponent, renderTo?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
     }
 
-    private _dataset: VXD.VXDataset;
+    private _dataset: VXD.TDataset;
     /*
     * Specifies the dataset that contains the field it represents.
     */
-    public get Dataset(): VXD.VXDataset {
+    public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
-    public set Dataset(val: VXD.VXDataset) {
+    public set Dataset(val: VXD.TDataset) {
         if (val != this._dataset) {
             if (this._dataset != null) {
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this);
-                (<any>this._dataset).removeEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this);
+                (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this);
             }
             this._dataset = val;
             if (this._dataset != null) {
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(false); });
-                (<any>this._dataset).registerEventListener(VXD.VXDataset.EVENT_STATE_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(false); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.draw(false); });
             }
         }
     }
