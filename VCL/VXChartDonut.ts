@@ -14,7 +14,7 @@ export class TChartDonut extends VXCB.TChartBase {
         this.values.add(col);
         col.Value = value;
         col.Label = label;
-        
+
         return col;
     }
 
@@ -29,11 +29,31 @@ export class TChartDonut extends VXCB.TChartBase {
         }
     }
 
+    private _colorPallete: Array<string> = new Array < string>();
+    public get ColorPallete(): Array<string> {
+        return this._colorPallete;
+    }
+    public set ColorPallete(val: Array<string>) {
+        var allColorOK = true;
+        if (val) val.forEach((item) => {
+            var isOk = /^#[0-9A-F]{6}$/i.test(item);
+            if (!isOk) {
+                allColorOK = false;
+                V.Application.raiseException("'" + item + "' is not valid hex color string");
+            }
+        });
+
+        if (allColorOK) {
+            this._colorPallete = val;
+            this.draw(true);
+        }
+    }
+
 
     private donut: Donut;
     public selectedValue(): V.TDountValue {
         if (this.donut == null) return null;
-        for (var i = this.donut.segments.length; i--;) {     
+        for (var i = this.donut.segments.length; i--;) {
             if (!this.donut.segments[i].selected) continue;
             return <V.TDountValue>this.values.FindItemByID(this.donut.segments[i].ID);
         }
@@ -66,15 +86,20 @@ export class TChartDonut extends VXCB.TChartBase {
             case V.BaseColor.Danger: btnColor = "btn-danger"; break;
             default: btnColor = "btn-primary"; break;
         }
-        btnColor = V.getClassStyleHexColor(btnColor, 'background-color');
-        var colors = calculateShades(btnColor, dataArray.length);
-        for (var j, x, i = colors.length; i; j = Math.floor(Math.random() * i), x = colors[--i], colors[i] = colors[j], colors[j] = x);
-
+        var colors;
+        if (this.ColorPallete && this.ColorPallete.length > 0) colors = this.ColorPallete;
+        else {
+            btnColor = V.getClassStyleHexColor(btnColor, 'background-color');
+            colors = calculateShades(btnColor, dataArray.length);
+            for (var j, x, i = colors.length; i; j = Math.floor(Math.random() * i), x = colors[--i], colors[i] = colors[j], colors[j] = x);
+        }
         this.donut = new Donut({
             element: this.jComponent[0],
             data: dataArray,
-            colors: colors
-        },this);
+            colors: colors,
+            xLabelFormat: this.XLabelFormat,
+            yLabelFormat: this.YLabelFormat
+        }, this);
         super.create();
     }
 
@@ -84,7 +109,7 @@ export class TChartDonut extends VXCB.TChartBase {
     }
 
 
-    
+
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
@@ -144,17 +169,17 @@ export class TDBChartDonut extends TChartDonut {
                     });
                 }
             }
-           
+
         }
     }
 
-    public getData(): any[]{
+    public getData(): any[] {
         this.values.clear();
         var dataArray = [];
         if (this.Dataset == null || this.ValueField == null) return dataArray;
         if (!this.Dataset.Active) return dataArray;
         this.Dataset.forEach(() => {
-           
+
             var lbl: string = this.Dataset.getFieldValue(this.LabelField);
             if (lbl == null) lbl = "";
             var val: number = this.Dataset.getFieldValue(this.ValueField);
@@ -187,7 +212,7 @@ class Donut extends VXCB.EventEmitter {
     private data;
     private values;
     private raphael;
-    public  segments: DonutSegment[];
+    public segments: DonutSegment[];
     private text2;
     private text1;
     private timeoutId;
@@ -196,14 +221,16 @@ class Donut extends VXCB.EventEmitter {
         colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
         backgroundColor: '#FFFFFF',
         labelColor: '#000000',
-        formatter: commas
+        formatter: commas,
+        xLabelFormat: null, //can be function or text
+        yLabelFormat: null //can be function or text
     };
 
-    constructor(options,owner) {
+    constructor(options, owner) {
         super();
         this.owner = owner;
         this.select = __bind(this.select, this);
-        this.unselect = __bind(this.unselect, this);
+
         this.click = __bind(this.click, this);
 
         var row;
@@ -279,13 +306,7 @@ class Donut extends VXCB.EventEmitter {
             seg.ID = this.data[i].id;
             seg.render();
             this.segments.push(seg);
-<<<<<<< .mine
             seg.on('hover', this.select);
-            seg.on('unhover', this.unhover);
-=======
-            seg.on('unhover', this.unselect);
-            seg.on('hover', this.select);
->>>>>>> .r1374
             seg.on('click', this.click);
             last = next;
             idx += 1;
@@ -317,45 +338,16 @@ class Donut extends VXCB.EventEmitter {
     }
 
     click(idx) {
-        var self = this;
         var y = this.fire('click', idx, this.data[idx]);
         if (this.owner) {
             var owner = <TChartDonut>this.owner;
-            (<any>owner).__currrntSelected = idx;
+
             if (owner.onClicked != null && idx <= owner.values.length()) (V.tryAndCatch(() => { owner.onClicked(owner.values.toArray()[idx]); }));
         }
-<<<<<<< .mine
-        
-       
-=======
-        self.clickedSelect = idx;
->>>>>>> .r1374
         return y;
     }
 
-<<<<<<< .mine
-    unhover(idx: number) {
-        var self = this;
-        if (this.owner) {
-            var owner = <TChartDonut>this.owner;
-
-            var rc = (<any>owner).__currrntSelected;
-        }
-=======
-    private clickedSelect : number;
-    unselect(idx: number) {
-        var self = this;
-        if (self.clickedSelect != null) self.select(self.clickedSelect);
->>>>>>> .r1374
-    }
-
     select(idx: number) {
-<<<<<<< .mine
-        var self = this;
-=======
-        var self = this;
-        if (self.clickedSelect == null) self.clickedSelect = idx;
->>>>>>> .r1374
         var oldidx: number = -1;
         var row, s, segment, _i, _len, _ref;
         _ref = this.segments;
@@ -367,10 +359,10 @@ class Donut extends VXCB.EventEmitter {
         segment = this.segments[idx];
         segment.select();
         row = this.data[idx];
-        var y = this.setLabels(row.label, this.options.formatter(row.value, row));
+        var y = this.setLabels(row);
         if (oldidx != idx && this.owner) {
             var owner = <TChartDonut>this.owner;
-            if (owner instanceof TDBChartDonut && (<TDBChartDonut>owner).Dataset != null){
+            if (owner instanceof TDBChartDonut && (<TDBChartDonut>owner).Dataset != null) {
                 (<TDBChartDonut>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
             }
             if (owner.onSelectionchanged != null && idx <= owner.values.length()) {
@@ -380,14 +372,14 @@ class Donut extends VXCB.EventEmitter {
         return y;
     }
 
-    setLabels(label1, label2) {
+    setLabels(row) {
         var inner, maxHeightBottom, maxHeightTop, maxWidth, text1bbox, text1scale, text2bbox, text2scale;
         inner = (Math.min(this.el.width() / 2, this.el.height() / 2) - 10) * 2 / 3;
         maxWidth = 1.8 * inner;
         maxHeightTop = inner / 2;
         maxHeightBottom = inner / 3;
         this.text1.attr({
-            text: label1,
+            text: (typeof this.options.xLabelFormat === 'function') ? this.options.xLabelFormat(row) : row.label,
             transform: ''
         });
         text1bbox = this.text1.getBBox();
@@ -396,7 +388,7 @@ class Donut extends VXCB.EventEmitter {
             transform: "S" + text1scale + "," + text1scale + "," + (text1bbox.x + text1bbox.width / 2) + "," + (text1bbox.y + text1bbox.height)
         });
         this.text2.attr({
-            text: label2,
+            text: (typeof this.options.yLabelFormat === 'function') ? this.options.yLabelFormat(row) : row.value,
             transform: ''
         });
         text2bbox = this.text2.getBBox();
@@ -483,30 +475,13 @@ class DonutSegment extends VXCB.EventEmitter {
     }
 
     render() {
-        var self = this;
+        var _this = this;
         this.arc = this.drawDonutArc(this.hilight, this.color);
-<<<<<<< .mine
         return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor, function () {
-            return self.fire('hover', self.index);
-        },
-        function () {
-            return self.fire('unhover', self.index);
-        },
-        function () {
-            return self.fire('click', self.index);
-        });
-=======
-        return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor,
-        function () {
-            return self.fire('hover', self.index);
-        },
-        function () {
-            return self.fire('unhover', self.index);
-        },
-        function () {
-            return self.fire('click', self.index);
-        });
->>>>>>> .r1374
+            return _this.fire('hover', _this.index);
+        }, function () {
+                return _this.fire('click', _this.index);
+            });
     }
 
     drawDonutArc(path, color) {
@@ -517,16 +492,12 @@ class DonutSegment extends VXCB.EventEmitter {
         });
     }
 
-<<<<<<< .mine
-    drawDonutSegment(path, fillColor, strokeColor, hoverFunction, unhoverFunction,clickFunction) {
-=======
-    drawDonutSegment(path, fillColor, strokeColor, hoverFunction, unhoverFunction, clickFunction) {
->>>>>>> .r1374
+    drawDonutSegment(path, fillColor, strokeColor, hoverFunction, clickFunction) {
         return this.raphael.path(path).attr({
             fill: fillColor,
             stroke: strokeColor,
             'stroke-width': 3
-        }).hover(hoverFunction, unhoverFunction).click(clickFunction);
+        }).hover(hoverFunction).click(clickFunction);
     }
 
     select() {

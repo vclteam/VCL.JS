@@ -1,7 +1,7 @@
 import VXCO = require("VCL/VXContainer");
 import V = require("VCL/VCL");
 import VXO = require("VCL/VXObject");
-
+import VXM = require("VCL/VXMenu");
 
 export class TComponent extends VXO.TObject {
     public owner: TComponent;
@@ -15,25 +15,23 @@ export class TComponent extends VXO.TObject {
         super();
         this.owner = aOwner;
 
-        if (aOwner == null && !this.isPage) {
-            V.Application.raiseException("Owner cannot be null");
-            throw "Owner cannot be null";
-        }
         if (aOwner != null && !aOwner.isContainer) {
             V.Application.raiseException("only container components can own components");
             throw "only container components can own components";
 
         }
         if (renderTo == null) {
-            this.jComponent = $("<div>");
+            this.jComponent = $("<div>"); //create and empty jComponent
             if (aOwner != null) {
+                //in case of tpanel
                 if ((<any>aOwner).jContent) (<any>aOwner).jContent.append(this.jComponent);
-                else aOwner.jComponent.append(this.jComponent);
+                else aOwner.jComponent.append(this.jComponent); //other type of container's
             }
             this.jComponent[0].id = this.ID;
         } else {
             var comp: JQuery;
-            comp = $(aOwner.jComponent).find("[id=" + renderTo + "]");
+            if (aOwner) comp = $(aOwner.jComponent).find("[id=" + renderTo + "]");
+            else comp = $("body").find("[id=" + renderTo + "]");
 
             //check for multiple occurrence
             if (comp.length > 1) {
@@ -63,32 +61,60 @@ export class TComponent extends VXO.TObject {
         this.jComponent.remove();
     }
 
-    private __clickover;
-    public popover(popupContainer: VXCO.TContainer, popoverplacement: V.PopoverPlacement = V.PopoverPlacement.Bottom, title?: string, 
-        autoClose: number = 0) {
-            this.__clickover = this.jComponent.data('clickover');
-            if (!this.__clickover) {
-                this.jComponent.clickover({
-                    html: true, content: popupContainer.jComponent, title: title,
-                    placement: popoverplacement != null ? V.PopoverPlacement[popoverplacement].toLocaleLowerCase() : "right",
-                    auto_close: autoClose
-                    
-                });
-                this.__clickover = this.jComponent.data('clickover');
-                this.__clickover['show']();
-            }
-            if (popupContainer.Visible) {
-                popupContainer.Visible = false;
-                this.__clickover.$tip.hide();
-                this.__clickover.$element.trigger('hidden');
-            } else {
-                popupContainer.Visible = true;
-                this.__clickover.$tip.show();
-                this.__clickover.$element.trigger('shown');
-                this.__clickover.resetPosition();
 
-            } 
+    public addClass(classStr: string) {
+        this.jComponent.addClass(classStr);
     }
+
+    public removeClass(classStr: string) {
+        this.jComponent.removeClass(classStr);
+    }
+
+
+    private __clickover;
+    public popover(popupContainer: VXCO.TContainer, popoverplacement: V.PopoverPlacement = V.PopoverPlacement.Bottom, title?: string,
+        autoClose: number = 0) {
+        this.__clickover = this.jComponent.data('clickover');
+        if (!this.__clickover) {
+            this.jComponent.clickover({
+                html: true, content: popupContainer.jComponent, title: title,
+                placement: popoverplacement != null ? V.PopoverPlacement[popoverplacement].toLocaleLowerCase() : "right",
+                auto_close: autoClose
+
+            });
+            this.__clickover = this.jComponent.data('clickover');
+            this.__clickover['show']();
+        }
+        if (popupContainer.Visible) {
+            popupContainer.Visible = false;
+            this.__clickover.$tip.hide();
+            this.__clickover.$element.trigger('hidden');
+            (<any>popupContainer).__popoverFrom = null;
+        } else {
+            (<any>popupContainer).__popoverFrom = this;
+            popupContainer.Visible = true;
+            this.__clickover.$tip.show();
+            this.__clickover.$element.trigger('shown');
+            this.__clickover.resetPosition();
+
+        }
+    }
+
+    private _sticktotop: boolean = false;
+    /*
+    * component that remain in view as the user scrolls the page
+    */
+    public get StickToTop(): boolean {
+        return this._sticktotop;
+    }
+
+    public set StickToTop(val: boolean) {
+        if (val != this._sticktotop) {
+            this._sticktotop = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     private _fittowidth: boolean = false;
     public get FitToWidth(): boolean {
@@ -97,7 +123,7 @@ export class TComponent extends VXO.TObject {
     public set FitToWidth(val: boolean) {
         if (val != this._fittowidth) {
             this._fittowidth = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -108,7 +134,7 @@ export class TComponent extends VXO.TObject {
     public set FitToHeight(val: boolean) {
         if (val != this._fittoheight) {
             this._fittoheight = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -119,7 +145,7 @@ export class TComponent extends VXO.TObject {
     public set Tooltip(val: string) {
         if (val != this._tooltip) {
             this._tooltip = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -130,7 +156,7 @@ export class TComponent extends VXO.TObject {
     public set TooltipPlacement(val: V.TooltipPlacement) {
         if (val != this._tooltipplacement) {
             this._tooltipplacement = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -142,7 +168,7 @@ export class TComponent extends VXO.TObject {
     public set Visible(val: boolean) {
         if (val != this._visible) {
             this._visible = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -153,7 +179,7 @@ export class TComponent extends VXO.TObject {
     public set Enabled(val: boolean) {
         if (val != this._enabled) {
             this._enabled = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -322,6 +348,9 @@ export class TComponent extends VXO.TObject {
         if (this.Visible) this.jComponent.show();
         else this.jComponent.hide();
 
+        if (this.StickToTop) this.jComponent.addClass("affix");
+        else this.jComponent.removeClass("affix");
+
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
     }
@@ -342,6 +371,68 @@ export class TComponent extends VXO.TObject {
     public parentInitialized() {
         if (!this.owner) return true;
         return (this.owner).initialized;
+    }
+}
+
+export class TPopupmenuComponent extends TComponent {
+    private jDropDownTarget: JQuery;
+
+    constructor(aOwner: TComponent, renderTo?: string) {
+        super(aOwner, renderTo);
+        this.menuItems.onChanged = () => {
+            this.drawDelayed(true);
+        }
+    }
+
+    public menuItems = new VXM.TMenuItemCollection<VXM.TMenuItem>();
+    public createMenuItem(text: string, onClicked?: () => void): VXM.TMenuItem {
+        var menuItem = new VXM.TMenuItem();
+        menuItem.Text = text;
+        menuItem.onClicked = onClicked;
+        this.menuItems.add(menuItem);
+        return menuItem;
+    }
+
+    public create() {
+        super.create();
+        this.reBuildMenu();
+    }
+
+    public showMenuDropdown() {
+        this.jComponent.addClass("open");
+    }
+
+    public hideMenuDropdown() {
+        this.jComponent.removeClass("open");
+    }
+
+    private _showmenucaret: boolean = true;
+    /*
+    * component that remain in view as the user scrolls the page
+    */
+    public get ShowMenuCaret(): boolean {
+        return this._showmenucaret;
+    }
+
+    public set ShowMenuCaret(val: boolean) {
+        if (val != this._showmenucaret) {
+            this._showmenucaret = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private reBuildMenu() {
+        this.jComponent.find(".dropdown-menu").empty();
+        if (!this.menuItems.length()) return;
+        if (!this.jDropDownTarget) return;
+
+        this.jComponent.addClass('dropdown');
+        this.jDropDownTarget.attr('data-toggle', "dropdown");
+        this.jDropDownTarget.addClass("dropdown-toggle");
+
+        this.menuItems.createmenu('dropdown-menu').appendTo(this.jComponent);
+        $('.dropdown-toggle').dropdown()
     }
 }
 
@@ -369,7 +460,7 @@ Clickover.prototype = $.extend({}, $.fn.popover.Constructor.prototype, {
 
     constructor: Clickover
 
-       , cinit: function (type, element, options) {
+    , cinit: function (type, element, options) {
         this.attr = {};
 
         // choose random attrs instead of timestamp ones
@@ -390,7 +481,7 @@ Clickover.prototype = $.extend({}, $.fn.popover.Constructor.prototype, {
         // will need custom handler inside here
 
     }
-       , clickery: function (e) {
+    , clickery: function (e) {
         // clickery isn't only run by event handlers can be called by timeout or manually
         // only run our click handler and  
         // need to stop progration or body click handler would fire right away
@@ -462,7 +553,7 @@ Clickover.prototype = $.extend({}, $.fn.popover.Constructor.prototype, {
             this.$element.trigger('hidden');
         }
     }
-       , isShown: function () {
+    , isShown: function () {
         return this.tip().hasClass('in');
     }, resetPosition: function () {
         var $tip
@@ -505,7 +596,7 @@ Clickover.prototype = $.extend({}, $.fn.popover.Constructor.prototype, {
             $tip.css(tp)
       }
     }
-      
+
 })
 
   /* plugin definition */

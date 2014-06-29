@@ -5,7 +5,7 @@ import VXU = require("VCL/VXUtils");
 import V = require("VCL/VCL");
 import VXB = require("VCL/VXInputBase");
 
-export class TButton extends VXC.TComponent {
+export class TButton extends VXC.TPopupmenuComponent {
     constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
         this._text = text;
@@ -59,15 +59,6 @@ export class TButton extends VXC.TComponent {
         }
     }
 
-    public menuItems = new VXM.TMenuItemCollection<VXM.TMenuItem>();
-    public createMenuItem(text : string,onClicked?:()=>void): VXM.TMenuItem {
-        var menuItem = new VXM.TMenuItem();
-        menuItem.Text = text;
-        menuItem.onClicked = onClicked;
-        this.menuItems.add(menuItem);
-        return menuItem;
-    }
-
 
     private _buttonicon: V.ButtonIcon = null;
     public get ButtonIcon(): V.ButtonIcon {
@@ -79,6 +70,18 @@ export class TButton extends VXC.TComponent {
             this.drawDelayed(true);
         }
     }
+
+    private _tabindex: number;
+    public get TabIndex(): number {
+        return this._tabindex;
+    }
+    public set TabIndex(val: number) {
+        if (val != this._tabindex) {
+            this._tabindex = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     private _iconalignment: V.IconAlignment = V.IconAlignment.Left;
     public get IconAlignment(): V.IconAlignment {
@@ -96,9 +99,9 @@ export class TButton extends VXC.TComponent {
     */
     public onClicked: (sender: TButton) => void;
 
-    private jText : JQuery;
-    private jImage: JQuery;
-    private jBtn: JQuery;
+    public jText : JQuery;
+    public jImage: JQuery;
+    public jBtn: JQuery;
     
     public create() {
         this.jComponent.empty(); //clear all subcomponents
@@ -109,11 +112,9 @@ export class TButton extends VXC.TComponent {
         this.jText = $('<span/>');
 
         this.jBtn = $('<button/>');
+        if (this.TabIndex) this.jBtn.attr('tabindex', this.TabIndex);
         this.jBtn.css('height', '100%').css('width','100%').addClass("btn");
         this.jBtn.css('display', this.jComponent.css('display'));
-        //this.jBtn.css('padding-right', '0px');
-        //this.jBtn.css('padding-left', '0px');
-        //this.jBtn.css('width', '100%');
         this.jBtn.appendTo(this.jComponent);
 
         if (this.ButtonIcon) {
@@ -140,10 +141,11 @@ export class TButton extends VXC.TComponent {
             else this.jImage.addClass('pull-right');
         }
 
-        if (this.menuItems.length() > 0) {
-            this.jBtn.append($('<span class="caret"/>'));
-            this.reBuildMenu();
-        }
+        //handle popupmenu
+        if (this.menuItems.length() > 0)
+            if(this.ShowMenuCaret) this.jBtn.append($('<span class="caret"/>'));
+        (<any>this).jDropDownTarget = this.jBtn; //control the menupopup mechansim
+
         this.jBtn.append(this.jText);
 
         switch (this.ButtonStyle) {
@@ -172,17 +174,6 @@ export class TButton extends VXC.TComponent {
 
     }
 
-    private reBuildMenu(showMenu: boolean = false) {
-        this.jBtn.attr('data-toggle', "dropdown");
-        this.jBtn.addClass('dropdown-toggle');
-        this.jComponent.find(".dropdown-menu").empty();
-        this.menuItems.createmenu('dropdown-menu').appendTo(this.jComponent);
-        $('.dropdown-toggle').dropdown()
-        if (showMenu) {
-            this.jComponent.addClass('open');
-        }
-    }
-
     public draw(reCreate : boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
@@ -192,6 +183,72 @@ export class TButton extends VXC.TComponent {
     }
 }
 
+declare var FB;
+export class TFacebookButton extends VXC.TComponent {
+    public onLoggedin: () => void;
+    private _showfirendface: boolean = true;
+    public get ShowFriendFace(): boolean {
+        return this._showfirendface;
+    }
+    public set ShowFriendFace(val: boolean) {
+        if (val != this._showfirendface) {
+            this._showfirendface = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _buttonsize: V.ButtonSize = V.ButtonSize.Small;
+    public get ButtonSize(): V.ButtonSize {
+        return this._buttonsize;
+    }
+    public set ButtonSize(val: V.ButtonSize) {
+        if (val != this._buttonsize) {
+            this._buttonsize = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    public create() {
+        var self = this;
+
+        if (this.jComponent.children().length==0) {
+            super.create();
+
+            this.jComponent.empty(); //clear all subcomponents
+            this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+            this.jComponent.addClass('fb-login-button');
+
+            if (this.ShowFriendFace) this.jComponent.attr('data-show_faces', 'true');
+            this.jComponent.attr('data-auto-logout-link', 'false');
+            if (this.ButtonSize == V.ButtonSize.Large) {
+                this.jComponent.attr('data-size', 'xlarge');
+            }
+            else if (this.ButtonSize == V.ButtonSize.Default) {
+                this.jComponent.attr('data-size', 'large');
+            }
+            else if (this.ButtonSize == V.ButtonSize.Small) {
+                this.jComponent.attr('data-size', 'medium');
+            }
+            else if (this.ButtonSize == V.ButtonSize.Mini) {
+                this.jComponent.attr('data-size', 'small');
+            }
+
+            FB.XFBML.parse();
+            this.jComponent.on('login', () => {
+                if (self.onLoggedin) self.onLoggedin();
+            });
+        }
+
+    }
+
+    public draw(reCreate: boolean) {
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
+
+    }
+}
 
 export class TToggleSwitch extends VXB.TEditorBase {
     private _value: boolean = false;

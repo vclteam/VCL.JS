@@ -4,6 +4,17 @@ import VXD = require("VCL/VXDataset");
 export class TTextBase extends VXC.TComponent {
     public onClicked: (sender: TTextBase) => void;
 
+    private _rtl: boolean = false;
+    public get Rtl(): boolean {
+        return this._rtl;
+    }
+    public set Rtl(val: boolean) {
+        if (val != this._rtl) {
+            this._rtl = val;
+            this.drawDelayed(true);
+        }
+    }
+
     private _text: string;
     /*
     * Text specify the text string that labels the control.
@@ -27,10 +38,24 @@ export class TTextBase extends VXC.TComponent {
         super.draw(reCreate);
     }
 
+    public create() {
+        super.create();
+    }
 }
 
 export class TDBTextBase extends VXC.TComponent {
     public onClicked: () => void;
+
+    private _rtl: boolean = false;
+    public get Rtl(): boolean {
+        return this._rtl;
+    }
+    public set Rtl(val: boolean) {
+        if (val != this._rtl) {
+            this._rtl = val;
+            this.drawDelayed(true);
+        }
+    }
 
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);

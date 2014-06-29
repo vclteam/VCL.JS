@@ -12,6 +12,7 @@ declare var bootbox;
 export class TApplication {
     private static _instance: TApplication;
     private sammy: any;
+    private igonreaAthenticationPage: string="";
     public navbaritems = new VXO.TCollection<TNavbarItem>();
 
     public initialize() {
@@ -26,11 +27,14 @@ export class TApplication {
                 this.navigateToPage(buildPageURL(self.MainPage));
             });
             this.get('#show/:class/:params', function () {
+                var className: string = self.hexToString(this.params["class"]);
                 var args: any[] = [];
-                if (self.AuthenticationRequired && !self.Authenticated && this.params["class"].toUpperCase() != self.LoginPage.toUpperCase()) {
-                    self.navigateToPage(self.LoginPage, ["#show/" + this.params["class"] + '/' + <string>this.params["params"]]);
+                if (self.AuthenticationRequired && !self.Authenticated &&
+                    className.toUpperCase() != self.LoginPage.toUpperCase() &&
+                    className.toUpperCase() != self.igonreaAthenticationPage.toUpperCase() ) {
+                    self.navigateToPage(self.LoginPage, ["#show/" + className + '/' + <string>this.params["params"]]);
                 } else {
-                    var className: string = this.params["class"];
+                    var className: string = self.hexToString(this.params["class"]);
                     var paramArgStr: string = self.hexToString(<string>this.params["params"]);
                     var paramArg = JSON.parse(paramArgStr);
                     $.each(paramArg, function (index, item) {
@@ -53,16 +57,15 @@ export class TApplication {
         });
     }
 
-    /*public checkServerConnectionStatus() {
-        var svr: V.TServer = new V.TServer();
-        window.setTimeout(()=>{
-            svr.ping(() => {
-                //everthing OK
-            }, () => {
-                });
-        }, 2000);
-    }*/
 
+	public logOff() {
+        this.Authenticated = false;
+        if (this.AuthenticationRequired) {
+            this.navigateToPage(this.MainPage, [+Math.random()]);
+        }
+    }
+
+	
     public serverURL: string = "backEnd";
     private createPageInstance(prototype, html, __args) {
         var instance = Object.create(prototype);
@@ -71,7 +74,13 @@ export class TApplication {
         return instance;
     }
 
-    
+
+    public loadJSLibraries(modulesName: Array<string>, callBack: () => void) {
+        require(modulesName, function (modl) {
+            if (callBack) callBack();
+        });
+    }
+
     public loadJSLibrary(moduleName: string,callBack : (moduleObject : any)=> void) {
         require([moduleName], function (modl) {
             if (callBack) callBack(modl);
@@ -123,6 +132,24 @@ export class TApplication {
 
 
 
+    public downloadFile(filename: string, preparingMessage?: string, failMessage?: string, onSuccess?: () => void, onFail?: () => void) {
+        this.loadJSLibraries(["jquery-ui", "fileDownload", "VCL/Scripts/css.js!jquery-uicss"], () => {
+            var options = {
+                failMessageHtml: failMessage,
+                preparingMessageHtml: preparingMessage,
+                successCallback: function (url) {
+                    if (onSuccess) onSuccess();
+                },
+                failCallback: function (responseHtml, url) {
+                    if (onFail) onFail();
+                }
+            };
+
+            (<any>$).fileDownload(encodeURI(V.Application.serverURL + "?METHOD=DOWNLOAD&PARAMS={FILENAME:\"" +
+                filename + "\"}"), options);
+        });
+    }
+
 
     /*
     *  capture page loading if the event return false page loading will not occurred
@@ -164,9 +191,9 @@ export class TApplication {
         json.buttons = new Array<any>();
         buttons.forEach((item) => {
             var btn: any = {};
-            btn.label = item;
-            btn.callback = (rc : BaseJQueryEventObject) => {
-                if (callback) callback((<any>rc.currentTarget).innerText);
+            btn["label"] = item;
+            btn["callback"] = (rc : BaseJQueryEventObject) => {
+                if (callback) callback((<any>rc.currentTarget).textContent);
             }
             json.buttons.push(btn);
         });
@@ -174,7 +201,17 @@ export class TApplication {
 
     }
 
+    /*
+    * The MessagePrompt function is used to display messages to the user. These messages may be informational, or warnings or whatever.  
+    */
+    public messageDlgPrompt(message: string, callback: (promptedText : string) => void) {
+        (<any>bootbox).prompt(message, (promptedText) => {
+            if (callback) callback(promptedText);
+        });
 
+    }
+
+    
 
     public getSessionValue(name: string, defaultValue?: any) {
         var session = this.sammy.session("VCL", function () {
@@ -200,15 +237,19 @@ export class TApplication {
         this.sammy.run(buildPageURL(this.MainPage));
     }
 
-    public login(email: string, password: string, onSuccuess: () => void,
+    /*
+    * specify the server side method for login 
+    */
+    public loginServerClass: string = "LOGIN";
+    public login(email: string, password: string, onSuccuess: (data? : any) => void,
         onFail?: (errorMessage: string) => void) {
         var server = new VXServer.TServer();
-        server.send("LOGIN", { USER: email, PASS: password }, (data) => {
+            server.send(this.loginServerClass, { USER: email, PASS: password }, (data) => {
             if (data.STATUS == "OK") {
                 this.UserRole = data.ROLE;
                 this.UserName = data.USER;
                 this.UserEmail = data.EMAIL;
-                onSuccuess();
+                onSuccuess(data);
             }
             else if (onFail) onFail(data);
         }, (error: string) => {
@@ -217,10 +258,13 @@ export class TApplication {
     }
 
 
-
-    public navigateToPage(className: String, ConstructorArgs?: any[]) {
+    public navigateToPage(className: string, ConstructorArgs?: any[], igonreaAthentication : boolean = false) {
         var url: string = buildPageURL(className, ConstructorArgs);
+        if (igonreaAthentication) {
+            this.igonreaAthenticationPage = className;
+        }
         this.sammy.setLocation(url);
+        //this.sammy.runRoute('get', url);
     }
 
     public navigateToURL(URL: string) {
@@ -258,6 +302,50 @@ export class TApplication {
         this.navbaritems.add(item);
         return item;
     }
+
+    /*private _language: string = "";
+    public get Language(): string {
+        return this._language;
+    }
+    public set Language(val: string) {
+        if (val != this._language) {
+            this._language = val;
+        }
+    }
+
+    private startPresist = false;
+    private LanguageDictionary = [];
+    public persistWordToLanguageDictionary(language: string, word: string) {
+        if (!this.LanguageDictionary[language]) this.LanguageDictionary[language]=[];
+        if (!this.LanguageDictionary[language][word]) {
+            this.LanguageDictionary[language].push(word);
+            if (!this.startPresist) {
+                setTimeout(() => {
+                    try {
+                    this.startPresist = true;
+                        this.saveLanguageDictionary()
+                } finally {
+                    }
+                }, 60000);
+            }
+        }
+    }
+
+    public loadLanguageDictionary(language: string) {
+        if (!this.LanguageDictionary[language]) return;
+    }
+
+    public getLanguageTranslation(word: string) : string{
+        if (!this.Language) return word;
+        if (!this.LanguageDictionary[this.Language]) return word;
+        var ed = this.LanguageDictionary[this.Language][word];
+        if (ed) return ed;
+        return word;
+    }
+
+    public saveLanguageDictionary() {
+        this.startPresist = false;
+    }*/
 
     private _mainpage: string = "PageHome";
     /**
@@ -447,6 +535,19 @@ export class TApplication {
         }
     }
 
+    private _enableapplicationcache: boolean = true;
+    /**
+    * Contains the text that appears in the browser title.
+    */
+    public get EnableApplicationCache(): boolean {
+        return this._enableapplicationcache;
+    }
+    public set EnableApplicationCache(val: boolean) {
+        if (val != this._enableapplicationcache) {
+            this._enableapplicationcache = val;
+        }
+    }
+
 
     private _applicationtitle: string = "VCL.JS Application";
     /**
@@ -493,14 +594,15 @@ export class TApplication {
             if (item.Text) $("<span/>").text(item.Text).appendTo(baritem);
             var lineItem: JQuery = $('<li>/');
             baritem.appendTo(lineItem);
-            if (item.menu.length() > 0) {
+            if (item.menuItems.length() > 0) {
 
-                item.menu.createmenu('dropdown-menu').appendTo(lineItem);
+                item.menuItems.createmenu('dropdown-menu').appendTo(lineItem);
                 baritem.addClass('dropdown-toggle');
                 baritem.attr('data-toggle', "dropdown");
                 lineItem.addClass('dropdown');
                 $('<b class="caret">').appendTo(baritem);
             }
+            $('.dropdown-toggle').dropdown()
             if (item.ItemAlignment == V.ItemAlignment.Left) lineItem.appendTo(navLeft)
             else lineItem.appendTo(navRight);
             return true;
@@ -723,7 +825,101 @@ export class TApplication {
             "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
         ]
     }
+}
 
+
+declare var FB;
+export class TFacebookAPI {
+    public onInitialized: () => void;
+
+    private _accessToken: string = null;
+
+    private _appid: string = null;
+    /*
+    * Text specify the text string that labels the control.
+    */
+    public get ApplicationID(): string {
+        return this._appid;
+    }
+    public set ApplicationID(val: string) {
+        if (val != this._appid) {
+            this._appid = val;
+            this.init();
+        }
+    }
+
+    public init() {
+        if (!this.ApplicationID) return;
+        var self = this;
+        var d = document;
+        var s = 'script'
+        var id = 'facebook-jssdk';
+
+        (<any>window).fbAsyncInit = function () {
+            (FB).init({
+                appId: self.ApplicationID,
+                xfbml: true,
+                version: 'v2.0'
+            })
+            if (self.onInitialized) self.onInitialized();
+        };
+
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {
+            return;
+        }
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "http://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }
+
+
+    private loginRresponseToEnum(status: any): V.FacebookLoginState {
+        if (status === 'connected') return V.FacebookLoginState.Connected;
+        else if (status === 'not_authorized') return V.FacebookLoginState.NotAuthorized;
+        else return V.FacebookLoginState.NotConnected;
+    }
+
+    public getLoginState(callback: (state: V.FacebookLoginState) => void) {
+        var self = this;
+        FB.getLoginStatus(function (response) {
+            var rc: V.FacebookLoginState = self.loginRresponseToEnum(response.status);
+            if (rc == V.FacebookLoginState.Connected) {
+                FB.api('/me', function (response) {
+                    self.UserName = response.name;
+                    self.UserID = response.id;
+                    if (callback) callback(rc);
+                })
+            } else if (callback) callback(rc);
+        });
+    }
+
+    public UserName: string;
+    public UserID: string;
+    public login(callback?: (state: V.FacebookLoginState) => void) {
+        var self = this;
+        FB.login(function (response) {
+            this._accessToken = response.authResponse.accessToken;
+            var rc: V.FacebookLoginState = self.loginRresponseToEnum(response.status);
+
+            if (rc == V.FacebookLoginState.Connected) {
+                FB.api('/me', function (response) {
+                    self.UserName = response.name;
+                    self.UserID = response.id;
+                    if (callback) callback(rc);
+                })
+            } else  if (callback) callback(rc);
+        })
+    }
+
+
+
+    public logout(callback?: () => void) {
+        FB.logout(function (response) {
+            if (callback) callback();
+        })
+    }
 
 }
 
@@ -735,11 +931,11 @@ export class TNavbarItem extends VXO.TCollectionItem {
         this.onClick = onClick;
     }
 
-    public menu = new VXM.TMenuItemCollection<VXM.TMenuItem>();
+    public menuItems = new VXM.TMenuItemCollection<VXM.TMenuItem>();
     public addMenuItem(text: string): VXM.TMenuItem {
         var menuItem = new VXM.TMenuItem();
         menuItem.Text = text;
-        this.menu.add(menuItem);
+        this.menuItems.add(menuItem);
         return menuItem;
     }
 
@@ -795,21 +991,22 @@ export class TNavbarItem extends VXO.TCollectionItem {
 }
 
 class BrowserHistory {
-    public navigateToPage(className: String, ConstructorArgs?: any[]) {
+    public navigateToPage(className: string, ConstructorArgs?: any[]) {
         var url: string = buildPageURL(className, ConstructorArgs);
     }
 }
 
-function buildPageURL(className: String, ConstructorArgs?: any[]) {
+function buildPageURL(className: string, ConstructorArgs?: any[]) {
     var paramObj = new Object();
     if (ConstructorArgs != null) {
         $.each(ConstructorArgs, function (index, item) {
-            if (item instanceof Date) {
+            if (typeof item === "undefined") paramObj[index] = null;
+            else if (item instanceof Date) {
                 paramObj[index] = '!~@!' + (<Date>item).getTime();
             } else paramObj[index] = item;
         });
     }
-    return "#show/" + className + '/' + (decodeURIComponent(stringToHex(JSON.stringify(paramObj))));
+    return "#show/" + stringToHex(className) + '/' + (decodeURIComponent(stringToHex(JSON.stringify(paramObj))));
 }
 
 function stringToHex(tmp: string): string {
@@ -913,6 +1110,4 @@ class passwordStrength {
         // using words are bad too!
         return score * -5;
     }
-
-
 }

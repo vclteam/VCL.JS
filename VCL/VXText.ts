@@ -25,8 +25,7 @@ export class TText extends VXT.TTextBase {
             this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'p', this.FitToWidth, this.FitToHeight);
             this.jComponent.addClass('lead');
         } else if (this.TextStyle == V.TextStyle.small) {
-            this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'p', this.FitToWidth, this.FitToHeight);
-            this.jComponent.addClass('small');
+            this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'small', this.FitToWidth, this.FitToHeight);
         } else this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'p', this.FitToWidth, this.FitToHeight);
 
         this.jComponent.off("click").click(() => {
@@ -34,6 +33,10 @@ export class TText extends VXT.TTextBase {
         })
 
         if (this.TextColor) this.jComponent.css('color', this.TextColor);
+        if (this.TextAlignment == V.TextAlignment.Left) this.jComponent.css('text-align', 'left');
+        if (this.TextAlignment == V.TextAlignment.Right) this.jComponent.css('text-align', 'right');
+        if (this.TextAlignment == V.TextAlignment.Center) this.jComponent.css('text-align', 'center');
+
 
         super.create();
     }
@@ -48,6 +51,18 @@ export class TText extends VXT.TTextBase {
             this.draw(true);
         }
     }
+
+    private _textaliggment: V.TextAlignment;
+    public get TextAlignment(): V.TextAlignment {
+        return this._textaliggment;
+    }
+    public set TextAlignment(val: V.TextAlignment) {
+        if (val != this._textaliggment) {
+            this._textaliggment = val;
+            this.draw(true);
+        }
+    }
+
 
     private _textcolor: string;
     public get TextColor(): string {
@@ -66,7 +81,7 @@ export class TText extends VXT.TTextBase {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        this.jComponent.text(this.Text)
+        this.jComponent.html(this.Text)
         if (this.onClicked != null) this.jComponent.css('cursor', 'pointer');
         else this.jComponent.css('cursor', '');
 
@@ -100,7 +115,6 @@ export class TLabel extends VXT.TTextBase {
         }
     }
 
-
     public create() {
         var self = this;
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
@@ -111,8 +125,8 @@ export class TLabel extends VXT.TTextBase {
         else if (this.LabelStyle == V.LabelStyle.Warning) this.jComponent.addClass('label-warning');
         else if (this.LabelStyle == V.LabelStyle.Important) this.jComponent.addClass('label-important');
         else if (this.LabelStyle == V.LabelStyle.Info) this.jComponent.addClass('label-info');
-        super.create();
 
+        super.create();
     }
 
 
@@ -141,6 +155,7 @@ export class TDBLabel extends VXT.TDBTextBase {
     public create() {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('label');
+        if (this.Rtl == true) this.jComponent.attr("dir", "RTL");
         this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
         if (this.LabelStyle == V.LabelStyle.Success) this.jComponent.addClass('label-success');
         else if (this.LabelStyle == V.LabelStyle.Warning) this.jComponent.addClass('label-warning');
@@ -173,6 +188,7 @@ export class TBadge extends VXT.TTextBase {
         var self = this;
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('badge');
+        if (this.Rtl == true) this.jComponent.attr("dir", "RTL");
         this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(self); })); return false; })
 
         if (this.BadgeStyle == V.BadgeStyle.Success) this.jComponent.addClass('badge-success');
@@ -209,6 +225,7 @@ export class TDBBadge extends VXT.TDBTextBase {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
 
         this.jComponent.addClass('badge');
+        if (this.Rtl == true) this.jComponent.attr("dir", "RTL");
         this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
 
         if (this.BadgeStyle == V.BadgeStyle.Success) this.jComponent.addClass('badge-success');
@@ -228,6 +245,17 @@ export class TDBBadge extends VXT.TDBTextBase {
 }
 
 export class TTagCloud extends VXC.TComponent {
+    /** Custom Format tooltip */
+    public ToolTipFormat: (item: TTagCloudItem) => string;
+    /** Custom on click */
+    public onClicked: (item: TTagCloudItem) => void;
+
+    private selectedTagItem: JQuery;
+
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+        super(aOwner, renderTo);
+    }
+
     private compareWeights(a: number, b: number) {
         return a - b;
     }
@@ -272,11 +300,6 @@ export class TTagCloud extends VXC.TComponent {
         return this.toHex(rgb);
     }
 
-    constructor(aOwner: VXC.TComponent, renderTo?: string) {
-        super(aOwner, renderTo);
-    }
-
-
     private _fontstart: number = 10;
     public get FontStart(): number {
         return this._fontstart;
@@ -295,6 +318,17 @@ export class TTagCloud extends VXC.TComponent {
     public set FontEnd(val: number) {
         if (val != this._fontend) {
             this._fontend = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _brackets: boolean = false;
+    public get BracketsAroundText(): boolean {
+        return this._brackets;
+    }
+    public set BracketsAroundText(val: boolean) {
+        if (val != this._brackets) {
+            this._brackets = val;
             this.drawDelayed(true);
         }
     }
@@ -326,6 +360,7 @@ export class TTagCloud extends VXC.TComponent {
     }
 
     public create() {
+        var self = this;
         this.jComponent.empty(); //clear all subcomponents
 
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
@@ -352,17 +387,24 @@ export class TTagCloud extends VXC.TComponent {
             var weighting = item.Value - lowest;
             tagItem.css({ "font-size": this.FontStart + (weighting * fontIncr) + "pt" });
             tagItem.css({ "color": this.tagColor(colorIncr, weighting) });
-            tagItem.text(item.Text);
+            var txt = item.Text;
+            if (this.BracketsAroundText) txt = "[" + txt + "]";
+            tagItem.text(txt);
             tagItem.css('margin', "3px");
             tagItem.attr('data-toggl', 'tooltip');
-            if (item.Tooltip) tagItem.attr('title',item.Tooltip);
+            if (this.ToolTipFormat) tagItem.attr('title', this.ToolTipFormat(item));
+            else if (item.Tooltip) tagItem.attr('title', item.Tooltip);
             else tagItem.attr('title', item.Value);
             tagItem.tooltip();
 
             tagItem.off("click").click(() => {
-                if (item.onClicked != null) (V.tryAndCatch(() => { item.onClicked(); })); return false;
+                if (self.selectedTagItem)
+                    self.selectedTagItem.css("background-color", "");
+                self.selectedTagItem = tagItem;
+                self.selectedTagItem.css("background-color", "yellow");
+                if (self.onClicked != null) (V.tryAndCatch(() => { self.onClicked(item); })); return false;
             })
-            
+
 
             tagItem.appendTo(this.jComponent);
         });
@@ -390,8 +432,6 @@ export class TTagCloud extends VXC.TComponent {
 }
 
 export class TTagCloudItem extends VXO.TCollectionItem {
-    public onClicked: () => void;
-
     private _text: string = null;
     public get Text(): string {
         return this._text;
@@ -446,6 +486,17 @@ export class TPillBoxItem extends VXO.TCollectionItem {
         }
     }
 
+    private _width: number = null;
+    public get Width(): number {
+        return this._width;
+    }
+    public set Width(val: number) {
+        if (val != this._width) {
+            this._width = val;
+        }
+    }
+
+
     private _pillboxstyle: V.PillBoxStyle = V.PillBoxStyle.Default;
     public get PillBoxItemStyle(): V.PillBoxStyle {
         return this._pillboxstyle;
@@ -472,6 +523,7 @@ export class TPillBoxItem extends VXO.TCollectionItem {
 export class TPillBox extends VXC.TComponent {
     public onClicked: (item: TPillBoxItem) => void;
     public onRemoved: (item: TPillBoxItem) => void;
+    public onRemove : (item: TPillBoxItem) => boolean;
     public items: V.TCollection<TPillBoxItem> = new V.TCollection<TPillBoxItem>();
     public createItem(text: string, style: V.PillBoxStyle= V.PillBoxStyle.Default): TPillBoxItem {
         var col = new TPillBoxItem();
@@ -480,6 +532,15 @@ export class TPillBox extends VXC.TComponent {
         col.Text = text;
         return col;
     }
+
+    public removeItem(item: TPillBoxItem) {
+
+        this.items.remove(item);
+        if (this.onRemoved) this.onRemoved(item);
+
+        this.drawDelayed(true);
+    }
+
     public create() {
         var self = this;
         this.jComponent.empty(); //clear all subcomponents
@@ -488,19 +549,21 @@ export class TPillBox extends VXC.TComponent {
         this.jComponent.addClass('pillbox');
         this.items.forEach((item) => {
             var jItem = $('<li>');
+            if (item.Width) jItem.css('width', item.Width + "px");
             if (item.EnableRemove) jItem.attr('data-content', String.fromCharCode(215));
-            jItem.text(item.Text);
-            jItem.data("ID",item);
+            jItem.html(item.Text);
+            jItem.data("ID", item);
             jItem.addClass('status-' + V.PillBoxStyle[item.PillBoxItemStyle].toLowerCase());
             jItem.off("click").click(function (e) {
                 var $li = $(e.currentTarget);
-                var item : TPillBoxItem = $li.data("ID");
+                var item: TPillBoxItem = $li.data("ID");
                 if (item.EnableRemove && $li.width() - e.offsetX < 16) {
                     var rc: any;
-                    if (self.onRemoved)  rc = self.onRemoved(item);
+                    if (self.onRemove) rc = self.onRemove(item);
                     if (rc != false) {
                         $li.remove();
-                        self.items.remove(item);
+                        self.removeItem(item);
+
                     }
                 } else {
                     if (self.onClicked) self.onClicked(item);
@@ -531,6 +594,19 @@ export class TBreadCrumbItem extends VXO.TCollectionItem {
                 this.OwnerCollection.refresh();
         }
     }
+
+    private _textcolor: string;
+    public get TextColor(): string {
+        return this._textcolor;
+    }
+    public set TextColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._textcolor) {
+                this._textcolor = val;
+            }
+        }
+    }
+
 
     private _text: string = null;
     public get Text(): string {
@@ -582,11 +658,13 @@ export class TBreadCrumb extends VXC.TComponent {
             if (!item.Enabled) {
                 jItem.addClass('active');
                 jItem.text(item.Text);
+                if (item.TextColor) jItem.css('color', item.TextColor);
             } else {
                 aItem = $('<a>');
                 aItem.text(item.Text);
                 aItem.attr('href', '#');
                 aItem.appendTo(jItem);
+                if (item.TextColor) aItem.css('color', item.TextColor);
             }
 
             sepItem = $('<span >').addClass('divider');
@@ -621,11 +699,11 @@ export class TPaginationItem extends VXO.TCollectionItem {
     private jImage: JQuery = null;
     private jItem: JQuery = null;
     private jText: JQuery = null;
-    
+
 
     constructor(aOwner: V.TPagination) {
         super();
-        this._pagination = aOwner;        
+        this._pagination = aOwner;
     }
 
 
@@ -710,7 +788,7 @@ export class TPaginationItem extends VXO.TCollectionItem {
         } else {
             aItem.attr('href', '#');
             this.jItem.off("click").click(function (e) {
-                var li:JQuery = $(this);                
+                var li: JQuery = $(this);
                 var item = li.data("ID");
                 item._pagination.items.forEach((item) => {
                     (<any>item).jItem.removeClass('active');
@@ -736,13 +814,11 @@ export class TPagination extends VXC.TComponent {
 
     public onClicked: (item: TPaginationItem) => void;
 
-
-
-    
     public createItem(text: string): TPaginationItem {
         var col = new TPaginationItem(this);
         this.items.add(col);
         col.Text = text;
+        this.drawDelayed(true);
         return col;
     }
 
@@ -783,13 +859,13 @@ export class TPagination extends VXC.TComponent {
             case V.PaginationAlignment.Right: this.jComponent.addClass("pagination-right"); break;
             case V.PaginationAlignment.Center: this.jComponent.addClass("pagination-centered"); break;
             default:
-                this.jComponent.removeClass("pagination-right"); 
-                this.jComponent.removeClass("pagination-centered"); 
+                this.jComponent.removeClass("pagination-right");
+                this.jComponent.removeClass("pagination-centered");
                 break;
         }
 
         var picker: JQuery = $('<ul>');
-                
+
         this.items.forEach((item) => {
             item.create();
             (<any>item).jItem.data("ID", item);

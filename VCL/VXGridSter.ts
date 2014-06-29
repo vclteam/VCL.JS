@@ -257,7 +257,7 @@ export class TWdgetPanel extends VXP.TPanel {
 
     public set SizeY(val: number) {
         if (val != this._sizeY) {
-            this._sizeY = val;
+            this._sizeY = Math.floor(val);
         }
     }
 
@@ -268,7 +268,7 @@ export class TWdgetPanel extends VXP.TPanel {
 
     public set SizeX(val: number) {
         if (val != this._sizeX) {
-            this._sizeX = val;
+            this._sizeX = Math.floor(val);
         }
     }
 
@@ -278,7 +278,7 @@ export class TWdgetPanel extends VXP.TPanel {
     }
     public set Y(val: number) {
         if (val != this._Y) {
-            this._Y = val;
+            this._Y = Math.floor(val);
         }
     }
 
@@ -288,7 +288,7 @@ export class TWdgetPanel extends VXP.TPanel {
     }
     public set X(val: number) {
         if (val != this._X) {
-            this._X = val;
+            this._X = Math.floor(val);
         }
     }
 

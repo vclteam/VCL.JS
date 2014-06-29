@@ -86,6 +86,19 @@ export class TPanelButton {
         }
     }
 
+
+    private _tooltip: string;
+    public get Tooltip(): string {
+        return this._tooltip;
+    }
+    public set Tooltip(val: string) {
+        if (val != this._tooltip) {
+            this._tooltip = val;
+            this.owner.drawDelayed(false);
+        }
+    }
+
+
     private _icon: V.Icon = V.Icon.icon_align_justify;
     public get Icon(): V.Icon {
         return this._icon;
@@ -93,6 +106,19 @@ export class TPanelButton {
     public set Icon(val: V.Icon) {
         if (val != this._icon) {
             this._icon = val;
+            this.Visible = true;
+            this.owner.drawDelayed(false);
+        }
+    }
+
+    private _url: string;
+    public get ImageUrl(): string {
+        return this._url;
+    }
+
+    public set ImageUrl(val: string) {
+        if (val != this._url) {
+            this._url = val;
             this.Visible = true;
             this.owner.drawDelayed(false);
         }
@@ -112,6 +138,7 @@ export class TPanelButton {
 
     public onClicked: () => void;
     public jButton: JQuery;
+    public jImage: JQuery;
     public jGroupButton: JQuery;
     public jMenu: JQuery;
 
@@ -159,7 +186,7 @@ export class TPanel extends VXCO.TContainer {
         }
     }
 
-  
+
 
     private _borderradius: number = 0;
     public get BorderRadius(): number {
@@ -172,7 +199,7 @@ export class TPanel extends VXCO.TContainer {
         }
     }
 
-    
+
 
     private _backgroundimageurl: string;
     public get BackgroundImageURL(): string {
@@ -265,7 +292,19 @@ export class TPanel extends VXCO.TContainer {
         }
     }
 
+    private _textheaderalign: V.HeaderTextAlignment = V.HeaderTextAlignment.Left;
+    public get HeaderTextAlignment(): V.HeaderTextAlignment {
+        return this._textheaderalign;
+    }
+    public set HeaderTextAlignment(val: V.HeaderTextAlignment) {
+        if (val != this._textheaderalign) {
+            this._textheaderalign = val;
+            this.drawDelayed(true);
+        }
+    }
 
+
+    public onPanelClicked: (sender: VXC.TComponent) => void;
     public onHeaderClicked: (sender: VXC.TComponent) => void;
     public onContentClicked: (sender: VXC.TComponent) => void;
 
@@ -294,26 +333,40 @@ export class TPanel extends VXCO.TContainer {
 
             this.jHeader.appendTo(this.jContent);
 
-            
+
             if (this.HeaderTextStyle == V.HeaderTextStyle.Strong) {
                 this.jHeaderText = $("<strong>");
             } else if (this.HeaderTextStyle == V.HeaderTextStyle.Small) {
-                this.jHeaderText = $("<small>");                
+                this.jHeaderText = $("<small>");
             } else {
                 this.jHeaderText = $("<div>");
             }
+
 
             if (this.BorderRadius > 0) {
                 this.jHeader.css("border-top-left-radius", this.BorderRadius);
                 this.jHeader.css("border-top-right-radius", this.BorderRadius);
             }
-            this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '80%');
+
+            this.jButtons = $("<div>");
+            if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
+                this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('text-align', 'right');
+                if (this.Button1.Visible || this.Button2.Visible || this.Button3.Visible || this.CloseButton.Visible) this.jHeaderText.css('width', '80%');
+                else {
+                    this.jHeaderText.css('width', '99%').css('padding-right','5px');
+                    this.jButtons.hide();
+                }
+            } else {
+                this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '80%');
+            }
+
+
             this.jHeaderText.appendTo(this.jHeader);
             this.jComponent.css('display', 'block');
             this.jContent.append(this.jComponent);
-         
 
-            this.jButtons = $("<div>");
+
+
             this.jButtons.prependTo(this.jHeader);
             if (this.ButtonAlignment == V.ButtonAlignment.Left) {
                 this.jButtons.addClass('pull-left');
@@ -333,15 +386,10 @@ export class TPanel extends VXCO.TContainer {
             this.createButton(this.Button2, null);
             this.createButton(this.Button3, null);
 
-
-
             var x = this.jComponent;
             this.jComponent = this.jContent;
             this.jContent = x;
             this.jContent.css('overflow', 'visible');
-            this.jContent.off("click").click(() => {
-                if (this.onContentClicked != null) (V.tryAndCatch(() => { this.onContentClicked(self); }));
-            })
             this.jOverlayText = $("<div>");
         }
 
@@ -362,6 +410,7 @@ export class TPanel extends VXCO.TContainer {
         this.jHeader.removeClass(function (index, css) {
             return (css.match(/\panel-header-\S+/g) || []).join(' ');
         });
+
         this.jHeaderText.removeClass(function (index, css) {
             return (css.match(/\panel-header-\S+/g) || []).join(' ');
         });
@@ -407,37 +456,55 @@ export class TPanel extends VXCO.TContainer {
         this.jHeader.off("click").click(() => {
             if (this.onHeaderClicked != null) (V.tryAndCatch(() => { this.onHeaderClicked(self); }));
         })
+        this.jContent.off("click").click(() => {
+            if (this.onContentClicked != null) (V.tryAndCatch(() => { this.onContentClicked(self); }));
+        })
+        this.jComponent.off("click").click(() => {
+            if (this.onPanelClicked != null) (V.tryAndCatch(() => { this.onPanelClicked(self); }));
+        })
         super.create();
     }
 
     private createButton(button: TPanelButton, clickEvent: () => void) {
         if (!button.jButton) {
-            button.jButton = $('<a>');
-            button.jButton.css('padding', '0px').css('background-color', 'transparent').css('vertical-align','middle')   ;
-            button.jButton.css('box-shadow', 'none')
-            button.jButton.css('border', 'none')
-            button.jButton.addClass('btn icon');
             button.jGroupButton = $('<div>');
             button.jGroupButton.css('display', 'inline-block').addClass('btn-group');
-
-            if (clickEvent) button.jButton.off("click").click(clickEvent)
-            else button.jButton.off("click").click(() => {
-                if (button.menuItems.length() > 0) button.jGroupButton.dropdown();
-                if (button.onClicked != null) (V.tryAndCatch(() => { button.onClicked(); }));
-            })
-            button.jGroupButton.prependTo(this.jButtons);
-            button.jButton.prependTo(button.jGroupButton);
+            button.jButton = $('<a>');
+            button.jImage = $('<img>');
+            button.jButton.css('padding', '0px').css('background-color', 'transparent').css('vertical-align', 'middle');
+            button.jButton.css('box-shadow', 'none');
+            button.jButton.css('border', 'none');
             if (this.LargeHeaderButton) button.jButton.addClass('icon-large');
+            if (clickEvent)
+                button.jButton.off("click").click(clickEvent);
+            else
+                button.jButton.off("click").click(() => {
+                    if (button.menuItems.length() > 0) button.jGroupButton.dropdown();
+                    if (button.onClicked != null) (V.tryAndCatch(() => { button.onClicked(); }));
+                });
+            button.jGroupButton.prependTo(this.jButtons);
+            button.jImage.prependTo(button.jButton);
+            button.jButton.prependTo(button.jGroupButton);
         }
 
         if (button.MarginBottom) button.jButton.css('margin-bottom', button.MarginBottom + "px");
         if (button.MarginTop) button.jButton.css('margin-top', button.MarginTop + "px");
         if (button.MarginLeft) button.jButton.css('margin-left', button.MarginLeft + "px");
-        if (button.MarginRight) button.jButton.css('margin-right', button.MarginRight+"px");
+        if (button.MarginRight) button.jButton.css('margin-right', button.MarginRight + "px");
         if (button.Color) button.jButton.css('color', button.Color);
-        
-        if (button.Text != null && button.Text!="") button.jButton.text(button.Text).addClass('btn-link');
-        else button.jButton.addClass(V.iconEnumToBootstrapStyle(<any>button.Icon)).text('');
+
+        if (button.Text != null && button.Text != "")
+            button.jButton.text(button.Text).addClass('btn-link');
+        else {
+            if (button.ImageUrl) {
+                button.jImage.attr('src', button.ImageUrl);
+            }
+            else {
+                button.jButton.addClass('btn');
+                button.jButton.addClass("icon");
+                button.jButton.addClass(V.iconEnumToBootstrapStyle(<any>button.Icon)).text('');
+            }
+        }
 
         if (button.jMenu) button.jMenu.remove();
         if (button.menuItems.length() > 0) {
@@ -448,6 +515,13 @@ export class TPanel extends VXCO.TContainer {
             button.jMenu.appendTo(button.jGroupButton);
             $('.dropdown-toggle').dropdown()
         }
+
+        //remove the old tooltip
+        button.jButton.data('tooltip', false);
+        if (button.Tooltip != "" && button.Tooltip != null) {
+            button.jButton.tooltip({ title: button.Tooltip });
+        }
+
         button.Visible ? button.jButton.show() : button.jButton.hide();
     }
 
@@ -455,7 +529,7 @@ export class TPanel extends VXCO.TContainer {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
         this.jHeaderText.text(this.HeaderText);
-        this.HeaderVisible ? this.jHeader.show().css('border-top','0px') : this.jHeader.hide().attr('min-height', '0px');
+        this.HeaderVisible ? this.jHeader.show().css('border-top', '0px') : this.jHeader.hide().attr('min-height', '0px');
         this.createButton(this.Button3, null);
         this.createButton(this.Button2, null);
         this.createButton(this.Button1, null);
@@ -466,6 +540,9 @@ export class TPanel extends VXCO.TContainer {
 
 
 export class TGoogleMap extends VXC.TComponent {
+    /** Custom Format tooltip */
+    public ToolTipFormat: (data: any) => string;
+
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
     }
@@ -552,24 +629,63 @@ export class TGoogleMap extends VXC.TComponent {
     }
 
     private setMarkerClick(item: TGoogleMapMarker) {
+        var infowindow = null;
         var self = this;
         google.maps.event.addListener(item.marker, 'click', function (a) {
             self.markerItems.forEach((item) => {
-                if (item.Lat == a.latLng.lb && item.Lng == a.latLng.mb) {
-                    if (item.InforWindowContent) {
-                        var infowindow = new google.maps.InfoWindow({
-                            content: item.InforWindowContent
-                        });
-                        infowindow.open(this.map, item.marker);
-                    }
-                    if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); }));
+                if (item.Lat == a.latLng.d && item.Lng == a.latLng.e) {
+                    if (self.onMarkerClicked != null) (V.tryAndCatch(() => { self.onMarkerClicked(item); }));
                 }
             });
         });
+
+        google.maps.event.addListener(item.marker, 'mouseover', function (a) {
+
+            var lat = -1;
+            var lng = -1;
+            var i = 0;
+            for (var x in a.latLng) {
+                if (i == 0)
+                    lat = a.latLng[x];
+                if (i == 1)
+                    lng = a.latLng[x];
+                i++
+            }
+
+            self.markerItems.forEach((item) => {
+                if (item.Lat == lat && item.Lng == lng) {
+                    var lbl = "";
+                    if (self.ToolTipFormat) {
+                        lbl = self.ToolTipFormat(item);
+                    }
+                    else {
+                        lbl = item.Title;
+                    }
+                    if (lbl) {
+                        item.InforWindowContent = "<div id='content' style='width:150px;overflow:hidden;'>" + lbl + "</div>";
+                        infowindow = new google.maps.InfoWindow({ content: item.InforWindowContent });
+                        infowindow.close();
+                        infowindow.open(self.map, item.marker);
+                    }
+                }
+            });
+        });
+
+        google.maps.event.addListener(item.marker, 'mouseout', function (a) {
+            self.markerItems.forEach((item) => {
+                if (item.Title) {
+                    if (infowindow)
+                        infowindow.close();
+                }
+            });
+        });
+
     }
 
+    public onDecodeAddress: (item: TGoogleMapMarker) => void;
 
     private decodeAddress(address: string, selectedItem: TGoogleMapMarker) {
+        var self = this;
         var myItem: TGoogleMapMarker = selectedItem;
         var geocoder = new google.maps.Geocoder();
         geocoder.geocode({ 'address': myItem.Address }, (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
@@ -583,6 +699,10 @@ export class TGoogleMap extends VXC.TComponent {
                 });
                 this.setMarkerClick(myItem);
                 this.tmpMarkers.push(myItem.marker);
+                if (self.onDecodeAddress) self.onDecodeAddress(myItem);
+            }
+            else {
+                console.log("Google Map cannot load markers: " + status);
             }
             this.optimizeZoomLevel();
         });
@@ -646,13 +766,14 @@ export class TGoogleMap extends VXC.TComponent {
         return col;
     }
 
-    public onLabelClicked: () => void;
+    public onMarkerClicked: (item) => void;
 
 
 }
 
 export class TGoogleMapMarker extends VXO.TCollectionItem {
     public marker: any;
+
     private _lat: number = null;
     public get Lat(): number {
         return this._lat;

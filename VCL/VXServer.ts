@@ -3,6 +3,10 @@ import V = require("VCL/VCL");
 import VO = require("VCL/VXObject");
 export class TServer {
     private async: boolean;
+    private timeout: number = 20000;
+    public  CallType: string = "POST";
+
+    public 
     constructor(async?: boolean) {
         this.async = true;
         if (async != null) this.async = async;
@@ -18,7 +22,7 @@ export class TServer {
         }
 
         var ajxParam: JQueryAjaxSettings = {
-            async: this.async, timeout: 200000,
+            async: this.async, timeout: this.timeout,
             url: filename, dataType: "html",
             cache: false,
             success: (data: any, textStatus: string, jqXHR: JQueryXHR) => {
@@ -66,9 +70,9 @@ export class TServer {
         }
 
         var ajxParam: JQueryAjaxSettings = {
-            async: this.async, timeout: 200000, cache: false,
+            async: this.async, timeout: this.timeout, cache: false,
             url: V.Application.serverURL, dataType: "json",
-            data: { PARAMS: data, METHOD: method },
+            data: { PARAMS: data, METHOD: method }, 
             success: (data: any) => {
                 if (cacheTimeOut > 0) {
                     var myData: ServerCacheItem = new ServerCacheItem();
@@ -96,9 +100,40 @@ export class TServer {
         }));
 
         var ajxParam: JQueryAjaxSettings = {
-            async: this.async, timeout: 200000, cache: false,
-            url: V.Application.serverURL, dataType: "json",
+            async: this.async, timeout: this.timeout, cache: false,
+            url: V.Application.serverURL, dataType: "json", type: this.CallType,
             data: { PARAMS: data, METHOD: method },
+            success: (data: any) => {
+                if (callback != null) callback(data);
+            },
+            error: (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => {
+                var responseText = jqXHR.responseText;
+                if (errorCallback != null) {
+                    errorCallback(responseText)
+               } else {
+                    V.Application.raiseException(responseText);
+                }
+            }
+        };
+        $.ajax(ajxParam);
+    }
+
+      private static jspCount : number = 0;
+    callJSONP(serverURL, param, callback?: (data) => any, errorCallback?: (textStatus: string) => any) {
+        var data: string = encodeURIComponent(JSON.stringify(param, function (key, value) {
+            if (key === "__ownerCollection") return undefined;
+            return value;
+        }));
+        var jspName = "jsonCallback" + (TServer.jspCount++);
+
+        var ajxParam: JQueryAjaxSettings = {
+            type: 'GET',
+            url: serverURL,
+            async: true,
+            jsonpCallback: jspName,
+            contentType: "application/json",
+            dataType: 'jsonp',
+            data: { PARAMS: data, JSP: jspName},
             success: (data: any) => {
                 if (callback != null) callback(data);
             },

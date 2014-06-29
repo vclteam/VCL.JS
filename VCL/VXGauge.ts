@@ -714,7 +714,7 @@ function  JustGage (config) {
     setDy(obj.txtTitle, obj.params.titleFontSize, obj.params.titleY);
 
     // value
-    obj.txtValue = obj.canvas.text(obj.params.valueX, obj.params.valueY, 0);
+    obj.txtValue = obj.canvas.text(obj.params.valueX, obj.params.valueY, obj.originalValue);
     obj.txtValue.attr({
         "font-size": obj.params.valueFontSize,
         "font-weight": "bold",

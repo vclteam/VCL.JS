@@ -101,7 +101,7 @@ export class TChartDotBase extends VXCB.TChartBase {
         }
     }
 
-    
+
 
     private _dotmaxsize: number = 10;
     /*
@@ -146,15 +146,16 @@ export class TChartDotBase extends VXCB.TChartBase {
         }
     }
 }
+
 export class TChartDot extends TChartDotBase {
-    public onGetLabelText: (item: V.TDotValue) => string;
+    //depricated - use ToolTipFormat instead
+    public onGetLabelText: (item: V.TDotValue) => any;
     public onClicked: (item: V.TDotValue) => void;
 
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.onGetLabelText = (item: V.TDotValue) => {
-            return item.Value + "\n" + item.LabelX + "\n" + item.LabelY;
-        }
+        if (this.ToolTipFormat)
+            this.onGetLabelText = this.ToolTipFormat;
     }
 
 
@@ -170,13 +171,14 @@ export class TChartDot extends TChartDotBase {
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
-        super.draw(true);//new do repaint
-
+        super.draw(true);//new do repaint        
     }
 
     private raphael: any;
     private dotchart: any;
     public create() {
+        if (this.ToolTipFormat)
+            this.onGetLabelText = this.ToolTipFormat;
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.raphael = new Raphael(this.jComponent[0]);
@@ -186,11 +188,11 @@ export class TChartDot extends TChartDotBase {
         var xs = [];
         var ys = [];
         var data = [];
-        var ids  = [];
+        var ids = [];
         var axisy = [];
         var axisx = [];
         if (this.values.length() == 0) return;
-       
+
         this.values.forEach((item) => {
             var idx = xSet.indexOf(item.LabelX);
             if (idx == -1) {
@@ -208,47 +210,70 @@ export class TChartDot extends TChartDotBase {
             ids.push(item);
         });
 
+
         var self = this;
-        this.dotchart = this.raphael.dotchart(0, 0, this.Width, this.Height, xs, ys, data,ids, {
+        this.dotchart = this.raphael.dotchart(0, 0, this.Width, this.Height, xs, ys, data, ids, {
             symbol: "o", max: this.DotMaxSize, heat: this.HeatMap,
             axis: "0 0 1 1", horizgridline: this.HorizontalGridLineWidth,
             vertgridline: this.VerticalGridLineWidth, gridlinecolor: this.GridLineColor,
             axisxstep: axisx.length - 1, axisystep: axisy.length - 1,
             axisxlabels: axisx, axisylabels: axisy,
-            axisxtype: " ", axisytype: " ", opacity: this.Opacity,titleX : this.TitleX,titleY : this.TitleY
+            axisxtype: " ", axisytype: " ", opacity: this.Opacity, titleX: this.TitleX, titleY: this.TitleY
 
-        }).hover(function () {
-            var txt = "";
-            if (this.obj != null) txt = self.onGetLabelText(this.obj)
-            //this.value + "\n" + this.obj.LabelX + "\n" + this.obj.LabelY;
-            var w = self.jComponent.width() / 2;
-            if (this.x > w)
-                this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 180, this.r + 2).insertBefore(this);
-            else this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 0, this.r + 2).insertBefore(this);
-            this.marker.show();
-            }, function () {
-                this.marker && this.marker.hide();
-            });
-        this.dotchart.click(function (x, b, f) {
-            if (self.ShowSelectedItem) {
-                if ((<any>self).selectednode) {
-                    (<any>self).selectednode.attr({ stroke: "none", "stroke-width": 0 })
-                 }
-                (<any>self).selectednode = this;
-                this.attr({ stroke: "#000", "stroke-width": 2 })
-            }
-            if (self.onClicked) self.onClicked(this.obj);
         });
+
+        var hover = new VXCB.Hover({
+            parent: this.jComponent
+        });
+
+        this.dotchart.hover(
+            function () {
+                var txt = "";
+                var item = this.obj;
+                if (item != null) {
+                    if (self.onGetLabelText) txt = self.onGetLabelText(item);
+                    else txt = item.Value + "<br>" + item.LabelX + "<br>" + item.LabelY;
+                }
+                //var w = self.jComponent.width() / 2;
+                //if (this.x > w)
+                //    this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 180, this.r + 2).insertBefore(this);
+                //else this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 0, this.r + 2).insertBefore(this);
+                ////this.marker.show();
+                (hover).update.apply(hover, ["<div id='content' style='width:150px;overflow:hidden;'>" + txt + "</div>", this.x, this.y]);
+
+            },
+            function () {
+                //this.marker && this.marker.hide();
+                hover.hide();
+            });
+
+        this.dotchart.click(
+            function (x, b, f) {
+                if (self.ShowSelectedItem) {
+                    if ((<any>self).selectednode) {
+                        (<any>self).selectednode.attr({ stroke: "none", "stroke-width": 0 })
+                     }
+                    (<any>self).selectednode = this;
+                    this.attr({ stroke: "#000", "stroke-width": 2 })
+                }
+                if (self.onClicked) self.onClicked(this.obj);
+            });
     }
+
 }
-
-
 
 export class TChartBubble extends TChartDotBase {
     private raphael: any;
     private dotchart: any;
-    public onGetLabelText: (item : VXCB.TBubbleValue) => string;
-    public onClicked: (item: VXCB.TBubbleValue) => void;
+    //depricated - use ToolTipFormat instead
+    public onGetLabelText: (item: V.TDotValue) => any;
+    public onClicked: (item: V.TDotValue) => void;
+
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+        super(aOwner, renderTo);
+        if (this.ToolTipFormat)
+            this.onGetLabelText = this.ToolTipFormat;
+    }
 
 
     public values = new VXCB.TChartValuesCollection<VXCB.TBubbleValue>();
@@ -266,14 +291,6 @@ export class TChartBubble extends TChartDotBase {
         super.draw(true);
     }
 
-    constructor(aOwner: VXC.TComponent, renderTo?: string) {
-        super(aOwner, renderTo);
-        this.onGetLabelText = (item: VXCB.TBubbleValue) => {
-            return item.Value + "\n" + item.ValueX + "\n" + item.ValueY;
-        }
-    }
-
-
     public create() {
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
@@ -288,7 +305,7 @@ export class TChartBubble extends TChartDotBase {
         var axisy = [];
         var axisx = [];
         if (this.values.length() == 0) return;
-        
+
         this.values.forEach((item) => {
             xs.push(item.ValueX);
             ys.push(item.ValueY);
@@ -300,22 +317,37 @@ export class TChartBubble extends TChartDotBase {
         this.dotchart = this.raphael.dotchart(0, 0, this.Width, this.Height, xs, ys, data, ids, {
             symbol: "o", max: this.DotMaxSize, heat: this.HeatMap,
             axis: "0 0 1 1",
-           // axisxstep: axisx.length - 1, axisystep: axisy.length - 1,
+            // axisxstep: axisx.length - 1, axisystep: axisy.length - 1,
 
             axisxtype: " ", axisytype: " ", opacity: this.Opacity, titleX: this.TitleX, titleY: this.TitleY
+        });
 
-        }).hover(function () {
+        var hover = new VXCB.Hover({
+            parent: this.jComponent
+        });
+
+        this.dotchart.hover(
+            function () {
                 var txt = "";
-                if (this.obj != null) txt = self.onGetLabelText(this.obj)
-            //this.value + "\n" + this.obj.LabelX + "\n" + this.obj.LabelY;
-            var w = self.jComponent.width() / 2;
-                if (this.x > w)
-                    this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 180, this.r + 2).insertBefore(this);
-                else this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 0, this.r + 2).insertBefore(this);
-                this.marker.show();
-            }, function () {
-                this.marker && this.marker.hide();
-            });
+                var item = this.obj;
+                if (item != null) {
+                    if (self.onGetLabelText) txt = self.onGetLabelText(item);
+                    else txt = item.Value + "<br>" + item.LabelX + "<br>" + item.LabelY;
+                }
+                //var w = self.jComponent.width() / 2;
+                //if (this.x > w)
+                //    this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 180, this.r + 2).insertBefore(this);
+                //else this.marker = this.marker || self.raphael.tag(this.x, this.y, txt, 0, this.r + 2).insertBefore(this);
+                ////this.marker.show();
+                (hover).update.apply(hover, ["<div id='content' style='width:150px;overflow:hidden;'>" + txt + "</div>", this.x, this.y]);
+
+            },
+            function () {
+                //this.marker && this.marker.hide();
+                hover.hide();
+            }
+            );
+
         this.dotchart.click(function (x, b, f) {
             if (self.ShowSelectedItem) {
                 if ((<any>self).selectednode) {
@@ -327,4 +359,5 @@ export class TChartBubble extends TChartDotBase {
             if (self.onClicked) self.onClicked(this.obj);
         });
     }
+
 }

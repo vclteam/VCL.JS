@@ -3,16 +3,17 @@ import V = require("VCL/VCL");
 import VXU = require("VCL/VXUtils");
 
 export class TEditorBase extends VXC.TComponent {
-    private _labelVisible: boolean = false;
-    public get LabelVisible(): boolean {
-        return this._labelVisible;
+    private _rtl: boolean = false;
+    public get Rtl(): boolean {
+        return this._rtl;
     }
-    public set LabelVisible(val: boolean) {
-        if (val != this._labelVisible) {
-            this._labelVisible = val;
+    public set Rtl(val: boolean) {
+        if (val != this._rtl) {
+            this._rtl = val;
             this.drawDelayed(true);
         }
     }
+
 
     private _labetextcolor: string;
     public get LabelTextColor(): string {
@@ -27,6 +28,52 @@ export class TEditorBase extends VXC.TComponent {
                 this._labetextcolor = val;
                 this.drawDelayed(true);
             }
+        }
+    }
+
+    private _tabindex: number;
+    public get TabIndex(): number {
+        return this._tabindex;
+    }
+    public set TabIndex(val: number) {
+        if (val != this._tabindex) {
+            this._tabindex = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _labelVisible: boolean = false;
+    public get LabelVisible(): boolean {
+        return this._labelVisible;
+    }
+    public set LabelVisible(val: boolean) {
+        if (val != this._labelVisible) {
+            this._labelVisible = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _helpVisible: boolean = false;
+    public get HelpVisible(): boolean {
+        return this._helpVisible;
+    }
+    public set HelpVisible(val: boolean) {
+        if (val != this._helpVisible) {
+            this._helpVisible = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _helptext: string = "";
+    public get HelpText(): string {
+        return this._helptext;
+    }
+    public set HelpText(val: string) {
+        if (val != this._helptext) {
+            this._helptext = val;
+            this.HelpVisible = true;
+            this.drawDelayed(true);
         }
     }
 
@@ -53,9 +100,16 @@ export class TEditorBase extends VXC.TComponent {
         }
     }
 
+    public setFocus() {
+        if (this.jEdit) this.jEdit.focus();
+    }
+
+
+    public onKeyUp: (keyCode: number) => void; 
     public onChanged: (sender: TEditorBase) => void;
 
     public jLabel: JQuery;
+    public jHelpLabel: JQuery;
     public jEdit: JQuery;
     public create() {
         if (this.LabelVisible) {
@@ -92,13 +146,33 @@ export class TEditorBase extends VXC.TComponent {
                 this.jComponent.append(this.jLabel);
             }
         }
+        if (this.HelpVisible) {
+            this.jHelpLabel = $('<small/>');
+            this.jHelpLabel.addClass('help-inline text-center');
+            this.jHelpLabel.css('font-size', '12px');
+            this.jHelpLabel.css('width', '100%');
+            this.jComponent.append(this.jHelpLabel);
+            this.jHelpLabel.text(this.HelpText);
+        }
 
         super.create();
     }
-
 }
 
 export class TInputBase extends TEditorBase {
+
+    private _inputStyle: V.InputStyle = V.InputStyle.Default;
+    public get InputStyle(): V.InputStyle {
+        return this._inputStyle;
+    }
+    public set InputStyle(val: V.InputStyle) {
+        if (val != this._inputStyle) {
+            this._inputStyle = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
     private _maxlength: number;
     public get MaxLength(): number {
         return this._maxlength;
@@ -111,13 +185,27 @@ export class TInputBase extends TEditorBase {
         }
     }
 
+    private _labelOverflow: boolean = false;
+    public get LabelOverflow(): boolean {
+        return this._labelOverflow;
+    }
+    public set LabelOverflow(val: boolean) {
+        if (val != this._labelOverflow) {
+            this._labelOverflow = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    public canEdit() {
+        return true;
+    }
+
     /**
     * Occurs when the user hit the button component.
     */
     public onButtonClicked: () => void;
-    /**
-    * Occurs when the text for the edit component may have changed.
-    */
+
     private jBtn: JQuery;
     private jImage: JQuery;
     private jbtnText: JQuery;
@@ -127,6 +215,11 @@ export class TInputBase extends TEditorBase {
         this.jComponent.empty();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('input-append control-group');
+        if (this.InputStyle == V.InputStyle.Error) this.jComponent.addClass("error");
+        else if (this.InputStyle == V.InputStyle.Warning) this.jComponent.addClass("warning");
+        if (this.InputStyle == V.InputStyle.Success) this.jComponent.addClass("success");
+        if (this.InputStyle == V.InputStyle.Info) this.jComponent.addClass("info");
+        if(!this.LabelOverflow) this.jComponent.css('overflow', 'hidden');
 
         //this.jinternalSpan = $("<span>").css('display', 'block').css('overflow', 'hidden').css('padding-right', '15px').css('width', '100%');
         this.jinternalSpan = $("<span>").css('display', 'block').css('overflow', 'hidden').css('padding-right', '15px');
@@ -136,6 +229,7 @@ export class TInputBase extends TEditorBase {
 
         } else {
             this.jEdit = $('<input/>');
+            if (this.TabIndex) this.jEdit.attr('tabindex', this.TabIndex);
         }
 
         this.jEdit.attr("type", 'text').attr('id', V.Application.genGUID()).css('width', '100%');
@@ -148,13 +242,14 @@ export class TInputBase extends TEditorBase {
         this.jImage = $('<i/>');
         this.jbtnText = $('<span/>');
 
-        if (!this.Enabled) this.jEdit.attr("disabled", "disabled");
+        if (!this.Enabled || ((<any>this).isEditable && !(<any>this).isEditable())) this.jEdit.attr("disabled", "disabled");
         if (this.Password) this.jEdit.attr("type", "Password");
         if (this.TextAlgnment == V.TextAlignment.Left) this.jEdit.css('text-align', 'left');
         if (this.TextAlgnment == V.TextAlignment.Right) this.jEdit.css('text-align', 'right');
         if (this.TextAlgnment == V.TextAlignment.Center) this.jEdit.css('text-align', 'center');
         if (this.MaxLength > 0) this.jEdit.attr("maxlength", this.MaxLength);
         if (this.Placeholder != null) this.jEdit.attr("placeholder", this.Placeholder);
+        if (this.Rtl == true) this.jEdit.attr("dir", "RTL");
         this.jinternalSpan.append(this.jEdit);
        
 

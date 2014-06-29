@@ -1,4 +1,5 @@
-﻿import VXObjectMod = require("VCL/VXObject");
+﻿//VCL.JS Main
+import VXObjectMod = require("VCL/VXObject");
 export class TObject extends VXObjectMod.TObject { };
 export class TTimer extends VXObjectMod.TTimer { };
 export class TCollectionItem extends VXObjectMod.TCollectionItem { };
@@ -20,9 +21,15 @@ export class TBootstrapRow extends VXContainMod.TBootstrapRow { };
 export class TBootstrapRowFluid extends VXContainMod.TBootstrapRowFluid { };
 export class TBootstrapSpan extends VXContainMod.TBootstrapSpan { };
 
+/***
+* Dynamically repeating controls and containers
+*/
+//export class TRepeater extends VXContainMod.TRepeater { };
+
 import VXAppMod = require("VCL/VXApplication");
 export class TApplication extends VXAppMod.TApplication { };
 export class TNavbarItem extends VXAppMod.TNavbarItem { };
+export class TFacebookAPI extends VXAppMod.TFacebookAPI { };
 
 import VXServerMod = require("VCL/VXServer");
 export class TServer extends VXServerMod.TServer { };
@@ -37,6 +44,9 @@ import VXTabMod = require("VCL/VXTab");
 export class TTabSheet extends VXTabMod.TTabSheet { };
 export class TTabPage extends VXTabMod.TTabPage { };
 export class TTabPanel extends VXTabMod.TTabPanel { };
+export class TAccordionGroupPanel extends VXTabMod.TAccordionGroupPanel { };
+export class TAccordionGroup extends VXTabMod.TAccordionGroup { };
+export class TAccordion extends VXTabMod.TAccordion { };
 
 //import VXPopupMod = require("VCL/VXPopup");
 
@@ -59,9 +69,12 @@ export class TDBText extends VXTextMod.TDBText { };
 import VXInputMod = require("VCL/VXInput");
 export class TDBInput extends VXInputMod.TDBInput { };
 export class TInput extends VXInputMod.TInput { };
+export class TInputTypeaHead extends VXInputMod.TInputTypeaHead { };
+export class TTypeaHeadItem extends VXInputMod.TTypeaHeadItem { };
 export class TTextArea extends VXInputMod.TTextArea { };
 export class TDBTextArea extends VXInputMod.TDBTextArea { };
 export class TInputNumeric extends VXInputMod.TInputNumeric { };
+export class TDBInputNumeric extends VXInputMod.TDBInputNumeric { };
 
 import VXImageMod = require("VCL/VXImage");
 export class TImage extends VXImageMod.TImage { };
@@ -96,11 +109,13 @@ import VXButtonMod = require("VCL/VXButton");
 */
 export class TButton extends VXButtonMod.TButton { };
 export class TToggleSwitch extends VXButtonMod.TToggleSwitch { };
+export class TFacebookButton extends VXButtonMod.TFacebookButton { };
 
 
 import VXDBGridMod = require("VCL/VXDBGrid");
 export class TDBGrid extends VXDBGridMod.TDBGrid { };
-export class TDBGridColumn extends VXDBGridMod.TBGridColumn { };
+export class TDBGridColumn extends VXDBGridMod.TDBGridColumn { };
+export class TGrid extends VXDBGridMod.TGrid { };
 
 
 import VXDatasetMod = require("VCL/VXDataset");
@@ -131,12 +146,13 @@ export class TNavBar extends VXSideBarMod.TNavBar { };
 import VXWellMod = require("VCL/VXWell");
 export class TWell extends VXWellMod.TWell { };
 export class TGoogleMap extends VXWellMod.TGoogleMap { };
-export class TPanel extends VXWellMod.TPanel { };
+export class TGoogleMapMarker extends VXWellMod.TGoogleMapMarker { };
+export class TPanel extends VXWellMod.TPanel { }; 
 export class TPanelButton extends VXWellMod.TPanelButton { };
-
 
 import VXCheckboxMod = require("VCL/VXCheckBox");
 export class TCheckBox extends VXCheckboxMod.TCheckBox { };
+export class TDBCheckBox extends VXCheckboxMod.TDBCheckBox { };
 
 import VXProgressMod = require("VCL/VXProgressBar");
 export class TProgressBar extends VXProgressMod.TProgressBar { };
@@ -166,6 +182,8 @@ export class TChartBar extends VXVXBarMod.TChartBar { };
 export class TDBChartBar extends VXVXBarMod.TDBChartBar { };
 export class TChartBullet extends VXVXBarMod.TChartBullet { };
 
+//import VXVXGraphMod = require("VCL/VXRGraphBase");
+//export class TGraphBar extends VXVXGraphMod.TGraphBar { };
 
 import VXVXBarVVMod = require("VCL/VXChartBarH");
 export class TChartBarH extends VXVXBarVVMod.TChartBarH { };
@@ -198,6 +216,7 @@ import VXconstMod = require("VCL/VXConst");
 import VXInputDateMod = require("VCL/VXDateInput");
 export class TInputDate extends VXInputDateMod.TDateInput { };
 export class TDBInputDate extends VXInputDateMod.TDBDateInput { };
+export class TInputTime extends VXInputDateMod.TInputTime { };
 
 
 import VXSparkMod = require("VCL/VXSparkLine");
@@ -213,19 +232,16 @@ export class TWidgetGrid extends VXGridSterMod.TWidgetGrid { };
 export class TWidgetPanel extends VXGridSterMod.TWdgetPanel { };
 
 export class TConst extends VXconstMod.TConst { };
-//export class TPopup extends VXPopupMod.TPopup { };
-
-
-//import VXCIT = require("VCL/VXS3Tree");
-//export class TD3Tree extends VXCIT.TD3Tree { };
 
 /**
 * Represents application-level information.
 * By default, when a new project is created, VCL.JS constructs an TApplication object and assigns it to the Application variable in the VCL module. 
 * Application has several properties that can be used to get information about an application while it runs.
 */
-export var Application: TApplication = new TApplication();
-export var Global: any = {};
+export var  Application: TApplication = new TApplication();
+export var  FacebookAPI: TFacebookAPI = new TFacebookAPI();
+
+export var  Global: any = {};
 export enum CalendarType { Daily, Monthly }
 export enum PasswordStrength { LOW, MEDIUM, HIGH, EXTREME }
 export enum SortColumnOrder { Ascending, Descending }
@@ -246,6 +262,41 @@ export enum ButtonStyle {
     Link
 }
 
+export enum ColumnType {
+    Text,
+    Icon,
+    Image
+}
+
+
+
+export enum PagerButtonStyle {
+    Default,
+    Primary,
+    Info,
+    Success,
+    Warning,
+    Danger,
+    Link
+}
+
+export enum PagerButtonSize {
+    Default,
+    Large,
+    Small,
+    Mini,
+}
+
+
+export enum InputStyle {
+    Default,
+    Info,
+    Success,
+    Warning,
+    Error
+}
+
+
 export enum HeaderStyle {
     Default,
     Primary,
@@ -255,6 +306,13 @@ export enum HeaderStyle {
     Danger,
     Transparent
 }
+
+export enum FacebookLoginState {
+    Connected,
+    NotAuthorized,
+    NotConnected
+}
+
 
 export enum BaseColor {
     Default,
@@ -289,6 +347,17 @@ export enum HeaderTextStyle {
     Strong,
     Small,
 }
+
+export enum HeaderTextAlignment {
+    Left,
+    Right,
+}
+
+export enum PagerAlignment {
+    Left,
+    Right,
+}
+
 
 export enum AlertStyle {
     Default,
@@ -570,6 +639,14 @@ export enum LabelPosition {
     BottomRight
 }
 
+export enum ComboDropMode {
+    Up,
+    Down,
+    Auto
+}
+
+
+
 export enum NotificationPosition {
     TopLeft,
     TopRight,
@@ -607,6 +684,15 @@ export enum TooltipPlacement {
     Top,
     Bottom,
 }
+
+
+export enum ModalEffects {
+    SlideDown,
+    SlideUp,
+    FadeIn,
+    FadeOut
+};
+
 
 export enum GridRowStyle {
     Default,
@@ -664,7 +750,7 @@ function dummy() {
     new VXComboboxMod.TCombobox(null);
     new VXWellMod.TPanel(null);
     new VXVXBarVVMod.TChartBarH(null);
-    new VXDBGridMod.TBGridColumn();
+    new VXDBGridMod.TDBGridColumn();
     new VXLineMod.TChartLine(null);
     new VXChartMod.TDountValue();
     new VXlistboxMod.TTreeNodeItem();

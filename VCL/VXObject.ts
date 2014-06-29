@@ -1864,6 +1864,7 @@ export module collections {
 
     export class Set<T>{
         private dictionary: Dictionary<T, any>;
+        public onChanged: () => void;
 
         /**
          * Creates an empty set.
@@ -1905,11 +1906,12 @@ export module collections {
          * @return {boolean} true if this set did not already contain the specified element.
          */
         add(element: T): boolean {
-            if (element instanceof TCollectionItem) (<any>element).OwnerCollection = this;
+            if (element instanceof TCollectionItem) (<any>element).__ownerCollection = this;
             if (this.contains(element) || collections.isUndefined(element)) {
                 return false;
             } else {
                 this.dictionary.setValue(element, element);
+                if (this.onChanged) this.onChanged();
                 return true;
             }
         }
@@ -1985,6 +1987,7 @@ export module collections {
                 return false;
             } else {
                 this.dictionary.remove(element);
+                if (this.onChanged) this.onChanged();
                 return true;
             }
         }
@@ -2014,6 +2017,15 @@ export module collections {
                 }
             }
         }
+
+        /**
+         * Returns element x from collection
+         */
+        get(index : number): T {
+            var rc = this.dictionary.values()[index];
+            return rc;
+        }
+
 
         /**
          * Returns an array containing all of the elements in this set in arbitrary order.
@@ -2046,6 +2058,7 @@ export module collections {
          */
         clear(): void {
             this.dictionary.clear();
+            if (this.onChanged) this.onChanged();
         }
 
         /*
@@ -2100,7 +2113,7 @@ export module collections {
             if (collections.isUndefined(element) || nCopies <= 0) {
                 return false;
             }
-            if (element instanceof TCollectionItem) (<any>element).OwnerCollection = this;
+            if (element instanceof TCollectionItem) (<any>element).__ownerCollection = this;
 
             if (!this.contains(element)) {
                 var node = {
@@ -2265,6 +2278,7 @@ export class TCollection<T> extends collections.Set<T>{
 
     public refresh() {
     }
+
 
     public FindItemByID(ID: string): T {
         var rc: T = null;

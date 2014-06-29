@@ -838,7 +838,6 @@ Slider.prototype = {
                 .prop('value', val);
         }
         else {
-            //console.log("Debug " + val);
             if (this.value[0] != previous) {
                 this.element
                     .trigger({

@@ -73,7 +73,7 @@ export class TOlapSSAS extends VXD.TClientDataset {
     }
 
     public getDimensionMembers(dimensionName: string, levelName: string,
-        callback: (items: V.TCollection<TOlapMemeber>) => void ) {
+        callback: (items: V.TCollection<TOlapMemeber>) => void) {
 
         this.checkRequiredParams();
         if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
@@ -188,9 +188,16 @@ export class TOlapSSAS extends VXD.TClientDataset {
                         recordSet[key] = row;
                     }
 
-                    if (rowCount == 0) row["VALUE"] = raw.v;
-                    for (var j = 0; j < rowCount; j++) {
-                        row[(<string>members[raw.a[j + colCount]][1]).toUpperCase()] = raw.v;
+                    if (rowCount == 0)
+                        row["VALUE"] = raw.v;
+                    else {
+                        var m = "";
+                        for (var j = 0; j < rowCount; j++) {
+                            m = m + (<string>members[raw.a[j + colCount]][1]).toUpperCase();
+                            if (j + 1 != rowCount)
+                                m += "|";
+                        }
+                        row[m] = raw.v;
                     }
                 }
                 var data4: any[] = [];

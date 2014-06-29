@@ -38,7 +38,7 @@ export class TQueryBase extends VXD.TClientDataset {
         //replace the dates with JS dates
         if (data.META) {
             for (var i = 0, l = data.META.length; i < l; i++) {
-                if (data.META[i].TYPE != 'date') continue;
+                if (data.META[i].TYPE.toLowerCase() != 'date') continue;
                 for (var j = 0; j < data.DATA.length; j++) {
                     if (data.DATA[j][data.META[i].NAME] != null)
                         data.DATA[j][data.META[i].NAME] = new Date(data.DATA[j][data.META[i].NAME]);
@@ -46,6 +46,7 @@ export class TQueryBase extends VXD.TClientDataset {
             }
         }
         this.setData(data.DATA);
+        this.setMetaData(data.META);
 
         if (this.onAfterOpen != null) (V.tryAndCatch(() => { this.onAfterOpen(this); }))
     }

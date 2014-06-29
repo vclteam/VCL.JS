@@ -345,25 +345,37 @@ export class Bar extends VX2.Bar {
             return null;
         }
 
+        row.index = index;
+        row.series = series;
+
         //user have data to put on
         if (typeof this.options.hoverCallback === 'function') {
             content = this.options.hoverCallback(index, this.options, content);
         }
         //generate hover div
         else {
-            var lblX: string = this.options.titleXTip;
-            content = "<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + lblX + ":\n  " + row.label + "\n</div>";
+            var lblX: string = "";
+            if (!this.options.toolTipFormat) {
+                lblX = this.options.titleX + ":\n  " + row.label;
+            }
+            content = "<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + lblX + "\n</div>";
             _ref = row.y;
             for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
                 if (series == j) {
                     y = _ref[j];
                     if (y != null) {
-                        var lblY: string = this.options.labels[j];
-                        if (lblY == null) {
-                            lblY = this.options.titleYTip;
+                        var lblY: string = "";
+                        if (this.options.toolTipFormat) {
+                            lblY = this.options.toolTipFormat(row);
                         }
-                        //lbl = lbl.substring(0, 14);
-                        content += "<div class='morris-hover-point' style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lblY + ":\n  " + (this.yLabelFormat(y, false)) + "\n</div>";
+                        else {
+                            lblY = this.options.labels[j];
+                            if (lblY == null)
+                                lblY = this.options.titleY;
+                            //lbl = lbl.substring(0, 14);
+                            lblY = lblY + ":\n  " + (this.yLabelFormat(y, false));
+                        }
+                        content += "<div style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lblY + "\n</div>";
                     }
                 }
             }

@@ -3,7 +3,7 @@ import VXU = require("VCL/VXUtils");
 import V = require("VCL/VCL");
 import VXM = require("VCL/VXMenu");
 
-export class TGraphic extends VXC.TComponent {
+export class TGraphic extends VXC.TPopupmenuComponent {
     public onClicked: () => void;
     public ondblclicked: () => void;
 }
@@ -47,27 +47,9 @@ export class TImage extends TGraphic {
         this.jImage.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(); })); return false; })
         
         this.jImage.attr('src', this.Url);
-
-        if (this.menuItems.length() > 0) {
-            this.reBuildMenu();
-        }
+        (<any>this).jDropDownTarget = this.jImage; //control the menupopup mechansim
 
         super.create();
-    }
-
-
-    private reBuildMenu(showMenu: boolean = false) {
-        this.jComponent.find(".dropdown-menu").empty();
-        if (!this.menuItems.length()) return;
-
-        this.jImage.attr('data-toggle', "dropdown");
-        this.jImage.addClass('dropdown-toggle');
-
-        this.menuItems.createmenu('dropdown-menu').appendTo(this.jComponent);
-        $('.dropdown-toggle').dropdown()
-        if (showMenu) {
-            this.jComponent.addClass('open');
-        }
     }
 
 
@@ -76,14 +58,14 @@ export class TImage extends TGraphic {
         super.draw(reCreate);
     }
 
-    public menuItems = new VXM.TMenuItemCollection<VXM.TMenuItem>();
-    public createMenuItem(text: string, onClicked?: () => void): VXM.TMenuItem {
-        var menuItem = new VXM.TMenuItem();
-        menuItem.Text = text;
-        menuItem.onClicked = onClicked;
-        this.menuItems.add(menuItem);
-        return menuItem;
+    public showMenuDropdown() {
+        this.jComponent.addClass("open");
     }
+
+    public hideMenuDropdown() {
+        this.jComponent.removeClass("open");
+    }
+
 }
 
 

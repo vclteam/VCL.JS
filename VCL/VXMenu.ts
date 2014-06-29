@@ -4,6 +4,8 @@ import VXU = require("VCL/VXUtils");
 
 export class TMenuItem extends VXO.TCollectionItem {
     public jComponent: JQuery;
+    public jIcon: JQuery;
+
     public create() {
         var self = this;
         if (this.jComponent == null) this.jComponent = $('<li/>');
@@ -14,7 +16,8 @@ export class TMenuItem extends VXO.TCollectionItem {
         if (this.Divider) this.jComponent.addClass('divider');
         else {
             this.jComponent.empty();
-            var itemRef: JQuery = $('<a/>');
+            //var itemRef: JQuery = $('<a href="#"/>');
+            var itemRef: JQuery = $('<a style="cursor:pointer"/>');
             itemRef.off("click").click(() => {
                 if (this.Enabled && this.onClicked != null) {
                     (V.tryAndCatch(() => { this.onClicked(self); }))
@@ -24,7 +27,8 @@ export class TMenuItem extends VXO.TCollectionItem {
             itemRef.appendTo(this.jComponent);
             if (this.Icon != null) {
                 var imageRef: JQuery = $('<i/>');
-                imageRef.addClass(V.iconEnumToBootstrapStyle(<any>this.Icon));
+                this.jIcon = imageRef;
+                imageRef.addClass(V.iconEnumToBootstrapStyle(<any>this.Icon) + " "  + this.IconClass);
                 imageRef.prependTo(itemRef);
                 if (this.IconColor) imageRef.css('color', this.IconColor);
             }
@@ -40,6 +44,17 @@ export class TMenuItem extends VXO.TCollectionItem {
     public set Enabled(val: boolean) {
         if (val != this._enabled) {
             this._enabled = val;
+            this.create();
+        }
+    }
+
+    private _iconclass: String = "";
+    public get IconClass(): String {
+        return this._iconclass;
+    }
+    public set IconClass(val: String) {
+        if (val != this._iconclass) {
+            this._iconclass = val;
             this.create();
         }
     }
@@ -136,5 +151,16 @@ export class TMenuItemCollection<T> extends VXO.TCollection<TMenuItem> {
         })
         return menu;
     }
+
+    remove(element: TMenuItem): boolean {
+        var rc = super.remove(element);
+        return rc;
+    }
+
+    add(element: TMenuItem): boolean {
+        var rc = super.add(element);
+        return rc;
+    }
+
 
 }

@@ -61,7 +61,7 @@ export class TNavBar extends TBarBase {
 }
 
 export class TSideBar extends TBarBase {
-    private _transparent: boolean = false;
+    private _transparent: boolean = true;
     public get Transparent(): boolean {
         return this._transparent;
     }

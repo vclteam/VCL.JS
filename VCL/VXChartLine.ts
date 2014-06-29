@@ -314,16 +314,16 @@ export class TChartLine extends TChartLineBase {
             pointStrokeColors: ['#ffffff'],
             titleX: this.TitleX,
             paddingX: this.TitleX ? 35 : 20,
-            titleXTip: this.TitleXTip,
             titleY: this.TitleY,
             paddingY: this.TitleY ? 25 : 5,
-            titleYTip: this.TitleYTip,
+            xLabelFormat: this.XLabelFormat,
+            yLabelFormat: this.YLabelFormat,
+            toolTipFormat: this.ToolTipFormat,
             pointFillColors: [],
             smooth: this.Smooth,
             xLabels: 'auto',
+            xLabelAngle: this.XLabelAngle,
             hideHover: this.ShowHoverLegend ? 'auto' : 'always',
-            xLabelFormat: this.XLabelFormat,
-            yLabelFormat: this.YLabelFormat,
             xLabelMargin: 15,
             grid: this.ShowGridLines,
             continuousLine: this.ContinuousLine,
@@ -358,6 +358,98 @@ export class TChartArea extends TChartLineBase {
         }
     }
 
+    private _series1areacolor: string = "#0b62a4";
+    public get Series1AreaColor(): string {
+        return this._series1areacolor;
+    }
+    public set Series1AreaColor(val: string) {
+        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series1areacolor) {
+                this._series1areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series2areacolor: string = "#7A92A3";
+
+    public get Series2AreaColor(): string {
+        return this._series2areacolor;
+    }
+    public set Series2AreaColor(val: string) {
+        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series2areacolor) {
+                this._series2areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series3areacolor: string = "#4da74d";
+    public get Series3AreaColor(): string {
+        return this._series3areacolor;
+    }
+    public set Series3AreaColor(val: string) {
+        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series3areacolor) {
+                this._series3areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series4areacolor: string = "#afd8f8";
+    public get Series4AreaColor(): string {
+        return this._series4areacolor;
+    }
+    public set Series4AreaColor(val: string) {
+        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series4areacolor) {
+                this._series4areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series5areacolor: string = "#edc240";
+    public get Series5AreaColor(): string {
+        return this._series5areacolor;
+    }
+    public set Series5AreaColor(val: string) {
+        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series5areacolor) {
+                this._series5areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series6areacolor: string = "#cb4b4b";
+    public get Series6AreaColor(): string {
+        return this._series6areacolor;
+    }
+    public set Series6AreaColor(val: string) {
+        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series6areacolor) {
+                this._series6areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
@@ -380,20 +472,22 @@ export class TChartArea extends TChartLineBase {
             pointSize: 3,
             lineColors: [this.Series1Color, this.Series2Color, this.Series3Color, this.Series4Color,
                 this.Series5Color, this.Series6Color],
+            areaColors: [this.Series1AreaColor, this.Series2AreaColor, this.Series3AreaColor, this.Series4AreaColor,
+                this.Series5AreaColor, this.Series6AreaColor],
             pointWidths: [1],
             pointStrokeColors: ['#ffffff'],
             titleX: this.TitleX,
             paddingX: this.TitleX ? 35 : 20,
-            titleXTip: this.TitleXTip,
             titleY: this.TitleY,
             paddingY: this.TitleY ? 25 : 5,
-            titleYTip: this.TitleYTip,
+            xLabelFormat: this.XLabelFormat,
+            yLabelFormat: this.YLabelFormat,
+            toolTipFormat: this.ToolTipFormat,
             pointFillColors: [],
+            xLabelAngle: this.XLabelAngle,
             smooth: this.Smooth,
             xLabels: 'auto',
             hideHover: 'auto',
-            xLabelFormat: this.XLabelFormat,
-            yLabelFormat: this.YLabelFormat,
             xLabelMargin: 24,
             grid: this.ShowGridLines,
             continuousLine: this.ContinuousLine,
@@ -703,6 +797,8 @@ export class TDBChartArea extends TChartArea {
         }
     }
 
+
+
     public getData(): any[] {
         this.values.clear();
         var dataArray = [];
@@ -896,24 +992,43 @@ class Line extends VXCB.Grid {
             return null;
         }
 
+        //calc series
+        var rows = 0;
+        for (var i = 0; i < row._y.length; i++) {
+            if (row._y[i] != null)
+                rows++;
+        }
+        row.series = index % rows;
+        row.index = index;
+
         //user have data to put on
         if (typeof this.options.hoverCallback === 'function') {
             content = this.options.hoverCallback(index, this.options, content);
         }
         //generate hover div
         else {
-            var lblX: string = this.options.titleXTip;
-            content = "<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + lblX + ":\n  " + row.label + "\n</div>";
+            var lblX: string = "";
+            if (!this.options.toolTipFormat) {
+                lblX = this.options.titleX + ":\n  " + row.label;
+            }
+            content = "<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + lblX + "\n</div>";
             _ref = row.y;
             for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
                 y = _ref[j];
                 if (y != null) {
-                    var lblY: string = this.options.labels[j];
-                    if (lblY == null) {
-                        lblY = this.options.titleYTip;
+                    var lblY: string = "";
+                    if (this.options.toolTipFormat) {
+                        row.series = j ;
+                        lblY = this.options.toolTipFormat(row);
                     }
-                    //lbl = lbl.substring(0, 14);
-                    content += "<div class='morris-hover-point' style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lblY + ":\n  " + (this.yLabelFormat(y, false)) + "\n</div>";
+                    else {
+                        lblY = this.options.labels[j];
+                        if (lblY == null)
+                            lblY = this.options.titleY;
+                        //lbl = lbl.substring(0, 14);
+                        lblY = lblY + ":\n  " + (this.yLabelFormat(y, false));
+                    }
+                    content += "<div style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lblY + "\n</div>";
                 }
             }
         }
@@ -987,7 +1102,7 @@ class Line extends VXCB.Grid {
         if (this.options.titleX) {
             var b = this.measureText(this.options.titleX);
             var center = (this.elementWidth / 2);
-            this.raphael.text(center, this.bottom + this.options.paddingX - this.options.titleTextSize / 2, this.options.titleX).
+            this.raphael.text(center, this.elementHeight - this.options.titleTextSize / 2, this.options.titleX).
                 attr('font-size', this.options.titleTextSize).attr('font-family', this.options.gridTextFamily).
                 attr('font-weight', "normal").attr('fill', this.options.titleTextColor);
         }
@@ -1181,6 +1296,9 @@ class Line extends VXCB.Grid {
             return this.options.lineColors.call(this, row, sidx, type);
         } else if (type === 'point') {
             return this.options.pointFillColors[sidx % this.options.pointFillColors.length] || this.options.lineColors[sidx % this.options.lineColors.length];
+        } else if (type === 'area') {
+            return this.options.areaColors[sidx % this.options.lineColors.length];
+
         } else {
             return this.options.lineColors[sidx % this.options.lineColors.length];
         }
@@ -1410,7 +1528,7 @@ class Area extends Line {
 
     fillForSeries(i) {
         var color;
-        color = Raphael.rgb2hsl(this.colorFor(this.data[i], i, 'line'));
+        color = Raphael.rgb2hsl(this.colorFor(this.data[i], i, 'area'));
         return Raphael.hsl(color.h, this.options.behaveLikeLine ? color.s * 0.9 : color.s * 0.75, Math.min(0.98, this.options.behaveLikeLine ? color.l * 1.2 : color.l * 1.25));
     }
 

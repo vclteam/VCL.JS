@@ -120,7 +120,7 @@ export class TDataset extends VXO.TObject {
     }
 
 
-    public getRecords(start: number, end: number, sortDirection: string, sortProperty: string): any {
+    public getRecords(start: number, end: number, sortDirection: string, sortProperty: string, groupProperty?: string): any {
         return this.recordset.slice(start, end + 1);
     }
 
@@ -162,7 +162,10 @@ export class TDataset extends VXO.TObject {
         if (this.RecordCount > 0) {
             this.Recno = 0;
             return true;
-        } else return false;
+        } else {
+            this.Recno = -1;
+            return false;
+        }
     }
 
     /**
@@ -172,7 +175,10 @@ export class TDataset extends VXO.TObject {
         if (this.RecordCount > 0) {
             this.Recno = this.RecordCount - 1;
             return true;
-        } else return false;
+        } else {
+             this.Recno = -1;
+            return false;
+        }
     }
 
 }
@@ -214,8 +220,11 @@ export class TObjectDataset extends TDataset {
 
 export class TClientDataset extends TDataset implements VXDatasetInt {
     private tempRecordset: Object[];
+    private tempGroupset: number[];
+
     private sourceRecordset: Object[];
     private sortProperty: string;
+    private groupProperty: string;
     private sortDirection: string;
 
     public onBeforeOpen: (dataset: TClientDataset) => void;
@@ -270,7 +279,8 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     * Clear the filter for a dataset.
     */
     public clearFilter() {
-        this.recordset = this.sourceRecordset;
+        if (this.sourceRecordset) this.recordset = this.sourceRecordset;
+        this.sourceRecordset = null;
         this.first();
         this.stateChanged();
     }
@@ -378,6 +388,21 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         if ((<any>this)._enabledControl) (<any>this).dataChanged();
     }
 
+    public metadata: any[] = [];
+    public setMetaData(meta: any[]) {
+        this.metadata = [];
+        if (meta != null) {
+            for (var i = 0, len = meta.length; i < len; i++) {
+                var obj: any = {};
+                for (var key in meta[i]) {
+                    obj[key.toUpperCase()] = meta[i][key];
+                }
+                obj["NAME"] = obj["NAME"].toUpperCase();
+                this.metadata.push(obj);
+            }
+        }
+    }
+
 
     public setData(data: any[]) {
         this.recordset = [];
@@ -403,32 +428,77 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         this.stateChanged();
     }
 
-    private sort(columnName: string, ascending: boolean = true) {
+    private countTempGroupset(grp) {
+        if (!grp || grp == "") grp = "~@!~#!@#!@#!!@#!@";
+        return this.tempGroupset[grp];
+    }
+
+
+    public sort(columnName: string, ascending: boolean = true, groupname : string = null) {
         this.tempRecordset = this.recordset.slice(0);
+        this.tempGroupset = [];
+
+        if (groupname) this.tempRecordset.forEach((item) => {
+            var grp = item[groupname];
+            if (!grp || grp == "") {
+                grp = "~@!~#!@#!@#!!@#!@";
+            }
+            if (this.tempGroupset[grp] == null) this.tempGroupset[grp] = 1;
+            else this.tempGroupset[grp] = this.tempGroupset[grp] + 1;
+        });
+
         if (ascending) {
             this.tempRecordset.sort(function (a, b) {
-                if (a[columnName] > b[columnName]) return 1;
-                else if (a[columnName] < b[columnName]) return -1
-                    else return 0;
+                var a1: string = "";
+                var b1: string = "";
+                if (groupname) {
+                    a1 += a[groupname];
+                    b1 += b[groupname];
+                    if (a1 > b1) return 1;
+                    else if (a1 < b1) return -1
+                }
+                if (columnName) {
+                    a1 += "~~" + a[columnName];
+                    b1 += "~~" + b[columnName];
+                }
+
+                if (a1 > b1) return 1;
+                else if (a1 < b1) return -1
+                else return 0;
             })
             } else {
-            this.tempRecordset.sort(function (a, b) {
-                if (a[columnName] < b[columnName]) return 1;
-                else if (a[columnName] > b[columnName]) return -1
-                    else return 0;
+                this.tempRecordset.sort(function (a, b) {
+                    var a1: string = "";
+                    var b1: string = "";
+                    if (groupname) {
+                        a1 += a[groupname];
+                        b1 += b[groupname];
+                        if (a1 > b1) return 1;
+                        else if (a1 < b1) return -1
+                    }
+                    if (columnName) {
+                        a1 += "~~" + a[columnName];
+                        b1 += "~~" + b[columnName];
+                    }
+
+                if (a1 < b1) return 1;
+                else if (a1 > b1) return -1
+                else return 0;
             })
             }
         this.sortProperty = columnName;
         this.sortDirection = ascending ? "ASC" : "DESC";
+        this.groupProperty = groupname;
         this.recordset = this.tempRecordset;
     }
 
-    public getRecords(start: number, end: number, sortDirection: string, sortProperty: string): any {
-        if (sortProperty == null || sortProperty == "") return this.recordset.slice(start, end + 1); //not sort was mentions
+    public getRecords(start: number, end: number, sortDirection: string, sortProperty: string, groupProperty? : string): any {
+        if ((sortProperty == null || sortProperty == "") && (groupProperty == null || groupProperty == "")) return this.recordset.slice(start, end + 1); //not sort was mentions
         sortProperty = sortProperty.toUpperCase();
         sortDirection = sortDirection.toUpperCase();
-        if (this.tempRecordset == null || sortDirection != this.sortDirection || sortProperty != this.sortProperty) {
-            this.sort(sortProperty, sortDirection == "ASC");
+        if (this.tempRecordset == null || sortDirection != this.sortDirection ||
+            sortProperty != this.sortProperty || groupProperty != this.groupProperty) {
+            this.sort(sortProperty, sortDirection == "ASC", groupProperty);
         }
         return this.recordset.slice(start, end + 1);
     }

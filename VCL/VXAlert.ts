@@ -5,9 +5,22 @@ import V = require("VCL/VCL");
 export class TAlert extends VXC.TComponent {
     constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
+        this.Visible = false;
         this._text = text;
         (<any>this)._fittowidth = true;
     }
+
+    private _rtl: boolean = false;
+    public get Rtl(): boolean {
+        return this._rtl;
+    }
+    public set Rtl(val: boolean) {
+        if (val != this._rtl) {
+            this._rtl = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     private _text: string;
     /*
@@ -54,6 +67,7 @@ export class TAlert extends VXC.TComponent {
         this.jComponent.empty();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('control-group');
+        if (this.Rtl == true) this.jComponent.attr("dir", "RTL");
 
         this.jAlert = $('<div>');
         this.jAlert.addClass('alert alert-block');
@@ -73,7 +87,7 @@ export class TAlert extends VXC.TComponent {
             this.jBtn.attr('type', 'button');
             this.jBtn.html('&times;');
             this.jBtn.off("click").click(() => {
-                this.jComponent.hide();
+                this.hide();
                 if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(this); }))
                 return false;
             })
@@ -82,15 +96,18 @@ export class TAlert extends VXC.TComponent {
         }
         this.jText = $('<div>');
         this.jText.appendTo(this.jAlert);
-        
+
         super.create();
     }
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-       
-        this.jText.html(this.Text); 
+        this.jText.html(this.Text);
+    }
+
+    public show() {
+        this.Visible = true;
     }
 }
 
@@ -115,7 +132,7 @@ export class TNotification extends VXC.TComponent {
         }
     }
 
-    private _timeout: number=3000;
+    private _timeout: number = 3000;
     /*
     * Fade alert out after a certain delay (in ms)
     */
@@ -168,7 +185,7 @@ export class TNotification extends VXC.TComponent {
     }
 
     public hide() {
-        this.jComponent.fadeOut('slow', $.proxy(this.close, this)); 
+        this.jComponent.fadeOut('slow', $.proxy(this.close, this));
     }
 
     private _closebuttonvisible: boolean = true;

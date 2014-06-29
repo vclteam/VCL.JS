@@ -110,7 +110,7 @@ export class TComboboxBase extends VXB.TEditorBase {
 
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        if(!this.Width) this.Width = 200;
+        //if(!this.Width) this.Width = 200;
         this.items = new TComboItemCollection<TComboItem>(this);
 
         jQuery.expr[":"].icontains = jQuery.expr.createPseudo(function (arg) {
@@ -130,13 +130,71 @@ export class TComboboxBase extends VXB.TEditorBase {
         return <TComboItem>col;
     }
 
+    private _buttonVisible: boolean = false;
+    public get ButtonVisible(): boolean {
+        return this._buttonVisible;
+    }
+    public set ButtonVisible(val: boolean) {
+        if (val != this._buttonVisible) {
+            this._buttonVisible = val;
+            this.drawDelayed(true);
+        }
+    }
 
+    private _buttontext: string = "";
+    public get ButtonText(): string {
+        if (this._buttontext == null) return "";
+        return this._buttontext;
+    }
+    public set ButtonText(val: string) {
+        if (val != this._buttontext) {
+            this._buttontext = val;
+            this.ButtonVisible = true;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _buttonicon: V.ButtonIcon = null;
+    public get ButtonIcon(): V.ButtonIcon {
+        return this._buttonicon;
+    }
+    public set ButtonIcon(val: V.ButtonIcon) {
+        if (val != this._buttonicon) {
+            this._buttonicon = val;
+            this.ButtonVisible = true;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _buttonstyle: V.ButtonStyle = V.ButtonStyle.Default;
+    public get ButtonStyle(): V.ButtonStyle {
+        return this._buttonstyle;
+    }
+    public set ButtonStyle(val: V.ButtonStyle) {
+        if (val != this._buttonstyle) {
+            this._buttonstyle = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    /**
+    * Occurs when the user hit the button component.
+    */
+    public onButtonClicked: () => void;
+
+
+
+    private jBtn: JQuery;
+    private jImage: JQuery;
+    private jbtnText: JQuery;
     public create() {
         this.jComponent.empty(); //clear all subcomponents
 
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('input-append control-group');
+
         this.jEdit = $('<select>');
+        if (this.TabIndex) this.jEdit.attr('tabindex', this.TabIndex);
 
         this.jEdit.appendTo(this.jComponent);
         this.jEdit.attr('id', V.Application.genGUID());
@@ -160,10 +218,13 @@ export class TComboboxBase extends VXB.TEditorBase {
             case V.ComboStyle.Danger: options.style = "btn-danger"; break;
         }
 
+        var itm: JQuery = $('<option/>').css('display', 'none');
+        itm.appendTo(this.jEdit);
         this.items.forEach((item: TComboItem) => {
-            var itm: JQuery = $('<option/>');
+            itm = $('<option/>');
             if (!item.Enabled) itm.attr('disabled', "disabled");
             itm.val(item.ID);
+            
 
             if (item.Divider)
                 itm.attr('data-divider', "true");
@@ -180,10 +241,54 @@ export class TComboboxBase extends VXB.TEditorBase {
         options.width = 'fit';
         options.selectedTextFormat = "count>" + this.ShowSelectionCount;
         options.noneSelectedText = this.NoneSelectedText;
+        options.Rtl = this.Rtl; 
 
         this.jEdit.selectpicker(options);
 
+        if (this.ButtonVisible) {
+            this.jImage = $('<i/>');
+            this.jbtnText = $('<span/>');
+
+            this.jBtn = $('<button/>').attr('tab-index', '-1').css('outline', 'none');
+            this.jBtn.addClass('btn');
+            this.jBtn.attr('type', "button");
+            switch (this.ButtonStyle) {
+                case V.ButtonStyle.Default: break;
+                case V.ButtonStyle.Primary: this.jBtn.addClass("btn-primary"); break;
+                case V.ButtonStyle.Info: this.jBtn.addClass("btn-info"); break;
+                case V.ButtonStyle.Success: this.jBtn.addClass("btn-success"); break;
+                case V.ButtonStyle.Warning: this.jBtn.addClass("btn-warning"); break;
+                case V.ButtonStyle.Danger: this.jBtn.addClass("btn-danger"); break;
+                case V.ButtonStyle.Link: this.jBtn.addClass("btn-link"); break;
+            }
+
+            if (this.ButtonIcon != null) {
+                this.jImage.addClass(V.iconEnumToBootstrapStyle(this.ButtonIcon));
+                this.jImage.appendTo(this.jBtn);
+                if (this.ButtonText != "") this.jImage.css('margin-right', '6px');
+                this.jbtnText.text(this.ButtonText);
+            } else if (this.ButtonText == "") this.jbtnText.text(".");
+            else this.jbtnText.text(this.ButtonText);
+
+            if (!this.Enabled) this.jBtn.addClass("disabled");
+            this.jbtnText.appendTo(this.jBtn);
+
+            this.jBtn.off("click").click(() => { if (this.onButtonClicked != null) (V.tryAndCatch(() => { this.onButtonClicked(); })); return false; });
+            this.jComponent.append(this.jBtn)
+        }
+
+
         super.create();
+    }
+
+    public checkAll() {
+        this.items.forEach((item) => { item.Checked = true });
+        this.draw(true);
+    }
+
+    public uncheckAll() {
+        this.items.forEach((item) => { item.Checked = false });
+        this.draw(false);
     }
 
     public get SelectedItems(): V.TComboItem[] {
@@ -215,7 +320,7 @@ export class TCombobox extends TComboboxBase {
     public set Text(val: string) {
         this.items.forEach((item) => { item.Checked = false });
         if (val) {
-            var arr = val.split(',');
+            var arr = val.toString().split(',');
             for (var i = 0; i < arr.length; i++) {
                 var rc = this.items.FindItemByValue(arr[i]);
                 if (rc) {
@@ -231,7 +336,8 @@ export class TCombobox extends TComboboxBase {
         super.create();
         var self = this;
         this.jEdit.change((item) => {
-            var currVal: string[] = this.jEdit.selectpicker("val").toString().split(',');
+            var dpVal = this.jEdit.selectpicker("val").toString();
+            var currVal: string[] = dpVal.split(',');
             var newVal = new Array();
             this.items.forEach((item) => { item.Checked = false; });
             for (var i = 0; i < currVal.length; i++) {
@@ -256,14 +362,15 @@ export class TCombobox extends TComboboxBase {
         super.draw(reCreate);
 
         var Value = new Array();
-        if (this.Text != null) {
+        if (this.Text != null && this.Text) {
             var currVal: string[] = this.Text.split(',');
             for (var i = 0; i < currVal.length; i++) {
                 var localValue = this.items.FindItemByValue(<string>currVal[i]);
                 if (localValue != null) Value.push(localValue.ID);
             }
         }
-        if (this.jEdit.selectpicker("val").toString() != Value.toString())  this.jEdit.selectpicker('val', Value);   
+        if (this.jEdit.selectpicker("val").toString() != Value.toString())
+            this.jEdit.selectpicker('val', Value);
     }
 
 }
@@ -356,18 +463,17 @@ export class TDBCombobox extends TComboboxBase {
         super.draw(reCreate);
 
         var Value = new Array();
-        var rc = this.DataValue; 
-        if (rc != null) {            
+        var rc = this.DataValue;
+        if (rc != null && rc != "") {
             var currVal = rc.split(',');
             for (var i = 0; i < currVal.length; i++) {
                 var localValue = this.items.FindItemByValue(currVal[i]);
                 if (localValue != null) Value.push(localValue.ID);
             }
         }
-        if (this.jEdit.selectpicker("val").toString() != Value.toString()) this.jEdit.selectpicker('val', Value);
-
+        if (this.jEdit.selectpicker("val").toString() != Value.toString())
+            this.jEdit.selectpicker('val', Value);
     }
-
 }
 
 
@@ -381,8 +487,7 @@ export class TComboItem extends VXM.TMenuItem {
     public set Value(val: string) {
         if (val != this._value) {
             this._value = val;
-            if (this.OwnerCollection != null)
-                this.OwnerCollection.refresh();
+            if (this.OwnerCollection) this.OwnerCollection.refresh();
         }
     }
 
@@ -403,6 +508,7 @@ export class TComboItem extends VXM.TMenuItem {
     public set Checked(val: boolean) {
         if (val != this._checked) {
             this._checked = val;
+            if (this.OwnerCollection) this.OwnerCollection.refresh();
         }
     }
 
@@ -430,17 +536,17 @@ export class TComboItemCollection<T> extends VXO.TCollection<TComboItem> {
 
     add(item: TComboItem): boolean {
         var rc = super.add(item);
-        if (!this.locked) this.owner.draw(true);
+        if (!this.locked) this.owner.drawDelayed(true);
         return rc;
     }
 
     public refresh() {
-        if (!this.locked) this.owner.draw(true);
+        if (!this.locked) this.owner.drawDelayed(false);
     }
 
     public EndUpdate() {
         super.EndUpdate();
-        this.owner.draw(true);
+        this.owner.drawDelayed(true);
     }
 
 }
@@ -481,7 +587,7 @@ Selectpicker.prototype = {
         this.$element.hide();
         this.multiple = this.$element.prop('multiple');
         var id = this.$element.attr('id');
-        this.$newElement = this.createView();
+        this.$newElement = this.createView(this.options.Rtl);
         this.$element.after(this.$newElement);
         this.$menu = this.$newElement.find('> .dropdown-menu');
         this.$button = this.$newElement.find('> button');
@@ -511,30 +617,51 @@ Selectpicker.prototype = {
         this.$newElement.data('this', this);
     },
 
-    createDropdown: function () {
+    createDropdown: function (rtl : boolean) {
         //If we are multiple, then add the show-tick class by default
         var multiple = this.multiple ? ' show-tick' : '';
         var header = this.options.header ? '<h3 class="popover-title">' + this.options.header + '<button type="button" class="close" aria-hidden="true">&times;</button></h3>' : '';
-        var searchbox = this.options.liveSearch ? '<div class="bootstrap-select-searchbox"><input type="text" class="input-block-level form-control" /></div>' : '';
-        var drop =
-            "<div style='width:100%' class='btn-group bootstrap-select" + multiple + "'>" +
-            "<button type='button' class='btn dropdown-toggle' data-toggle='dropdown'>" +
-            "<div class='filter-option pull-left'></div>&nbsp;" +
-            "<div class='caret'></div>" +
-            "</button>" +
-            "<div class='dropdown-menu open'>" +
-            header +
-            searchbox +
-            "<ul class='dropdown-menu inner' role='menu'>" +
-            "</ul>" +
-            "</div>" +
-            "</div>";
 
-        return $(drop);
+        if (rtl) {
+            var searchbox = this.options.liveSearch ? '<div class="bootstrap-select-searchbox" dir="rtl"><input type="text" class="input-block-level form-control" /></div>' : '';
+            var drop =
+                "<div style='width:100%' class='btn-group bootstrap-select" + multiple + "'>" +
+                "<button type='button' class='btn dropdown-toggle' data-toggle='dropdown'>" +
+                "<div class='filter-option pull-left' style='text-align:right'></div>&nbsp;" +
+                "<div class='caret'></div>" +
+                "</button>" +
+                "<div class='dropdown-menu open'>" +
+                header +
+                searchbox +
+                "<ul class='dropdown-menu inner' dir='rtl' role='menu'>" +
+                "</ul>" +
+                "</div>" +
+                "</div>";
+
+            return $(drop);
+
+        } else {
+            var searchbox = this.options.liveSearch ? '<div class="bootstrap-select-searchbox"><input type="text" class="input-block-level form-control" /></div>' : '';
+            var drop =
+                "<div style='width:100%' class='btn-group bootstrap-select" + multiple + "'>" +
+                "<button type='button' class='btn dropdown-toggle' data-toggle='dropdown'>" +
+                "<div class='filter-option pull-left'></div>&nbsp;" +
+                "<div class='caret'></div>" +
+                "</button>" +
+                "<div class='dropdown-menu open'>" +
+                header +
+                searchbox +
+                "<ul class='dropdown-menu inner' role='menu'>" +
+                "</ul>" +
+                "</div>" +
+                "</div>";
+
+            return $(drop);
+        }
     },
 
-    createView: function () {
-        var $drop = this.createDropdown();
+    createView: function (rtl : boolean) {
+        var $drop = this.createDropdown(rtl);
         var $li = this.createLi();
         $drop.find('ul').append($li);
         return $drop;
@@ -663,7 +790,7 @@ Selectpicker.prototype = {
             var max = this.options.selectedTextFormat.split(">");
             var notDisabled = this.options.hideDisabled ? ':not([disabled])' : '';
             if ((max.length > 1 && selectedItems.length > max[1]) || (max.length == 1 && selectedItems.length >= 2)) {
-                title = this.options.countSelectedText.replace('{0}', selectedItems.length).replace('{1}', this.$element.find('option:not([data-divider="true"]):not([data-hidden="true"])' + notDisabled).length);
+                title = this.options.countSelectedText.replace('{0}', selectedItems.length).replace('{1}', this.$element.find('option:not([data-divider="true"]):not([data-hidden="true"])' + notDisabled).length-1);
             }
         }
 
@@ -696,7 +823,9 @@ Selectpicker.prototype = {
         var selectClone = this.$newElement.clone();
         selectClone.appendTo('body');
         var $menuClone = selectClone.addClass('open').find('> .dropdown-menu');
-        var liHeight = $menuClone.find('li > a').outerHeight();
+        var as: JQuery = $menuClone.find('li > a');
+        if (as.length) as.text("A");
+        var liHeight = as.outerHeight();
         var headerHeight = this.options.header ? $menuClone.find('.popover-title').outerHeight() : 0;
         selectClone.remove();
         this.$newElement.data('liHeight', liHeight).data('headerHeight', headerHeight);
