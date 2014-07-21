@@ -7,7 +7,7 @@ import VXO = require("VCL/VXObject");
 import VXU = require("VCL/VXUtils");
 
 export class TGridBase extends VXC.TComponent {
-    public onRowClicked: (clickedColumn: V.TDBGridColumn) => void;
+    public onRowClicked: (record : any,clickedColumn: V.TDBGridColumn) => void;
     public onChecboxClicked: (recno: number) => void;
     public onGetRowStyle: (record: any) => V.GridRowStyle;
     public onNextPageClicked: () => void;
@@ -46,6 +46,7 @@ export class TGridBase extends VXC.TComponent {
     public set ShowSelectedRecord(val: boolean) {
         if (val != this._showselectedrecord) {
             this._showselectedrecord = val;
+            this.drawDelayed(true);
         }
     }
 
@@ -207,6 +208,14 @@ export class TGridBase extends VXC.TComponent {
             if (this._pagesize < 1) this._pagesize = 1;
             this.drawDelayed(true);
         }
+    }
+
+    private visbleColumnCount(): number {
+        var cnt = this.ShowSelectCheckbox?1:0;
+        this.columns.forEach((item) => {
+            if (item.Visible) cnt++;
+        });
+        return cnt;
     }
 
     public jGrid: JQuery;
@@ -431,7 +440,7 @@ export class TGridBase extends VXC.TComponent {
         if (cnt == 0 || !this.GroupBoxVisible) {
             this.jComponent.append($("<thead></thead>"));
         } else {
-            var cmb: string = '<tr><th colspan="' + this.columns.length() + '"><div class="row-fluid"><div class="span3 control-group" >'
+            var cmb: string = '<tr><th colspan="' + this.visbleColumnCount() + '"><div class="row-fluid"><div class="span3 control-group" >'
             cmb += '<label class="control-label" style="width:100%">'+this.GroupBoxGroupByCaption+'</label >';
             cmb += '<select class="selectpicker gpislp"  style="width:100%">';
             cmb += "<option value='xxxxxxxxxxx'>*</option>";
@@ -669,7 +678,7 @@ export class TDBGrid extends TGridBase {
     }
 }
 
-xport class TDBGridColumn extends VXO.TCollectionItem {
+export class TDBGridColumn extends VXO.TCollectionItem {
     public grid: TGridBase;
     public onClicked: () => void;
     public onGetValue: (record: any) => any;
@@ -685,6 +694,17 @@ xport class TDBGridColumn extends VXO.TCollectionItem {
     public set Rtl(val: boolean) {
         if (val != this._rtl) {
             this._rtl = val;
+            this.grid.drawDelayed(true);
+        }
+    }
+
+    private _visible: boolean = true;
+    public get Visible(): boolean {
+        return this._visible;
+    }
+    public set Visible(val: boolean) {
+        if (val != this._visible) {
+            this._visible = val;
             this.grid.drawDelayed(true);
         }
     }
@@ -844,7 +864,8 @@ export class TBaseGridDataSource {
             (<any>_grid).selectedRecordId = recId;
             if ((<TDBGrid>_grid).Dataset) (<any>_grid).Dataset.Recno = (<any>_grid).Dataset.getRecordIndexRecNo(recId);
             if (_grid.ShowSelectedRecord) self.refreshSelection(_grid);
-            if (_grid.onRowClicked && (<TDBGrid>_grid).Dataset) _grid.onRowClicked((<TDBGrid>_grid).Dataset.getCurrentRecord());
+            if (_grid.onRowClicked)
+                _grid.onRowClicked((<TDBGrid>_grid).Dataset ? (<TDBGrid>_grid).Dataset.getCurrentRecord() : null, selectedCol);
         });
 
         _grid.columns.forEach((columnItem: TDBGridColumn) => {
@@ -958,7 +979,7 @@ export class TBaseGridDataSource {
         var _columns = new Array();
         if (this.grid.ShowSelectCheckbox) {
             _columns.push({
-                property: "___CHECKED___", label: this.grid.CheckboxColumnHeader, sortable: false, width: 18, align: "c"
+                property: "___CHECKED___", label: this.grid.CheckboxColumnHeader, sortable: false, width: 18, align: "c",visible : true
             });
         }
 
@@ -979,7 +1000,7 @@ export class TBaseGridDataSource {
             _columns.push({
                 property: item.ID, label: label, sortable: false, width: item.Width,
                 align: align,
-                halign: halign,
+                halign: halign,visible : item.Visible,
                 grouped:true
             });
         }
@@ -1000,7 +1021,7 @@ export class TBaseGridDataSource {
 
                 _columns.push({
                     property: item.ID, label: label, sortable: item.Sortable, width: item.Width,
-                    align: align,
+                    align: align,visible : item.Visible,
                     halign: halign
                 });
             }
@@ -1027,11 +1048,14 @@ class TDBGridDataSource extends TBaseGridDataSource {
 
         var columnname = "";
         var groupname = "";
+        var col;
         if (options.sortProperty) {
-            columnname = self.grid.columns.FindItemByID(options.sortProperty).FieldName;
+            col = self.grid.columns.FindItemByID(options.sortProperty);
+            if (col) columnname = col.FieldName;
         }
         if (options.groupProperty) {
-            groupname = self.grid.columns.FindItemByID(options.groupProperty).FieldName;
+            col = self.grid.columns.FindItemByID(options.groupProperty);
+            if (col) groupname = col.FieldName;
         }
 
         this._data = (<TDBGrid>self.grid).Dataset.getRecords(options.pageIndex * options.pageSize,
@@ -1201,15 +1225,20 @@ Datagrid.prototype = {
     renderColumns: function () {
         var self = this;
 
-        this.$footer.attr('colspan', this.columns.length);
+        var _grid = this.options.dataSource.grid;
+        var colCount = _grid ? _grid.visbleColumnCount() : this.columns.length; 
+        this.$footer.attr('colspan', colCount);
 
         var colHTML = '';
 
         $.each(this.columns, function (index, column) {
+            var style = "";
             colHTML += '<th data-property="' + column.property + '"';
             if (column.sortable) colHTML += ' class="sortable"';
-            if (column.halign=="r") colHTML += ' style="text-align:right" ';
-            if (column.width > 0) colHTML += ' width=' + column.width + "px";
+            if (column.halign == "r") style += 'text-align:right;';
+            if (column.width > 0) style += 'width:' + column.width + "px;";
+            if (!column.visible) style += 'display:none;';
+            if (style!="") colHTML += " style='" + style + "' ";
             colHTML += '>' + column.label + '</th>';
         });
 
@@ -1304,14 +1333,18 @@ Datagrid.prototype = {
                         LineHTML += " data-record=" + row.___RECORDID___ + '"/></td>';
                     } else {
                         var showtop: boolean = _grid.ShowHorzLines;
-                        if (showtop && column.grouped && (<string>row[column.property]).indexOf('__emptygroupclass__') > 0) showtop = false;
-                        if ((<string>row[column.property]).indexOf('__emptygroupclassfirst') > 0) cls +="padding-top: 0px;"
+						if (row[column.property]) {
+							if (showtop && column.grouped && (<string>row[column.property]).indexOf('__emptygroupclass__') > 0) showtop = false;
+							if ((<string>row[column.property]).indexOf('__emptygroupclassfirst') > 0) cls +="padding-top: 0px;"
+						}
 
                         cls += showtop ? "" : "border-top: none;";
                         cls += "overflow:hidden;";
                         if (column.align == 'l') cls += "text-align: left;";
                         else if (column.align == 'r') cls += "text-align:right;";
                         else if (column.align == 'c') cls += "text-align:center;";
+
+                        if (column.visible == false) cls += "display:none;";
                         LineHTML += '<td style="' + cls;
                         if (column.width > 0) LineHTML += ' width:' + column.width + "px;";
                         LineHTML += '">' + row[column.property] + '</td>';
@@ -1335,6 +1368,7 @@ Datagrid.prototype = {
                     var style: string = "border-right:0px;";
                     if (row > 0) style = "border-top-color:transparent;";
                     style += _grid.ShowVertLines || index == 0 ? "" : "border-left :  none;";
+                    if (column.visible == false) style += "display:none;";
                     rowHTML += '<td style="' + style + '">&nbsp;</td>';
                 });
                 rowHTML += '</tr>';
@@ -1354,8 +1388,10 @@ Datagrid.prototype = {
     },
 
     placeholderRowHTML: function (content) {
+        var _grid = this.options.dataSource.grid;
+        var colCount = _grid ? _grid.visbleColumnCount() : this.columns.length; 
         return '<tr><td style="text-align:center;padding:20px;border-bottom:none;" colspan="' +
-            this.columns.length + '">' + content + '</td></tr>';
+            colCount + '">' + content + '</td></tr>';
     },
 
     headerClicked: function (e) {
@@ -1414,7 +1450,6 @@ Datagrid.prototype = {
 
     groupChanged: function (e) {
         var val = this.$groupby.selectpicker("val").toString();
-        console.log(val);
         var _grid: TGridBase = this.options.dataSource.grid;
         if (!_grid) return;
         (<any>_grid).GroupColumn = _grid.columns.FindItemByID(val);

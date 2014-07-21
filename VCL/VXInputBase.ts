@@ -3,6 +3,40 @@ import V = require("VCL/VCL");
 import VXU = require("VCL/VXUtils");
 
 export class TEditorBase extends VXC.TComponent {
+
+    private _required: boolean = false;
+    public get Required(): boolean {
+        return this._required;
+    }
+    public set Required(val: boolean) {
+        if (val != this._required) {
+            this._required = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    public isEmpty(): boolean {
+        var c: String = this.jEdit.val();
+        if (!c) return true;
+        if (c) c = c.trim();
+        return c == "";
+    }
+
+    public ShowErrorMessage(message : string): void {
+        this._errortext = message
+        this.HelpVisible = true;
+        this.addClass("error");
+        this.drawDelayed(true);
+    }
+
+    public HideErrorMessage(): void {
+        this.removeClass("error");
+        this._errortext = null;
+        this.drawDelayed(true);
+    }
+
+
+
     private _rtl: boolean = false;
     public get Rtl(): boolean {
         return this._rtl;
@@ -64,7 +98,7 @@ export class TEditorBase extends VXC.TComponent {
         }
     }
 
-
+    private _errortext: string = "";
     private _helptext: string = "";
     public get HelpText(): string {
         return this._helptext;
@@ -89,7 +123,7 @@ export class TEditorBase extends VXC.TComponent {
             this.drawDelayed(true);
         }
     }
-    private _labelposition: V.LabelPosition = V.LabelPosition.TopLeft;
+    private _labelposition: V.LabelPosition = V.Application.LocaleSettings.LabelPosition;
     public get LabelPosition(): V.LabelPosition {
         return this._labelposition;
     }
@@ -146,13 +180,13 @@ export class TEditorBase extends VXC.TComponent {
                 this.jComponent.append(this.jLabel);
             }
         }
-        if (this.HelpVisible) {
+        if (this.HelpVisible || this._errortext) {
             this.jHelpLabel = $('<small/>');
             this.jHelpLabel.addClass('help-inline text-center');
             this.jHelpLabel.css('font-size', '12px');
             this.jHelpLabel.css('width', '100%');
             this.jComponent.append(this.jHelpLabel);
-            this.jHelpLabel.text(this.HelpText);
+            this.jHelpLabel.text(this._errortext? this._errortext:this.HelpText);
         }
 
         super.create();
@@ -214,7 +248,7 @@ export class TInputBase extends TEditorBase {
     public create() {
         this.jComponent.empty();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
-        this.jComponent.addClass('input-append control-group');
+        this.jComponent.addClass('control-group');
         if (this.InputStyle == V.InputStyle.Error) this.jComponent.addClass("error");
         else if (this.InputStyle == V.InputStyle.Warning) this.jComponent.addClass("warning");
         if (this.InputStyle == V.InputStyle.Success) this.jComponent.addClass("success");
@@ -226,9 +260,8 @@ export class TInputBase extends TEditorBase {
         if ((<any>this).textarea) {
             this.jEdit = $('<textarea/>').attr('rows', (<V.TTextArea>this).Rows).css('resize','none');
             if ((<V.TTextArea>this).Wrap) this.jEdit.attr('Wrap', 'Wrap');
-
         } else {
-            this.jEdit = $('<input/>');
+            this.jEdit = $('<input/>').css('margin-bottom','0px');
             if (this.TabIndex) this.jEdit.attr('tabindex', this.TabIndex);
         }
 
@@ -256,7 +289,8 @@ export class TInputBase extends TEditorBase {
         if (this.ButtonVisible) {
             this.jBtn = $('<button/>').attr('tab-index','-1').css('outline','none');
             this.jBtn.addClass('btn');
-            this.jBtn.attr('type', "button").css('float','right');
+            this.jBtn.attr('type', "button").css('float', 'right');
+            this.jComponent.addClass('input-append');
             switch (this.ButtonStyle) {
                 case V.ButtonStyle.Default: break;
                 case V.ButtonStyle.Primary: this.jBtn.addClass("btn-primary"); break;
@@ -299,6 +333,10 @@ export class TInputBase extends TEditorBase {
 
 
     private _placeholder: string;
+    /*
+    * The placeholder attribute specifies a short hint that describes the expected value of an input field 
+    * (e.g. a sample value or a short description of the expected format).
+    */
     public get Placeholder(): string {
         return this._placeholder;
     }

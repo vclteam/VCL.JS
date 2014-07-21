@@ -158,8 +158,32 @@ export class TInputNumeric extends VXB.TInputBase {
 
     public set Value(val: number) {
         if (val != this._value) {
+            if (val > this.MaxValue) val = this.MaxValue;
+            if (val < this.MinValue) val = this.MinValue;
             this._value = val;
             this.draw(false);
+        }
+    }
+
+    private _maxvalue: number = 999999999999;
+    public get MaxValue(): number {
+        return this._maxvalue;
+    }
+    public set MaxValue(val: number) {
+        if (val != this._maxvalue) {
+            this._maxvalue = val;
+            this.drawDelayed(false);
+        }
+    }
+
+    private _minvalue: number = -999999999999;
+    public get MinValue(): number {
+        return this._minvalue;
+    }
+    public set MinValue(val: number) {
+        if (val != this._minvalue) {
+            this._minvalue = val;
+            this.drawDelayed(false);
         }
     }
 
@@ -187,30 +211,33 @@ export class TInputNumeric extends VXB.TInputBase {
 
     public create() {
         super.create();
+        var self = this;
         this.jComponent.attr('data-trigger', "spinner").addClass('spinner');
 
         //draw the component
         var addon = $("<div>").addClass('add-on');
-        var btdown = $("<a>").css('outline','none').attr('data-spin', "down").addClass('spin-down').attr('tabindex', '-1').attr('href', '#').append('<i class="icon-sort-down"/>');
-        btdown.off('click').click(() => { this.Value -= this.Step; if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); })); });
+        var btdown = $("<a>").css('outline','none').attr('data-spin', "down").addClass('spin-down').attr('tabindex', '-1').append('<i class="icon-sort-down"/>');
+        btdown.off('click').click(() => { if (!this.Enabled) return;this.Value -= this.Step; if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); })); });
 
-        var btUp = $("<a>").css('outline', 'none').attr('data-spin', "up").addClass('spin-up').attr('tabindex', '-1').attr('href', '#').append('<i class="icon-sort-up"/>');
-        btUp.off('click').click(() => { this.Value += this.Step; if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); })); });
+        var btUp = $("<a>").css('outline', 'none').attr('data-spin', "up").addClass('spin-up').attr('tabindex', '-1').append('<i class="icon-sort-up"/>');
+        btUp.off('click').click(() => { if (!this.Enabled) return; this.Value += this.Step; if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); })); });
         this.jEdit.css('clear', 'none');
         this.jEdit.change(() => {
-            this._value = this.jEdit.val();
-            this.Value = this.Value;
+            var _value = this.jEdit.val();
+            self.Value = _value;
+            if (self.Value != _value) this.jEdit.val(self.Value.toString());
             if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); }));
         });
         
         this.jEdit.keyup(function () {
-            var val = this.value.replace(/[^0-9\.]/g, '');
+            var val = this.value.replace(/[^0-9\.-]/g, '');
             if (val != this.value) {
-                this.value = this.value.replace(/[^0-9\.]/g, '');
+                this.value = this.value.replace(/[^0-9\.-]/g, '');
                 if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); }));
             }
         });
-        addon.css('float','right');
+        addon.css('float', 'right');
+        this.jComponent.addClass('input-append');
         addon.append(btUp);
         addon.append(btdown);
         (<any>this).jinternalSpan.before(addon);
@@ -321,10 +348,10 @@ export class TDBInputNumeric extends VXB.TInputBase {
 
         //draw the component
         var addon = $("<div>").addClass('add-on');
-        var btdown = $("<a>").css('outline', 'none').attr('data-spin', "down").addClass('spin-down').attr('tabindex', '-1').attr('href', '#').append('<i class="icon-sort-down"/>');
+        var btdown = $("<a>").css('outline', 'none').attr('data-spin', "down").addClass('spin-down').attr('tabindex', '-1').append('<i class="icon-sort-down"/>');
         btdown.off('click').click(() => { this.DataValue -= this.Step; if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); })); });
 
-        var btUp = $("<a>").css('outline', 'none').attr('data-spin', "up").addClass('spin-up').attr('tabindex', '-1').attr('href', '#').append('<i class="icon-sort-up"/>');
+        var btUp = $("<a>").css('outline', 'none').attr('data-spin', "up").addClass('spin-up').attr('tabindex', '-1').append('<i class="icon-sort-up"/>');
         btUp.off('click').click(() => { this.DataValue += this.Step; if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); })); });
         this.jEdit.css('clear', 'none');
         this.jEdit.change(() => {

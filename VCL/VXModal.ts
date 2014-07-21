@@ -81,3 +81,130 @@ export class TModal extends VXC.TContainer {
         return true;
     }
 }
+
+
+
+export class TModalBuilder extends TModal {
+    private colCount = 0;
+    private body: V.TContainer;
+    private header: V.TText;
+    private currentRow: V.TBootstrapRowFluid;
+    constructor(effect?: V.ModalEffects, duration?: number) {
+        super(effect, duration);
+        this.body = new V.TContainer(this, "__boddy__");
+        this.header = new V.TText(this, "captionText");
+        var btn: V.TButton = new V.TButton(this, "okBtn", this.OKBtnText);
+        btn.ButtonStyle = V.ButtonStyle.Primary;
+        btn.onClicked = () => {
+            this.close();
+        }
+
+        if (this.ShowCancelBtn) {
+            var btn: V.TButton = new V.TButton(this, "closeBtn", this.CancelBtnText);
+            btn.onClicked = () => {
+                this.cancel();
+            }
+         }
+
+        this.header.TextStyle = V.TextStyle.h3;
+        this.createRow();
+    }
+
+    public createInput(text? : string,labelText?: string, sizeInSpan: number = 2): V.TInput{
+        this.colCount += sizeInSpan;
+        if (this.colCount > 12) {
+            this.colCount = 0;
+            this.createRow();
+        }
+        var inp: V.TInput = new V.TInput(this.currentRow, null);
+        inp.Text = text;
+        inp.LabelText = labelText;
+        inp.jComponent.addClass("span" + sizeInSpan);
+        return inp;
+    }
+
+    public createTextArea(text?: string, labelText?: string, sizeInSpan: number = 2): V.TTextArea {
+        this.colCount += sizeInSpan;
+        if (this.colCount > 12) {
+            this.colCount = 0;
+            this.createRow();
+        }
+        var inp: V.TTextArea = new V.TTextArea(this.currentRow, null);
+        inp.Text = text;
+        inp.LabelText = labelText;
+        inp.jComponent.addClass("span" + sizeInSpan);
+        return inp;
+    }
+
+
+    public createInputDate(date?: Date, labelText?: string, sizeInSpan: number = 2): V.TInputDate {
+        this.colCount += sizeInSpan;
+        if (this.colCount > 12) {
+            this.colCount = 0;
+            this.createRow();
+        }
+        var inp: V.TInputDate = new V.TInputDate(this.currentRow, null);
+        inp.Date = date;
+        inp.LabelText = labelText;
+        inp.jComponent.addClass("span" + sizeInSpan);
+        return inp;
+    }
+
+    public createCheckbox(checked?: boolean, labelText?: string, sizeInSpan: number = 2): V.TCheckBox{
+        this.colCount += sizeInSpan;
+        if (this.colCount > 12) {
+            this.colCount = 0;
+            this.createRow();
+        }
+        var inp: V.TCheckBox = new V.TCheckBox(this.currentRow, null, labelText);
+        inp.Checked = checked;
+        inp.jComponent.addClass("span" + sizeInSpan);
+        return inp;
+    }
+
+    public createRow() {
+        this.currentRow = this.body.createBootstrapRowFluid();
+    }
+
+    public getContanierHTML() {
+        return '<div class="modal-header"><div id="captionText" /></div><div id="__boddy__" class="modal-body"></div><div class="modal-footer"><div id="closeBtn" /><div id="okBtn" /></div>';
+    }
+
+    /*
+    * Text specify the modal header text.
+    */
+    public get HeaderText(): string {
+        return this.header.Text;
+    }
+    public set HeaderText(val: string) {
+        this.header.Text = val;
+    }
+
+
+    private _okbtntext: string = "OK";
+    public get OKBtnText(): string {
+        return this._okbtntext;
+    }
+    public set OKBtnText(val: string) {
+        this._okbtntext = val;
+    }
+
+
+    private _cancelbtntext :string = "Cancel";
+    public get CancelBtnText(): string {
+        return this._cancelbtntext;
+    }
+    public set CancelBtnText(val: string) {
+        this._cancelbtntext = val;
+    }
+
+
+    private _showcancelbtn :boolean = true;
+    public get ShowCancelBtn(): boolean {
+        return this._showcancelbtn;
+    }
+    public set ShowCancelBtn(val: boolean) {
+        this._showcancelbtn = val;
+    }
+
+}

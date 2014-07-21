@@ -220,24 +220,40 @@ export class TComboboxBase extends VXB.TEditorBase {
 
         var itm: JQuery = $('<option/>').css('display', 'none');
         itm.appendTo(this.jEdit);
+        //loook for groups
+        var groups = [];
         this.items.forEach((item: TComboItem) => {
-            itm = $('<option/>');
-            if (!item.Enabled) itm.attr('disabled', "disabled");
-            itm.val(item.ID);
-            
+            if (item.Group && item.Group.length > 0 && groups.indexOf(item.Group) == -1) groups.push(item.Group);
+        })
+        groups.sort();
+        groups.push("");
 
-            if (item.Divider)
-                itm.attr('data-divider', "true");
-            else {
-                if (item.Text != null && item.Text.toString().length > 0) itm.text(item.Text);
-                else itm.text(item.Value.toString());
-                if (!item.SubText != null && item.SubText.toString().length > 0) {
-                    itm.attr('data-subtext', item.SubText.toString());
+        groups.forEach((group) => {
+            if (groups.length > 1) {
+                var gitm = $('<optgroup/>');
+                gitm.attr('label', group);
+                gitm.appendTo(this.jEdit);
+            } else gitm = this.jEdit;
+            this.items.forEach((item: TComboItem) => {
+                if (item.Group == group) {
+                    itm = $('<option/>');
+                    if (!item.Enabled) itm.attr('disabled', "disabled");
+                    itm.val(item.ID);
+
+                    if (item.Divider) itm.attr('data-divider', "true");
+                    else {
+                        if (item.Text != null && item.Text.toString().length > 0) itm.text(item.Text);
+                        else itm.text(item.Value.toString());
+                        if (!item.SubText != null && item.SubText.toString().length > 0) {
+                            itm.attr('data-subtext', item.SubText.toString());
+                        }
+                    }
+                    itm.appendTo(gitm);
                 }
-            }
-            itm.appendTo(this.jEdit);
-            return true;
+                return true;
+            });
         });
+
         options.width = 'fit';
         options.selectedTextFormat = "count>" + this.ShowSelectionCount;
         options.noneSelectedText = this.NoneSelectedText;
@@ -317,6 +333,12 @@ export class TCombobox extends TComboboxBase {
         this.items.forEach((item) => { if (item.Checked) arr.push(item.Value) });
         return arr.toString();
     }
+
+
+    public isEmpty(): boolean {
+        return this.Text == "";
+    }
+
     public set Text(val: string) {
         this.items.forEach((item) => { item.Checked = false });
         if (val) {
@@ -417,6 +439,12 @@ export class TDBCombobox extends TComboboxBase {
         }
     }
 
+
+    public isEmpty(): boolean {
+        return this.DataValue == "" || this.DataValue == null;
+    }
+
+
     public get DataValue(): any {
         if (this.Dataset == null || this.Dataset.Active == false || this.Dataset.RecordCount <= 0) return null;
         if (this.DataField == null || this.DataField.toString() == "") return null;
@@ -498,8 +526,21 @@ export class TComboItem extends VXM.TMenuItem {
     public set SubText(val: string) {
         if (val != this._subtext) {
             this._subtext = val;
+            if (this.OwnerCollection) this.OwnerCollection.refresh();
         }
     }
+
+    private _group: string = "";
+    public get Group(): string {
+        return this._group;
+    }
+    public set Group(val: string) {
+        if (val != this._subtext) {
+            this._group = val;
+            if (this.OwnerCollection) this.OwnerCollection.refresh();
+        }
+    }
+
 
     private _checked: boolean = false;
     public get Checked(): boolean {
@@ -625,7 +666,7 @@ Selectpicker.prototype = {
         if (rtl) {
             var searchbox = this.options.liveSearch ? '<div class="bootstrap-select-searchbox" dir="rtl"><input type="text" class="input-block-level form-control" /></div>' : '';
             var drop =
-                "<div style='width:100%' class='btn-group bootstrap-select" + multiple + "'>" +
+                "<div style='width:100%;display:block' class='btn-group bootstrap-select" + multiple + "'>" +
                 "<button type='button' class='btn dropdown-toggle' data-toggle='dropdown'>" +
                 "<div class='filter-option pull-left' style='text-align:right'></div>&nbsp;" +
                 "<div class='caret'></div>" +
@@ -643,7 +684,7 @@ Selectpicker.prototype = {
         } else {
             var searchbox = this.options.liveSearch ? '<div class="bootstrap-select-searchbox"><input type="text" class="input-block-level form-control" /></div>' : '';
             var drop =
-                "<div style='width:100%' class='btn-group bootstrap-select" + multiple + "'>" +
+                "<div style='width:100%;display:block' class='btn-group bootstrap-select" + multiple + "'>" +
                 "<button type='button' class='btn dropdown-toggle' data-toggle='dropdown'>" +
                 "<div class='filter-option pull-left'></div>&nbsp;" +
                 "<div class='caret'></div>" +
@@ -712,7 +753,7 @@ Selectpicker.prototype = {
                     var labelIcon = $this.parent().data('icon') ? '<i class="' + $this.parent().data('icon') + '"></i> ' : '';
                     label = labelIcon + '<span class="text">' + label + labelSubtext + '</span>';
 
-                    if ($this[0]["index"] != 0) {
+                    if ($this[0]["index"] >1) {
                         _liA.push(
                             '<div class="div-contain"><div class="divider"></div></div>' +
                             '<dt>' + label + '</dt>' +

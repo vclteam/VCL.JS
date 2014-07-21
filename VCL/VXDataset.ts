@@ -47,8 +47,10 @@ export class TDataset extends VXO.TObject {
     }
 
     private dataChanged() {
-        if (this.onDataChanged != null) this.onDataChanged();
-        (<any>this).triggerEvent(TDataset.EVENT_DATA_CHANGED);
+        if ((<any>this)._enabledControl) {
+            if (this.onDataChanged != null) this.onDataChanged();
+            (<any>this).triggerEvent(TDataset.EVENT_DATA_CHANGED);
+        }
     }
 
     /**

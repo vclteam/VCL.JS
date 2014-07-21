@@ -4,9 +4,83 @@ import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 import VXCB = require("VCL/VXChartBase");
 
-export class TChartDonut extends VXCB.TChartBase {
+export class TChartPieBase extends VXCB.TChartBase{
     public onSelectionchanged: (value: V.TDountValue) => void;
     public onClicked: (value: V.TDountValue) => void;
+
+
+    private _fulldonut: boolean = false;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get FullDonut(): boolean {
+        return this._fulldonut;
+    }
+    public set FullDonut(val: boolean) {
+        if (val != this._fulldonut) {
+            this._fulldonut = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _drawlabel: boolean = true;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get DrawLabel(): boolean {
+        return this._drawlabel;
+    }
+    public set DrawLabel(val: boolean) {
+        if (val != this._drawlabel) {
+            this._drawlabel = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _drawvalue: boolean = true;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get DrawValue(): boolean {
+        return this._drawvalue;
+    }
+    public set DrawValue(val: boolean) {
+        if (val != this._drawvalue) {
+            this._drawvalue = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _startangle: number = 0;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get StartAngle(): number {
+        return this._startangle;
+    }
+    public set StartAngle(val: number) {
+        if (val != this._startangle) {
+            this._startangle = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _endangle: number = 360;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get EndAngle(): number {
+        return this._endangle;
+    }
+    public set EndAngle(val: number) {
+        if (val != this._endangle) {
+            this._endangle = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     public values = new VXCB.TChartValuesCollection<VXCB.TDountValue>();
     public createValue(label: string, value: number): VXCB.TDountValue {
@@ -18,6 +92,18 @@ export class TChartDonut extends VXCB.TChartBase {
         return col;
     }
 
+    public getData(): any[] {
+        var dataArray = [];
+        this.values.forEach((valueOfElement: VXCB.TDountValue) => {
+            var obj: any = { label: valueOfElement.Label, value: valueOfElement.Value, id: valueOfElement.ID };
+            dataArray.push(obj);
+            return true;
+        });
+        return dataArray;
+    }
+}
+
+export class TChartDonut extends TChartPieBase{
     private _basecolor: V.BaseColor = V.BaseColor.Primary;
     public get BaseColor(): V.BaseColor {
         return this._basecolor;
@@ -61,15 +147,6 @@ export class TChartDonut extends VXCB.TChartBase {
     }
 
 
-    public getData(): any[] {
-        var dataArray = [];
-        this.values.forEach((valueOfElement: VXCB.TDountValue) => {
-            var obj: any = { label: valueOfElement.Label, value: valueOfElement.Value, id: valueOfElement.ID };
-            dataArray.push(obj);
-            return true;
-        });
-        return dataArray;
-    }
 
     public create() {
         this.jComponent.empty(); //clear all subcomponents
@@ -97,8 +174,14 @@ export class TChartDonut extends VXCB.TChartBase {
             element: this.jComponent[0],
             data: dataArray,
             colors: colors,
+            drawlabel: this.DrawLabel,
+            drawvalue: this.DrawValue,
+            startangle: this.StartAngle,
+            fulldonut : this.FullDonut,
+            endangle:this.EndAngle,
             xLabelFormat: this.XLabelFormat,
             yLabelFormat: this.YLabelFormat
+
         }, this);
         super.create();
     }
@@ -107,8 +190,6 @@ export class TChartDonut extends VXCB.TChartBase {
         var hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
     }
-
-
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
@@ -292,15 +373,24 @@ class Donut extends VXCB.EventEmitter {
             total += value;
         }
         min = 5 / (2 * w);
-        C = 1.9999 * Math.PI - min * this.data.length;
-        last = 0;
+        var ang: number = Math.min(this.options.endangle - this.options.startangle,360);
+        ang = (ang / 180)-0.0001
+        C = ang * Math.PI - min * this.data.length; 
+        last = (this.options.startangle / 180) * Math.PI;
+        //last=0;
         idx = 0;
         this.segments = [];
         _ref1 = this.values;
         for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
             value = _ref1[i];
             next = last + min + C * (value / total);
-            seg = new DonutSegment(cx, cy, w * 2, w, last, next,
+            var inner = 0;
+            var outer = 0;
+            inner = w * 2;
+            outer = w; 
+            if (this.options.fulldonut) { inner = 0; outer = w * 3; } 
+
+            seg = new DonutSegment(cx, cy, inner, outer, last, next,
                 this.options.colors[idx % this.options.colors.length],
                 this.options.backgroundColor, idx, this.raphael);
             seg.ID = this.data[i].id;
@@ -311,8 +401,9 @@ class Donut extends VXCB.EventEmitter {
             last = next;
             idx += 1;
         }
-        this.text1 = this.drawEmptyDonutLabel(cx, cy - 10, this.options.labelColor, 15, 800);
-        this.text2 = this.drawEmptyDonutLabel(cx, cy + 10, this.options.labelColor, 14);
+        
+        this.text1 = this.drawEmptyDonutLabel(cx, cy - 10, this.options.labelColor, 15, 400);
+        this.text2 = this.drawEmptyDonutLabel(cx, cy + 10, this.options.labelColor, 14,300);
         max_value = Math.max.apply(null, (function () {
             var _k, _len2, _ref2, _results;
             _ref2 = this.values;
@@ -378,24 +469,29 @@ class Donut extends VXCB.EventEmitter {
         maxWidth = 1.8 * inner;
         maxHeightTop = inner / 2;
         maxHeightBottom = inner / 3;
-        this.text1.attr({
-            text: (typeof this.options.xLabelFormat === 'function') ? this.options.xLabelFormat(row) : row.label,
-            transform: ''
-        });
-        text1bbox = this.text1.getBBox();
-        text1scale = Math.min(maxWidth / text1bbox.width, maxHeightTop / text1bbox.height);
-        this.text1.attr({
-            transform: "S" + text1scale + "," + text1scale + "," + (text1bbox.x + text1bbox.width / 2) + "," + (text1bbox.y + text1bbox.height)
-        });
-        this.text2.attr({
-            text: (typeof this.options.yLabelFormat === 'function') ? this.options.yLabelFormat(row) : row.value,
-            transform: ''
-        });
-        text2bbox = this.text2.getBBox();
-        text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height);
-        return this.text2.attr({
-            transform: "S" + text2scale + "," + text2scale + "," + (text2bbox.x + text2bbox.width / 2) + "," + text2bbox.y
-        });
+        if (this.options.drawlabel) {
+            this.text1.attr({
+                text: (typeof this.options.xLabelFormat === 'function') ? this.options.xLabelFormat(row) : row.label,
+                transform: ''
+            });
+            text1bbox = this.text1.getBBox();
+            text1scale = Math.min(maxWidth / text1bbox.width, maxHeightTop / text1bbox.height);
+            this.text1.attr({
+                transform: "S" + text1scale + "," + text1scale + "," + (text1bbox.x + text1bbox.width / 2) + "," + (text1bbox.y + text1bbox.height)
+            });
+        }
+
+        if (this.options.drawvalue) {
+            this.text2.attr({
+                text: (typeof this.options.yLabelFormat === 'function') ? this.options.yLabelFormat(row) : row.value,
+                transform: ''
+            });
+            text2bbox = this.text2.getBBox();
+            text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height);
+            return this.text2.attr({
+                transform: "S" + text2scale + "," + text2scale + "," + (text2bbox.x + text2bbox.width / 2) + "," + text2bbox.y
+            });
+        }
     }
 
     drawEmptyDonutLabel = function (xPos, yPos, color, fontSize, fontWeight?) {
@@ -458,7 +554,7 @@ class DonutSegment extends VXCB.EventEmitter {
     }
 
     calcArcPoints = function (r) {
-        return [this.cx + r * this.sin_p0, this.cy + r * this.cos_p0, this.cx + r * this.sin_p1, this.cy + r * this.cos_p1];
+        return [this.cx - r * this.sin_p0, this.cy - r * this.cos_p0, this.cx - r * this.sin_p1, this.cy - r * this.cos_p1];
     }
 
     calcSegment = function (r1, r2) {

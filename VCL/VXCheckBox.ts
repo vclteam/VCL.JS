@@ -2,6 +2,9 @@ import VXC = require("VCL/VXComponent");
 import VXU = require("VCL/VXUtils");
 import V = require("VCL/VCL");
 import VXD = require("VCL/VXDataset");
+import VXM = require("VCL/VXMenu");
+import VXO = require("VCL/VXObject");
+import VXCO = require("VCL/VXContainer");
 
 export class TCheckBoxBase extends VXC.TComponent {
     public onClicked: (sender: TCheckBoxBase) => void;
@@ -164,5 +167,205 @@ export class TDBCheckBox extends TCheckBoxBase {
 
         this.jText.text(this.Text);
         this.jCheckbox.prop('checked', this.DataValue);
+    }
+}
+
+
+
+export class TVerticalCheckBoxItemCollection<T> extends VXO.TCollection<TVerticalCheckBoxItem> {
+    private owner: TVerticalCheckBoxList;
+
+    constructor(aOwner: TVerticalCheckBoxList) {
+        super();
+        this.owner = aOwner;
+    }
+
+    add(item: TVerticalCheckBoxItem): boolean {
+        var rc = super.add(item);
+        if (!this.locked) this.owner.drawDelayed(true);
+        return rc;
+    }
+
+    public refresh() {
+        if (!this.locked) this.owner.drawDelayed(false);
+    }
+
+    public EndUpdate() {
+        super.EndUpdate();
+        this.owner.drawDelayed(true);
+    }
+}
+
+export class TVerticalCheckBoxItem extends VXO.TCollectionItem {
+    private _checked: boolean = false;
+    public get Checked(): boolean {
+        return this._checked;
+    }
+    public set Checked(val: boolean) {
+        if (val != this._checked) {
+            this._checked = val;
+            if (this.OwnerCollection) this.OwnerCollection.refresh();
+        }
+    }
+    private _enabled: boolean = true;
+    public get Enabled(): boolean {
+        return this._enabled;
+    }
+    public set Enabled(val: boolean) {
+        if (val != this._enabled) {
+            this._enabled = val;
+            if (this.OwnerCollection) this.OwnerCollection.refresh();
+        }
+    }
+    private _filter: boolean = false;
+
+    private _visible: boolean = true;
+    public get Visible(): boolean {
+        return this._visible;
+    }
+    public set Visible(val: boolean) {
+        if (val != this._enabled) {
+            this._visible = val;
+            if (this.OwnerCollection) this.OwnerCollection.refresh();
+        }
+    }
+    private _text: string = "";
+    public get Text(): string {
+        return this._text;
+    }
+    public set Text(val: string) {
+        if (val != this._text) {
+            this._text = val;
+            if (this.OwnerCollection) this.OwnerCollection.refresh();
+        }
+    }
+}
+
+
+export class TVerticalCheckBoxList extends VXCO.TContainer {
+    public onChanged: (sender: TVerticalCheckBoxItem) => void;
+
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+        super(aOwner, renderTo);
+        //if(!this.Width) this.Width = 200;
+        this.items = new TVerticalCheckBoxItemCollection<TVerticalCheckBoxItem>(this);
+    }
+
+    public items: TVerticalCheckBoxItemCollection<TVerticalCheckBoxItem> ;
+    public createItem(text: string, checked?: boolean): TVerticalCheckBoxItem {
+        var col: TVerticalCheckBoxItem = new TVerticalCheckBoxItem();
+        col.OwnerCollection = this.items;
+        col.Checked = checked;
+        col.Text = text;
+        this.items.add(col);
+        return <TVerticalCheckBoxItem>col;
+    }
+
+    public create() {
+        var self = this;
+        this.jComponent.empty();
+        this.jComponent.css("overflow", "auto");
+
+
+        var content: JQuery = $("<div>");
+        this.jComponent.append(content);
+
+        var itemsLength = this.items.length();
+        var vCnt = 0;
+        var grp: JQuery;
+        for (var i = 0; i < this.items.length(); i++) {
+            var item = this.items.get(i);
+            if (!item.Visible || (<any>item)._filter) continue;
+
+            if (vCnt % this.MaxItemsInColumn == 0) {
+                grp = $("<div>");
+                grp.css("display", "inline-block").css("vertical-align", "top").css("margin-left", this.GroupMarginLeft+"px").
+                    css("margin-right", this.GroupMarginRight + "px").css('width', this.MaxColumnWidth + "px");
+                content.append(grp);
+            }
+
+            var cbl: JQuery = $('<Label class="checkbox">');
+            cbl.text(item.Text);
+            grp.append(cbl);
+
+            var cbi: JQuery = $('<input type="checkbox">');
+            cbi.prependTo(cbl);
+            if (!item.Enabled || !this.Enabled) cbi.attr('disabled', 'disabled');
+            cbi.prop('checked', item.Checked);
+            cbi.change(() => {
+                if (self.onChanged != null) (V.tryAndCatch(() => { self.onChanged(item); }));
+            })
+            vCnt++;
+        }
+        var wd = ((vCnt / this.MaxItemsInColumn) + 1) * (this.MaxColumnWidth + this.GroupMarginLeft + this.GroupMarginRight);;
+        content.css("width", wd + "px");
+
+        super.create();
+    }
+
+    private _groupMarginLeft: number = 10;
+    public get GroupMarginLeft(): number {
+        return this._groupMarginLeft;
+    }
+    public set GroupMarginLeft(val: number) {
+        if (val != this._groupMarginLeft) {
+            this._groupMarginLeft = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _groupMarginright: number = 10;
+    public get GroupMarginRight(): number {
+        return this._groupMarginright;
+    }
+    public set GroupMarginRight(val: number) {
+        if (val != this._groupMarginright) {
+            this._groupMarginright = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _maxItemsInColumn: number = 5;
+    public get MaxItemsInColumn(): number {
+        return this._maxItemsInColumn;
+    }
+    public set MaxItemsInColumn(val: number) {
+        if (val != this._maxItemsInColumn) {
+            this._maxItemsInColumn = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _columnWidth: number = 200;
+    public get MaxColumnWidth(): number {
+        return this._columnWidth;
+    }
+    public set MaxColumnWidth(val: number) {
+        if (val != this._columnWidth) {
+            this._columnWidth = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    public applyFilter(filterCallback: (item: TVerticalCheckBoxItem) => boolean) {
+        this.items.forEach((item) => {
+            (<any>item)._filter = !filterCallback(item);
+        })
+        this.drawDelayed(true);
+    }
+
+    public clearFilter() {
+        this.items.forEach((item) => {
+            (<any>item)._filter = false
+        })
+        this.drawDelayed(true);
+    }
+
+    public draw(reCreate: boolean) {
+        if (!this.parentInitialized()) return;
+
+        if (reCreate || !this.initialized) {
+            super.draw(reCreate);
+        }
     }
 }

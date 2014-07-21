@@ -662,7 +662,7 @@ export class TBreadCrumb extends VXC.TComponent {
             } else {
                 aItem = $('<a>');
                 aItem.text(item.Text);
-                aItem.attr('href', '#');
+                //aItem.attr('href', '#');
                 aItem.appendTo(jItem);
                 if (item.TextColor) aItem.css('color', item.TextColor);
             }
@@ -786,7 +786,7 @@ export class TPaginationItem extends VXO.TCollectionItem {
         if (!this.Enabled) {
             this.jItem.addClass('disabled');
         } else {
-            aItem.attr('href', '#');
+            //aItem.attr('href', '#');
             this.jItem.off("click").click(function (e) {
                 var li: JQuery = $(this);
                 var item = li.data("ID");

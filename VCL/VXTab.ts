@@ -288,7 +288,17 @@ export class TAccordionGroup extends VXO.TCollectionItem {
             this._acc.drawDelayed(true);
         }
     }
-
+    private _expandFirstGroup: boolean;
+    public get ExpandFirstGroup(): boolean {
+        return this._expandFirstGroup;
+    }
+    public set ExpandFirstGroup(val: boolean) {
+        if (val != this._expandFirstGroup) {
+            this._expandFirstGroup = val;
+            this._headerSelectionBox.Visible = val;
+            this._acc.drawDelayed(true);
+        }
+    }
     public create() {
         var self: V.TAccordionGroup = this;
         //Creating bootstrap taks which represent an Accordion Group
@@ -315,7 +325,10 @@ export class TAccordionGroup extends VXO.TCollectionItem {
 
         if (this._refcontainer) { //Build the refcontainer html -> The Inside of Accordion group
             var refcontbody = $('<div>');
-            refcontbody.addClass('accordion-body collapse').attr('ID', this._refcontainer.ID + "yk");
+            if (this._expandFirstGroup)
+                refcontbody.addClass('accordion-body collapse in').attr('ID', this._refcontainer.ID + "yk");
+            else
+                refcontbody.addClass('accordion-body collapse').attr('ID', this._refcontainer.ID + "yk");
             var refcontinner: JQuery = $('<div>');
             refcontinner.addClass('accordion-inner');
             //var innerref: JQuery = this._refcontainer.jComponent;//  $('#' + this._refcontainer.ID); 

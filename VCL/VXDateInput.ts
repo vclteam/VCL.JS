@@ -45,20 +45,20 @@ export class TDateInputBase extends VXI.TEditorBase {
     public create() {
         this.jComponent.empty();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
-        this.jComponent.addClass('input-append control-group date');
+        this.jComponent.addClass('control-group date');
 
-        this.jEdit = $('<input/>')
+        this.jEdit = $('<input/>').css('width', '100%').css('box-sizing', 'border-box').css('height', '100%');
         this.jEdit.attr('type', 'text');
-        this.jEdit.appendTo(this.jComponent);
         this.jEdit.attr('id', V.Application.genGUID());
 
         this.jButton = $('<span />')
         this.jButton.addClass('add-on');
-        this.jButton.appendTo(this.jComponent);
 
-        this.jImage = $('<i/>')
+        this.jImage = $('<i/>').css('box-sizing', 'border-box')
         this.jImage.addClass('icon-calendar');
         this.jImage.appendTo(this.jButton);
+
+        VXU.VXUtils.inputWithButton(this.jEdit, this.jButton).appendTo(this.jComponent);
 
 
         if (!this.Enabled) {
@@ -70,10 +70,6 @@ export class TDateInputBase extends VXI.TEditorBase {
         this.jComponent.datepicker({ format: df, autoclose: this.AutoClose, minViewMode: this.CalendarType == V.CalendarType.Daily ? 0 : 1 });
 
         super.create();
-    }
-
-    public setEditorWidth() {
-        this.jEdit.width(this.jComponent.width() - this.jButton.width() - this.jButton.outerWidth());
     }
 }
 
@@ -104,25 +100,24 @@ export class TTimeInputBase extends VXI.TEditorBase {
         }
     }
 
-
-    
-
     private tm: JQuery;
 
 
     public create() {
         this.jComponent.empty();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
-        this.jComponent.addClass('input-append control-group date bootstrap-timepicker');
+        this.jComponent.addClass('control-group date bootstrap-timepicker');
 
-        this.jEdit = $('<input/>')
+        this.jEdit = $('<input/>').css('width', '100%').css('box-sizing', 'border-box').css('height', '100%');
         this.jEdit.attr('type', 'text');
-        this.jEdit.appendTo(this.jComponent);
         this.jEdit.attr('id', V.Application.genGUID());
 
         this.jButton = $('<span />')
         this.jButton.addClass('add-on');
-        this.jButton.appendTo(this.jComponent);
+
+        VXU.VXUtils.inputWithButton(this.jEdit, this.jButton).appendTo(this.jComponent);
+        //this.jEdit.appendTo(this.jComponent);
+        //this.jButton.appendTo(this.jComponent);
 
         this.jImage = $('<i/>')
         this.jImage.addClass('icon-time');
@@ -137,10 +132,6 @@ export class TTimeInputBase extends VXI.TEditorBase {
         this.tm = this.jEdit.timepicker({ showSeconds: this.ShowSeconds, disableFocus: true,showMeridian:this.ShowMeridian});
 
         super.create();
-    }
-
-    public setEditorWidth() {
-        this.jEdit.width(this.jComponent.width() - this.jButton.width() - this.jButton.outerWidth());
     }
 }
 
@@ -175,10 +166,10 @@ export class TDateInput extends TDateInputBase {
 
         this.jComponent.datepicker("setDate", this.Date);
         // display blank if invalid date or date is 0 (01/01/1970)
-        if (self.jComponent.find('input')[0].value == 'NaN/NaN/NaN' || this.Date.getTime() == -7200000)
+        if (self.jComponent.find('input')[0].value == 'NaN/NaN/NaN' || V.Application.formatDateTime(this.Date, "dd/mm/yyyy") == "01/01/1970")
             self.jComponent.find('input')[0].value = '';
 
-        this.setEditorWidth();
+        //this.setEditorWidth();
     }
 }
 
@@ -263,9 +254,9 @@ export class TDBDateInput extends TDateInputBase {
         }
         this.jComponent.datepicker("setDate", this.Date);
         // display blank if invalid date or date is 0 (01/01/1970)
-        if (self.jComponent.find('input')[0].value == 'NaN/NaN/NaN' || this.Date.getTime() == -7200000)
+        if (self.jComponent.find('input')[0].value == 'NaN/NaN/NaN' || V.Application.formatDateTime(this.Date, "dd/mm/yyyy") == "01/01/1970")
             self.jComponent.find('input')[0].value = '';
-        this.setEditorWidth();
+        //this.setEditorWidth();
     }
 
     public create() {
@@ -332,7 +323,7 @@ export class TInputTime extends TTimeInputBase {
         var self: any = this;
 
         (<any>this).tm.timepicker("setTime", this.Time);
-        this.setEditorWidth();
+        //this.setEditorWidth();
     }
 }
 

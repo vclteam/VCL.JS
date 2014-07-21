@@ -115,6 +115,21 @@ export class TComponent extends VXO.TObject {
         }
     }
 
+    private _outline: boolean = false;
+    /*
+    * An outline is a line that is drawn around elements (outside the borders) to make the element "stand out".
+    */
+    public get Outline(): boolean {
+        return this._outline;
+    }
+
+    public set Outline(val: boolean) {
+        if (val != this._outline) {
+            this._outline = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     private _fittowidth: boolean = false;
     public get FitToWidth(): boolean {
@@ -350,6 +365,9 @@ export class TComponent extends VXO.TObject {
 
         if (this.StickToTop) this.jComponent.addClass("affix");
         else this.jComponent.removeClass("affix");
+
+        if (this.Outline) this.jComponent.css("outline",'#00FF00 dotted thick');
+        else this.jComponent.css("outline","");
 
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;

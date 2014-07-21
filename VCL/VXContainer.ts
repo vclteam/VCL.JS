@@ -4,6 +4,7 @@ import VXO = require("VCL/VXObject");
 import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 import VXU = require("VCL/VXUtils");
+import VXB = require("VCL/VXInputBase");
 
 declare function Spinner(options: any): void;
 
@@ -14,9 +15,9 @@ export class TContainer extends VXC.TComponent {
     public onMouseOver: (sender: VXC.TComponent) => void;
     public onMouseOut: (sender: VXC.TComponent) => void;
 
-
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
+        if (!this.__HTML__ ) this.__HTML__ = this.getContanierHTML();
         if (this.__HTML__) $(this.jComponent).html(this.__HTML__);
         if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
         this.jComponent.off("click").click(() => {
@@ -34,9 +35,65 @@ export class TContainer extends VXC.TComponent {
         this.components.add(component);
     }
 
+    public getContanierHTML() {
+        return this.__HTML__;
+    }
+
+  
+    /*
+    * Check all input for validation - return true if everything is OK
+    */
+    public ValidateInput(): boolean {
+        var rc = true;
+        this.components.forEach((item) => {
+            if (item instanceof VXB.TEditorBase) {
+                var itm: VXB.TEditorBase = <VXB.TEditorBase>item;
+                if (itm.Required && itm.isEmpty()) {
+                    itm.ShowErrorMessage(V.Application.LocaleSettings.MSG_This_value_is_required)
+                    rc = false;
+                } else {
+                    itm.HideErrorMessage();
+                }
+            }
+        })
+        return rc;
+    }
+
+    private removeShadow() {
+        this.jComponent.removeClass('jquery-shadow-raised jquery-perspective jquery-shadow jquery-shadow-lifted');
+        this.jComponent.removeClass('jquery-shadow-sides jquery-shadow-sides-vt-2 jquery-shadow-sides-vt-1 jquery-shadow-sides-hz-1 jquery-shadow-sides-hz-2');
+    }
 
     public draw(reCreate: boolean, drawChilds: boolean = true) {
+        //if (!this.parentInitialized()) return;
         super.draw(reCreate);
+        
+        if (this.ShadowOptions == V.ShadowOptions.None) {
+            this.removeShadow();
+        } if (this.ShadowOptions == V.ShadowOptions.Perspective) {
+            this.removeShadow();
+            this.jComponent.addClass('jquery-shadow jquery-perspective');
+        } else if (this.ShadowOptions == V.ShadowOptions.Raised) {
+            this.removeShadow();
+            this.jComponent.addClass('jquery-shadow jquery-shadow-raised');
+        } else if (this.ShadowOptions == V.ShadowOptions.Lifted) {
+            this.removeShadow();
+            this.jComponent.addClass('jquery-shadow jquery-shadow-lifted');
+        } else if (this.ShadowOptions == V.ShadowOptions.Side_hz_1) {
+            this.removeShadow();
+            this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-hz-1');
+        } else if (this.ShadowOptions == V.ShadowOptions.Side_hz_2) {
+            this.removeShadow();
+            this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-hz-2');
+        } else if (this.ShadowOptions == V.ShadowOptions.Side_vt_1) {
+            this.removeShadow();
+            this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-vt-1');
+        } else if (this.ShadowOptions == V.ShadowOptions.Side_vt_2) {
+            this.removeShadow();
+            this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-vt-2');
+        }
+
+        
         if (drawChilds) {
             this.components.forEach((item: VXC.TComponent) => {
                 item.draw(reCreate);
@@ -126,7 +183,18 @@ export class TContainer extends VXC.TComponent {
         if (TContainer.activeQueries.length() == 0) this.hideLoadingProgressBar();
     }
 
+    private _shadow: V.ShadowOptions = V.ShadowOptions.None
+    public get ShadowOptions(): V.ShadowOptions {
+        return this._shadow;
+    }
+    public set ShadowOptions(val: V.ShadowOptions) {
+        if (val != this._shadow) {
+            this._shadow = val;
+            this.drawDelayed(false);
+        }
+    }
 }
+
 
 export class TBootstrapRow extends TContainer {
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
@@ -279,3 +347,6 @@ export class TRepeater extends TContainer {
         this.drawItems();
     }
 }
+
+
+

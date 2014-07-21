@@ -23,7 +23,16 @@ export class VXUtils {
         }
         return rep;
     }
-
+    //finx bootstrap issue with input button & span size
+    public static inputWithButton(jedit : JQuery,jbtn : JQuery) : JQuery {
+        var prnt: JQuery = $("<div>").css('display', 'table').css('position', 'relative').addClass('input-append').css('margin-bottom','0px').css('height','100%');
+        jedit.css('display', 'table-cell').css('width', '100%').css('box-sizing', 'border-box').css('float', 'left').
+            css('z-index', '2').css('height', '100%').css('border-right', '0px');
+        jbtn.css('display', 'table-cell').css('width', '1%').css('vertical-align', 'middle').css('box-sizing', 'border-box');
+        jedit.appendTo(prnt);
+        jbtn.appendTo(prnt);
+        return prnt;
+    }
 
 }
 

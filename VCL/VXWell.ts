@@ -329,7 +329,7 @@ export class TPanel extends VXCO.TContainer {
             this.jContent.insertBefore(this.jComponent);
 
             this.jHeader = $("<div>");
-            this.jHeader.addClass('panel-header');
+            this.jHeader.addClass('panel-header').css('padding-left', '3px').css('padding-right', '3px');;
 
             this.jHeader.appendTo(this.jContent);
 
@@ -348,26 +348,52 @@ export class TPanel extends VXCO.TContainer {
                 this.jHeader.css("border-top-right-radius", this.BorderRadius);
             }
 
-            this.jButtons = $("<div>");
-            if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
-                this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('text-align', 'right');
-                if (this.Button1.Visible || this.Button2.Visible || this.Button3.Visible || this.CloseButton.Visible) this.jHeaderText.css('width', '80%');
-                else {
-                    this.jHeaderText.css('width', '99%').css('padding-right','5px');
-                    this.jButtons.hide();
+            this.jButtons = $("<div>").addClass("btn-toolbar").css('margin-top', '0px');;
+            if (this.Button1.Visible || this.Button2.Visible || this.Button3.Visible || this.CloseButton.Visible) {
+                this.jButtons.show();
+                this.jHeaderText.css('overflow', 'hidden').css('white-space', 'nowrap').css('width', 'auto');
+                if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
+                    this.jHeaderText.addClass('pull-right').css('text-align', 'right')
+                } else {
+                    this.jHeaderText.addClass('pull-left').css('text-align', 'left')
                 }
             } else {
-                this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '80%');
+                this.jButtons.hide();
+                this.jHeaderText.css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '99%');
+                if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
+                    this.jHeaderText.addClass('pull-right').css('text-align', 'right');
+                } else {
+                    this.jHeaderText.addClass('pull-left').css('text-align', 'left');
+                }
             }
+
+
+
+                    /*this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('text-align', 'right');
+                    if (this.Button1.Visible || this.Button2.Visible || this.Button3.Visible || this.CloseButton.Visible) {
+                        this.jHeaderText.css('width', '80%');
+                    }
+                    else {
+                        this.jHeaderText.css('width', '99%').css('padding-right', '5px');
+                        this.jButtons.hide();
+                    }
+                } else {
+                    this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '80%');
+                }
+            } else {
+            if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
+                   this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('text-align', 'right');
+                } else {
+                }
+            }*/
 
 
             this.jHeaderText.appendTo(this.jHeader);
             this.jComponent.css('display', 'block');
             this.jContent.append(this.jComponent);
 
-
-
             this.jButtons.prependTo(this.jHeader);
+
             if (this.ButtonAlignment == V.ButtonAlignment.Left) {
                 this.jButtons.addClass('pull-left');
                 this.jButtons.removeClass('pull-right');
@@ -465,11 +491,12 @@ export class TPanel extends VXCO.TContainer {
         super.create();
     }
 
+
     private createButton(button: TPanelButton, clickEvent: () => void) {
         if (!button.jButton) {
             button.jGroupButton = $('<div>');
-            button.jGroupButton.css('display', 'inline-block').addClass('btn-group');
-            button.jButton = $('<a>');
+            button.jGroupButton.addClass('btn-group');
+            button.jButton = $('<button>');
             button.jImage = $('<img>');
             button.jButton.css('padding', '0px').css('background-color', 'transparent').css('vertical-align', 'middle');
             button.jButton.css('box-shadow', 'none');
@@ -493,9 +520,9 @@ export class TPanel extends VXCO.TContainer {
         if (button.MarginRight) button.jButton.css('margin-right', button.MarginRight + "px");
         if (button.Color) button.jButton.css('color', button.Color);
 
-        if (button.Text != null && button.Text != "")
+        if (button.Text != null && button.Text != "") {
             button.jButton.text(button.Text).addClass('btn-link');
-        else {
+        } else {
             if (button.ImageUrl) {
                 button.jImage.attr('src', button.ImageUrl);
             }
@@ -522,7 +549,7 @@ export class TPanel extends VXCO.TContainer {
             button.jButton.tooltip({ title: button.Tooltip });
         }
 
-        button.Visible ? button.jButton.show() : button.jButton.hide();
+        button.jGroupButton.css('display', button.Visible ? 'inline-block' : 'none');
     }
 
     public draw(reCreate: boolean) {

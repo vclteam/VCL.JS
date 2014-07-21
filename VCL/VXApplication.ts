@@ -24,7 +24,7 @@ export class TApplication {
             this.use("Local");
 
             this.get('#/', function () {
-                this.navigateToPage(buildPageURL(self.MainPage));
+                this.navigateToPage(this.buildPageURL(self.MainPage));
             });
             this.get('#show/:class/:params', function () {
                 var className: string = self.hexToString(this.params["class"]);
@@ -32,18 +32,14 @@ export class TApplication {
                 if (self.AuthenticationRequired && !self.Authenticated &&
                     className.toUpperCase() != self.LoginPage.toUpperCase() &&
                     className.toUpperCase() != self.igonreaAthenticationPage.toUpperCase() ) {
-                    self.navigateToPage(self.LoginPage, ["#show/" + className + '/' + <string>this.params["params"]]);
+                    self.navigateToPage(self.LoginPage, ["#show/" + this.params["class"] + '/' + <string>this.params["params"]]);
                 } else {
                     var className: string = self.hexToString(this.params["class"]);
                     var paramArgStr: string = self.hexToString(<string>this.params["params"]);
-                    var paramArg = JSON.parse(paramArgStr);
+                    var paramArg = JSON.parse(paramArgStr, jsonCreateDateParserTemp);
                     $.each(paramArg, function (index, item) {
-                        if (typeof item == "string" && item.slice(0, 4) == "!~@!") {
-                            var itemS: string = <string> item;
-                            args.push(new Date(parseInt(itemS.substring(4))));
-                        } else args.push(item);
+                        args.push(item);
                     });
-                    var paramArg = JSON.parse(paramArgStr);
                     if (self.OnPageLoad != null) {
                         var rc = self.OnPageLoad(className, args);
                         if (!rc) return true;
@@ -79,6 +75,16 @@ export class TApplication {
         require(modulesName, function (modl) {
             if (callBack) callBack();
         });
+    }
+
+    private ___botstrapversion : number = -1
+    public getBootstrapVersion(): number {
+        if (this.___botstrapversion > -1) return this.___botstrapversion;
+
+        this.___botstrapversion = 0;
+        if ((typeof ((<any>$()).emulateTransitionEnd) == 'function')) this.___botstrapversion = 3;
+        else if ((typeof $().modal == 'function')) this.___botstrapversion = 2;
+        return this.___botstrapversion;
     }
 
     public loadJSLibrary(moduleName: string,callBack : (moduleObject : any)=> void) {
@@ -184,7 +190,7 @@ export class TApplication {
     /*
     * The MessageDlg function is used to display messages to the user. These messages may be informational, or warnings or whatever.  
     */
-    public messageDlg(message: string, title: string, buttons: Array<string>, callback: (results : string) => void) {
+    public messageDlg(message: string, title: string, buttons: Array<string>, callback?: (results : string) => void) {
         var json: any = {};
         json.message = message;
         json.title = title;
@@ -204,7 +210,7 @@ export class TApplication {
     /*
     * The MessagePrompt function is used to display messages to the user. These messages may be informational, or warnings or whatever.  
     */
-    public messageDlgPrompt(message: string, callback: (promptedText : string) => void) {
+    public messageDlgPrompt(message: string, callback?: (promptedText : string) => void) {
         (<any>bootbox).prompt(message, (promptedText) => {
             if (callback) callback(promptedText);
         });
@@ -234,8 +240,17 @@ export class TApplication {
 
     public run() {
         V.Application.refreshDefaultPage();
-        this.sammy.run(buildPageURL(this.MainPage));
+        this.sammy.run(this.buildPageURL(this.MainPage));
     }
+
+    /*
+    * return the encoded page url as string
+    */
+    public buildPageURL(className: string, ConstructorArgs?: any[]) {
+        return "#show/" + stringToHex(className) + '/' + (decodeURIComponent(stringToHex(
+        JSON.stringify(ConstructorArgs ? ConstructorArgs : new Object(), jsonCreateDateParserTemp))));
+    }
+
 
     /*
     * specify the server side method for login 
@@ -259,7 +274,7 @@ export class TApplication {
 
 
     public navigateToPage(className: string, ConstructorArgs?: any[], igonreaAthentication : boolean = false) {
-        var url: string = buildPageURL(className, ConstructorArgs);
+        var url: string = this.buildPageURL(className, ConstructorArgs);
         if (igonreaAthentication) {
             this.igonreaAthenticationPage = className;
         }
@@ -667,9 +682,11 @@ export class TApplication {
         return this.FormatNumber(value, precision) + type;
     }
 
-    public PERCENT: string = "%";
+
+    public LocaleSettings: TLocaleSettings = new TLocaleSettings();
+
     public FormatPercent(value: number, precision: number = 0): string {
-        return this.FormatNumber(value, precision) + this.PERCENT;
+        return this.FormatNumber(value, precision) + this.LocaleSettings.PercentString;
     }
 
     public FormatCurrency(value: number, precision: number = 2): string {
@@ -920,8 +937,15 @@ export class TFacebookAPI {
             if (callback) callback();
         })
     }
-
 }
+
+
+export class TLocaleSettings {
+    public MSG_This_value_is_required: string = "This value is required.";
+    public PercentString: string = "%";
+    public LabelPosition: V.LabelPosition = V.LabelPosition.TopLeft;
+}
+
 
 export class TNavbarItem extends VXO.TCollectionItem {
     constructor(text?: string, icon?: string, onClick?: () => void) {
@@ -990,23 +1014,18 @@ export class TNavbarItem extends VXO.TCollectionItem {
     public onClick: () => void;
 }
 
-class BrowserHistory {
-    public navigateToPage(className: string, ConstructorArgs?: any[]) {
-        var url: string = buildPageURL(className, ConstructorArgs);
-    }
-}
 
-function buildPageURL(className: string, ConstructorArgs?: any[]) {
-    var paramObj = new Object();
-    if (ConstructorArgs != null) {
-        $.each(ConstructorArgs, function (index, item) {
-            if (typeof item === "undefined") paramObj[index] = null;
-            else if (item instanceof Date) {
-                paramObj[index] = '!~@!' + (<Date>item).getTime();
-            } else paramObj[index] = item;
-        });
+
+var __reISOdeffordate__ = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.{0,1}\d*))(?:Z|(\+|-)([\d|:]*))?$/;
+function jsonCreateDateParserTemp(key, value) {
+    if (typeof value === 'undefined') return null
+    if (typeof value === 'string') {
+        if ((<string>value).substring(0, 4) == "~@~!")
+            return new Date((<string>value).substring(4));
+        var a = __reISOdeffordate__.exec(value);
+        if (a) return "~@~!"+(new Date(value));
     }
-    return "#show/" + stringToHex(className) + '/' + (decodeURIComponent(stringToHex(JSON.stringify(paramObj))));
+    return value;
 }
 
 function stringToHex(tmp: string): string {
@@ -1111,3 +1130,4 @@ class passwordStrength {
         return score * -5;
     }
 }
+

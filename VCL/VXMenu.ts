@@ -17,7 +17,7 @@ export class TMenuItem extends VXO.TCollectionItem {
         else {
             this.jComponent.empty();
             //var itemRef: JQuery = $('<a href="#"/>');
-            var itemRef: JQuery = $('<a style="cursor:pointer"/>');
+            var itemRef: JQuery = $('<a style="cursor:pointer;text-align:left"/>');
             itemRef.off("click").click(() => {
                 if (this.Enabled && this.onClicked != null) {
                     (V.tryAndCatch(() => { this.onClicked(self); }))
