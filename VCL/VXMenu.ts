@@ -23,14 +23,21 @@ export class TMenuItem extends VXO.TCollectionItem {
                     (V.tryAndCatch(() => { this.onClicked(self); }))
                 }
             })
-            itemRef.text(this.Text);
+            itemRef.html(this.Text);
             itemRef.appendTo(this.jComponent);
-            if (this.Icon != null) {
-                var imageRef: JQuery = $('<i/>');
+            if (this.Icon != null || this.ImageURL!=null) {
+                var imageRef: JQuery;
+
+                if (this.Icon) {
+                    imageRef = $('<i/>');
+                    imageRef.addClass(V.iconEnumToBootstrapStyle(<any>this.Icon) + " " + this.IconClass);
+                    if (this.IconColor) imageRef.css('color', this.IconColor);
+                } else if (this.ImageURL) {
+                    imageRef = $('<img/>');
+                    imageRef.attr('src', this.ImageURL);
+                }
                 this.jIcon = imageRef;
-                imageRef.addClass(V.iconEnumToBootstrapStyle(<any>this.Icon) + " "  + this.IconClass);
                 imageRef.prependTo(itemRef);
-                if (this.IconColor) imageRef.css('color', this.IconColor);
             }
         }
     }
@@ -88,6 +95,19 @@ export class TMenuItem extends VXO.TCollectionItem {
             if (complete != null) complete();
         })
     }
+
+    private _imageurl: string = null;
+    public get ImageURL(): string {
+        return this._imageurl;
+    }
+    public set ImageURL(val: string) {
+        if (val != this._imageurl) {
+            this._imageurl = val;
+            this.create();
+        }
+    }
+
+
 
 
     private _icon: V.Icon = null;

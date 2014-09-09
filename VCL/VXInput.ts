@@ -152,7 +152,7 @@ export class TInputNumeric extends VXB.TInputBase {
 
     private _value: number = 0;
     public get Value(): number {
-        if (!this._value) return 0;
+        if (!this._value) return null;
         return parseFloat((parseFloat(this._value.toString())).toFixed(this.Precision));
     }
 
@@ -160,7 +160,7 @@ export class TInputNumeric extends VXB.TInputBase {
         if (val != this._value) {
             if (val > this.MaxValue) val = this.MaxValue;
             if (val < this.MinValue) val = this.MinValue;
-            this._value = val;
+            this._value = <any>val==""?null:val;
             this.draw(false);
         }
     }
@@ -225,7 +225,7 @@ export class TInputNumeric extends VXB.TInputBase {
         this.jEdit.change(() => {
             var _value = this.jEdit.val();
             self.Value = _value;
-            if (self.Value != _value) this.jEdit.val(self.Value.toString());
+            if (self.Value != _value) this.jEdit.val(self.Value?self.Value.toString():null);
             if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); }));
         });
         
@@ -247,7 +247,7 @@ export class TInputNumeric extends VXB.TInputBase {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        this.jEdit.val(this.Value.toString());
+        this.jEdit.val(this.Value?this.Value.toString():"");
     }
 }
 

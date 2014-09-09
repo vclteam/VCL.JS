@@ -136,7 +136,7 @@ export class TDBCheckBox extends TCheckBoxBase {
         if (this.DataField == null || this.DataField.toString() == "") return null;
 
         var val: any = this.Dataset.getFieldValue(this._datafield);
-        if (val == 0 || val == false ||!val) return false;
+        if (val == 0 || val == false || !val) return false;
         return true;
     }
 
@@ -229,6 +229,7 @@ export class TVerticalCheckBoxItem extends VXO.TCollectionItem {
             if (this.OwnerCollection) this.OwnerCollection.refresh();
         }
     }
+
     private _text: string = "";
     public get Text(): string {
         return this._text;
@@ -247,11 +248,10 @@ export class TVerticalCheckBoxList extends VXCO.TContainer {
 
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        //if(!this.Width) this.Width = 200;
         this.items = new TVerticalCheckBoxItemCollection<TVerticalCheckBoxItem>(this);
     }
 
-    public items: TVerticalCheckBoxItemCollection<TVerticalCheckBoxItem> ;
+    public items: TVerticalCheckBoxItemCollection<TVerticalCheckBoxItem>;
     public createItem(text: string, checked?: boolean): TVerticalCheckBoxItem {
         var col: TVerticalCheckBoxItem = new TVerticalCheckBoxItem();
         col.OwnerCollection = this.items;
@@ -279,7 +279,7 @@ export class TVerticalCheckBoxList extends VXCO.TContainer {
 
             if (vCnt % this.MaxItemsInColumn == 0) {
                 grp = $("<div>");
-                grp.css("display", "inline-block").css("vertical-align", "top").css("margin-left", this.GroupMarginLeft+"px").
+                grp.css("display", "inline-block").css("vertical-align", "top").css("margin-left", this.GroupMarginLeft + "px").
                     css("margin-right", this.GroupMarginRight + "px").css('width', this.MaxColumnWidth + "px");
                 content.append(grp);
             }
@@ -289,11 +289,18 @@ export class TVerticalCheckBoxList extends VXCO.TContainer {
             grp.append(cbl);
 
             var cbi: JQuery = $('<input type="checkbox">');
+            cbi.attr('id', item.ID);
             cbi.prependTo(cbl);
             if (!item.Enabled || !this.Enabled) cbi.attr('disabled', 'disabled');
             cbi.prop('checked', item.Checked);
-            cbi.change(() => {
-                if (self.onChanged != null) (V.tryAndCatch(() => { self.onChanged(item); }));
+            cbi.change((ev : JQueryEventObject) => {
+                var id: string = $(ev.target).attr("id");
+                var itm;
+                if (id) itm = self.items.FindItemByID(id);
+                if (itm) {
+                    itm.Checked = $(ev.target).is(":checked");
+                    if (self.onChanged != null) (V.tryAndCatch(() => { self.onChanged(itm); }));
+                }
             })
             vCnt++;
         }

@@ -2034,7 +2034,7 @@ export module collections {
          */
         toArray(): T[] {
             var rc = this.dictionary.values();
-            this.removeOwnerCollections(rc);
+            //this.removeOwnerCollections(rc);
             return rc;
         }
 

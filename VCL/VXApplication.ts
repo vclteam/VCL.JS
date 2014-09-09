@@ -12,7 +12,7 @@ declare var bootbox;
 export class TApplication {
     private static _instance: TApplication;
     private sammy: any;
-    private igonreaAthenticationPage: string="";
+    private igonreaAthenticationPage: string = "";
     public navbaritems = new VXO.TCollection<TNavbarItem>();
 
     public initialize() {
@@ -31,7 +31,7 @@ export class TApplication {
                 var args: any[] = [];
                 if (self.AuthenticationRequired && !self.Authenticated &&
                     className.toUpperCase() != self.LoginPage.toUpperCase() &&
-                    className.toUpperCase() != self.igonreaAthenticationPage.toUpperCase() ) {
+                    className.toUpperCase() != self.igonreaAthenticationPage.toUpperCase()) {
                     self.navigateToPage(self.LoginPage, ["#show/" + this.params["class"] + '/' + <string>this.params["params"]]);
                 } else {
                     var className: string = self.hexToString(this.params["class"]);
@@ -54,14 +54,14 @@ export class TApplication {
     }
 
 
-	public logOff() {
+    public logOff() {
         this.Authenticated = false;
         if (this.AuthenticationRequired) {
             this.navigateToPage(this.MainPage, [+Math.random()]);
         }
     }
 
-	
+
     public serverURL: string = "backEnd";
     private createPageInstance(prototype, html, __args) {
         var instance = Object.create(prototype);
@@ -77,7 +77,7 @@ export class TApplication {
         });
     }
 
-    private ___botstrapversion : number = -1
+    private ___botstrapversion: number = -1
     public getBootstrapVersion(): number {
         if (this.___botstrapversion > -1) return this.___botstrapversion;
 
@@ -87,7 +87,7 @@ export class TApplication {
         return this.___botstrapversion;
     }
 
-    public loadJSLibrary(moduleName: string,callBack : (moduleObject : any)=> void) {
+    public loadJSLibrary(moduleName: string, callBack: (moduleObject: any) => void) {
         require([moduleName], function (modl) {
             if (callBack) callBack(modl);
         });
@@ -183,14 +183,14 @@ export class TApplication {
     /*
     * The showMessage procedure displays a string of Text in a simple dialog with an OK button. with an optional callback
     */
-    public showMessage(message: string, callback? : ()=> void) {
+    public showMessage(message: string, callback?: () => void) {
         (<any>bootbox).alert(message, callback)
     }
 
     /*
     * The MessageDlg function is used to display messages to the user. These messages may be informational, or warnings or whatever.  
     */
-    public messageDlg(message: string, title: string, buttons: Array<string>, callback?: (results : string) => void) {
+    public messageDlg(message: string, title: string, buttons: Array<string>, callback?: (results: string) => void) {
         var json: any = {};
         json.message = message;
         json.title = title;
@@ -198,7 +198,7 @@ export class TApplication {
         buttons.forEach((item) => {
             var btn: any = {};
             btn["label"] = item;
-            btn["callback"] = (rc : BaseJQueryEventObject) => {
+            btn["callback"] = (rc: BaseJQueryEventObject) => {
                 if (callback) callback((<any>rc.currentTarget).textContent);
             }
             json.buttons.push(btn);
@@ -210,14 +210,14 @@ export class TApplication {
     /*
     * The MessagePrompt function is used to display messages to the user. These messages may be informational, or warnings or whatever.  
     */
-    public messageDlgPrompt(message: string, callback?: (promptedText : string) => void) {
+    public messageDlgPrompt(message: string, callback?: (promptedText: string) => void) {
         (<any>bootbox).prompt(message, (promptedText) => {
             if (callback) callback(promptedText);
         });
 
     }
 
-    
+
 
     public getSessionValue(name: string, defaultValue?: any) {
         var session = this.sammy.session("VCL", function () {
@@ -248,7 +248,7 @@ export class TApplication {
     */
     public buildPageURL(className: string, ConstructorArgs?: any[]) {
         return "#show/" + stringToHex(className) + '/' + (decodeURIComponent(stringToHex(
-        JSON.stringify(ConstructorArgs ? ConstructorArgs : new Object(), jsonCreateDateParserTemp))));
+            JSON.stringify(ConstructorArgs ? ConstructorArgs : new Object(), jsonCreateDateParserTemp))));
     }
 
 
@@ -256,10 +256,10 @@ export class TApplication {
     * specify the server side method for login 
     */
     public loginServerClass: string = "LOGIN";
-    public login(email: string, password: string, onSuccuess: (data? : any) => void,
+    public login(email: string, password: string, onSuccuess: (data?: any) => void,
         onFail?: (errorMessage: string) => void) {
         var server = new VXServer.TServer();
-            server.send(this.loginServerClass, { USER: email, PASS: password }, (data) => {
+        server.send(this.loginServerClass, { USER: email, PASS: password }, (data) => {
             if (data.STATUS == "OK") {
                 this.UserRole = data.ROLE;
                 this.UserName = data.USER;
@@ -273,7 +273,7 @@ export class TApplication {
     }
 
 
-    public navigateToPage(className: string, ConstructorArgs?: any[], igonreaAthentication : boolean = false) {
+    public navigateToPage(className: string, ConstructorArgs?: any[], igonreaAthentication: boolean = false) {
         var url: string = this.buildPageURL(className, ConstructorArgs);
         if (igonreaAthentication) {
             this.igonreaAthenticationPage = className;
@@ -411,6 +411,19 @@ export class TApplication {
     public set UseRole(val: string) {
         if (val != this.UserRole) {
             this.setSessionValue('_userrole', val);
+        }
+    }
+
+
+    /**
+    * Specifies the logged userId
+    */
+    public get UserId(): string {
+        return this.getSessionValue('_userid', "");
+    }
+    public set UserId(val: string) {
+        if (val != this.UserEmail) {
+            this.setSessionValue('_userid', val);
         }
     }
 
@@ -693,9 +706,11 @@ export class TApplication {
         return this.CurrencyString + this.FormatNumber(value, precision);
     }
 
-    public formatHumanFriendly(value, roundfactor): string {
+    public formatHumanFriendly(value: number, roundfactor): string {
         var p, d2, i, s;
-
+        var isNegative = value < 0;
+        value = Math.abs(value);
+        var res = "0";
         p = Math.pow;
         d2 = p(10, roundfactor);
         i = 7;
@@ -703,18 +718,24 @@ export class TApplication {
         while (i) {
             s = p(10, i-- * 3);
             if (s <= value) {
-                value = Math.round(value * d2 / s) / d2 + "KMGTPE"[i];
+                res = Math.round(value * d2 / s) / d2 + "KMGTPE"[i];
                 found = true;
                 break;
             }
         }
         if (!found)
-            value = this.FormatNumber(value, roundfactor);
-        return value;
+            res = this.FormatNumber(value, roundfactor);
+        if (isNegative)
+            res = "-" + res;
+        return res;
     }
 
 
+
+
     public FormatNumber(value: number, precision: number = 2, removeExtraZeros: boolean = false): string {
+        var isNegative = value < 0;
+        value = Math.abs(value);
         var intp: string = (Math.floor(value).toString());
         var decp: string = (value - Math.floor(value)).toString();
         decp = (decp.substr(2, 1000) + '000000000').substr(0, precision);
@@ -734,8 +755,11 @@ export class TApplication {
                 }
             }
         }
+        if (isNegative)
+            res = "-" + res;
         return res;
     }
+
 
 
     /**
@@ -926,7 +950,7 @@ export class TFacebookAPI {
                     self.UserID = response.id;
                     if (callback) callback(rc);
                 })
-            } else  if (callback) callback(rc);
+            } else if (callback) callback(rc);
         })
     }
 
@@ -1023,7 +1047,7 @@ function jsonCreateDateParserTemp(key, value) {
         if ((<string>value).substring(0, 4) == "~@~!")
             return new Date((<string>value).substring(4));
         var a = __reISOdeffordate__.exec(value);
-        if (a) return "~@~!"+(new Date(value));
+        if (a) return "~@~!" + (new Date(value));
     }
     return value;
 }

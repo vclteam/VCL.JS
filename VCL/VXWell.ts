@@ -7,10 +7,176 @@ import V = require("VCL/VCL");
 import VXO = require("VCL/VXObject");
 import VXM = require("VCL/VXMenu");
 
+
+export class TCarouselPage extends VXO.TCollectionItem {
+    private _carousel: TCarousel;
+    private _container: V.TContainer;
+
+    private _caption: string = null;
+    public get Caption(): string {
+
+        return this._caption;
+    }
+    public set Caption(val: string) {
+        if (val != this._caption) {
+            this._caption = val;
+        }
+    }
+
+    private _text: string = null;
+    public get Text(): string {
+
+        return this._text;
+    }
+    public set Text(val: string) {
+        if (val != this._text) {
+            this._text = val;
+        }
+    }
+
+
+    private _visible: boolean = true;
+    public get Visible(): boolean {
+        return this._visible;
+    }
+    public set Visible(val: boolean) {
+        if (val != this._visible) {
+            this._visible = val;
+            if (this) this._carousel.drawDelayed(true);
+        }
+    }
+
+    private jitem: JQuery;
+    private jcaption: JQuery;
+    public create(): JQuery {
+        this.jitem = $("<div>");
+        this.jitem.addClass('item');
+        var jcap = $("<div>").addClass("carousel-caption");
+        jcap.appendTo(this.jitem);
+        if (this.Caption) {
+            this.jcaption = $("<h4>");
+            this.jcaption.appendTo(jcap).html(this.Caption);
+        }
+        if (this.Text) {
+            this.jcaption = $("<p>");
+            this.jcaption.appendTo(jcap).html(this.Text);
+        }
+
+        return this.jitem;
+    }
+
+    constructor(aOwner: TCarousel, container: VXCO.TContainer) {
+        super();
+        if (container) this.ID = container.ID + "@@";
+        this._container = container;
+    }
+}
+
+
+export class TCarousel extends VXCO.TContainer {
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+        super(aOwner, renderTo);
+        this.Height = 200;
+        this.Width = 200;
+    }
+    public create() {
+
+        // detach panel back before cleaning
+        this.items.forEach((item) => {
+           var td: V.TContainer = (<any>item)._container
+           if (td) {
+               if (td.jComponent.parent()) td.jComponent.parent().detach('#' + td.ID);
+           }
+        });
+
+
+        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+        this.jComponent.addClass('carousel').addClass('slide');
+        super.create();
+
+        var inner = $("<div/>");
+        inner.addClass('carousel-inner');//.css('width', '100%');
+        this.jComponent.append(inner);
+
+        var navleft = $("<a/>");
+        navleft.addClass('left carousel-control');
+        navleft.attr("href", "#" + this.ID);
+        navleft.attr("data-slide", "prev");
+        navleft.html('&lsaquo;');
+
+        var navright = $("<a/>");
+        navright.addClass('right carousel-control');
+        navright.attr("href", "#" + this.ID);
+        navright.attr("data-slide", "next");
+        navright.html('&rsaquo;');
+        this.jComponent.append(navright);
+
+        var firstSlide: JQuery;
+        this.jComponent.append(navleft);
+        this.items.forEach((item) => {
+            /*var cmp: JQuery = $('#' + this._tabdata.ID);
+            cmp.parent().detach('#' + this._tabdata.ID);
+            this.jTabPane.append(cmp);*/
+
+            var slide = item.create();
+            firstSlide = firstSlide ? firstSlide : slide;
+            inner.append(slide);
+        });
+        if (firstSlide) firstSlide.addClass('active');
+
+    }
+
+    public draw(reCreate: boolean) {
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
+    }
+
+    public items: V.TCollection<TCarouselPage> = new V.TCollection<TCarouselPage>();
+    public createCarouselPage(container: VXCO.TContainer, caption?: string, text? : string): TCarouselPage {
+        var exists: boolean = false;
+        if (container == null) {
+            V.Application.raiseException("container cannot be null");
+            return;
+        }
+
+        this.items.forEach((item) => {
+            if (item.ID == container.ID) {
+                V.Application.raiseException("You cant enter the same container twice");
+                exists = true;
+            }
+        });
+
+        if (exists) return;
+
+        var col: TCarouselPage = new TCarouselPage(this, container);
+        this.items.add(col);
+        col.Caption = caption;
+        col.Text = text;
+        this.drawDelayed(true);
+        return col;
+    }
+}
+
+
 export class TWell extends VXCO.TContainer {
+    private _color: string;
+    public get Color(): string {
+        return this._color;
+    }
+    public set Color(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._color) {
+                this._color = val;
+                this.owner.drawDelayed(true);
+            }
+        }
+    }
+
+
     public create() {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('well');
+        if (this.Color) this.jComponent.css('background-color', this.Color);
         super.create();
     }
 
@@ -69,7 +235,7 @@ export class TPanelButton {
     public set Visible(val: boolean) {
         if (val != this._visible) {
             this._visible = val;
-            this.owner.drawDelayed(false);
+            this.owner.drawDelayed(true);
         }
     }
 
@@ -81,7 +247,7 @@ export class TPanelButton {
         if (V.Application.checkColorString(val)) {
             if (val != this._color) {
                 this._color = val;
-                this.owner.drawDelayed(false);
+                this.owner.drawDelayed(true);
             }
         }
     }
@@ -107,7 +273,7 @@ export class TPanelButton {
         if (val != this._icon) {
             this._icon = val;
             this.Visible = true;
-            this.owner.drawDelayed(false);
+            this.owner.drawDelayed(true);
         }
     }
 
@@ -120,7 +286,7 @@ export class TPanelButton {
         if (val != this._url) {
             this._url = val;
             this.Visible = true;
-            this.owner.drawDelayed(false);
+            this.owner.drawDelayed(true);
         }
     }
 
@@ -132,7 +298,7 @@ export class TPanelButton {
         if (val != this._text) {
             this._text = val;
             this.Visible = true;
-            this.owner.drawDelayed(false);
+            this.owner.drawDelayed(true);
         }
     }
 
@@ -220,7 +386,7 @@ export class TPanel extends VXCO.TContainer {
     public set HeaderStyle(val: V.HeaderStyle) {
         if (val != this._hedderstyle) {
             this._hedderstyle = val;
-            this.drawDelayed(true);
+            this.drawDelayed(false);
         }
     }
 
@@ -311,7 +477,6 @@ export class TPanel extends VXCO.TContainer {
     public create() {
         var self = this;
         if (this.jContent == null) {
-
             this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
             var attrs = {};
             $.each($(this.jComponent)[0].attributes, function (idx, attr) {
@@ -349,44 +514,6 @@ export class TPanel extends VXCO.TContainer {
             }
 
             this.jButtons = $("<div>").addClass("btn-toolbar").css('margin-top', '0px');;
-            if (this.Button1.Visible || this.Button2.Visible || this.Button3.Visible || this.CloseButton.Visible) {
-                this.jButtons.show();
-                this.jHeaderText.css('overflow', 'hidden').css('white-space', 'nowrap').css('width', 'auto');
-                if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
-                    this.jHeaderText.addClass('pull-right').css('text-align', 'right')
-                } else {
-                    this.jHeaderText.addClass('pull-left').css('text-align', 'left')
-                }
-            } else {
-                this.jButtons.hide();
-                this.jHeaderText.css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '99%');
-                if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
-                    this.jHeaderText.addClass('pull-right').css('text-align', 'right');
-                } else {
-                    this.jHeaderText.addClass('pull-left').css('text-align', 'left');
-                }
-            }
-
-
-
-                    /*this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('text-align', 'right');
-                    if (this.Button1.Visible || this.Button2.Visible || this.Button3.Visible || this.CloseButton.Visible) {
-                        this.jHeaderText.css('width', '80%');
-                    }
-                    else {
-                        this.jHeaderText.css('width', '99%').css('padding-right', '5px');
-                        this.jButtons.hide();
-                    }
-                } else {
-                    this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '80%');
-                }
-            } else {
-            if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
-                   this.jHeaderText.addClass('pull-left').css('overflow', 'hidden').css('white-space', 'nowrap').css('text-align', 'right');
-                } else {
-                }
-            }*/
-
 
             this.jHeaderText.appendTo(this.jHeader);
             this.jComponent.css('display', 'block');
@@ -419,6 +546,25 @@ export class TPanel extends VXCO.TContainer {
             this.jOverlayText = $("<div>");
         }
 
+        if (this.Button1.Visible || this.Button2.Visible || this.Button3.Visible || this.CloseButton.Visible) {
+            this.jButtons.show();
+            this.jHeaderText.css('overflow', 'hidden').css('white-space', 'nowrap').css('width', 'auto');
+            if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
+                this.jHeaderText.addClass('pull-right').css('text-align', 'right')
+                } else {
+                this.jHeaderText.addClass('pull-left').css('text-align', 'left')
+                }
+        } else {
+            this.jButtons.hide();
+            this.jHeaderText.css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '99%');
+            if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
+                this.jHeaderText.addClass('pull-right').css('text-align', 'right');
+            } else {
+                this.jHeaderText.addClass('pull-left').css('text-align', 'left');
+            }
+        }
+
+
         //fix some issues with change of width and height
         if (!this.FitToWidth) {
             this.jComponent.css('display', 'inline-block');
@@ -433,51 +579,11 @@ export class TPanel extends VXCO.TContainer {
         }
 
         this.jComponent.css('border-width', this.BorderWidth);
-        this.jHeader.removeClass(function (index, css) {
-            return (css.match(/\panel-header-\S+/g) || []).join(' ');
-        });
-
-        this.jHeaderText.removeClass(function (index, css) {
-            return (css.match(/\panel-header-\S+/g) || []).join(' ');
-        });
-        this.jContent.removeClass(function (index, css) {
-            return (css.match(/\panel-\S+/g) || []).join(' ');
-        });
 
         if (this.BackgroundImageURL != null && this.BackgroundImageURL.length > 0) {
             this.jComponent.css('background-image', 'url(' + this.BackgroundImageURL + ')').css('background-size', 'cover').css('background-repeat', 'no-repeat');
         }
 
-        switch (this.HeaderStyle) {
-            case V.HeaderStyle.Default:
-                this.jHeader.addClass("panel-header-default");
-                this.jHeaderText.addClass('panel-header-default');
-                this.jContent.addClass('panel-default panel-content'); break;
-            case V.HeaderStyle.Primary:
-                this.jHeader.addClass("panel-header-primary");
-                this.jHeaderText.addClass('panel-header-primary');
-                this.jContent.addClass('panel-primary panel-content'); break;
-            case V.HeaderStyle.Info:
-                this.jHeader.addClass("panel-header-info");
-                this.jHeaderText.addClass('panel-header-info');
-                this.jContent.addClass('panel-info panel-content '); break;
-            case V.HeaderStyle.Success:
-                this.jHeader.addClass("panel-header-success");
-                this.jHeaderText.addClass('panel-header-success');
-                this.jContent.addClass('panel-success'); break;
-            case V.HeaderStyle.Warning:
-                this.jHeader.addClass("panel-header-warning");
-                this.jHeaderText.addClass('panel-header-warning');
-                this.jContent.addClass('panel-warning panel-content '); break;
-            case V.HeaderStyle.Danger:
-                this.jHeader.addClass("panel-header-danger");
-                this.jHeaderText.addClass('panel-header-danger');
-                this.jContent.addClass('panel-danger panel-content '); break;
-            case V.HeaderStyle.Transparent:
-                this.jHeader.addClass("panel-header-transparent");
-                this.jHeaderText.addClass('panel-header-transparent');
-                this.jContent.addClass('panel-transparent panel-content '); break;
-        }
         //this.jContent.css('height', '100%');
         this.jHeader.off("click").click(() => {
             if (this.onHeaderClicked != null) (V.tryAndCatch(() => { this.onHeaderClicked(self); }));
@@ -487,6 +593,7 @@ export class TPanel extends VXCO.TContainer {
         })
         this.jComponent.off("click").click(() => {
             if (this.onPanelClicked != null) (V.tryAndCatch(() => { this.onPanelClicked(self); }));
+            else if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(self); }));
         })
         super.create();
     }
@@ -561,9 +668,51 @@ export class TPanel extends VXCO.TContainer {
         this.createButton(this.Button2, null);
         this.createButton(this.Button1, null);
         this.createButton(this.CloseButton, null);
+
+        this.jHeader.removeClass(function (index, css) {
+            return (css.match(/\panel-header-\S+/g) || []).join(' ');
+        });
+        this.jHeaderText.removeClass(function (index, css) {
+            return (css.match(/\panel-header-\S+/g) || []).join(' ');
+        });
+        this.jContent.removeClass(function (index, css) {
+            return (css.match(/\panel-\S+/g) || []).join(' ');
+        });
+
+
+        switch (this.HeaderStyle) {
+            case V.HeaderStyle.Default:
+                this.jHeader.addClass("panel-header-default");
+                this.jHeaderText.addClass('panel-header-default');
+                this.jContent.addClass('panel-default panel-content'); break;
+            case V.HeaderStyle.Primary:
+                this.jHeader.addClass("panel-header-primary");
+                this.jHeaderText.addClass('panel-header-primary');
+                this.jContent.addClass('panel-primary panel-content'); break;
+            case V.HeaderStyle.Info:
+                this.jHeader.addClass("panel-header-info");
+                this.jHeaderText.addClass('panel-header-info');
+                this.jContent.addClass('panel-info panel-content '); break;
+            case V.HeaderStyle.Success:
+                this.jHeader.addClass("panel-header-success");
+                this.jHeaderText.addClass('panel-header-success');
+                this.jContent.addClass('panel-success'); break;
+            case V.HeaderStyle.Warning:
+                this.jHeader.addClass("panel-header-warning");
+                this.jHeaderText.addClass('panel-header-warning');
+                this.jContent.addClass('panel-warning panel-content '); break;
+            case V.HeaderStyle.Danger:
+                this.jHeader.addClass("panel-header-danger");
+                this.jHeaderText.addClass('panel-header-danger');
+                this.jContent.addClass('panel-danger panel-content '); break;
+            case V.HeaderStyle.Transparent:
+                this.jHeader.addClass("panel-header-transparent");
+                this.jHeaderText.addClass('panel-header-transparent');
+                this.jContent.addClass('panel-transparent panel-content '); break;
+        }
+
     }
 }
-
 
 
 export class TGoogleMap extends VXC.TComponent {
@@ -605,29 +754,82 @@ export class TGoogleMap extends VXC.TComponent {
 
     private map: google.maps.Map;
     public create() {
+        var self = this;
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         var myLatlng = new google.maps.LatLng(0, 0);
         var mapOptions: google.maps.MapOptions = { zoom: 6, center: myLatlng, mapTypeId: google.maps.MapTypeId.ROADMAP };
         this.map = new google.maps.Map(this.jComponent[0], mapOptions);
+        google.maps.event.addListenerOnce(this.map, 'idle', function () {
+            // Get projection
+            self.refreshMarkers();
+            self.refreshHeatmap();
+            self.optimizeZoomLevel1();
+            self.optimizeZoomLevel2();
+        });
 
-        super.create();
+
     }
 
     public draw(reCreate: boolean) {
-
-        require(["VCL/Scripts/async!http://maps.google.com/maps/api/js?sensor=false&key=" + this.GoogleAPIKey], () => {
+        require(["VCL/Scripts/async!http://maps.google.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization&key=" + this.GoogleAPIKey], () => {
             if (!this.parentInitialized()) return;
             super.draw(reCreate);
-            this.refreshMarkers();
         });
     }
 
+    private createheatmaplayer(layername: string): Array<google.maps.LatLng>{
+        var heatData: Array<google.maps.LatLng> = [];
+        this.heatmapMarkerItems.forEach((item) => {
+            if ((item.Lat && item.Lng) && item.Layer == layername) {
+                var myLatlng = new google.maps.LatLng(item.Lat, item.Lng);
+                var obj = { location: myLatlng, weight: item.Weight }
+                    heatData.push(<any>obj);
+            } else if (item.Address) {
+                this.decodeHeatmapAddress(item.Address, item);
+            }
+        });
+        return heatData;
+    }
+
     private tmpMarkers: google.maps.Marker[] = [];
+    private heatmapLayer: Array<google.maps.visualization.HeatmapLayer>;
+    private refreshHeatmap(): string[]{
+        var self = this;
+        if (this.heatmapLayer) {
+            this.heatmapLayer.forEach((item) => {
+                item.setMap(null);
+            });
+        }
+
+        this.heatmapLayer = [];
+        var layrs: Array<string> = [];
+        this.heatmapMarkerItems.forEach((item) => {
+            if (item.Lat && item.Lng && item.Layer && layrs.indexOf(item.Layer) == -1) layrs.push(item.Layer);
+        });
+
+        if (this.heatmapMarkerItems.length) {
+            layrs.forEach((layer) => {
+                var heatData: Array<google.maps.LatLng> = this.createheatmaplayer(layer);
+                var opt: google.maps.visualization.HeatmapLayerOptions = { data: heatData,radius : 20 };
+                var heat = new google.maps.visualization.HeatmapLayer(opt);
+                heat.setMap(this.map);
+                this.heatmapLayer.push(heat);
+
+                var homeControlDiv: any = document.createElement('div');
+                var homeControl = new HeatControl(homeControlDiv, self.map, layer, heat);
+                homeControlDiv.index = 1;
+                self.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
+                (<any>heat).homeControlDiv = homeControlDiv;
+            })
+        }
+        return layrs;
+    }
+
+
     private refreshMarkers() {
         //reset markers
-        for (var i = 0; i < this.tmpMarkers.length; i++) {
-            this.tmpMarkers[i].setMap(null);
-        }
+        for (var i = 0; i < this.tmpMarkers.length; i++) { this.tmpMarkers[i].setMap(null); }
+
         this.tmpMarkers = [];
         this.markerItems.forEach((item: TGoogleMapMarker) => { item.marker = null });
 
@@ -652,15 +854,24 @@ export class TGoogleMap extends VXC.TComponent {
             if (item.marker && item.Visible) item.marker.setMap(this.map);
             if (item.marker && !item.Visible) item.marker.setMap(null);
         });
-        this.optimizeZoomLevel();
     }
 
     private setMarkerClick(item: TGoogleMapMarker) {
-        var infowindow = null;
         var self = this;
         google.maps.event.addListener(item.marker, 'click', function (a) {
+            var lat = -1;
+            var lng = -1;
+            var i = 0;
+            for (var x in a.latLng) {
+                if (i == 0)
+                    lat = a.latLng[x];
+                if (i == 1)
+                    lng = a.latLng[x];
+                i++
+            }
+
             self.markerItems.forEach((item) => {
-                if (item.Lat == a.latLng.d && item.Lng == a.latLng.e) {
+                if (item.Lat == lat && item.Lng == lng) {
                     if (self.onMarkerClicked != null) (V.tryAndCatch(() => { self.onMarkerClicked(item); }));
                 }
             });
@@ -690,9 +901,9 @@ export class TGoogleMap extends VXC.TComponent {
                     }
                     if (lbl) {
                         item.InforWindowContent = "<div id='content' style='width:150px;overflow:hidden;'>" + lbl + "</div>";
-                        infowindow = new google.maps.InfoWindow({ content: item.InforWindowContent });
-                        infowindow.close();
-                        infowindow.open(self.map, item.marker);
+                        item.infowindow = new google.maps.InfoWindow({ content: item.InforWindowContent });
+                        item.infowindow.close();
+                        item.infowindow.open(self.map, item.marker);
                     }
                 }
             });
@@ -701,21 +912,23 @@ export class TGoogleMap extends VXC.TComponent {
         google.maps.event.addListener(item.marker, 'mouseout', function (a) {
             self.markerItems.forEach((item) => {
                 if (item.Title) {
-                    if (infowindow)
-                        infowindow.close();
+                    if (item.infowindow)
+                        item.infowindow.close();
                 }
             });
         });
 
     }
-
+    private decodeReq: number = 0;
     public onDecodeAddress: (item: TGoogleMapMarker) => void;
 
     private decodeAddress(address: string, selectedItem: TGoogleMapMarker) {
         var self = this;
+        this.decodeReq++;
         var myItem: TGoogleMapMarker = selectedItem;
         var geocoder = new google.maps.Geocoder();
         geocoder.geocode({ 'address': myItem.Address }, (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
+            this.decodeReq--;
             if (status == google.maps.GeocoderStatus.OK) {
                 myItem.Lat = results[0].geometry.location.lat();
                 myItem.Lng = results[0].geometry.location.lng();
@@ -728,12 +941,37 @@ export class TGoogleMap extends VXC.TComponent {
                 this.tmpMarkers.push(myItem.marker);
                 if (self.onDecodeAddress) self.onDecodeAddress(myItem);
             }
-            else {
-                console.log("Google Map cannot load markers: " + status);
+            if (!this.decodeReq) {
+                this.optimizeZoomLevel1();
+                this.optimizeZoomLevel2();
             }
-            this.optimizeZoomLevel();
         });
     }
+
+    private decodeHeatmapAddress(address: string, selectedItem: TGoogleMapHeatmapMarker) {
+        var self = this;
+        var myItem: TGoogleMapHeatmapMarker = selectedItem;
+        var geocoder = new google.maps.Geocoder();
+        this.decodeReq++;
+        geocoder.geocode({ 'address': myItem.Address }, (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
+            this.decodeReq--;
+            if (status == google.maps.GeocoderStatus.OK) {
+                myItem.Lat = results[0].geometry.location.lat();
+                myItem.Lng = results[0].geometry.location.lng();
+                self.refreshHeatmap();
+            }
+            if (!this.decodeReq) {
+                this.optimizeZoomLevel1();
+                this.optimizeZoomLevel2();
+            }
+        });
+    }
+
+    public optimizeZoomLevel() {
+        this.optimizeZoomLevel1();
+        this.optimizeZoomLevel2();
+    }
+
 
     /**
     * Returns the zoom level at which the given rectangular region fits in the map view. 
@@ -746,7 +984,9 @@ export class TGoogleMap extends VXC.TComponent {
         var MAX_ZOOM = /*map.mapTypes.get(map.getMapTypeId()).maxZoom ||*/ 21;
         var MIN_ZOOM = /*map.mapTypes.get(map.getMapTypeId()).minZoom ||*/ 0;
 
-        var ne = map.getProjection().fromLatLngToPoint(bounds.getNorthEast());
+        var p = map.getProjection();
+        var b = bounds.getNorthEast();
+        var ne = p.fromLatLngToPoint(b);
         var sw = map.getProjection().fromLatLngToPoint(bounds.getSouthWest());
 
         var worldCoordWidth = Math.abs(ne.x - sw.x);
@@ -763,7 +1003,7 @@ export class TGoogleMap extends VXC.TComponent {
         return 0;
     }
 
-    private optimizeZoomLevel() {
+    private optimizeZoomLevel1() {
         var bounds = new google.maps.LatLngBounds();
         var found = false;
         this.markerItems.forEach((item: TGoogleMapMarker) => {
@@ -772,10 +1012,52 @@ export class TGoogleMap extends VXC.TComponent {
             var point = new google.maps.LatLng(item.Lat, item.Lng);
             bounds.extend(point);
         });
+
         if (!found) return;
         this.map.setZoom(this.getZoomByBounds(this.map, bounds));
         this.map.setCenter(bounds.getCenter());
     }
+    private optimizeZoomLevel2() {
+        var bounds = new google.maps.LatLngBounds();
+        var found = false;
+        this.heatmapMarkerItems.forEach((item: TGoogleMapHeatmapMarker) => {
+            if (!item.Lat || !item.Lng) return;
+            found = true;
+            var point = new google.maps.LatLng(item.Lat, item.Lng);
+            bounds.extend(point);
+        });
+
+        if (!found) return;
+        this.map.setZoom(this.getZoomByBounds(this.map, bounds));
+        this.map.setCenter(bounds.getCenter());
+    }
+
+    //private headmapgardiant: any;
+    //public setHeatmapGradient(fromColor: string, toColor: string, layer: string = "default") {
+    //    if (!this.headmapgardiant) this.headmapgardiant = {};
+    //   this.headmapgardiant[layer] = { fromcolor: fromColor, tocolor: toColor };
+    //}
+
+    public heatmapMarkerItems: VXO.TCollection<TGoogleMapHeatmapMarker> = new VXO.TCollection<TGoogleMapHeatmapMarker>();
+    createHeatmapMarker(lat: number, lng: number, weight: number, layer : string = "heatmap"): TGoogleMapHeatmapMarker {
+        var col: TGoogleMapHeatmapMarker = new TGoogleMapHeatmapMarker();
+        this.heatmapMarkerItems.add(col);
+        col.Lat = lat;
+        col.Lng = lng;
+        col.Weight = weight;
+        col.Layer = layer;
+        return col;
+    }
+
+    createHeatmapMarkerFromAddress(address: string, weight: number, layer: string = "heatmap"): TGoogleMapHeatmapMarker {
+        var col: TGoogleMapHeatmapMarker = new TGoogleMapHeatmapMarker();
+        this.heatmapMarkerItems.add(col);
+        col.Address = address;
+        col.Weight = weight;
+        col.Layer = layer;
+        return col;
+    }
+
 
     public markerItems: VXO.TCollection<TGoogleMapMarker> = new VXO.TCollection<TGoogleMapMarker>();
     createMarker(lat: number, lng: number): TGoogleMapMarker {
@@ -798,9 +1080,40 @@ export class TGoogleMap extends VXC.TComponent {
 
 }
 
+
+function HeatControl(controlDiv, map: google.maps.Map, caption, heat: google.maps.visualization.HeatmapLayer) {
+    controlDiv.style.padding = '5px';
+
+    // Set CSS for the control border
+    var controlUI = document.createElement('div');
+    controlUI.style.backgroundColor = 'white';
+    controlUI.style.borderStyle = 'solid';
+    controlUI.style.borderWidth = '2px';
+    controlUI.style.cursor = 'pointer';
+    controlUI.style.textAlign = 'center';
+    controlDiv.appendChild(controlUI);
+
+    // Set CSS for the control interior
+    var controlText = document.createElement('div');
+    controlText.style.fontFamily = 'Arial,sans-serif';
+    controlText.style.fontSize = '12px';
+    controlText.style.paddingLeft = '4px';
+    controlText.style.paddingRight = '4px';
+    controlText.innerHTML = caption;
+    controlUI.appendChild(controlText);
+
+    // Setup the click event listeners: simply set the map to
+    // Chicago
+    google.maps.event.addDomListener(controlUI, 'click', function () {
+        if (heat.getMap() == null) heat.setMap(map);
+        else heat.setMap(null);
+  });
+
+}
+
 export class TGoogleMapMarker extends VXO.TCollectionItem {
     public marker: any;
-
+    public infowindow: any;
     private _lat: number = null;
     public get Lat(): number {
         return this._lat;
@@ -859,5 +1172,74 @@ export class TGoogleMapMarker extends VXO.TCollectionItem {
         if (val != this._content) {
             this._content = val;
         }
+    }
+}
+
+export class TGoogleMapHeatmapMarker extends VXO.TCollectionItem {
+    public marker: any;
+    public infowindow: any;
+    private _lat: number = null;
+    public get Lat(): number {
+        return this._lat;
+    }
+    public set Lat(val: number) {
+        if (val != this._lat) {
+            this._lat = val;
+        }
+    }
+
+    private _lng: number = null;
+    public get Lng(): number {
+        return this._lng;
+    }
+    public set Lng(val: number) {
+        if (val != this._lng) {
+            this._lng = val;
+        }
+    }
+
+    private _address: string = null;
+    public get Address(): string {
+        return this._address;
+    }
+    public set Address(val: string) {
+        if (val != this._address) {
+            this._address = val;
+        }
+    }
+
+    private _layer: string = null;
+    public get Layer(): string {
+        return this._layer;
+    }
+    public set Layer(val: string) {
+        if (val != this._layer) {
+            this._layer = val;
+        }
+    }
+
+
+    private _weight: number = null;
+    public get Weight(): number {
+        return this._weight;
+    }
+    public set Weight(val: number) {
+        if (val != this._weight) {
+            this._weight = val;
+        }
+    }
+}
+
+export class TGraphEditor extends VXC.TComponent {
+    public create() {
+        super.create();
+    }
+
+    public draw(reCreate: boolean) {
+        require(["VCL/Scripts/cytoscape/cytoscape.min"], (cyt) => {
+            if (!this.parentInitialized()) return;
+
+            super.draw(reCreate);
+        });
     }
 }

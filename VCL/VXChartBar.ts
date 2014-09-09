@@ -4,8 +4,31 @@ import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 import VXCB = require("VCL/VXChartBase");
 
-export class TChartBar extends VXCB.TChartBarBase {
-    public height;
+export class TChartBar extends VXCB.TGridChartBase {
+    /** Custom Format value on top */
+    public LabelOnTopFormat: (data: any) => string;
+
+    /** Custom onClick */
+    public onClicked: (value: V.TBarValue, series: number, idx: number) => void;
+
+    /** The Bars */
+    private bar: Bar;
+
+    public selectedItem(series: number, idx: number, fireEvents: boolean) {
+        this.bar.clickItem(series, idx, fireEvents);
+    }
+
+    private _showValueOnTop: boolean = false;
+    public get ShowValueOnTop(): boolean {
+        return this._showValueOnTop;
+    }
+    public set ShowValueOnTop(val: boolean) {
+        if (val != this._showValueOnTop) {
+            this._showValueOnTop = val;
+            this.drawDelayed(true);
+        }
+    }
+
     private _maximumbarwidth: number = 40;
     public get MaximumBarWidth(): number {
         return this._maximumbarwidth;
@@ -17,8 +40,7 @@ export class TChartBar extends VXCB.TChartBarBase {
         }
     }
 
-
-    private _minY: number = 0;
+    private _minY: number = null;
     public get YMin(): number {
         return this._minY;
     }
@@ -55,7 +77,7 @@ export class TChartBar extends VXCB.TChartBarBase {
         }
     }
 
-    private _unselectcolorOpacity: number = 0.8;
+    private _unselectcolorOpacity: number = 0.7;
     /*
     * set the opacity of the unselected bars - values (0-1)
     */
@@ -70,10 +92,395 @@ export class TChartBar extends VXCB.TChartBarBase {
         }
     }
 
+    private _series1color: string = "#0b62a4";
+    public get Series1Color(): string {
+        return this._series1color;
+    }
+    public set Series1Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series1color) {
+                this._series1color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series2color: string = "#7A92A3";
+
+    public get Series2Color(): string {
+        return this._series2color;
+    }
+    public set Series2Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series2color) {
+                this._series2color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series3color: string = "#4da74d";
+    public get Series3Color(): string {
+        return this._series3color;
+    }
+    public set Series3Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series3color) {
+                this._series3color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series4color: string = "#afd8f8";
+    public get Series4Color(): string {
+        return this._series4color;
+    }
+    public set Series4Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series4color) {
+                this._series4color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series5color: string = "#edc240";
+    public get Series5Color(): string {
+        return this._series5color;
+    }
+    public set Series5Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series5color) {
+                this._series5color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series6color: string = "#cb4b4b";
+    public get Series6Color(): string {
+        return this._series6color;
+    }
+    public set Series6Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series6color) {
+                this._series6color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
 
 
+    private _series7color: string = "#727272";
+    public get Series7Color(): string {
+        return this._series7color;
+    }
+    public set Series7Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series7color) {
+                this._series7color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+    private _series8color: string = "#f1595f";
+    public get Series8Color(): string {
+        return this._series8color;
+    }
+    public set Series8Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series8color) {
+                this._series8color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+    private _series9color: string = "#79c36a";
+    public get Series9Color(): string {
+        return this._series9color;
+    }
+    public set Series9Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series9color) {
+                this._series9color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+    private _series10color: string = "#599ad3";
+    public get Series10Color(): string {
+        return this._series10color;
+    }
+    public set Series10Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series10color) {
+                this._series10color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
 
-    public onClicked: (value: V.TBarValue, series: number) => void;
+    private _series11color: string = "#EAA83A";
+    public get Series11Color(): string {
+        return this._series11color;
+    }
+    public set Series11Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series11color) {
+                this._series11color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series12color: string = "#f9a65a";
+    public get Series12Color(): string {
+        return this._series12color;
+    }
+    public set Series12Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series12color) {
+                this._series12color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series13color: string = "#9e66ab";
+    public get Series13Color(): string {
+        return this._series13color;
+    }
+    public set Series13Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series13color) {
+                this._series13color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
+    private _series14color: string = "#cd7058";
+    public get Series14Color(): string {
+        return this._series14color;
+    }
+    public set Series14Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series14color) {
+                this._series14color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series15color: string = "#d77fb3";
+    public get Series15Color(): string {
+        return this._series15color;
+    }
+    public set Series15Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series15color) {
+                this._series15color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series1name: string = null;
+    public get Series1Name(): string {
+        return this._series1name;
+    }
+    public set Series1Name(val: string) {
+        if (val != this._series1name) {
+            this._series1name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series2name: string = null;
+    public get Series2Name(): string {
+        return this._series2name;
+    }
+    public set Series2Name(val: string) {
+        if (val != this._series2name) {
+            this._series2name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series3name: string = null;
+    public get Series3Name(): string {
+        return this._series3name;
+    }
+    public set Series3Name(val: string) {
+        if (val != this._series3name) {
+            this._series3name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series4name: string = null;
+    public get Series4Name(): string {
+        return this._series4name;
+    }
+    public set Series4Name(val: string) {
+        if (val != this._series4name) {
+            this._series4name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series5name: string = null;
+    public get Series5Name(): string {
+        return this._series5name;
+    }
+    public set Series5Name(val: string) {
+        if (val != this._series5name) {
+            this._series5name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series6name: string = null;
+    public get Series6Name(): string {
+        return this._series6name;
+    }
+    public set Series6Name(val: string) {
+        if (val != this._series6name) {
+            this._series6name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series7name: string = null;
+    public get Series7Name(): string {
+        return this._series7name;
+    }
+    public set Series7Name(val: string) {
+        if (val != this._series7name) {
+            this._series7name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series8name: string = null;
+    public get Series8Name(): string {
+        return this._series8name;
+    }
+    public set Series8Name(val: string) {
+        if (val != this._series8name) {
+            this._series8name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series9name: string = null;
+    public get Series9Name(): string {
+        return this._series9name;
+    }
+    public set Series9Name(val: string) {
+        if (val != this._series9name) {
+            this._series9name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series10name: string = null;
+    public get Series10Name(): string {
+        return this._series10name;
+    }
+    public set Series10Name(val: string) {
+        if (val != this._series10name) {
+            this._series10name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series11name: string = null;
+    public get Series11Name(): string {
+        return this._series11name;
+    }
+    public set Series11Name(val: string) {
+        if (val != this._series11name) {
+            this._series11name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series12name: string = null;
+    public get Series12Name(): string {
+        return this._series12name;
+    }
+    public set Series12Name(val: string) {
+        if (val != this._series12name) {
+            this._series12name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series13name: string = null;
+    public get Series13Name(): string {
+        return this._series13name;
+    }
+    public set Series13Name(val: string) {
+        if (val != this._series13name) {
+            this._series13name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series14name: string = null;
+    public get Series14Name(): string {
+        return this._series14name;
+    }
+    public set Series14Name(val: string) {
+        if (val != this._series14name) {
+            this._series14name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series15name: string = null;
+    public get Series15Name(): string {
+        return this._series15name;
+    }
+    public set Series15Name(val: string) {
+        if (val != this._series15name) {
+            this._series15name = val;
+            this.drawDelayed(true);
+        }
+    }
 
     private _showhoverlegend: boolean = true;
     public get ShowHoverLegend(): boolean {
@@ -142,23 +549,50 @@ export class TChartBar extends VXCB.TChartBarBase {
         }
     }
 
-    private _showgridlines: boolean = true;
-    public get ShowGridLines(): boolean {
-        return this._showgridlines;
+    private _defSelectionLast: boolean = false;
+    public get SetLastSelected(): boolean {
+        return this._defSelectionLast;
     }
-    public set ShowGridLines(val: boolean) {
-        if (val != this._showgridlines) {
-            this._showgridlines = val;
+    public set SetLastSelected(val: boolean) {
+        if (val != this._defSelectionLast) {
+            this._defSelectionLast = val;
             this.drawDelayed(true);
         }
     }
 
+    public values = new VXCB.TChartValuesCollection<VXCB.TBarValue>();
+    public createValue(label: string, value1?: number, value2?: number, value3?: number, value4?: number,
+        value5?: number, value6?: number, value7?: number, value8?: number, value9?: number, value10?: number,
+        value11?: number, value12?: number, value13?: number, value14?: number, value15?: number): VXCB.TBarValue {
+        var col = new VXCB.TBarValue();
+        this.values.add(col);
+        col.Value1 = value1;
+        col.Value2 = value2;
+        col.Value3 = value3;
+        col.Value4 = value4;
+        col.Value5 = value5;
+        col.Value6 = value6;
+        col.Value7 = value7;
+        col.Value8 = value8;
+        col.Value9 = value9;
+        col.Value10 = value10;
+        col.Value11 = value11;
+        col.Value12 = value12;
+        col.Value13 = value13;
+        col.Value14 = value14;
+        col.Value15 = value15;
+
+
+        col.Label = label;
+        return col;
+    }
 
     public getData(): any[] {
         var dataArray = [];
         this.values.forEach((valueOfElement: VXCB.TBarValue) => {
             dataArray.push({
-                x: valueOfElement.Label, id: valueOfElement.ID,
+                x: valueOfElement.Label,
+                id: valueOfElement.ID,
                 value1: !isFinite(valueOfElement.Value1) ? null : valueOfElement.Value1,
                 value2: !isFinite(valueOfElement.Value2) ? null : valueOfElement.Value2,
                 value3: !isFinite(valueOfElement.Value3) ? null : valueOfElement.Value3,
@@ -183,7 +617,6 @@ export class TChartBar extends VXCB.TChartBarBase {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-
         this.bar.setData(this.getData());
     }
 
@@ -196,21 +629,27 @@ export class TChartBar extends VXCB.TChartBarBase {
                 element: this.jComponent[0],
                 //data: dataArray,
                 xkey: "x",
-                ykeys: ["value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8", "value9", "value10", "value11", "value12", "value13", "value14", "value15"],
-                labels: [this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name
-                    , this.Series7Name, this.Series8Name, this.Series9Name, this.Series10Name, this.Series11Name, this.Series12Name
-                    , this.Series13Name, this.Series14Name, this.Series5Name
+                ykeys: [
+                    "value1", "value2", "value3", "value4", "value5",
+                    "value6", "value7", "value8", "value9", "value10",
+                    "value11", "value12", "value13", "value14", "value15"
+                ],
+                labels: [
+                    this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name,
+                    this.Series7Name, this.Series8Name, this.Series9Name, this.Series10Name, this.Series11Name, this.Series12Name,
+                    this.Series13Name, this.Series14Name, this.Series15Name
                 ],
                 barSizeRatio: 0.75,
                 barGap: 0,
                 titleX: this.TitleX,
-                paddingX: this.TitleX ? 35 : 20,
+                paddingX: this.TitleX ? 35 : 15,
                 titleY: this.TitleY,
-                xLabelAngle : this.XLabelAngle,
-                paddingY: this.TitleY ? 25 : 5,
+                paddingY: this.TitleY ? 35 : 15,
+                xLabelAngle: this.XLabelAngle,
                 xLabelFormat: this.XLabelFormat,
                 yLabelFormat: this.YLabelFormat,
                 toolTipFormat: this.ToolTipFormat,
+                labelOnTopFormat: this.LabelOnTopFormat,
                 hideHover: this.ShowHoverLegend ? 'auto' : 'always',
                 stacked: this.Stacked,
                 barColors: [
@@ -218,7 +657,8 @@ export class TChartBar extends VXCB.TChartBarBase {
                     this.Series7Color, this.Series8Color, this.Series9Color, this.Series10Color, this.Series11Color, this.Series12Color,
                     this.Series13Color, this.Series14Color, this.Series15Color
                 ],
-                xLabelMargin: 15, corners: [this.BarLeftTopRadius, this.BarRightTopRadius, this.BarRightBottomRadius, this.BarLeftBottomRadius],
+                xLabelMargin: this.XLabelMargin,
+                corners: [this.BarLeftTopRadius, this.BarRightTopRadius, this.BarRightBottomRadius, this.BarLeftBottomRadius],
                 gridTextColor: this.GridTextColor,
                 titleTextColor: this.TitleTextColor,
                 gridTextSize: this.GridTextSize,
@@ -226,19 +666,23 @@ export class TChartBar extends VXCB.TChartBarBase {
                 preUnits: this.PreValueUnit,
                 postUnits: this.PostValueUnit,
                 gridTextFamily: this.Font,
-                gridTextWeight: 'normal',
+                gridTitleWeight: this.GridTitleWeight,
+                gridTextWeight: this.GridTextWeight,
                 maximumbarwidth: this.MaximumBarWidth,
                 grid: this.ShowGridLines,
                 selectedOpacity: this.SelectedBarOpacity,
                 unselectOpacity: this.UnselectedBarOpacity,
                 ymax: ymax,
                 ymin: ymin,
+                ygap: this.YGap,
+                axisx: this.ShowXAxisLabels,
+                axisy: this.ShowYAxisLabels,
+                parseTime: true,
             }, this);
 
         return b;
     }
 
-    public bar: Bar;
     public create() {
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
@@ -504,6 +948,7 @@ export class TDBChartBar extends TChartBar {
         this.Dataset.forEach(() => {
             var obj: any = {
                 x: this.Dataset.getFieldValue(this.LabelField),
+                id: this.Dataset.Recno.toString(),
                 value1: !isFinite(this.Dataset.getFieldValue(this.ValueField1)) ? null : this.Dataset.getFieldValue(this.ValueField1),
                 value2: !isFinite(this.Dataset.getFieldValue(this.ValueField2)) ? null : this.Dataset.getFieldValue(this.ValueField2),
                 value3: !isFinite(this.Dataset.getFieldValue(this.ValueField3)) ? null : this.Dataset.getFieldValue(this.ValueField3),
@@ -540,7 +985,7 @@ export class TDBChartBar extends TChartBar {
             col.Value14 = obj.value14;
             col.Value15 = obj.value15;
             col.Label = obj.x;
-            col.ID = this.Dataset.Recno.toString();
+            col.ID = obj.id;
         });
 
         return dataArray;
@@ -557,15 +1002,17 @@ export class Bar extends VXCB.Grid {
     public bars;
 
     constructor(options, owner) {
-        super($.extend({}, options, { parseTime: true }));
-        this.owner = owner;
+        super(options, owner);
 
         this.onHoverOut = __bind(this.onHoverOut, this);
         this.onHoverMove = __bind(this.onHoverMove, this);
+
+        if ((<TChartBar>this.owner).ShowValueOnTop)
+            this.options.paddingXTop = 35;
     }
 
     init() {
-        this.cumulative = this.options.stacked;
+        this.cumulative = true;//this.options.stacked; cause Bag in one item
         if (this.options.hideHover !== 'always') {
             this.hover = new VXCB.Hover({
                 parent: this.el
@@ -580,7 +1027,7 @@ export class Bar extends VXCB.Grid {
         var _ref;
         this.calcBars();
         if (this.options.hideHover === false) {
-            return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(this.data.length - 1, -1));
+            return (_ref = this.hover).update.apply(_ref, this.displayHoverForRow(this.data.length - 1, -1));
         }
     }
 
@@ -590,17 +1037,17 @@ export class Bar extends VXCB.Grid {
         _results = [];
         for (var idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
             row = _ref[idx];
-            row._x = this.left + this.width * (idx + 0.5) / this.data.length;
+            row._x = this.left + (this.width) * (idx + 0.5) / this.data.length;
             _results.push(row._y = (function () {
                 var _j, _len1, _ref1, _results1;
                 _ref1 = row.y;
                 _results1 = [];
                 for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
                     y = _ref1[_j];
-                    if (y != null) {
+                    if (y != 0 && y != null) {
                         _results1.push(this.transY(y));
                     } else {
-                        _results1.push(null);
+                        // _results1.push(null);
                     }
                 }
                 return _results1;
@@ -610,14 +1057,19 @@ export class Bar extends VXCB.Grid {
     }
 
     draw() {
-        if (this.options.axes) {
+        this.drawSeries();
+
+        if (this.options.axisx) {
             this.drawXAxis();
         }
-        return this.drawSeries();
+
+        this.clickItem(-1, -1);
+
+        return;
     }
 
     drawXAxis() {
-        var label, labelBox, margin, offset, prevAngleMargin, prevLabelMargin, row, textBox, ypos, _i, _ref, _results;
+        var label, labelBox, angleSize, offset, prevAngleMargin, prevLabelMargin, row, textBox, ypos, _i, _ref, _results;
         prevLabelMargin = null;
         prevAngleMargin = null;
         _results = [];
@@ -626,36 +1078,36 @@ export class Bar extends VXCB.Grid {
 
 
         if (this.options.titleX) {
-            var b = this.measureText(this.options.titleX);
             var center = (this.elementWidth / 2);
-            this.raphael.text(center, this.elementHeight - this.options.titleTextSize /2,
-                this.options.titleX).
+            this.raphael.text(center, this.elementHeight - this.options.titleTextSize, this.options.titleX).
                 attr('font-size', this.options.titleTextSize).attr('font-family', this.options.gridTextFamily).
-                attr('font-weight', "normal").attr('fill', this.options.titleTextColor);
+                attr('font-weight', this.options.gridTitleWeight).attr('fill', this.options.titleTextColor);
         }
 
+        var _tmpLabels = [];
         for (var i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-            row = this.data[this.data.length - 1 - i];
-            label = this.drawXAxisLabel(row._x, ypos, row.label);
-            textBox = label.getBBox();
-            label.transform("r" + (-this.options.xLabelAngle));
-            labelBox = label.getBBox();
-            label.transform("t0," + (labelBox.height / 2) + "...");
-            if (this.options.xLabelAngle !== 0) {
-                offset = -0.5 * textBox.width * Math.cos(this.options.xLabelAngle * Math.PI / 180.0);
-                label.transform("t" + offset + ",0...");
-            }
-            if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
-                if (this.options.xLabelAngle !== 0) {
-                    margin = 1.25 * this.options.gridTextSize / Math.sin(this.options.xLabelAngle * Math.PI / 180.0);
-                    prevAngleMargin = labelBox.x - margin;
-                }
-                _results.push(prevLabelMargin = labelBox.x - this.options.xLabelMargin);
-            } else {
-                _results.push(label.remove());
+            row = this.data[i];
+            label = this.measureText(this.xLabelFormat(row, true), this.options.xLabelAngle);
+
+            //calc angle size - permit calculation of the triangle 
+            if (this.options.xLabelAngle !== 0)
+                angleSize = this.options.gridTextSize / Math.sin(this.options.xLabelAngle * Math.PI / 180.0);
+            else
+                angleSize = label.width;
+
+            if (/*i==0 || i == _ref-1 ||*/ this.options.xLabelMargin == null || prevLabelMargin == null || (row._x >= 0 && row._x >= prevLabelMargin && row._x < this.el.width())) {
+                _results.push(prevLabelMargin = row._x + angleSize + this.options.xLabelMargin);
+                _tmpLabels.push(row);
             }
         }
+        this.measureText(null);
 
+        for (var i = 0; i < _tmpLabels.length; i++) {
+            row = _tmpLabels[i];
+            label = this.drawXAxisLabel(row._x, ypos, this.xLabelFormat(row, true), this.options.xLabelAngle);
+            label.node.lastChild.TipValue = this.xLabelFormat(row, true, false);
+            label.node.lastChild.TipId = "xlabel";
+        }
         return _results;
     }
 
@@ -678,7 +1130,6 @@ export class Bar extends VXCB.Grid {
         }
         this.options.numBars = Math.max(1, numBars);
         barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (this.options.numBars - 1)) / this.options.numBars;
-        this.options.barWidth = Math.min(this.options.maximumbarwidth, barWidth);
         leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
         zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
         return this.bars = (function () {
@@ -719,13 +1170,14 @@ export class Bar extends VXCB.Grid {
                             }
                             row._size.push(size);
                             row._top.push(top);
+                            row.index = idx;
+                            row.series = sidx;
                             if (!this.barNodes[idx]) this.barNodes[idx] = [];
 
                             if (rowold && rowold._size && rowold._size.length >= sidx)
-                                this.barNodes[idx].push(this.drawBar(idx, left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), rowold._size[sidx], rowold._top[sidx], sidx, this.options.corners));
+                                this.barNodes[idx].push(this.drawBar(row, idx, left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), rowold._size[sidx], rowold._top[sidx], sidx, this.options.corners));
                             else
-                                this.barNodes[idx].push(this.drawBar(idx, left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), 0, 0, sidx, this.options.corners));
-
+                                this.barNodes[idx].push(this.drawBar(row, idx, left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), 0, 0, sidx, this.options.corners));
                             _results1.push(lastTop += size);
                         } else {
                             _results1.push(null);
@@ -796,61 +1248,100 @@ export class Bar extends VXCB.Grid {
         return -1;
     }
 
-    clickItem(idx: number, series: number) {
-        var owner = <TChartBar>this.owner;
+    clickItem(idx: number, series: number, fireEvents: boolean = true) {
         if (!this.owner) return;
-        this.barNodes.forEach((item) => {
-            item.forEach((node) => {
-                node.attr('opacity', this.options.unselectOpacity);
-            });
-        });
+        var owner = <TChartBar>this.owner;
+        if (!owner.SelectionEnabled) return;
 
+        //set default selection
+        if (idx == -1 && series == -1 && owner.SetLastSelected) {
+            idx = this.barNodes.length - 1;
+            series = this.barNodes[idx].length - 1;
+        }
 
-        this.barNodes[idx].forEach((node) => { node.attr('opacity', this.options.selectedOpacity); });
-        if (!owner.onClicked) return;
         if (idx >= 0 && idx <= owner.values.length()) {
-            if ((owner instanceof TDBChartBar) && (<TDBChartBar>owner).Dataset != null) {
-                (<TDBChartBar>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
+            var id = this.data[idx].id;
+            var item = owner.values.FindItemByID(id);
+
+            if (item != null) {
+                var o: V.TSelectedChartValue = new V.TSelectedChartValue();
+                o.Idx = idx;
+                o.Series = series;
+                o.ChartValue = item;
+
+                //unselect all
+                this.barNodes.forEach((item) => {
+                    item.forEach((bar) => { if (bar) bar.attr('opacity', this.options.unselectOpacity); });
+                });
+
+                //check clicked
+                owner.SelectedItem = o;
+                owner.SelectedItems.forEach((item) => {
+                    this.barNodes[item.Idx][item.Series].attr('opacity', this.options.selectedOpacity);
+                });
+
+                if (owner instanceof TDBChartBar && (<TDBChartBar>owner).Dataset != null) {
+                    (<TDBChartBar>owner).Dataset.Recno = parseInt(id);
+                }
+                if (fireEvents)
+                    if (owner.onClicked)
+                        (V.tryAndCatch(() => { owner.onClicked(item, series, idx) }));
+
             }
-            (V.tryAndCatch(() => { owner.onClicked(owner.values.toArray()[idx], series) }));
         }
     }
 
     onGridClick(x, y, evt) {
         var idx = evt.target.idx;
-        this.clickItem(idx, evt.target.series);
+        var series = evt.target.series;
+        this.clickItem(idx, series);
     }
 
+    private oldTipId: string = "";
     onHoverMove(x, y, evt) {
-        var indexX, inxY, _ref;
-        indexX = evt.target.idx;
-
-        if (indexX == null || indexX < 0)
-            return;
-
-        if (!this.hover || this.barNodes.length == 0 || this.barNodes.length <= indexX || this.barNodes[indexX] == null)
-            return;
-
-        //var bar = this.barNodes[indexX][0];
-        //var width: number = bar.attr('width');
-        //if (indexX < this.barNodes.length / 2)
-        //    this.hover.offset = width;
-        //else
-        //    this.hover.offset = -width;
+        var tipId = evt.target.TipId;
+        var idx = evt.target.idx;
         var series = evt.target.series;
+        var key = tipId + idx + series;
+        if (key == this.oldTipId) return;
+        this.oldTipId = key;
 
-        return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(indexX, series));
+        var _ref;
+        //start hover
+        if (!this.hover) return;
+        this.hover.hide();
+        if (tipId && tipId.indexOf("node") != -1) {
+            this.hover.animation = false;
+            (_ref = this.hover).update.apply(_ref, this.hoverItem(idx, series));;
+        }
+        if (tipId && tipId.indexOf("xlabel") != -1) {
+            var l = evt.target.TipValue;
+            this.hover.animation = true;
+            (_ref = this.hover).update.apply(_ref, ["<div style='pointer-events: none;' class='morris-hover-row-label'>" + l + "</div>", x, y]);
+        }
+    }
+
+    hoverItem(idx, series) {
+        //owner
+        var owner = <TChartBar>this.owner;
+
+        //continue?
+        if (idx == null && series == null)
+            return;
+
+        return this.displayHoverForRow(idx, series);
     }
 
     onHoverOut() {
         if (!this.hover) return;
         if (this.options.hideHover !== false) {
-            return this.hover.hide();
+            this.hover.hide();
+            return this.hoverItem(null, null);
         }
     }
 
-    hoverContentForRow(index, series) {
-        var content, j, row, x, y, _i, _len, _ref;
+    displayHoverForRow(index, series) {
+        var j, row, x, y, _i, _len, _ref
         row = this.data[index];
         if (row == null) {
             return null;
@@ -859,46 +1350,34 @@ export class Bar extends VXCB.Grid {
         row.index = index;
         row.series = series;
 
-        //user have data to put on
-        if (typeof this.options.hoverCallback === 'function') {
-            content = this.options.hoverCallback(index, this.options, content);
+        var content: string = "";
+        var lblX: string = "";
+        if (!this.options.toolTipFormat) {
+            lblX = (this.options.titleX ? this.options.titleX + ": " : "") + this.xLabelFormat(row, false, false);
+            content = "<div style='pointer-events: none;' class='morris-hover-row-label'>" + lblX + "</div>";
         }
-        //generate hover div
-        else {
-            var lblX: string = "";
-            if (!this.options.toolTipFormat) {
-                lblX = this.options.titleX + ":\n  " + row.label;
-            }
-            content = "<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + lblX + "\n</div>";
-            _ref = row.y;
-            for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-                if (series == j) {
-                    y = _ref[j];
-                    if (y != null) {
-                        var lblY: string = "";
-                        if (this.options.toolTipFormat) {
-                            lblY = this.options.toolTipFormat(row);
-                        }
-                        else {
-                            lblY = this.options.labels[j];
-                            if (lblY == null)
-                                lblY = this.options.titleY;
-                            //lbl = lbl.substring(0, 14);
-                            lblY = lblY + ":\n  " + (this.yLabelFormat(y, false));
-                        }
-                        content += "<div style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lblY + "\n</div>";
+        _ref = row.y;
+        for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+            if (series == j) {
+                y = _ref[j];
+                if (y != null) {
+                    var lblY: string = "";
+                    if (this.options.toolTipFormat) {
+                        lblY = this.options.toolTipFormat(row);
                     }
+                    else {
+                        lblY = this.options.labels[j];
+                        if (lblY == null) lblY = this.options.titleY;
+                        lblY = (this.options.titleY ? this.options.titleY + ": " : "") + (this.yLabelFormat(y, false));
+                    }
+                    content += "<div style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>" + lblY + "</div>";
                 }
             }
         }
 
+
         //draw location
         return [content, row._x, row._y[series]];
-    }
-
-    drawXAxisLabel(xPos, yPos, text) {
-        var label;
-        return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     }
 
     public roundedRect(x, y, w, h, r = [0, 0, 0, 0]) {
@@ -908,10 +1387,15 @@ export class Bar extends VXCB.Grid {
             "L", x + r[3], y + h, "Q", x, y + h, x, y + h - r[3], "Z"];
     }
 
-    drawBar(idx, xPos, yPos, width, height, barColor, oldheight, oldy, series, cornes: number[]= [0, 0, 0, 0]) {
+    drawBar(row, idx, xPos, yPos, width, height, barColor, oldheight, oldy, series, cornes: number[]= [0, 0, 0, 0]) {
         var self = this;
         var bar;
-        var maxWidth: number = Math.min(this.options.maximumbarwidth, width);
+        var maxWidth: number = width;
+        if (this.options.maximumbarwidth)
+            maxWidth = Math.min(this.options.maximumbarwidth, maxWidth);
+        else
+            maxWidth = maxWidth - 4;
+        this.options.barWidth = maxWidth;
         var newXpos = xPos + ((width - maxWidth) / 2);
         var zerCnt = 0;
         var zerMax = 0;
@@ -926,6 +1410,15 @@ export class Bar extends VXCB.Grid {
             else bar = this.raphael.path(this.roundedRect(newXpos, yPos, maxWidth, height, cornes)).attr('fill', barColor).attr('opacity', this.options.unselectOpacity).attr('stroke-width', 0);
         }
 
+        if ((<TChartBar>this.owner).ShowValueOnTop) {
+            var l = this.labelOnTopFormat(row, true);
+            var w = this.measureText(l).width;
+            var s = maxWidth;
+            if (w <= (s * 2) && s > 20)
+                this.drawXAxisLabel(newXpos + s / 2, 5, l, 0);
+        }
+
+        bar.node.TipId = "node" + idx + "" + series;
         bar.node.idx = idx;
         bar.node.series = series;
         bar.node.onclick = function (evt, x, y) {
@@ -942,6 +1435,13 @@ export class Bar extends VXCB.Grid {
         }
 
         return bar;
+    }
+
+    labelOnTopFormat(data, humanFriendly: boolean) {
+        var owner = (<TChartBar>this.owner);
+        if (owner.LabelOnTopFormat != null)
+            return owner.LabelOnTopFormat(data);
+        return this.doLabelFormat(data.y[0], humanFriendly);
     }
 
 }
@@ -970,7 +1470,7 @@ export class TChartBullet extends VXC.TComponent {
         return this._titlecolor;
     }
     public set TitleColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
 

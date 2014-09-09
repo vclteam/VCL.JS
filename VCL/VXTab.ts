@@ -5,6 +5,7 @@ import VXU = require("VCL/VXUtils");
 import VXO = require("VCL/VXObject");
 import VXCO = require("VCL/VXContainer");
 import VXW = require("VCL/VXWell");
+import VXM = require("VCL/VXMenu");
 
 export class TTabPanel extends VXW.TPanel {
     constructor(aOwner: VXC.TComponent, renderTo?: string, headerText?: string) {
@@ -12,7 +13,12 @@ export class TTabPanel extends VXW.TPanel {
         this.BorderWidth = 0;
         this.HeaderVisible = false;
     }
+    public create() {
+        super.create();
+        this.jContent.css('overflow', 'auto');
+    }
 }
+
 
 export class TTabSheet extends VXO.TCollectionItem {
     private _tab: V.TTabPage = null;
@@ -218,6 +224,134 @@ export class TTabPage extends VXCO.TContainer {
 }
 
 
+export class TAccordionGroupButton {
+
+    /**
+    * The margin clears an area around an component . 
+    * The margin does not have a background color, and is completely transparent.
+    * Sets the left margin of an component
+    */
+    private _marginLeft: number = 0;
+    private _marginRight: number = 0;
+    private _marginTop: number = 0;
+    private _marginBottom: number = 0;
+    public get MarginLeft(): number { return this._marginBottom; }
+    public set MarginLeft(pixel: number) { if (pixel != this._marginLeft) { this._marginLeft = pixel; } }
+    /**
+    * The margin clears an area around an component . 
+    * The margin does not have a background color, and is completely transparent.
+    *  Sets the right margin of an component
+    */
+    public get MarginRight(): number { return this._marginRight; }
+    public set MarginRight(pixel: number) { if (pixel != this._marginRight) { this._marginRight = pixel; } }
+    /**
+    * The margin clears an area around an component . 
+    * The margin does not have a background color, and is completely transparent.
+    * Sets the top margin of an component
+    */
+    public get MarginTop(): number { return this._marginTop; }
+    public set MarginTop(pixel: number) { if (pixel != this._marginTop) { this._marginTop = pixel; } }
+    /**
+    * The margin clears an area around an component . 
+    * The margin does not have a background color, and is completely transparent.
+    * Sets the bottom margin of an component
+    */
+    public get MarginBottom(): number { return this._marginBottom; }
+    public set MarginBottom(pixel: number) { if (pixel != this._marginBottom) { this._marginBottom = pixel; } }
+
+
+    private owner: TAccordionGroup;
+    constructor(owner: TAccordionGroup, icon?: V.Icon) {
+        this.owner = owner;
+        if (icon) this._icon = icon;
+
+    }
+    private _visible: boolean = false;
+    public get Visible(): boolean {
+        return this._visible;
+    }
+    public set Visible(val: boolean) {
+        if (val != this._visible) {
+            this._visible = val;
+        }
+    }
+
+    private _color: string;
+    public get Color(): string {
+        return this._color;
+    }
+    public set Color(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._color) {
+                this._color = val;
+            }
+        }
+    }
+
+
+    private _tooltip: string;
+    public get Tooltip(): string {
+        return this._tooltip;
+    }
+    public set Tooltip(val: string) {
+        if (val != this._tooltip) {
+            this._tooltip = val;
+        }
+    }
+
+
+    private _icon: V.Icon = V.Icon.icon_align_justify;
+    public get Icon(): V.Icon {
+        return this._icon;
+    }
+    public set Icon(val: V.Icon) {
+        if (val != this._icon) {
+            this._icon = val;
+            this.Visible = true;
+        }
+    }
+
+    private _url: string;
+    public get ImageUrl(): string {
+        return this._url;
+    }
+
+    public set ImageUrl(val: string) {
+        if (val != this._url) {
+            this._url = val;
+            this.Visible = true;
+        }
+    }
+
+    private _text: string = "";
+    public get Text(): string {
+        return this._text;
+    }
+    public set Text(val: string) {
+        if (val != this._text) {
+            this._text = val;
+            this.Visible = true;
+        }
+    }
+
+    public onClicked: () => void;
+    public jButton: JQuery;
+    public jImage: JQuery;
+    public jGroupButton: JQuery;
+    public jMenu: JQuery;
+
+    public menuItems = new VXM.TMenuItemCollection<VXM.TMenuItem>();
+    public createMenuItem(text: string, onClicked?: () => void): VXM.TMenuItem {
+        var menuItem = new VXM.TMenuItem();
+        menuItem.Text = text;
+        menuItem.onClicked = onClicked;
+        this.menuItems.add(menuItem);
+        return menuItem;
+    }
+}
+
+
+
 //A Panel to hold all graphics for an inner group - the content of a group
 export class TAccordionGroupPanel extends VXW.TPanel {
     constructor(aOwner: VXC.TComponent, renderTo?: string, headerText?: string) {
@@ -231,11 +365,38 @@ export class TAccordionGroupPanel extends VXW.TPanel {
 export class TAccordionGroup extends VXO.TCollectionItem {
     private _acc: V.TAccordion = null;
 
-    private jaccordiongroup: JQuery = null;
+    public jComponent: JQuery = null;
     private jaccordionheading: JQuery = null;
     private jaccordiontoggle: JQuery = null;
-    private jaccordiontoggleText: JQuery = null;
     private jaccordiontoggleCont: JQuery = null;
+
+    public Button1: TAccordionGroupButton;
+    public Button2: TAccordionGroupButton;
+    public Button3: TAccordionGroupButton;
+    public onChecboxClicked: (sender: TAccordionGroup ) => void;
+
+    private _showselectcheckbox: boolean = false;
+    public get ShowSelectCheckbox(): boolean {
+        return this._showselectcheckbox;
+    }
+    public set ShowSelectCheckbox(val: boolean) {
+        if (val != this._showselectcheckbox) {
+            this._showselectcheckbox = val;
+            this.draw(true);
+        }
+    }
+
+    private _expanded: boolean = false;
+    public get Expanded(): boolean {
+        return this._expanded;
+    }
+    public set Expanded(val: boolean) {
+        if (val != this._expanded) {
+            this._expanded = val;
+            this.draw(false);
+        }
+    }
+
 
     private _refcontainer: VXCO.TContainer = null;
 
@@ -243,10 +404,90 @@ export class TAccordionGroup extends VXO.TCollectionItem {
         super();
         this._acc = aOwner;
         this._refcontainer = refcontainer;
-        this._headerContainer = new VXCO.TContainer(this._acc);
-        this.HeaderSelectionBox = new V.TCheckBox(this._acc);
-        this.HeaderSelectionBox.Visible = false;
+        this.Button1 = new TAccordionGroupButton(this);
+        this.Button2 = new TAccordionGroupButton(this);
+        this.Button3 = new TAccordionGroupButton(this);
     }
+
+    private jButtons: JQuery;
+
+    public destroy() {
+        if (this._acc != null) {
+            var a = this._acc.items.remove(this);
+        }
+        this.jComponent.remove();
+    }
+
+
+    private createButton(button: TAccordionGroupButton, clickEvent: () => void) {
+        button.jGroupButton = $('<div>');
+        button.jGroupButton.addClass('btn-group');
+        button.jButton = $('<button>');
+        button.jImage = $('<img>');
+        button.jButton.css('padding', '0px').css('background-color', 'transparent').css('vertical-align', 'middle');
+        button.jButton.css('box-shadow', 'none');
+        button.jButton.css('border', 'none');
+        if (clickEvent)
+            button.jButton.off("click").click(clickEvent);
+        else
+            button.jButton.off("click").click(() => {
+                if (button.menuItems.length() > 0) button.jGroupButton.dropdown();
+                if (button.onClicked != null) (V.tryAndCatch(() => { button.onClicked(); }));
+            });
+        button.jGroupButton.prependTo(this.jButtons);
+        button.jImage.prependTo(button.jButton);
+        button.jButton.prependTo(button.jGroupButton);
+    
+        if (button.MarginBottom) button.jButton.css('margin-bottom', button.MarginBottom + "px");
+        if (button.MarginTop) button.jButton.css('margin-top', button.MarginTop + "px");
+        if (button.MarginLeft) button.jButton.css('margin-left', button.MarginLeft + "px");
+        if (button.MarginRight) button.jButton.css('margin-right', button.MarginRight + "px");
+        if (button.Color) button.jButton.css('color', button.Color);
+
+        if (button.Text != null && button.Text != "") {
+            button.jButton.text(button.Text).addClass('btn-link');
+        } else {
+            if (button.ImageUrl) {
+                button.jImage.attr('src', button.ImageUrl);
+            }
+            else {
+                button.jButton.addClass('btn');
+                button.jButton.addClass("icon");
+                button.jButton.addClass(V.iconEnumToBootstrapStyle(<any>button.Icon)).text('');
+            }
+        }
+
+        if (button.jMenu) button.jMenu.remove();
+        if (button.menuItems.length() > 0) {
+            button.jButton.attr('data-toggle', "dropdown");
+            button.jButton.addClass('dropdown-toggle');
+            button.jMenu = button.menuItems.createmenu('dropdown-menu');
+            button.jMenu.data('open', false);
+            button.jMenu.appendTo(button.jGroupButton);
+            $('.dropdown-toggle').dropdown()
+        }
+
+        //remove the old tooltip
+        button.jButton.data('tooltip', false);
+        if (button.Tooltip != "" && button.Tooltip != null) {
+            button.jButton.tooltip({ title: button.Tooltip });
+        }
+
+        button.jGroupButton.css('display', button.Visible ? 'inline-block' : 'none');
+    }
+
+    private _checked: boolean = null;
+    public get Checked(): boolean {
+        return this._checked;
+    }
+    public set Checked(val: boolean) {
+        if (val != this._checked) {
+            this._checked = val;
+            this.draw(false);
+        }
+    }
+
+
     private _text: string = null;
     public get Text(): string {
         return this._text;
@@ -254,88 +495,71 @@ export class TAccordionGroup extends VXO.TCollectionItem {
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
-            this._acc.drawDelayed(true);
+            this.draw(false);
         }
     }
-    private _headerContainer: V.TContainer;
-    public get HeaderContainer(): V.TContainer {
-        return this._headerContainer;
-    }
-    public set HeaderContainer(val: V.TContainer) {
-        if (val != this._headerContainer) {
-            this._headerContainer = val;
-            this._acc.drawDelayed(true);
-        }
-    }
-    private _headerSelectionBox: V.TCheckBox;
-    public get HeaderSelectionBox(): V.TCheckBox {
-        return this._headerSelectionBox;
-    }
-    public set HeaderSelectionBox(val: V.TCheckBox) {
-        if (val != this._headerSelectionBox) {
-            this._headerSelectionBox = val;
-            this._acc.drawDelayed(true);
-        }
-    }
-    private _showSelectionBox: boolean;
-    public get ShowSelectionBox(): boolean {
-        return this._showSelectionBox;
-    }
-    public set ShowSelectionBox(val: boolean) {
-        if (val != this._showSelectionBox) {
-            this._showSelectionBox = val;
-            this._headerSelectionBox.Visible = val;
-            this._acc.drawDelayed(true);
-        }
-    }
-    private _expandFirstGroup: boolean;
-    public get ExpandFirstGroup(): boolean {
-        return this._expandFirstGroup;
-    }
-    public set ExpandFirstGroup(val: boolean) {
-        if (val != this._expandFirstGroup) {
-            this._expandFirstGroup = val;
-            this._headerSelectionBox.Visible = val;
-            this._acc.drawDelayed(true);
-        }
-    }
+
+    private jCheckbox: JQuery;
+    private jAccBody: JQuery;
+
     public create() {
         var self: V.TAccordionGroup = this;
         //Creating bootstrap taks which represent an Accordion Group
-        this.jaccordiongroup = $('<div>');
-        this.jaccordiongroup.addClass('accordion-group row-fluid').attr('ID', this.ID);
-        //Deal with checkbox
-        if (this._showSelectionBox && this._headerSelectionBox) {
-            //this._headerSelectionBox.addClass('span1');
-            this.jaccordiongroup.append(this._headerSelectionBox.jComponent[0].innerHTML);
-        }
+        this.jComponent = $('<div>');
+        this.jComponent.addClass('accordion-group row-fluid').attr('ID', this.ID);
         this.jaccordionheading = $('<div>');
-        this.jaccordionheading.addClass('accordion-heading').css('display', 'inline-block');
-        //if (this._showSelectionBox) this.jaccordionheading.addClass('span11');
+        this.jaccordionheading.addClass('accordion-heading');//.css('display', 'inline-block');
         this.jaccordiontoggle = $('<a>');
-        this.jaccordiontoggle.addClass('accordion-toggle').attr('data-toggle', 'collapse').attr('data-parent', '#' + this._acc.ID).attr('href', '#' + this._refcontainer.ID + "yk");//.text('Yos' + '#' + this._refcontainer.ID);
-        this.jaccordiontoggleText = $('<span/>').text(this.Text);
+        
+        this.jaccordiontoggle.addClass('accordion-toggle').attr('data-toggle', 'collapse').attr('data-parent', '#' + this._acc.ID);
+        if (this._refcontainer)  this.jaccordiontoggle.attr('href', '#' + this._refcontainer.ID + "yk");
         //Add the Header Container if defined else the provided text
-        if (this._headerContainer)
-            this.jaccordiontoggle.append(this.HeaderContainer.jComponent[0].innerHTML);//jaccordiontoggleText);
-        else
-            this.jaccordiontoggle.append(this.jaccordiontoggleText);
+
+        if (this.ShowSelectCheckbox) {
+            this.jCheckbox = $('<input >');
+            this.jCheckbox.attr('type', 'checkbox').css('float', 'left').addClass('accordion-checkbox');
+            this.jaccordionheading.append(this.jCheckbox);
+
+            this.jCheckbox.change((event) => {
+                self.Checked = this.jCheckbox.prop('checked');
+                if (self.onChecboxClicked != null) (V.tryAndCatch(() => { self.onChecboxClicked(this); }));
+            })
+
+        }
+
         this.jaccordionheading.append(this.jaccordiontoggle);
-        this.jaccordiongroup.append(this.jaccordionheading);
+        this.jComponent.append(this.jaccordionheading);
 
         if (this._refcontainer) { //Build the refcontainer html -> The Inside of Accordion group
-            var refcontbody = $('<div>');
-            if (this._expandFirstGroup)
-                refcontbody.addClass('accordion-body collapse in').attr('ID', this._refcontainer.ID + "yk");
-            else
-                refcontbody.addClass('accordion-body collapse').attr('ID', this._refcontainer.ID + "yk");
+            this.jAccBody = $('<div>');
+            this.jAccBody.addClass('accordion-body collapse').attr('ID', this._refcontainer.ID + "yk");
             var refcontinner: JQuery = $('<div>');
             refcontinner.addClass('accordion-inner');
             //var innerref: JQuery = this._refcontainer.jComponent;//  $('#' + this._refcontainer.ID); 
             refcontinner.append(this._refcontainer.jComponent);
-            refcontbody.append(refcontinner);
-            this.jaccordiongroup.append(refcontbody);
+            this.jAccBody.append(refcontinner);
+            this.jComponent.append(this.jAccBody);
             this._refcontainer.create();
+        }
+        this.jButtons = $("<div>").addClass("accordion-button").css('float','right');
+        this.createButton(this.Button1, null);
+        this.createButton(this.Button2, null);
+        this.createButton(this.Button3, null);
+
+        this.jButtons.prependTo(this.jaccordionheading);
+    }
+
+    public draw(recreate: boolean)  {
+        if (recreate) this.create();
+
+        if (this.jCheckbox) this.jCheckbox.prop('checked', this.Checked);
+        if (this.jaccordiontoggle) this.jaccordiontoggle.html(this.Text)
+        if (this.Expanded) {
+            if (this.jaccordiontoggle) this.jaccordiontoggle.removeClass('collapsed');
+            if (this.jAccBody) this.jAccBody.addClass('in');
+        } else {
+            if (this.jaccordiontoggle)  this.jaccordiontoggle.addClass('collapsed');
+        if (this.jAccBody) this.jAccBody.removeClass('in');
         }
     }
 }
@@ -343,14 +567,14 @@ export class TAccordionGroup extends VXO.TCollectionItem {
 //The main Accordion element - holds an array of TAccordionGroups
 export class TAccordion extends VXCO.TContainer {
     public items: V.TCollection<TAccordionGroup> = new V.TCollection<TAccordionGroup>();
-    private created: boolean = false;
     private jaccordion: JQuery = null;
 
     public createAccordionGroup(text: string, refcontainer: VXCO.TContainer): TAccordionGroup {
         var ag = new TAccordionGroup(this, refcontainer);
-        this.items.add(ag);
         ag.Text = text;
-        refcontainer.FitToWidth = true;
+        this.items.add(ag);
+        if (refcontainer) refcontainer.FitToWidth = true;
+        this.drawDelayed(true);
         return ag;
     }
 
@@ -362,15 +586,14 @@ export class TAccordion extends VXCO.TContainer {
         this.jaccordion = $('<div>');
         this.jaccordion.addClass('accordion').attr('ID', this.ID);
         this.items.forEach((item) => {
-            item.create();
-            var td: V.TComponent = (<any>item).jaccordiongroup;
-            if (td) {
-                this.jaccordion.append(td);
+            item.draw(true);
+            if (item && item.jComponent) {
+                this.jaccordion.append(item.jComponent);
             }
         });
         //Attach the accordion element to the jComponent
         this.jComponent.append(this.jaccordion);
-        this.created = true;
+        //var x = this.jaccordion.collapse()
     }
 
     public draw(reCreate: boolean) {

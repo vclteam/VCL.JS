@@ -7,11 +7,12 @@ export class TServer {
     public  CallType: string = "POST";
 
     public 
-    constructor(async?: boolean) {
+    constructor(async?: boolean,atimeout? : number) {
         this.async = true;
         if (async != null) this.async = async;
-
+        if (atimeout) this.timeout = atimeout;
     }
+
 
     getHTML(filename: string, callback?: (data) => any, errorCallback?: (textStatus: string) => any) {
         var key = "getHTML~" + filename + "~E31dfdf~";

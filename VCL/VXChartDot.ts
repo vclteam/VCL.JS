@@ -1,40 +1,16 @@
 import V = require("VCL/VCL");
 import VXU = require("VCL/VXUtils");
-import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 import VXCB = require("VCL/VXChartBase");
 
 declare var Raphael;
-export class TChartDotBase extends VXCB.TChartBase {
+export class TChartDotBase extends VXCB.TGridChartBase {
     private selectednode: any;
 
-    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+    constructor(aOwner: V.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         (<any>this)._fittowidth = true;
         this.Height = 200;
-    }
-
-
-    private _titleX: string;
-    public get TitleX(): string {
-        return this._titleX;
-    }
-    public set TitleX(val: string) {
-        if (val != this._titleX) {
-            this._titleX = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _titleY: string;
-    public get TitleY(): string {
-        return this._titleY;
-    }
-    public set TitleY(val: string) {
-        if (val != this._titleY) {
-            this._titleY = val;
-            this.drawDelayed(true);
-        }
     }
 
     private _showselecteditem: boolean = true;
@@ -51,11 +27,11 @@ export class TChartDotBase extends VXCB.TChartBase {
         }
     }
 
-    private _Dotcolor: string;
+    private _Dotcolor: string = "#9dcdd4";
     public get DotColor(): string {
         return this._Dotcolor;
     }
-    public set TextColor(val: string) {
+    public set DotColor(val: string) {
         if (V.Application.checkColorString(val)) {
             if (val != this._Dotcolor) {
                 this._Dotcolor = val;
@@ -63,7 +39,6 @@ export class TChartDotBase extends VXCB.TChartBase {
             }
         }
     }
-
 
     private _horizontalgridline: number = 0;
     public get HorizontalGridLineWidth(): number {
@@ -147,15 +122,30 @@ export class TChartDotBase extends VXCB.TChartBase {
     }
 }
 
+class Dot extends VXCB.Grid {
+    constructor(options, owner) {
+        super(options, owner);
+        this.grid = [];
+        this.resizeEvent();
+    }
+
+    redraw() {
+        this.owner.create();
+        this.resizeEvent();
+    }
+}
+
 export class TChartDot extends TChartDotBase {
     //depricated - use ToolTipFormat instead
     public onGetLabelText: (item: V.TDotValue) => any;
     public onClicked: (item: V.TDotValue) => void;
 
-    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+    constructor(aOwner: V.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         if (this.ToolTipFormat)
             this.onGetLabelText = this.ToolTipFormat;
+
+        var dot = new Dot({ element: this.jComponent[0] }, this);
     }
 
 
@@ -181,6 +171,7 @@ export class TChartDot extends TChartDotBase {
             this.onGetLabelText = this.ToolTipFormat;
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+        $(this.jComponent[0]).empty();
         this.raphael = new Raphael(this.jComponent[0]);
         var xSet = new V.TList<string>();
         var ySet = new V.TList<string>();
@@ -210,17 +201,37 @@ export class TChartDot extends TChartDotBase {
             ids.push(item);
         });
 
-
+        var colors = [this.DotColor] //UC.Colors.calculateShades(this.DotColor, ids.length);
         var self = this;
-        this.dotchart = this.raphael.dotchart(0, 0, this.Width, this.Height, xs, ys, data, ids, {
-            symbol: "o", max: this.DotMaxSize, heat: this.HeatMap,
-            axis: "0 0 1 1", horizgridline: this.HorizontalGridLineWidth,
-            vertgridline: this.VerticalGridLineWidth, gridlinecolor: this.GridLineColor,
-            axisxstep: axisx.length - 1, axisystep: axisy.length - 1,
-            axisxlabels: axisx, axisylabels: axisy,
-            axisxtype: " ", axisytype: " ", opacity: this.Opacity, titleX: this.TitleX, titleY: this.TitleY
-
-        });
+        this.dotchart = this.raphael.dotchart(0, 0, this.Width, this.Height - 12, xs, ys, data, ids,
+            {
+                symbol: "o",
+                colors: colors,
+                max: this.DotMaxSize,
+                heat: this.HeatMap,
+                axis: "0 0 1 1",
+                horizgridline: this.HorizontalGridLineWidth,
+                vertgridline: this.VerticalGridLineWidth,
+                gridlinecolor: this.GridLineColor,
+                gridTextColor: this.GridTextColor,
+                titleTextColor: this.TitleTextColor,
+                gridTextSize: this.GridTextSize,
+                titleTextSize: this.TitleTextSize,
+                preUnits: this.PreValueUnit,
+                postUnits: this.PostValueUnit,
+                gridTextFamily: this.Font,
+                gridTitleWeight: this.GridTitleWeight,
+                gridTextWeight: this.GridTextWeight,
+                axisxstep: axisx.length - 1,
+                axisystep: axisy.length - 1,
+                axisxlabels: axisx,
+                axisylabels: axisy,
+                axisxtype: " ",
+                axisytype: " ",
+                opacity: this.Opacity,
+                titleX: this.TitleX,
+                titleY: this.TitleY,
+            });
 
         var hover = new VXCB.Hover({
             parent: this.jComponent
@@ -254,7 +265,7 @@ export class TChartDot extends TChartDotBase {
                         (<any>self).selectednode.attr({ stroke: "none", "stroke-width": 0 })
                      }
                     (<any>self).selectednode = this;
-                    this.attr({ stroke: "#000", "stroke-width": 2 })
+                    this.attr({ stroke: '#000', "stroke-width": 2 })
                 }
                 if (self.onClicked) self.onClicked(this.obj);
             });
@@ -269,7 +280,7 @@ export class TChartBubble extends TChartDotBase {
     public onGetLabelText: (item: V.TDotValue) => any;
     public onClicked: (item: V.TDotValue) => void;
 
-    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+    constructor(aOwner: V.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         if (this.ToolTipFormat)
             this.onGetLabelText = this.ToolTipFormat;
@@ -288,7 +299,7 @@ export class TChartBubble extends TChartDotBase {
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
-        super.draw(true);
+        super.draw(reCreate);
     }
 
     public create() {
@@ -313,13 +324,28 @@ export class TChartBubble extends TChartDotBase {
             ids.push(item);
         });
 
+
         var self = this;
         this.dotchart = this.raphael.dotchart(0, 0, this.Width, this.Height, xs, ys, data, ids, {
-            symbol: "o", max: this.DotMaxSize, heat: this.HeatMap,
+            symbol: "o",
+            max: this.DotMaxSize,
+            heat: this.HeatMap,
             axis: "0 0 1 1",
             // axisxstep: axisx.length - 1, axisystep: axisy.length - 1,
-
-            axisxtype: " ", axisytype: " ", opacity: this.Opacity, titleX: this.TitleX, titleY: this.TitleY
+            gridTextColor: this.GridTextColor,
+            titleTextColor: this.TitleTextColor,
+            gridTextSize: this.GridTextSize,
+            titleTextSize: this.TitleTextSize,
+            preUnits: this.PreValueUnit,
+            postUnits: this.PostValueUnit,
+            gridTextFamily: this.Font,
+            gridTitleWeight: this.GridTitleWeight,
+            gridTextWeight: this.GridTextWeight,
+            axisxtype: " ",
+            axisytype: " ",
+            opacity: this.Opacity,
+            titleX: this.TitleX,
+            titleY: this.TitleY
         });
 
         var hover = new VXCB.Hover({
@@ -354,7 +380,7 @@ export class TChartBubble extends TChartDotBase {
                     (<any>self).selectednode.attr({ stroke: "none", "stroke-width": 0 })
                  }
                 (<any>self).selectednode = this;
-                this.attr({ stroke: "#000", "stroke-width": 2 })
+                this.attr({ stroke: '#000', "stroke-width": 2 })
             }
             if (self.onClicked) self.onClicked(this.obj);
         });

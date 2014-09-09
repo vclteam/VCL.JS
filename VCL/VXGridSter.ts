@@ -142,6 +142,7 @@ export class TWidgetGrid extends VXCO.TContainer {
         item.HeaderText = headerText;
         this.widgets.add(item);
         if (sizeX != null) if (this.jGridster != null) this._addWidget(item);
+        this.drawDelayed(true);
         return item;
     }
 
@@ -210,10 +211,15 @@ export class TWidgetGrid extends VXCO.TContainer {
             widgetID.jComponent.attr('data-col', widgets[i].X);
         }
         //handle all new wigets
-        this.widgets.forEach((item) => {
+        this.widgets.forEach((item: TWdgetPanel) => {
             if (item.Tag == 0) {
                 var obj = this.jGridster.next_position(item.SizeX, item.SizeY);
 
+                item.X = obj.col;
+                item.Y = obj.row;
+
+                item.jComponent.attr('data-row', item.Y);
+                item.jComponent.attr('data-col', item.X);
             }
         });
 

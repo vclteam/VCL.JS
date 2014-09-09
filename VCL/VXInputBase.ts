@@ -285,12 +285,11 @@ export class TInputBase extends TEditorBase {
         if (this.Rtl == true) this.jEdit.attr("dir", "RTL");
         this.jinternalSpan.append(this.jEdit);
        
-
+        this.jComponent.addClass('input-append');
         if (this.ButtonVisible) {
             this.jBtn = $('<button/>').attr('tab-index','-1').css('outline','none');
             this.jBtn.addClass('btn');
             this.jBtn.attr('type', "button").css('float', 'right');
-            this.jComponent.addClass('input-append');
             switch (this.ButtonStyle) {
                 case V.ButtonStyle.Default: break;
                 case V.ButtonStyle.Primary: this.jBtn.addClass("btn-primary"); break;

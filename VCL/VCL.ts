@@ -147,10 +147,13 @@ export class TNavBar extends VXSideBarMod.TNavBar { };
 
 import VXWellMod = require("VCL/VXWell");
 export class TWell extends VXWellMod.TWell { };
+export class TCarousel extends VXWellMod.TCarousel { };
 export class TGoogleMap extends VXWellMod.TGoogleMap { };
 export class TGoogleMapMarker extends VXWellMod.TGoogleMapMarker { };
+export class TGoogleMapHeatmapMarker extends VXWellMod.TGoogleMapHeatmapMarker { };
 export class TPanel extends VXWellMod.TPanel { }; 
 export class TPanelButton extends VXWellMod.TPanelButton { };
+export class TGraphEditor extends VXWellMod.TGraphEditor { };
 
 import VXCheckboxMod = require("VCL/VXCheckBox");
 export class TCheckBox extends VXCheckboxMod.TCheckBox { };
@@ -209,7 +212,7 @@ export class TDountValue extends VXChartMod.TDountValue { };
 export class TBarValue extends VXChartMod.TBarValue { };
 export class TLineValue extends VXChartMod.TLineValue { };
 export class TDotValue extends VXChartMod.TDotValue { };
-
+export class TSelectedChartValue extends VXChartMod.TSelectedChartValue { };
 
 import VXDotMod = require("VCL/VXChartDot");
 export class TChartDot extends VXDotMod.TChartDot { };
@@ -221,6 +224,7 @@ import VXInputDateMod = require("VCL/VXDateInput");
 export class TInputDate extends VXInputDateMod.TDateInput { };
 export class TDBInputDate extends VXInputDateMod.TDBDateInput { };
 export class TInputTime extends VXInputDateMod.TInputTime { };
+export class TDateButton extends VXInputDateMod.TDateButton { };
 
 
 import VXSparkMod = require("VCL/VXSparkLine");
@@ -344,6 +348,8 @@ export enum DeviceType {
     Phone,
     Default
 }
+
+
 export enum TextStyle {
     Default,
     h1,
@@ -356,6 +362,15 @@ export enum TextStyle {
     small,
     strong,
 }
+
+export enum AggergateFunction {
+    None,
+    Sum,
+    Max,
+    Min,
+    Avg,
+}
+
 
 export enum HeaderTextStyle {
     Default,
@@ -777,7 +792,6 @@ function dummy() {
     new VXSSASMod.TOlapSSAS(null);
     new VXInputDateMod.TDBDateInput(null);
     new VXPageMod.TPage();
-    new VXDatasetMod.TObjectDataset();
     new VXSideBarMod.TSideBar(null);
     new VXCheckboxMod.TCheckBox(null);
     new VXDonutMod.TChartDonut(null);

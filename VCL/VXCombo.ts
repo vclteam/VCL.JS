@@ -357,9 +357,14 @@ export class TCombobox extends TComboboxBase {
     public create() {
         super.create();
         var self = this;
+        var currVal;
         this.jEdit.change((item) => {
-            var dpVal = this.jEdit.selectpicker("val").toString();
-            var currVal: string[] = dpVal.split(',');
+            if (typeof self.jEdit.selectpicker("val") == "string") {
+                var dpVal = self.jEdit.selectpicker("val").toString();
+                currVal = dpVal.split(',');
+            } else currVal = self.jEdit.selectpicker("val")
+            var oldText :String = self.Text;
+
             var newVal = new Array();
             this.items.forEach((item) => { item.Checked = false; });
             for (var i = 0; i < currVal.length; i++) {
@@ -370,7 +375,7 @@ export class TCombobox extends TComboboxBase {
                 }
             }
 
-            if (self.onChanged && currVal != newVal) (V.tryAndCatch(() => { self.onChanged(self); }))
+            if (self.onChanged && oldText != self.Text) (V.tryAndCatch(() => { self.onChanged(self); }))
         });
     }
 

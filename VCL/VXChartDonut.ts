@@ -4,54 +4,40 @@ import VXC = require("VCL/VXComponent");
 import VXD = require("VCL/VXDataset");
 import VXCB = require("VCL/VXChartBase");
 
-export class TChartPieBase extends VXCB.TChartBase{
-    public onSelectionchanged: (value: V.TDountValue) => void;
+export class TChartDonut extends VXCB.TChartBase {
     public onClicked: (value: V.TDountValue) => void;
 
 
-    private _fulldonut: boolean = false;
+
+
+    private _humanFriendlyvalue: boolean = false;
     /**
-    * Specifies the field from which the edit control displays data.
+    * Donut become a pie
     */
-    public get FullDonut(): boolean {
-        return this._fulldonut;
+    public get HumanFriendlyValueFormat(): boolean {
+        return this._humanFriendlyvalue;
     }
-    public set FullDonut(val: boolean) {
-        if (val != this._fulldonut) {
-            this._fulldonut = val;
+    public set HumanFriendlyValueFormat(val: boolean) {
+        if (val != this._humanFriendlyvalue) {
+            this._humanFriendlyvalue = val;
             this.drawDelayed(true);
         }
     }
 
 
-    private _drawlabel: boolean = true;
+    private _behaveLikePie: boolean = false;
     /**
-    * Specifies the field from which the edit control displays data.
+    * Donut become a pie
     */
-    public get DrawLabel(): boolean {
-        return this._drawlabel;
+    public get BehaveLikePie(): boolean {
+        return this._behaveLikePie;
     }
-    public set DrawLabel(val: boolean) {
-        if (val != this._drawlabel) {
-            this._drawlabel = val;
+    public set BehaveLikePie(val: boolean) {
+        if (val != this._behaveLikePie) {
+            this._behaveLikePie = val;
             this.drawDelayed(true);
         }
     }
-
-    private _drawvalue: boolean = true;
-    /**
-    * Specifies the field from which the edit control displays data.
-    */
-    public get DrawValue(): boolean {
-        return this._drawvalue;
-    }
-    public set DrawValue(val: boolean) {
-        if (val != this._drawvalue) {
-            this._drawvalue = val;
-            this.drawDelayed(true);
-        }
-    }
-
 
     private _startangle: number = 0;
     /**
@@ -81,6 +67,67 @@ export class TChartPieBase extends VXCB.TChartBase{
         }
     }
 
+    private _drawlabel: boolean = true;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get DrawLabel(): boolean {
+        return this._drawlabel;
+    }
+    public set DrawLabel(val: boolean) {
+        if (val != this._drawlabel) {
+            this._drawlabel = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _drawvalue: boolean = true;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get DrawValue(): boolean {
+        return this._drawvalue;
+    }
+    public set DrawValue(val: boolean) {
+        if (val != this._drawvalue) {
+            this._drawvalue = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _titletextsize: number = 15;
+    public get TextSize(): number {
+        return this._titletextsize;
+    }
+    public set TextSize(val: number) {
+        if (val != this._titletextsize) {
+            this._titletextsize = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _font: string = 'sans-serif';
+    public get TextFont(): string {
+        return this._font;
+    }
+    public set TextFont(val: string) {
+        if (val != this._font) {
+            this._font = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _titleTextWeight: string = "bold";
+    public get TitleTextWeight(): string {
+        return this._titleTextWeight;
+    }
+    public set TitleTextWeight(val: string) {
+        if (val != this._titleTextWeight) {
+            this._titleTextWeight = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     public values = new VXCB.TChartValuesCollection<VXCB.TDountValue>();
     public createValue(label: string, value: number): VXCB.TDountValue {
@@ -92,18 +139,6 @@ export class TChartPieBase extends VXCB.TChartBase{
         return col;
     }
 
-    public getData(): any[] {
-        var dataArray = [];
-        this.values.forEach((valueOfElement: VXCB.TDountValue) => {
-            var obj: any = { label: valueOfElement.Label, value: valueOfElement.Value, id: valueOfElement.ID };
-            dataArray.push(obj);
-            return true;
-        });
-        return dataArray;
-    }
-}
-
-export class TChartDonut extends TChartPieBase{
     private _basecolor: V.BaseColor = V.BaseColor.Primary;
     public get BaseColor(): V.BaseColor {
         return this._basecolor;
@@ -111,11 +146,11 @@ export class TChartDonut extends TChartPieBase{
     public set BaseColor(val: V.BaseColor) {
         if (val != this._basecolor) {
             this._basecolor = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
-    private _colorPallete: Array<string> = new Array < string>();
+    private _colorPallete: Array<string> = new Array<string>();
     public get ColorPallete(): Array<string> {
         return this._colorPallete;
     }
@@ -131,7 +166,7 @@ export class TChartDonut extends TChartPieBase{
 
         if (allColorOK) {
             this._colorPallete = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -147,11 +182,22 @@ export class TChartDonut extends TChartPieBase{
     }
 
 
+    public getData(): any[] {
+        var dataArray = [];
+        this.values.forEach((valueOfElement: VXCB.TDountValue) => {
+            var obj: any = { label: valueOfElement.Label, value: valueOfElement.Value, id: valueOfElement.ID };
+            dataArray.push(obj);
+            return true;
+        });
+        return dataArray;
+    }
 
     public create() {
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         var dataArray = this.getData();
+
+        this.TruncateLength = null;
 
         var btnColor: string;
         switch (this.BaseColor) {
@@ -163,6 +209,7 @@ export class TChartDonut extends TChartPieBase{
             case V.BaseColor.Danger: btnColor = "btn-danger"; break;
             default: btnColor = "btn-primary"; break;
         }
+
         var colors;
         if (this.ColorPallete && this.ColorPallete.length > 0) colors = this.ColorPallete;
         else {
@@ -170,18 +217,26 @@ export class TChartDonut extends TChartPieBase{
             colors = calculateShades(btnColor, dataArray.length);
             for (var j, x, i = colors.length; i; j = Math.floor(Math.random() * i), x = colors[--i], colors[i] = colors[j], colors[j] = x);
         }
+
         this.donut = new Donut({
+            xkey: "label",
+            ykeys: ["value"],
+            backgroundColor: '#FFFFFF',
+            labelColor: '#000000',
             element: this.jComponent[0],
             data: dataArray,
             colors: colors,
+            startangle: this.StartAngle,
+            endangle: this.EndAngle,
+            xLabelFormat: this.XLabelFormat,
+            yLabelFormat: this.YLabelFormat,
+            behaveLikePie: this.BehaveLikePie,
+            gridTextWeight: this.TitleTextWeight,
+            gridTextSize: this.TextSize,
+            gridTextFamily: this.TextFont,
             drawlabel: this.DrawLabel,
             drawvalue: this.DrawValue,
-            startangle: this.StartAngle,
-            fulldonut : this.FullDonut,
-            endangle:this.EndAngle,
-            xLabelFormat: this.XLabelFormat,
-            yLabelFormat: this.YLabelFormat
-
+            humanfriendly: this.HumanFriendlyValueFormat
         }, this);
         super.create();
     }
@@ -190,6 +245,8 @@ export class TChartDonut extends TChartPieBase{
         var hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
     }
+
+
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
@@ -286,224 +343,273 @@ export class TDBChartDonut extends TChartDonut {
 declare var Raphael;
 var __slice = [].slice;
 
-
-class Donut extends VXCB.EventEmitter {
-    private el;
-    private options;
-    private data;
-    private values;
-    private raphael;
+class Donut extends VXCB.Grid {
     public segments: DonutSegment[];
     private text2;
     private text1;
-    private timeoutId;
-
-    defaults = {
-        colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
-        backgroundColor: '#FFFFFF',
-        labelColor: '#000000',
-        formatter: commas,
-        xLabelFormat: null, //can be function or text
-        yLabelFormat: null //can be function or text
-    };
 
     constructor(options, owner) {
-        super();
-        this.owner = owner;
-        this.select = __bind(this.select, this);
-
-        this.click = __bind(this.click, this);
-
-        var row;
-        /*if (!(this instanceof Donut)) {
-            return new Donut(options);
-        }*/
-        if (typeof options.element === 'string') {
-            this.el = $(document.getElementById(options.element));
-        } else {
-            this.el = $(options.element);
-        }
-        this.options = $.extend({}, this.defaults, options);
-        if (this.el === null || this.el.length === 0) {
-            throw new Error("Graph placeholder not found.");
-        }
-        if (options.data === void 0 || options.data.length === 0) {
-            return;
-        }
-        this.data = options.data;
-        this.values = (function () {
-            var _i, _len, _ref, _results;
-            _ref = this.data;
-            _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                row = _ref[_i];
-                _results.push(parseFloat(row.value));
-            }
-            return _results;
-        }).call(this);
-        this.redraw();
+        super(options, owner);
     }
 
-    resizeHandler(self: Donut) {
-        self.timeoutId = null;
-        self.raphael.setSize(self.el.width(), self.el.height());
-        return self.redraw();
+    init() {
+        if (this.options.hideHover !== 'always') {
+            this.hover = new VXCB.Hover({
+                parent: this.el
+            });
+
+            this.on('hovermove', this.onHoverMove);
+            this.on('hoverout', this.onHoverOut);
+        }
     }
 
+
+    private oldTipId: string = "";
+    onHoverMove(x, y, evt) {
+        var tipId = evt.target.TipId;
+        var idx = evt.target.idx;
+        var series = evt.target.series;
+        var key = tipId + idx + series + "";
+        if (key == this.oldTipId) return;
+        this.oldTipId = key;
+
+        //start hover
+        if (tipId == "node")
+            this.hoverItem(idx, series);
+        else {
+            this.hoverItem(null, null);
+        }
+        if (!this.hover) return;
+    }
+
+    onHoverOut(x, y, evt) {
+        if (!this.hover) return;
+        if (this.options.hideHover !== false) {
+            return this.hover.hide();
+        }
+    }
 
     redraw() {
         var C, cx, cy, i, idx, last, max_value, min, next, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
         this.el.empty();
         this.raphael = new Raphael(this.el[0]);
         var self = this;
-        $(window).bind('resize', function (evt) {
-            if (self.timeoutId != null) {
-                window.clearTimeout(self.timeoutId);
-            }
-            return self.timeoutId = window.setTimeout(self.resizeHandler, 30, self);
-        });
 
-        cx = this.el.width() / 2;
-        cy = this.el.height() / 2;
-        w = (Math.min(cx, cy) - 10) / 3;
+        var ang: number = Math.min(this.options.endangle - this.options.startangle, 360);
+
+        var ww = this.el.width();
+        var hh = this.el.height();
+        var div = ww > hh && ang == 180 ? 1.1 : 2;
+        cx = ww / 2;
+        cy = hh / div /*+ 10*/;
+        var txtH = this.measureText('---').height;
+        var txtY;;
+
+        if (this.options.behaveLikePie) {
+            txtY = txtH;
+
+            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 5, "---");
+        } else if (Math.abs(Math.abs(this.options.endangle) - Math.abs(this.options.startangle)) > 91) {
+            txtY = cy - txtH * 2;
+            txtH = 0;
+            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 30, "---");
+        } else {
+            txtY = cy - txtH * 2;
+            txtH = 0;
+            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 10, "---");
+        }
+        w = (Math.min(cx, cy - txtH * 3)) / 3 - 1;
         total = 0;
-        _ref = this.values;
+        _ref = this.data;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            value = _ref[_i];
+            value = _ref[_i].y[0];
             total += value;
         }
         min = 5 / (2 * w);
-        var ang: number = Math.min(this.options.endangle - this.options.startangle,360);
-        ang = (ang / 180)-0.0001
-        C = ang * Math.PI - min * this.data.length; 
+        C = (ang / 180) * Math.PI - min * this.data.length - 0.0001;
         last = (this.options.startangle / 180) * Math.PI;
-        //last=0;
         idx = 0;
+
         this.segments = [];
-        _ref1 = this.values;
+        _ref1 = this.data;
         for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
-            value = _ref1[i];
+            value = _ref1[i].y[0];
             next = last + min + C * (value / total);
             var inner = 0;
             var outer = 0;
-            inner = w * 2;
-            outer = w; 
-            if (this.options.fulldonut) { inner = 0; outer = w * 3; } 
-
-            seg = new DonutSegment(cx, cy, inner, outer, last, next,
+            if (this.options.behaveLikePie) { inner = 0; outer = w * 2.5; } else { inner = w * 2; outer = Math.max(20, w); }
+            seg = new DonutSegment(
+                cx, cy, inner, outer, last, next - 0.02,
                 this.options.colors[idx % this.options.colors.length],
-                this.options.backgroundColor, idx, this.raphael);
+                this.options.backgroundColor, idx, this.raphael, _ref1.length);
             seg.ID = this.data[i].id;
-            seg.render();
+            var s = seg.render();
+            s.node.TipId = "node";
+            s.node.idx = idx;
+            s.node.series = -1;
+            s.node.onclick = function (evt, x, y) {
+                var offset = $(self.el).offset();
+                self.click(evt.pageX - offset.left, evt.pageY - offset.top, evt);
+            };
             this.segments.push(seg);
-            seg.on('hover', this.select);
-            seg.on('click', this.click);
             last = next;
             idx += 1;
         }
-        
-        this.text1 = this.drawEmptyDonutLabel(cx, cy - 10, this.options.labelColor, 15, 400);
-        this.text2 = this.drawEmptyDonutLabel(cx, cy + 10, this.options.labelColor, 14,300);
-        max_value = Math.max.apply(null, (function () {
-            var _k, _len2, _ref2, _results;
-            _ref2 = this.values;
-            _results = [];
-            for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-                value = _ref2[_k];
-                _results.push(value);
+
+        if (_ref1.length) {
+            //glow max_value idx
+            idx = 0;
+            var max_value = this.data[0].y[0], value;
+            for (var _k1 = 0; _k1 < this.data.length; _k1++) {
+                value = this.data[_k1].y[0];
+                if (max_value < value) {
+                    max_value = value;
+                    idx = _k1;
+                }
             }
-            return _results;
-        }).call(this));
-        idx = 0;
-        _ref2 = this.values;
-        _results = [];
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-            value = _ref2[_k];
-            if (value === max_value) {
-                this.select(idx);
-                break;
-            }
-            _results.push(idx += 1);
+            this.hoverItem(idx, 0);
         }
+        this.resizeEvent();
         return _results;
     }
 
-    click(idx) {
-        var y = this.fire('click', idx, this.data[idx]);
-        if (this.owner) {
-            var owner = <TChartDonut>this.owner;
 
-            if (owner.onClicked != null && idx <= owner.values.length()) (V.tryAndCatch(() => { owner.onClicked(owner.values.toArray()[idx]); }));
-        }
-        return y;
-    }
+    click(x, y, evt) {
+        if (!this.owner) return;
+        var owner = <TChartDonut>this.owner;
+        if (!owner.SelectionEnabled) return;
 
-    select(idx: number) {
-        var oldidx: number = -1;
-        var row, s, segment, _i, _len, _ref;
-        _ref = this.segments;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            s = _ref[_i];
-            if (s.selected) oldidx = _i;
-            s.deselect();
-        }
-        segment = this.segments[idx];
-        segment.select();
-        row = this.data[idx];
-        var y = this.setLabels(row);
-        if (oldidx != idx && this.owner) {
-            var owner = <TChartDonut>this.owner;
+        var idx = evt.target.idx;
+        //var y = this.fire('click', idx, this.data[idx]);
+        var id = this.data[idx].id;
+        var item = owner.values.toArray()[idx];//owner.values.FindItemByID(id);
+        var segment = this.segments[idx];
+
+        if (item != null) {
+            var o: V.TSelectedChartValue = new V.TSelectedChartValue();
+            o.Idx = idx;
+            o.Series = 0;
+            o.ChartValue = item;
+
+            //unselect all
+            owner.SelectedItems.forEach((item) => {
+                this.segments[item.Idx].deselect();
+            });
+
+            //check clicked
+            owner.SelectedItem = o;
+            owner.SelectedItems.forEach((item) => {
+                this.segments[item.Idx].select();
+            });
+
             if (owner instanceof TDBChartDonut && (<TDBChartDonut>owner).Dataset != null) {
                 (<TDBChartDonut>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
             }
-            if (owner.onSelectionchanged != null && idx <= owner.values.length()) {
-                (V.tryAndCatch(() => { owner.onSelectionchanged(owner.values.toArray()[idx]); }));
+            if (owner.onClicked != null && idx <= owner.values.length()) (V.tryAndCatch(() => { owner.onClicked(item); }));
+        }
+        return;
+    }
+
+    hoverItem(idx, series) {
+        if (!this.segments) return;
+        //owner
+        var owner = <TChartDonut>this.owner;
+
+        //deselect oldIdx
+        this.segments.forEach((item) => {
+            item.deselect();
+        });
+
+        //check clicked
+        owner.SelectedItems.forEach((item) => {
+            this.segments[item.Idx].select();
+        });
+
+        var id;
+        var segment;
+        var row;
+        if (idx == null && series == null) {
+            if (owner.SelectedItems.length() != 0) {
+                idx = owner.SelectedItems.get(0).Idx;
+            }
+            else {
+                return;
             }
         }
-        return y;
+
+        segment = this.segments[idx];
+        row = this.data[idx];
+
+        //glow
+        segment.select();
+
+        //set dataset Recno
+        if (owner instanceof TDBChartDonut && (<TDBChartDonut>owner).Dataset != null) {
+            (<TDBChartDonut>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
+        }
+        var y = this.setLabels(row, segment.color);
+
+        return;
     }
 
-    setLabels(row) {
+    setLabels(row, color) {
         var inner, maxHeightBottom, maxHeightTop, maxWidth, text1bbox, text1scale, text2bbox, text2scale;
-        inner = (Math.min(this.el.width() / 2, this.el.height() / 2) - 10) * 2 / 3;
-        maxWidth = 1.8 * inner;
-        maxHeightTop = inner / 2;
-        maxHeightBottom = inner / 3;
-        if (this.options.drawlabel) {
+
+        inner = Math.min(this.el.width(), this.el.height()) / 2 * 1 / 2.5 - 5;
+        maxWidth = inner * 2;
+        if (this.options.behaveLikePie)
+            maxWidth = Math.min(this.el.width() - 5, this.el.height() - 5);
+        maxHeightTop = inner;
+        var mytext: string = (this.options.drawlabel ? this.xLabelFormat(row, true) : "");
+        var txtW = this.measureText(mytext).width;
+
+        if (txtW > maxWidth) {
+            var s = mytext.split(new RegExp(" +"));
+            var idx = Math.ceil(s.length / 2);
+            mytext = mytext.substr(0, mytext.indexOf(s[idx])) + "\n" + mytext.substr(mytext.indexOf(s[idx]));
+
             this.text1.attr({
-                text: (typeof this.options.xLabelFormat === 'function') ? this.options.xLabelFormat(row) : row.label,
-                transform: ''
+                text: mytext,
+                transform: '',
+                fill: color,
             });
+
             text1bbox = this.text1.getBBox();
-            text1scale = Math.min(maxWidth / text1bbox.width, maxHeightTop / text1bbox.height);
+            text1scale = Math.min(maxWidth / text1bbox.width, maxHeightTop / text1bbox.height) * 1.5;
+            if (text1scale > 1) text1scale = 1;
             this.text1.attr({
-                transform: "S" + text1scale + "," + text1scale + "," + (text1bbox.x + text1bbox.width / 2) + "," + (text1bbox.y + text1bbox.height)
+                text: (this.options.drawvalue ? this.yLabelFormat(row.y[0], this.options.humanfriendly) : "") + "\n" + mytext,
+                transform: "S" + text1scale + "," + text1scale + "," + (text1bbox.x + text1bbox.width / 2) + "," + (text1bbox.y + text1bbox.height),
+                fill: color,
             });
         }
-
-        if (this.options.drawvalue) {
-            this.text2.attr({
-                text: (typeof this.options.yLabelFormat === 'function') ? this.options.yLabelFormat(row) : row.value,
-                transform: ''
+        else {
+            this.text1.attr({
+                text: mytext,
+                transform: '',
+                fill: color,
             });
-            text2bbox = this.text2.getBBox();
-            text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height);
-            return this.text2.attr({
-                transform: "S" + text2scale + "," + text2scale + "," + (text2bbox.x + text2bbox.width / 2) + "," + text2bbox.y
+
+            text1bbox = this.text1.getBBox();
+            text1scale = Math.min(maxWidth / text1bbox.width, maxHeightTop / text1bbox.height) * 1.6;
+            if (text1scale > 1) text1scale = 1;
+
+            this.text1.attr({
+                text: (this.options.drawvalue ? this.yLabelFormat(row.y[0], this.options.humanfriendly) : "") + "\n" + mytext,
+                transform: "S" + text1scale + "," + text1scale + "," + (text1bbox.x + text1bbox.width / 2) + "," + (text1bbox.y + text1bbox.height),
+                fill: color,
             });
         }
     }
 
-    drawEmptyDonutLabel = function (xPos, yPos, color, fontSize, fontWeight?) {
-        var text;
-        text = this.raphael.text(xPos, yPos, '').attr('font-size', fontSize).attr('fill', color);
-        if (fontWeight != null) {
-            text.attr('font-weight', fontWeight);
-        }
+
+    drawEmptyDonutLabel(xPos, yPos, txt) {
+        var text = this.raphael.text(xPos, yPos, txt);
+        text.attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight);
         return text;
     }
 
-  }
+}
 
 
 class DonutSegment extends VXCB.EventEmitter {
@@ -526,11 +632,13 @@ class DonutSegment extends VXCB.EventEmitter {
     private arc;
     private seg;
     public selected;
+    public count;
     public ID;
 
 
-    constructor(cx, cy, inner, outer, p0, p1, color, backgroundColor, index, raphael) {
+    constructor(cx, cy, inner, outer, p0, p1, color, backgroundColor, index, raphael, count) {
         super();
+        this.count = count;
         this.cx = cx;
         this.cy = cy;
         this.inner = inner;
@@ -539,8 +647,8 @@ class DonutSegment extends VXCB.EventEmitter {
         this.backgroundColor = backgroundColor;
         this.index = index;
         this.raphael = raphael;
-        this.deselect = __bind(this.deselect, this);
 
+        this.deselect = __bind(this.deselect, this);
         this.select = __bind(this.select, this);
 
         this.sin_p0 = Math.sin(p0);
@@ -548,7 +656,8 @@ class DonutSegment extends VXCB.EventEmitter {
         this.sin_p1 = Math.sin(p1);
         this.cos_p1 = Math.cos(p1);
         this.is_long = (p1 - p0) > Math.PI ? 1 : 0;
-        this.path = this.calcSegment(this.inner + 3, this.inner + this.outer - 5);
+        var chng: number = (this.inner - this.outer) / 5;
+        this.path = this.calcSegment(this.inner + 3, this.inner + this.outer - chng);
         this.selectedPath = this.calcSegment(this.inner + 3, this.inner + this.outer);
         this.hilight = this.calcArc(this.inner);
     }
@@ -573,31 +682,30 @@ class DonutSegment extends VXCB.EventEmitter {
     render() {
         var _this = this;
         this.arc = this.drawDonutArc(this.hilight, this.color);
-        return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor, function () {
-            return _this.fire('hover', _this.index);
-        }, function () {
-                return _this.fire('click', _this.index);
-            });
+        return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor);
     }
 
     drawDonutArc(path, color) {
+        var s = this.count > 50 ? 0 : 2;  //Math.min(2, (1 / this.count) * 100);
         return this.raphael.path(path).attr({
             stroke: color,
-            'stroke-width': 2,
+            'stroke-width': s,
             opacity: 0
         });
     }
 
-    drawDonutSegment(path, fillColor, strokeColor, hoverFunction, clickFunction) {
+    drawDonutSegment(path, fillColor, strokeColor) {
+        var s = this.count > 50 ? 0 : 2;// Math.min(2 , (1 / this.count) * 100);
         return this.raphael.path(path).attr({
             fill: fillColor,
             stroke: strokeColor,
-            'stroke-width': 3
-        }).hover(hoverFunction).click(clickFunction);
+            'stroke-width': s,
+        });
     }
 
     select() {
         if (!this.selected) {
+            //var t = Raphael.transformPath(this.path, 'T' + 0 + "," + -this.cx * 0.1);
             this.seg.animate({
                 path: this.selectedPath
             }, 150, '<>');
@@ -647,7 +755,7 @@ function __bind(fn, me) { return function () { return fn.apply(me, arguments); }
 // http://www.highintegritydesign.com
 //
 // licensed under a Creative Commons Attribution-Share Alike 3.0 United States License. 
-//	http://creativecommons.org/licenses/by-sa/3.0/us/
+//    http://creativecommons.org/licenses/by-sa/3.0/us/
 //*********************************************************************
 
 
@@ -784,5 +892,6 @@ function makeTableRowColors(colors, displayType) {
     tableRow += "</tr>";
     return tableRow;
 }
+
 
 

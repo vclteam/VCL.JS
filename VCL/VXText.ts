@@ -83,7 +83,7 @@ export class TText extends VXT.TTextBase {
         super.draw(reCreate);
         this.jComponent.html(this.Text)
         if (this.onClicked != null) this.jComponent.css('cursor', 'pointer');
-        else this.jComponent.css('cursor', '');
+        else this.jComponent.css('cursor', 'default');
 
     }
 }
@@ -659,12 +659,14 @@ export class TBreadCrumb extends VXC.TComponent {
                 jItem.addClass('active');
                 jItem.text(item.Text);
                 if (item.TextColor) jItem.css('color', item.TextColor);
+                jItem.css('cursor', 'text');
             } else {
                 aItem = $('<a>');
                 aItem.text(item.Text);
                 //aItem.attr('href', '#');
                 aItem.appendTo(jItem);
                 if (item.TextColor) aItem.css('color', item.TextColor);
+                aItem.css('cursor', 'pointer');
             }
 
             sepItem = $('<span >').addClass('divider');

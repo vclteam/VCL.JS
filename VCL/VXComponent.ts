@@ -51,7 +51,10 @@ export class TComponent extends VXO.TObject {
             this.jComponent[0].id = this.ID;
             this.jComponent.attr("DATA-ID", renderTo);
         }
-        if (aOwner != null) (<any>aOwner).addComponent(this);
+        if (aOwner != null) {
+            (<any>aOwner).addComponent(this);
+        }
+        this.addClass(this.getClassName().toUpperCase());
     }
 
     public destroy() {
@@ -72,14 +75,15 @@ export class TComponent extends VXO.TObject {
 
 
     private __clickover;
-    public popover(popupContainer: VXCO.TContainer, popoverplacement: V.PopoverPlacement = V.PopoverPlacement.Bottom, title?: string,
-        autoClose: number = 0) {
+    public popover(popupContainer: VXCO.TContainer, popoverplacement: V.PopoverPlacement = V.PopoverPlacement.Bottom,
+        title?: string,
+        autoClose: number = 0, width: number = null) {
         this.__clickover = this.jComponent.data('clickover');
         if (!this.__clickover) {
             this.jComponent.clickover({
                 html: true, content: popupContainer.jComponent, title: title,
                 placement: popoverplacement != null ? V.PopoverPlacement[popoverplacement].toLocaleLowerCase() : "right",
-                auto_close: autoClose
+                auto_close: autoClose, width: width
 
             });
             this.__clickover = this.jComponent.data('clickover');
@@ -100,6 +104,7 @@ export class TComponent extends VXO.TObject {
         }
     }
 
+
     private _sticktotop: boolean = false;
     /*
     * component that remain in view as the user scrolls the page
@@ -114,6 +119,7 @@ export class TComponent extends VXO.TObject {
             this.drawDelayed(true);
         }
     }
+
 
     private _outline: boolean = false;
     /*
@@ -183,7 +189,7 @@ export class TComponent extends VXO.TObject {
     public set Visible(val: boolean) {
         if (val != this._visible) {
             this._visible = val;
-            this.drawDelayed(false);
+            this.drawDelayed(true);
         }
     }
 
@@ -312,15 +318,6 @@ export class TComponent extends VXO.TObject {
     public get Height(): number { return parseFloat(this.jComponent.css('height')); }
     public set Height(pixel: number) { if (pixel != this.Height) this.jComponent.css('height', pixel); }
 
-    /**
-    * Makes the control invisible.
-    * Call Hide to hide a control. Hide sets the Visible property of the control to false.
-    * Although a control that is hidden is not visible, its properties and methods are still available.
-    */
-    public hide() {
-        this.Visible = false;
-    }
-
     public create() {
         if (this.Visible) this.jComponent.show();
         else this.jComponent.hide();
@@ -356,25 +353,54 @@ export class TComponent extends VXO.TObject {
         }, 50);
     }
 
+    private __tmpShowDuration: number = 0;
+    private __tmpHideDuration: number = 0;
     public draw(reCreate: boolean) {
+        var self = this;
         if (!this.jComponent) return;
         if (reCreate) this.__drawdelayed = false;
 
-        if (this.Visible) this.jComponent.show();
-        else this.jComponent.hide();
+        if (this.Visible) {
+            this.jComponent.show(self.__tmpShowDuration, () => {
+                this.__tmpShowDuration = 0;
+            });
+        } else {
+            this.jComponent.hide(self.__tmpHideDuration, () => {
+                self.__tmpHideDuration = 0;
+            });
+        }
 
         if (this.StickToTop) this.jComponent.addClass("affix");
         else this.jComponent.removeClass("affix");
-
-        if (this.Outline) this.jComponent.css("outline",'#00FF00 dotted thick');
-        else this.jComponent.css("outline","");
 
         if (reCreate || !this.initialized) this.create();
         this.initialized = true;
     }
 
+
+    /**
+    * Makes the control invisible.
+    * Call Hide to hide a control. Hide sets the Visible property of the control to false.
+    * Although a control that is hidden is not visible, its properties and methods are still available.
+    */
+    public hide() {
+        this.Visible = false;
+    }
+
+    public HideWithAnimation(duration?: number) {
+        this.__tmpHideDuration = duration?duration:400;
+        this.Visible = false;
+    }
+
+
+
     public show() {
-        this.draw(true);
+        this.Visible = true;
+    }
+
+    public showWithAnimation(duration: number) {
+        this.__tmpShowDuration = duration ? duration : 400;
+        this.Visible = true;
     }
 
 
@@ -442,7 +468,7 @@ export class TPopupmenuComponent extends TComponent {
 
     private reBuildMenu() {
         this.jComponent.find(".dropdown-menu").empty();
-        if (!this.menuItems.length()) return;
+        if (!this.menuItems.length() || !this.Enabled) return;
         if (!this.jDropDownTarget) return;
 
         this.jComponent.addClass('dropdown');
@@ -589,33 +615,42 @@ Clickover.prototype = $.extend({}, $.fn.popover.Constructor.prototype, {
             this.options.placement.call(this, $tip[0], this.$element[0]) :
             this.options.placement
 
-        inside = /in/.test(placement)
+        inside = /in/.test(placement);
 
+        pos = this.getPosition(inside);
         pos = this.getPosition(inside)
+        pos.top = this.$element[0].offsetTop;
+        pos.left = this.$element[0].offsetLeft;
 
-        actualWidth = $tip[0].offsetWidth
-        actualHeight = $tip[0].offsetHeight
 
-        switch (inside ? placement.split(' ')[1] : placement) {
-                case 'bottom':
-                    tp = { top: pos.top + pos.height, left: pos.left + pos.width / 2 - actualWidth / 2 }
-            break
+
+       actualWidth = this.options.width ? this.options.width : $tip[0].offsetWidth;
+       actualHeight = $tip[0].offsetHeight
+       var maxleft: number = $(window).width() - pos.width;
+
+       var lft = Math.min(maxleft, pos.left + pos.width / 2 - actualWidth / 2);
+       //lft = Math.max(lft, 0);
+       switch (inside ? placement.split(' ')[1] : placement) {
+          case 'bottom':
+              tp = { top: pos.top + pos.height, left: lft }
+              break
           case 'top':
-                    tp = { top: pos.top - actualHeight, left: pos.left + pos.width / 2 - actualWidth / 2 }
-            break
+              tp = { top: pos.top - actualHeight, left: lft }
+              break
           case 'left':
-                    tp = { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth }
-            break
+              tp = { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth }
+              break
           case 'right':
-                    tp = { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width }
-            break
+              tp = { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width }
+              break
         }
 
-            $tip.css(tp)
+          $tip.css(tp)
       }
     }
-
 })
+
+
 
   /* plugin definition */
   /* stolen from bootstrap tooltip.js */

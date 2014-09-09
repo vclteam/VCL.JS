@@ -59,6 +59,17 @@ export class TButton extends VXC.TPopupmenuComponent {
         }
     }
 
+    private _buttonimageurl: string;
+    public get ButtonImageURL(): string {
+        return this._buttonimageurl;
+    }
+    public set ButtonImageURL(val: string) {
+        if (val != this.ButtonImageURL) {
+            this._buttonimageurl = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     private _buttonicon: V.ButtonIcon = null;
     public get ButtonIcon(): V.ButtonIcon {
@@ -119,8 +130,7 @@ export class TButton extends VXC.TPopupmenuComponent {
 
         if (this.ButtonIcon) {
             $(this.jImage).addClass(V.iconEnumToBootstrapStyle(this.ButtonIcon));
-            if (this.ButtonIcon == V.ButtonIcon.icon_spinner)
-                $(this.jImage).addClass('icon-spin');
+            if (this.ButtonIcon == V.ButtonIcon.icon_spinner) $(this.jImage).addClass('icon-spin');
             this.jBtn.append(this.jImage);
             if (this.ButtonSize == V.ButtonSize.Large) {
                 this.jImage.addClass('icon-large');
@@ -137,6 +147,12 @@ export class TButton extends VXC.TPopupmenuComponent {
             if (this.ButtonSize == V.ButtonSize.Mini) {
                 this.jImage.css('margin-top', '3px');
             }
+            if (this.IconAlignment == V.IconAlignment.Left) this.jImage.addClass('pull-left');
+            else this.jImage.addClass('pull-right');
+        } else if (this.ButtonImageURL) {
+            this.jImage = $('<img/>');
+            this.jImage.attr('src', this.ButtonImageURL);
+            this.jBtn.append(this.jImage);
             if (this.IconAlignment == V.IconAlignment.Left) this.jImage.addClass('pull-left');
             else this.jImage.addClass('pull-right');
         }

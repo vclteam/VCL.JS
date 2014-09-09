@@ -4,12 +4,12 @@ import VXO = require("VCL/VXObject");
 
 export class TChartBase extends VC.TComponent {
 
-    /** Custom Format XLabel*/
-    public XLabelFormat: (data: any) => void;
     /** Custom Format YLabel*/
-    public YLabelFormat: (data: any) => void;
-    /** Custom Format tooltip */
-    public ToolTipFormat: (data: any) => void;
+    public YLabelFormat: (label: number) => string;
+    /** Custom Format XLabel*/
+    public XLabelFormat: (data: any) => string;
+    /** Custom Format ToolTip */
+    public ToolTipFormat: (data: any) => string;
 
     constructor(aOwner: VC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
@@ -62,6 +62,116 @@ export class TChartBase extends VC.TComponent {
         ctx.drawImage(this.image, 0, 0);
         //$("#cnv").attr('src',canvas.toDataURL("image/png"));//canvas.toDataURL("image/jpg");
     }
+
+    private _dateFormatLongMode: boolean = false;
+    public get DateFormatLongMode(): boolean {
+        return this._dateFormatLongMode;
+    }
+    public set DateFormatLongMode(val: boolean) {
+        if (val != this._dateFormatLongMode) {
+            this._dateFormatLongMode = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _SelectionEnabeld: boolean = true;
+    public get SelectionEnabled(): boolean {
+        return this._SelectionEnabeld;
+    }
+    public set SelectionEnabled(val: boolean) {
+        if (val != this._SelectionEnabeld) {
+            this._SelectionEnabeld = val;
+        }
+    }
+
+    private _SelectedItems = new V.TCollection<TSelectedChartValue>();
+    public get SelectedItems(): V.TCollection<TSelectedChartValue> {
+        return this._SelectedItems;
+    }
+    public set SelectedItems(val: V.TCollection<TSelectedChartValue>) {
+        if (val && val != this._SelectedItems) {
+            this._SelectedItems = val;
+        }
+        if (val == null) {
+            this.SelectedItem = null;
+            this.SelectedItems.clear();
+        }
+    }
+
+    private _SelectedItem: TSelectedChartValue;
+    public get SelectedItem(): TSelectedChartValue {
+        return this._SelectedItem;
+    }
+    public set SelectedItem(val: TSelectedChartValue) {
+        var found = false;
+        if (!this.MultiSelectMode)
+            this.SelectedItems.clear();
+        else
+            this.SelectedItems.forEach((item) => {
+                if (val && item.Series == val.Series && item.Idx == val.Idx) {
+                    this.SelectedItems.remove(item);
+                    found = true;
+                }
+            });
+        //reselect what left
+        if (val && !found) {
+            this._SelectedItem = val;
+            this.SelectedItems.add(val);
+        }
+    }
+
+    private _multiSelectMode: boolean = false;
+    public get MultiSelectMode(): boolean {
+        return this._multiSelectMode;
+    }
+    public set MultiSelectMode(val: boolean) {
+        if (val != this._multiSelectMode) {
+            this._multiSelectMode = val;
+        }
+    }
+
+    private _TruncateLength: number = 20;
+    public get TruncateLength(): number {
+        return this._TruncateLength;
+    }
+    public set TruncateLength(val: number) {
+        if (val != this.TruncateLength) {
+            this._TruncateLength = val;
+            this.drawDelayed(true);
+        }
+    }
+}
+
+export class TSelectedChartValue extends VXO.TObject {
+    private _series: number = -1;
+    public get Series(): number {
+        return this._series;
+    }
+    public set Series(val: number) {
+        if (val != this._series) {
+            this._series = val;
+        }
+    }
+
+    private _idx: number = -1;
+    public get Idx(): number {
+        return this._idx;
+    }
+    public set Idx(val: number) {
+        if (val != this._idx) {
+            this._idx = val;
+        }
+    }
+
+    private _chartValue: TChartValue;
+    public get ChartValue(): TChartValue {
+        return this._chartValue;
+    }
+    public set ChartValue(val: TChartValue) {
+        if (val != this._chartValue) {
+            this._chartValue = val;
+        }
+    }
 }
 
 export class TGridChartBase extends TChartBase {
@@ -77,7 +187,7 @@ export class TGridChartBase extends TChartBase {
         }
     }
 
-    private _titleY: string;
+    private _titleY: string = null;
     public get TitleY(): string {
         return this._titleY;
     }
@@ -88,7 +198,7 @@ export class TGridChartBase extends TChartBase {
         }
     }
 
-
+    /** Angle between 0 - 360 */
     private _xLabelAngle: number = 0;
     public get XLabelAngle(): number {
         return this._xLabelAngle;
@@ -100,6 +210,16 @@ export class TGridChartBase extends TChartBase {
         }
     }
 
+    private _xLabelMargin: number = 10;
+    public get XLabelMargin(): number {
+        return this._xLabelMargin;
+    }
+    public set XLabelMargin(val: number) {
+        if (val != this._xLabelMargin) {
+            this._xLabelMargin = val;
+            this.drawDelayed(true);
+        }
+    }
 
     private _gridtextsize: number = 12;
     public get GridTextSize(): number {
@@ -134,6 +254,28 @@ export class TGridChartBase extends TChartBase {
         }
     }
 
+    private _gridTextWeight: string = "normal";
+    public get GridTextWeight(): string {
+        return this._gridTextWeight;
+    }
+    public set GridTextWeight(val: string) {
+        if (val != this._gridTextWeight) {
+            this._gridTextWeight = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _titleTextWeight: string = "bold";
+    public get GridTitleWeight(): string {
+        return this._titleTextWeight;
+    }
+    public set GridTitleWeight(val: string) {
+        if (val != this._titleTextWeight) {
+            this._titleTextWeight = val;
+            this.drawDelayed(true);
+        }
+    }
+
     private _gridtextcolor: string = "#888";
     public get GridTextColor(): string {
         return this._gridtextcolor;
@@ -160,438 +302,57 @@ export class TGridChartBase extends TChartBase {
         }
     }
 
+    /* Y scale value padding - number between 0 - 1 percent */
+    private _gapY: number = 0;
+    public get YGap(): number {
+        return this._gapY;
+    }
+    public set YGap(val: number) {
+        if (val != this._gapY) {
+            if (val == null) val = 0; //Def
+            if (val < 0) val = 0;
+            if (val > 1) val = 1;
+            this._gapY = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _showgridlines: boolean = true;
+    public get ShowGridLines(): boolean {
+        return this._showgridlines;
+    }
+    public set ShowGridLines(val: boolean) {
+        if (val != this._showgridlines) {
+            this._showgridlines = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _showXAxisValue: boolean = true;
+    public get ShowXAxisLabels(): boolean {
+        return this._showXAxisValue;
+    }
+    public set ShowXAxisLabels(val: boolean) {
+        if (val != this._showXAxisValue) {
+            this._showXAxisValue = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _showYAxisValue: boolean = true;
+    public get ShowYAxisLabels(): boolean {
+        return this._showYAxisValue;
+    }
+    public set ShowYAxisLabels(val: boolean) {
+        if (val != this._showYAxisValue) {
+            this._showYAxisValue = val;
+            this.drawDelayed(true);
+        }
+    }
+
     public create() {
         super.create();
     }
-}
-
-
-
-export class TChartBarBase extends TGridChartBase {
-    private _series1color: string = "#0b62a4";
-    public get Series1Color(): string {
-        return this._series1color;
-    }
-    public set Series1Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series1color) {
-                this._series1color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-    private _series2color: string = "#7A92A3";
-
-    public get Series2Color(): string {
-        return this._series2color;
-    }
-    public set Series2Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series2color) {
-                this._series2color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-    private _series3color: string = "#4da74d";
-    public get Series3Color(): string {
-        return this._series3color;
-    }
-    public set Series3Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series3color) {
-                this._series3color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-    private _series4color: string = "#afd8f8";
-    public get Series4Color(): string {
-        return this._series4color;
-    }
-    public set Series4Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series4color) {
-                this._series4color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-    private _series5color: string = "#edc240";
-    public get Series5Color(): string {
-        return this._series5color;
-    }
-    public set Series5Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series5color) {
-                this._series5color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-    private _series6color: string = "#cb4b4b";
-    public get Series6Color(): string {
-        return this._series6color;
-    }
-    public set Series6Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series6color) {
-                this._series6color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-
-    private _series7color: string = "#727272";
-    public get Series7Color(): string {
-        return this._series7color;
-    }
-    public set Series7Color(val: string) {
-        var isOk = /^#[0-9A-F]{7}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series7color) {
-                this._series7color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-    private _series8color: string = "#f1595f";
-    public get Series8Color(): string {
-        return this._series8color;
-    }
-    public set Series8Color(val: string) {
-        var isOk = /^#[0-9A-F]{8}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series8color) {
-                this._series8color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-    private _series9color: string = "#79c36a";
-    public get Series9Color(): string {
-        return this._series9color;
-    }
-    public set Series9Color(val: string) {
-        var isOk = /^#[0-9A-F]{9}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series9color) {
-                this._series9color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-    private _series10color: string = "#599ad3";
-    public get Series10Color(): string {
-        return this._series10color;
-    }
-    public set Series10Color(val: string) {
-        var isOk = /^#[0-9A-F]{10}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series10color) {
-                this._series10color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-    private _series11color: string = "#EAA83A";
-    public get Series11Color(): string {
-        return this._series11color;
-    }
-    public set Series11Color(val: string) {
-        var isOk = /^#[0-9A-F]{10}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series11color) {
-                this._series11color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-
-    private _series12color: string = "#f9a65a";
-    public get Series12Color(): string {
-        return this._series12color;
-    }
-    public set Series12Color(val: string) {
-        var isOk = /^#[0-9A-F]{12}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series12color) {
-                this._series12color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-    private _series13color: string = "#9e66ab";
-    public get Series13Color(): string {
-        return this._series13color;
-    }
-    public set Series13Color(val: string) {
-        var isOk = /^#[0-9A-F]{13}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series13color) {
-                this._series13color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-
-    private _series14color: string = "#cd7058";
-    public get Series14Color(): string {
-        return this._series14color;
-    }
-    public set Series14Color(val: string) {
-        var isOk = /^#[0-9A-F]{14}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series14color) {
-                this._series14color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-
-    private _series15color: string = "#d77fb3";
-    public get Series15Color(): string {
-        return this._series15color;
-    }
-    public set Series15Color(val: string) {
-        var isOk = /^#[0-9A-F]{15}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-            if (val != this._series15color) {
-                this._series15color = val;
-                this.drawDelayed(true);
-            }
-        }
-    }
-
-    private _series1name: string = null;
-    public get Series1Name(): string {
-        return this._series1name;
-    }
-
-    public set Series1Name(val: string) {
-        if (val != this._series1name) {
-            this._series1name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _series2name: string = null;
-    public get Series2Name(): string {
-        return this._series2name;
-    }
-    public set Series2Name(val: string) {
-        if (val != this._series2name) {
-            this._series2name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _series3name: string = null;
-    public get Series3Name(): string {
-        return this._series3name;
-    }
-    public set Series3Name(val: string) {
-        if (val != this._series3name) {
-            this._series3name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _series4name: string = null;
-    public get Series4Name(): string {
-        return this._series4name;
-    }
-    public set Series4Name(val: string) {
-        if (val != this._series4name) {
-            this._series4name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _series5name: string = null;
-    public get Series5Name(): string {
-        return this._series5name;
-    }
-    public set Series5Name(val: string) {
-        if (val != this._series5name) {
-            this._series5name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _series6name: string = null;
-    public get Series6Name(): string {
-        return this._series6name;
-    }
-    public set Series6Name(val: string) {
-        if (val != this._series6name) {
-            this._series6name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _series7name: string = null;
-    public get Series7Name(): string {
-        return this._series7name;
-    }
-    public set Series7Name(val: string) {
-        if (val != this._series7name) {
-            this._series7name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-
-    private _series8name: string = null;
-    public get Series8Name(): string {
-        return this._series8name;
-    }
-    public set Series8Name(val: string) {
-        if (val != this._series8name) {
-            this._series8name = val;
-            this.drawDelayed(true);
-        }
-    }
-    private _series9name: string = null;
-    public get Series9Name(): string {
-        return this._series9name;
-    }
-    public set Series9Name(val: string) {
-        if (val != this._series9name) {
-            this._series9name = val;
-            this.drawDelayed(true);
-        }
-    }
-    private _series10name: string = null;
-    public get Series10Name(): string {
-        return this._series10name;
-    }
-    public set Series10Name(val: string) {
-        if (val != this._series10name) {
-            this._series10name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _series11name: string = null;
-    public get Series11Name(): string {
-        return this._series11name;
-    }
-    public set Series11Name(val: string) {
-        if (val != this._series11name) {
-            this._series11name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-
-    private _series12name: string = null;
-    public get Series12Name(): string {
-        return this._series12name;
-    }
-    public set Series12Name(val: string) {
-        if (val != this._series12name) {
-            this._series12name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-
-    private _series13name: string = null;
-    public get Series13Name(): string {
-        return this._series13name;
-    }
-    public set Series13Name(val: string) {
-        if (val != this._series13name) {
-            this._series13name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-
-    private _series14name: string = null;
-    public get Series14Name(): string {
-        return this._series14name;
-    }
-    public set Series14Name(val: string) {
-        if (val != this._series14name) {
-            this._series14name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-
-    private _series15name: string = null;
-    public get Series15Name(): string {
-        return this._series15name;
-    }
-    public set Series15Name(val: string) {
-        if (val != this._series15name) {
-            this._series15name = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    public values = new TChartValuesCollection<TBarValue>();
-    public createValue(label: string, value1?: number, value2?: number, value3?: number, value4?: number,
-        value5?: number, value6?: number, value7?: number, value8?: number, value9?: number, value10?: number,
-        value11?: number, value12?: number, value13?: number, value14?: number, value15?: number): TBarValue {
-        var col = new TBarValue();
-        this.values.add(col);
-        col.Value1 = value1;
-        col.Value2 = value2;
-        col.Value3 = value3;
-        col.Value4 = value4;
-        col.Value5 = value5;
-        col.Value6 = value6;
-        col.Value7 = value7;
-        col.Value8 = value8;
-        col.Value9 = value9;
-        col.Value10 = value10;
-        col.Value11 = value11;
-        col.Value12 = value12;
-        col.Value13 = value13;
-        col.Value14 = value14;
-        col.Value15 = value15;
-
-
-        col.Label = label;
-        return col;
-    }
-
-
 }
 
 export class TChartValue extends VXO.TCollectionItem {
@@ -689,6 +450,7 @@ export class TBubbleValue extends TChartValue {
 
 
 export class TBarValue extends TChartValue {
+
     private _seriesvalue1: number;
     public get Value1(): number {
         return this._seriesvalue1;
@@ -847,6 +609,7 @@ export class TBarValue extends TChartValue {
             this._label = val;
         }
     }
+
 }
 
 
@@ -911,12 +674,100 @@ export class TLineValue extends TChartValue {
         }
     }
 
+    private _seriesvalue7: number;
+    public get Value7(): number {
+        return this._seriesvalue7;
+    }
+    public set Value7(val: number) {
+        if (val != this._seriesvalue7) {
+            this._seriesvalue7 = val;
+        }
+    }
 
-    private _date: Date;
-    public get Date(): Date {
+    private _seriesvalue8: number;
+    public get Value8(): number {
+        return this._seriesvalue8;
+    }
+    public set Value8(val: number) {
+        if (val != this._seriesvalue8) {
+            this._seriesvalue8 = val;
+        }
+    }
+
+    private _seriesvalue9: number;
+    public get Value9(): number {
+        return this._seriesvalue9;
+    }
+    public set Value9(val: number) {
+        if (val != this._seriesvalue9) {
+            this._seriesvalue9 = val;
+        }
+    }
+    private _seriesvalue10: number;
+    public get Value10(): number {
+        return this._seriesvalue10;
+    }
+
+    public set Value10(val: number) {
+        if (val != this._seriesvalue10) {
+            this._seriesvalue10 = val;
+        }
+    }
+    private _seriesvalue11: number;
+    public get Value11(): number {
+        return this._seriesvalue11;
+    }
+    public set Value11(val: number) {
+        if (val != this._seriesvalue11) {
+            this._seriesvalue11 = val;
+        }
+    }
+
+    private _seriesvalue12: number;
+    public get Value12(): number {
+        return this._seriesvalue12;
+    }
+    public set Value12(val: number) {
+        if (val != this._seriesvalue12) {
+            this._seriesvalue12 = val;
+        }
+    }
+
+    private _seriesvalue13: number;
+    public get Value13(): number {
+        return this._seriesvalue13;
+    }
+    public set Value13(val: number) {
+        if (val != this._seriesvalue13) {
+            this._seriesvalue13 = val;
+        }
+    }
+
+    private _seriesvalue14: number;
+    public get Value14(): number {
+        return this._seriesvalue14;
+    }
+    public set Value14(val: number) {
+        if (val != this._seriesvalue14) {
+            this._seriesvalue14 = val;
+        }
+    }
+
+    private _seriesvalue15: number;
+    public get Value15(): number {
+        return this._seriesvalue15;
+    }
+    public set Value15(val: number) {
+        if (val != this._seriesvalue15) {
+            this._seriesvalue15 = val;
+        }
+    }
+
+    private _date: any;
+    public get Date(): any {
         return this._date;
     }
-    public set Date(val: Date) {
+    public set Date(val: any) {
         if (val != this._date) {
             this._date = val;
         }
@@ -933,6 +784,10 @@ var __slice = [].slice;
 export class EventEmitter {
     private handlers;
     public owner: TChartBase;
+
+    constructor() {
+
+    }
 
     on(name, handler) {
         if (this.handlers == null) {
@@ -982,6 +837,7 @@ export class Grid extends EventEmitter {
     public top;
     public bottom;
     public grid;
+    public ygap;
     public ymax;
     public ymin;
     public dy;
@@ -991,9 +847,11 @@ export class Grid extends EventEmitter {
     private timeoutId;
 
 
-    constructor(options) {
+    constructor(options, owner) {
         super();
         var _this = this;
+        this.owner = owner;
+        this.options = $.extend({}, this.gridDefaults, this.defaults || {}, options);
         if (typeof options.element === 'string') {
             this.el = $(document.getElementById(options.element));
         } else {
@@ -1005,23 +863,12 @@ export class Grid extends EventEmitter {
         if (this.el.css('position') === 'static') {
             this.el.css('position', 'relative');
         }
-        this.options = $.extend({}, this.gridDefaults, this.defaults || {}, options);
         if (typeof this.options.units === 'string') {
             this.options.postUnits = options.units;
         }
         this.raphael = new Raphael(this.el[0]);
         var self = this;
-        $(window).bind('resize', function (evt) {
-            if (self.timeoutId != null) {
-                window.clearTimeout(self.timeoutId);
-            }
-            if (!self.grid) {
-                //grid in no longer there
-                $(window).off("resize");
-                return;
-            }
-            return self.timeoutId = window.setTimeout(self.resizeHandler, 30, self);
-        });
+
         this.elementWidth = null;
         this.elementHeight = null;
         this.dirty = false;
@@ -1033,7 +880,9 @@ export class Grid extends EventEmitter {
             _this.onHoverMove(evt.pageX - offset.left, evt.pageY - offset.top, evt);
         });
         this.el.bind('mouseout', function (evt) {
-            return _this.onHoverOut();
+            var offset;
+            offset = _this.el.offset();
+            _this.onHoverOut(evt.pageX - offset.left, evt.pageY - offset.top, evt);
         });
         this.el.bind('touchstart touchmove touchend', function (evt) {
             var offset, touch;
@@ -1056,13 +905,15 @@ export class Grid extends EventEmitter {
     postInit() { }
     draw() { }
     onHoverMove(x, y, evt) { }
-    onHoverOut() { }
+    onHoverOut(x, y, evt) { }
     onGridClick(x, y, evt) { }
 
 
     gridDefaults = {
-        dateFormat: null,
-        axes: true,
+        xkey: "label",
+        ykeys: ["value"],
+        axisy: true,
+        axisx: true,
         grid: true,
         gridLineColor: '#aaa',
         gridStrokeWidth: 0.5,
@@ -1071,17 +922,17 @@ export class Grid extends EventEmitter {
         gridTextFamily: 'sans-serif',
         gridTextWeight: 'normal',
         hideHover: false,
-        xLabelFormat: null, //can be function or text
-        yLabelFormat: null, //can be function or text
+        xLabelFormat: null, //function only
+        yLabelFormat: null, //function only
         xLabelAngle: 0,
+        yLabelAngle: 0,
         numLines: 5,
-        paddingX: 15,
-        paddingY: 5,
         parseTime: true,
         postUnits: '',
         preUnits: '',
         ymax: 'auto',
-        ymin: 'auto 0',
+        ymin: 'auto',
+        ygap: 0,
         goals: [],
         goalStrokeWidth: 1.0,
         goalLineColors: ['#666633', '#999966', '#cc6666', '#663333'],
@@ -1089,19 +940,25 @@ export class Grid extends EventEmitter {
         eventStrokeWidth: 1.0,
         eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502'],
         selectedOpacity: 1,
-        unselectOpacity: 0.7
+        unselectOpacity: 0.7,
+        paddingX: 15,
+        paddingYRight: 15,
+        paddingY: 15,
+        paddingXTop: 15,
     }
 
     resizeHandler(self: Grid) {
+        //$(window).off("resize");
         self.timeoutId = null;
         self.raphael.setSize(self.el.width(), self.el.height());
-        return self.redraw();
+        self.redraw();
     }
 
 
     setData(data, redraw?) {
         var e, idx, index, maxGoal, minGoal, ret, row, step, total, y, ykey, ymax, ymin, yval;
         redraw = true;
+        this.owner.SelectedItems = null;
 
         this.options.data = data;
         if (!(data != null) || data.length === 0) {
@@ -1129,27 +986,22 @@ export class Grid extends EventEmitter {
                 ret = {};
                 ret.label = row[this.options.xkey];
                 ret.id = row["id"];
-                if (typeof this.options.xLabelFormat === 'function') {
-                    ret.x = index;
-                    ret.label = this.options.xLabelFormat(ret);
-                }
-                else
-                    if (this.options.parseTime && ret.label.getMonth) {
-                        ret.x = ret.label.getTime();
-                        if (this.options.dateFormat) {
-                            ret.label = this.options.dateFormat(ret.x);
-                        } else {
-                            var dt: Date = new Date(ret.x);
-                            if (dt.getHours() == 0 && dt.getMinutes() == 0 && dt.getSeconds() == 0)
-                                ret.label = V.Application.formatDateTime(dt, V.Application.DateFormat);
-                            else
-                                ret.label = V.Application.formatDateTime(dt, V.Application.LongDateFormat);
-                            //ret.label = new Date(ret.label).toString();
-                        }
-                    }
-                    else {
-                        ret.x = index;
-                    }
+                ret.x = index;
+
+                if (this.options.parseTime && ret.label instanceof Date)
+                    ret.x = ret.label.getTime();
+                //if (typeof this.options.xLabelFormat === 'function') {
+                //    ret.label = this.options.xLabelFormat(ret);
+                //}
+                //else
+                //    if (this.options.parseTime && ret.label.getMonth) {
+                //        var dateTime = ret.label.getTime();
+                //        var dt: Date = new Date(dateTime);
+                //        if (this.DateFormatLongMode)
+                //            ret.label = V.Application.formatDateTime(dt, V.Application.LongDateFormat);
+                //        else
+                //            ret.label = V.Application.formatDateTime(dt, V.Application.DateFormat);
+                //    }
 
                 total = 0;
                 ret.y = (function () {
@@ -1159,12 +1011,9 @@ export class Grid extends EventEmitter {
                     for (idx = _j = 0, _len1 = _ref.length; _j < _len1; idx = ++_j) {
                         ykey = _ref[idx];
                         yval = row[ykey];
-                        if (typeof yval === 'string') {
-                            yval = parseFloat(yval);
-                        }
-                        if ((yval != null) && typeof yval !== 'number') {
-                            yval = null;
-                        }
+                        yval = parseFloat((yval + ""));
+                        if (isNaN(yval)) yval = null;
+
                         if (yval != null) {
                             if (this.cumulative) {
                                 total += yval;
@@ -1222,31 +1071,52 @@ export class Grid extends EventEmitter {
             this.xmin -= 1;
             this.xmax += 1;
         }
-        this.ymin = this.yboundary('min', ymin);
-        this.ymax = this.yboundary('max', ymax);
+
+        this.ymin = ymin; //this.yboundary('min', ymin);
+        this.ymax = ymax; //this.yboundary('max', ymax);
+        this.ygap = this.ymax * this.options.ygap;
+        this.ymin = this.ymin - this.ygap;
+        this.ymax = this.ymax + this.ygap;
+
+        ////stack on 0 is ymin is not neative
+        //if (this.ymax < 0 && this.ymin < 0)
+        //    this.ymax = 0;
+        //if (this.ymax > 0 && this.ymin > 0)
+        //    this.ymin = 0;
+
+        if (this.options.ymin != 'auto')
+            this.ymin = parseFloat(this.options.ymin);
+        if (this.options.ymax != 'auto')
+            this.ymax = parseFloat(this.options.ymax);
+
+        //ymin cannot be equal to ymax
         if (this.ymin === this.ymax) {
-            if (ymin) {
-                this.ymin -= 1;
-            }
+            if (this.ymax < 0 && this.ymin < 0)
+                this.ymax = 0;
+            if (this.ymax >= 0 && this.ymin >= 0)
+                this.ymin = 0;
+        }
+
+        if (this.ymin === 0 && this.ymax === 0) {
+            this.ymin -= 1;
             this.ymax += 1;
         }
-        if (this.options.axes === true || this.options.grid === true) {
-            if (this.options.ymax === this.gridDefaults.ymax && this.options.ymin === this.gridDefaults.ymin) {
-                this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
-                this.ymin = Math.min(this.ymin, this.grid[0]);
-                this.ymax = Math.max(this.ymax, this.grid[this.grid.length - 1]);
-            } else {
-                step = (this.ymax - this.ymin) / (this.options.numLines - 1);
-                this.grid = (function () {
-                    var _i, _ref, _ref1, _results;
-                    _results = [];
-                    for (y = _i = _ref = this.ymin, _ref1 = this.ymax; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; y = _i += step) {
-                        _results.push(y);
-                    }
-                    return _results;
-                }).call(this);
+
+        //if (this.options.axes === true || this.options.grid === true) {
+        //this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
+        //this.ymin = Math.min(this.ymin, this.grid[0]);
+        //this.ymax = Math.max(this.ymax, this.grid[this.grid.length - 1]);
+        //depricated - specific grid lines
+        step = (this.ymax - this.ymin) / (this.options.numLines - 1);
+        this.grid = (function () {
+            var _i, _ref, _ref1, _results;
+            _results = [];
+            for (y = _i = _ref = this.ymin, _ref1 = (this.ymax + 0.001); _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; y = _i += step) {
+                _results.push(y);
             }
-        }
+            return _results;
+        }).call(this);
+        //}
         this.dirty = true;
         return this.redraw();
     }
@@ -1317,7 +1187,7 @@ export class Grid extends EventEmitter {
     }
 
     _calc() {
-        var bottomOffsets, gridLine, h, i, w, yLabelWidths;
+        var xLabelHeights, yLabel, xLabel, h, i, w, yLabelWidths;
         w = this.el.width();
         h = this.el.height();
         if (this.elementWidth !== w || this.elementHeight !== h || this.dirty) {
@@ -1325,32 +1195,39 @@ export class Grid extends EventEmitter {
             this.elementHeight = h;
             this.dirty = false;
             this.left = this.options.paddingY;
-            this.right = this.elementWidth - 15;//this.options.paddingY;
-            this.top = 15;//this.options.paddingX;
+            this.right = this.elementWidth - this.options.paddingYRight;
+            this.top = this.options.paddingXTop;
             this.bottom = this.elementHeight - this.options.paddingX;
-            if (this.options.axes) {
-                yLabelWidths = (function () {
-                    var _i, _len, _ref, _results;
-                    _ref = this.grid;
-                    _results = [];
-                    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                        gridLine = _ref[_i];
-                        _results.push(this.measureText(this.yLabelFormat(gridLine, true), 0).width);
-                    }
-                    return _results;
-                }).call(this);
-                this.left += Math.max.apply(Math, yLabelWidths);
-                var cacheHeight = -1;
-                bottomOffsets = (function () {
-                    var _i, _ref, _results;
-                    _results = [];
-                    for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-                         _results.push(this.measureText(this.data[i].label, -this.options.xLabelAngle).height);
-                    }
-                    return _results;
-                }).call(this);
-                this.bottom -= Math.max.apply(Math, bottomOffsets);
-            }
+            //if (this.options.axes) {
+            yLabelWidths = (function () {
+                var _i, _len, _ref, _results;
+                _ref = this.grid;
+                _results = [];
+                for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                    yLabel = _ref[_i];
+                    var res = this.measureText(this.yLabelFormat(yLabel, true), this.options.yLabelAngle);
+                    var yLabelWidth = res.width;
+                    _results.push(yLabelWidth);
+                }
+                this.measureText(null);
+                return _results;
+            }).call(this);
+            this.left += Math.max.apply(Math, yLabelWidths);
+            var cacheHeight = -1;
+            xLabelHeights = (function () {
+                var _i, _ref, _results;
+                _results = [];
+                for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+                    xLabel = this.data[i];
+                    var res = this.measureText(this.xLabelFormat(xLabel, true), this.options.xLabelAngle);
+                    var xLabelHeight = res.height;
+                    _results.push(xLabelHeight);
+                }
+                this.measureText(null);
+                return _results;
+            }).call(this);
+            this.bottom -= Math.max.apply(Math, xLabelHeights);
+            //}
             this.width = Math.max(1, this.right - this.left);
             this.height = Math.max(1, this.bottom - this.top);
 
@@ -1382,52 +1259,71 @@ export class Grid extends EventEmitter {
         this.drawGrid();
         this.drawGoals();
         this.drawEvents();
-        return this.draw();
-
+        this.draw();
+        this.resizeEvent();
+        this.measureText(null, 0);
     }
 
-    measureText(text, angle = 0) {
-        var ret, tt;
-        if (text == null) return { height: 0, width: 0 };
-        tt = this.raphael.text(100, 100, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).rotate(angle);
-        ret = tt.getBBox();
-        tt.remove();
-        return ret;
-    }
-
-    xLabelFormat(label, humanFriendly: boolean) {
-        if (typeof this.options.xLabelFormat === 'function') {
-            return this.options.xLabelFormat(label);
-        } else {
-            if (typeof label === 'number') {
-                if (humanFriendly)
-                    return V.Application.formatHumanFriendly(label, 2);
-                else
-                    return V.Application.FormatNumber(label, 2);
+    resizeEvent() {
+        var self = this;
+        $(window).on('resize', function (evt) {
+            if (self.timeoutId != null) {
+                window.clearTimeout(self.timeoutId);
             }
-            else
-                return "" + label;
-        }
+            if (!self.grid) {
+                //grid in no longer there
+                $(window).off("resize");
+                return;
+            }
+            return self.timeoutId = window.setTimeout(self.resizeHandler, 30, self);
+        });
+    }
+
+    xLabelFormat(data, humanFriendly: boolean, useTrancate: boolean = true) {
+        var label = "";
+        if (typeof this.options.xLabelFormat === 'function')
+            label = this.options.xLabelFormat(data);
+        else
+            label = this.doLabelFormat(data.label, humanFriendly);
+        if (useTrancate)
+            label = this.trancateText(label);
+        return label;
     }
 
     yLabelFormat(label, humanFriendly: boolean) {
-        if (typeof this.options.yLabelFormat === 'function') {
-            return this.options.yLabelFormat(label);
-        } else {
-            if (typeof label === 'number') {
-                if (humanFriendly)
-                    return V.Application.formatHumanFriendly(label, 2);
-                else
-                    return V.Application.FormatNumber(label, 2);
-            }
+        if (typeof this.options.yLabelFormat === 'function')
+            label = this.options.yLabelFormat(label);
+        else
+            label = this.doLabelFormat(label, humanFriendly);
+        return label;
+    }
+
+    doLabelFormat(label, humanFriendly: boolean): string {
+        if (typeof label === 'number') {
+            if (humanFriendly)
+                label = V.Application.formatHumanFriendly(label, 2);
             else
-                return "" + label;
+                label = V.Application.FormatNumber(label, (label % 1 === 0) ? 0 : 2);
         }
+        else
+            if (label instanceof Date) {
+                var dateTime = label.getTime();
+                var dt: Date = new Date(dateTime);
+                if (this.owner.DateFormatLongMode)
+                    label = V.Application.formatDateTime(dt, V.Application.LongDateFormat);
+                else
+                    label = V.Application.formatDateTime(dt, V.Application.DateFormat);
+            }
+            else {
+                label = label + "";
+            }
+        return label;
     }
 
     hitTest(x, y) {
         return null;
     }
+
     updateHover(x, y) {
         var hit, _ref;
         hit = this.hitTest(x, y);
@@ -1438,15 +1334,14 @@ export class Grid extends EventEmitter {
 
     drawGrid() {
         var lineY, y, _i, _len, _ref, _results;
-        if (this.options.grid === false && this.options.axes === false) {
-            return;
-        }
+        //if (this.options.grid === false && this.options.axes === false) {
+        //    return;
+        //}
         if (this.options.titleY) {
-            var b = this.measureText(this.options.titleY, 270);
             var center = (this.elementHeight / 2);
             this.raphael.text(this.options.titleTextSize / 2 /*this.left - this.options.paddingY*/, center, this.options.titleY).
                 attr('font-size', this.options.titleTextSize).attr('font-family', this.options.gridTextFamily).
-                attr('font-weight', "normal").attr('fill', this.options.titleTextColor).rotate(270);
+                attr('font-weight', this.options.gridTitleWeight).attr('fill', this.options.titleTextColor).rotate(270);
         }
 
         _ref = this.grid;
@@ -1463,12 +1358,11 @@ export class Grid extends EventEmitter {
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             lineY = _ref[_i];
             y = this.transY(lineY);
-            if (this.options.axes) {
-                this.drawYAxisLabel(this.left - 4, y, this.yLabelFormat(lineY, true));
+            if (this.options.axisy) {
+                this.drawYAxisLabel(this.left - 4, y, this.yLabelFormat(lineY, true), this.options.yLabelAngle);
             }
             if (this.options.grid) {
                 _results.push(this.drawGridLine("M" + this.left + "," + y + "H" + (this.left + this.width)));
-                this.drawGridLine("M" + this.left + "," + y + "H" + (this.left + this.width));
             } else {
                 _results.push(void 0);
             }
@@ -1508,12 +1402,166 @@ export class Grid extends EventEmitter {
         return this.raphael.path("M" + (this.transX(event)) + "," + this.bottom + "V" + this.top).attr('stroke', color).attr('stroke-width', this.options.eventStrokeWidth);
     }
 
-    drawYAxisLabel(xPos, yPos, text) {
-        return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
-    }
-
     drawGridLine(path) {
         return this.raphael.path(path).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
+    }
+
+    drawYAxisLabel(xPos, yPos, text, angle = 0) {
+        var label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        var textBox = label.getBBox();
+        label.transform("r" + (-angle));
+        var labelBox = label.getBBox();
+        if (angle !== 0) {
+            label.transform("t0," + (labelBox.width / 2) + "...");
+            //var offset = -0.5 * textBox.height * Math.cos(angle * Math.PI / 180.0);
+            //label.transform("t" + offset + ",0...");
+        }
+        return label;
+    }
+
+    drawXAxisLabel(xPos, yPos, text, angle = 0) {
+        /*
+        text = this.trancateText(text);
+        if (this.tempSpan == null) {            
+            this.t = new Date();
+        }
+        this.tempSpan = $('<span>').css("transform", "rotate(" + (360 - angle) + "deg)").css("-ms-transform", "rotate(" + (360 - angle) + "deg)").css("-webkit-transform", "rotate(" + (360 - angle) + "deg)").css('font-size', this.options.gridTextSize).css('font-family', this.options.gridTextFamily).css('font-weight', this.options.gridTextWeight);
+        //this.tempSpan = this.tempSpan.clone();
+        this.tempSpan.appendTo(this.el[0]);
+        this.tempSpan.css('position', 'absolute');
+        this.tempSpan.text(text);
+
+        var res = { height: this.tempSpan.height(), width: this.tempSpan.width() }
+        var offset = (res.height / 2);
+        if (angle !== 0) {
+            offset = 0.5 * res.width * Math.cos(angle * Math.PI / 180.0);
+        }
+        this.tempSpan.css("left", (xPos - res.width - offset)).css("top", yPos);
+        
+        if (this.tempSpan && text == null) {
+            console.log("end:" + (new Date().getTime() - this.t));
+        }
+        return this.tempSpan;
+        */
+        var label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
+        var textBox = label.getBBox();
+        label.transform("r" + (-angle));
+        var labelBox = label.getBBox();
+        label.transform("t0," + (labelBox.height / 2) + "...");
+        if (angle !== 0) {
+            var offset = -0.5 * textBox.width * Math.cos(angle * Math.PI / 180.0);
+            label.transform("t" + offset + ",0...");
+        }
+        return label;
+
+    }
+
+    private timeProcess: number;
+    private tempSpan: any;
+    measureText(text, angle = 0) {
+        //option a - best ever
+        //remove
+        if (text == null) {
+            if (this.tempSpan) {
+                this.tempSpan.remove();
+                this.tempSpan = null;
+                //console.log("measureText end:" + (new Date().getTime() - this.timeProcess));
+            }
+            return null;
+        }
+        //create
+        if (this.tempSpan == null) {
+            this.timeProcess = new Date().getTime();
+            //console.log("measureText start: 0");
+            this.tempSpan = $('<canvas>');
+            this.tempSpan[0].getContext("2d").font = this.options.gridTextWeight + " " + this.options.gridTextSize + " " + this.options.gridTextFamily;
+        }
+        var tmp = this.tempSpan[0].getContext("2d");
+        var w = tmp.measureText(text).width;
+        var h = this.options.gridTextSize + 2;
+
+        //calc rotate new h & w
+        if (angle != 0) {
+            var a = Math.cos(this.toRadians(angle)) * w;
+            var b = Math.sin(this.toRadians(angle)) * w;
+            var b1 = Math.cos(this.toRadians(180 - 90 - angle)) * h;
+            h = b + b1;
+            w = a + b1;
+        }
+        var res = { height: h, width: w };
+        return res;
+
+        /* //option b - much slow then then a
+        //remove
+        if (text == null) {
+            if (this.tempSpan) {
+                this.tempSpan.remove();
+                this.tempSpan = null;
+                console.log("measureText end:" + (new Date().getTime() - this.timeProcess));
+            }
+            return null;
+        }
+        //create
+        if (this.tempSpan == null) {
+            this.timeProcess = new Date().getTime();
+            console.log("measureText start: 0");
+            this.tempSpan = $('<span>').css('font-size', this.options.gridTextSize).css('font-family', this.options.gridTextFamily).css('font-weight', this.options.gridTextWeight);
+            //this.tempSpan.css("transform", "rotate(" + (360 - angle) + "deg)").css("-ms-transform", "rotate(" + (360 - angle) + "deg)").css("-webkit-transform", "rotate(" + (360 - angle) + "deg)");
+            this.tempSpan.appendTo(this.owner.jComponent);
+        }
+
+        this.tempSpan.text(text);
+        var h = this.tempSpan.height();
+        var w = this.tempSpan.width();
+
+        if (angle != 0) {
+            //NOTE: this.tempSpan[0].scrollHeight | this.tempSpan[0].scrollWidth only works only in IE - so i dont use them
+            var a = Math.cos(angle) * w;
+            var b = Math.sin(angle) * w;
+            var b1 = Math.cos(180 - 90 - angle) * h;
+            h = b + b1;
+            w = a + b1;
+        }
+        var res = { height: h, width: w };
+        return res;
+        */
+
+        /* //option c - much slow then then b
+        //remove
+        if (text == null) {
+            if (this.tempSpan) {
+                this.tempSpan.remove();
+                this.tempSpan = null;
+                console.log("end:" + (new Date().getTime() - this.timeProcess));
+            }
+            return null;
+        }
+        //create
+        if (this.tempSpan == null) {
+            this.timeProcess = new Date().getTime();
+            this.tempSpan = this.raphael.text(0, 0, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
+            this.tempSpan.transform("r" + (-angle));
+        }
+        this.tempSpan.attr({ text: text });
+        var res = { height: this.tempSpan.getBBox().height, width: this.tempSpan.getBBox().width };
+        return res;
+        */
+
+    }
+
+    private toRadians(angle) {
+        var d = angle * (Math.PI / 180);
+        return d;
+    }
+
+    public trancateText(text: string) {
+        var t = text + "";
+        if (this.owner.TruncateLength) {
+            var maxL = this.owner.TruncateLength;
+            if (t.length > maxL)
+                t = t.substr(0, maxL) + "...";
+        }
+        return t;
     }
 }
 

@@ -6,7 +6,7 @@ import VXCB = require("VCL/VXChartBase");
 
 
 export class TChartLineBase extends VXCB.TGridChartBase {
-    public onClicked: (value: V.TLineValue) => void;
+    public onClicked: (value: V.TLineValue, series: number, idx: number) => void;
 
     private _showhoverlegend: boolean = true;
     public get ShowHoverLegend(): boolean {
@@ -19,9 +19,7 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         }
     }
 
-
-
-    private _minY: number = 0;
+    private _minY: number = null;
     public get YMin(): number {
         return this._minY;
     }
@@ -48,7 +46,7 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         return this._series1color;
     }
     public set Series1Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series1color) {
@@ -64,7 +62,7 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         return this._series2color;
     }
     public set Series2Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series2color) {
@@ -79,7 +77,7 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         return this._series3color;
     }
     public set Series3Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series3color) {
@@ -94,7 +92,7 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         return this._series4color;
     }
     public set Series4Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series4color) {
@@ -109,7 +107,7 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         return this._series5color;
     }
     public set Series5Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series5color) {
@@ -124,11 +122,147 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         return this._series6color;
     }
     public set Series6Color(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series6color) {
                 this._series6color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
+    private _series7color: string = "#727272";
+    public get Series7Color(): string {
+        return this._series7color;
+    }
+    public set Series7Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series7color) {
+                this._series7color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+    private _series8color: string = "#f1595f";
+    public get Series8Color(): string {
+        return this._series8color;
+    }
+    public set Series8Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series8color) {
+                this._series8color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+    private _series9color: string = "#79c36a";
+    public get Series9Color(): string {
+        return this._series9color;
+    }
+    public set Series9Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series9color) {
+                this._series9color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+    private _series10color: string = "#599ad3";
+    public get Series10Color(): string {
+        return this._series10color;
+    }
+    public set Series10Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series10color) {
+                this._series10color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series11color: string = "#EAA83A";
+    public get Series11Color(): string {
+        return this._series11color;
+    }
+    public set Series11Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series11color) {
+                this._series11color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
+    private _series12color: string = "#f9a65a";
+    public get Series12Color(): string {
+        return this._series12color;
+    }
+    public set Series12Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series12color) {
+                this._series12color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series13color: string = "#9e66ab";
+    public get Series13Color(): string {
+        return this._series13color;
+    }
+    public set Series13Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series13color) {
+                this._series13color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
+    private _series14color: string = "#cd7058";
+    public get Series14Color(): string {
+        return this._series14color;
+    }
+    public set Series14Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series14color) {
+                this._series14color = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
+    private _series15color: string = "#d77fb3";
+    public get Series15Color(): string {
+        return this._series15color;
+    }
+    public set Series15Color(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series15color) {
+                this._series15color = val;
                 this.drawDelayed(true);
             }
         }
@@ -142,45 +276,6 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         if (val != this._series1name) {
             this._series1name = val;
             this.drawDelayed(true);
-        }
-    }
-
-    /*
-     * When set to false (the default), all null and undefined values in a data series will be ignored and lines will be drawn spanning them. 
-     */
-    private _continuousine: boolean = false;
-    public get ContinuousLine(): boolean {
-        return this._continuousine;
-    }
-    public set ContinuousLine(val: boolean) {
-        if (val != this._continuousine) {
-            this._continuousine = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    /*
-     *  enable line smoothing. 
-    */
-    private _smooth: boolean = true;
-    public get Smooth(): boolean {
-        return this._smooth;
-    }
-    public set Smooth(val: boolean) {
-        if (val != this._smooth) {
-            this._smooth = val;
-            this.drawDelayed(false);
-        }
-    }
-
-    private _linewidth: number = 3;
-    public get LineWidth(): number {
-        return this._linewidth;
-    }
-    public set LineWidth(val: number) {
-        if (val != this._linewidth) {
-            this._linewidth = val;
-            this.drawDelayed(false);
         }
     }
 
@@ -238,28 +333,184 @@ export class TChartLineBase extends VXCB.TGridChartBase {
             this.drawDelayed(true);
         }
     }
-    private _showgridlines: boolean = true;
-    public get ShowGridLines(): boolean {
-        return this._showgridlines;
+
+    private _series7name: string = null;
+    public get Series7Name(): string {
+        return this._series7name;
     }
-    public set ShowGridLines(val: boolean) {
-        if (val != this._showgridlines) {
-            this._showgridlines = val;
+    public set Series7Name(val: string) {
+        if (val != this._series7name) {
+            this._series7name = val;
             this.drawDelayed(true);
         }
     }
+
+
+    private _series8name: string = null;
+    public get Series8Name(): string {
+        return this._series8name;
+    }
+    public set Series8Name(val: string) {
+        if (val != this._series8name) {
+            this._series8name = val;
+            this.drawDelayed(true);
+        }
+    }
+    private _series9name: string = null;
+    public get Series9Name(): string {
+        return this._series9name;
+    }
+    public set Series9Name(val: string) {
+        if (val != this._series9name) {
+            this._series9name = val;
+            this.drawDelayed(true);
+        }
+    }
+    private _series10name: string = null;
+    public get Series10Name(): string {
+        return this._series10name;
+    }
+    public set Series10Name(val: string) {
+        if (val != this._series10name) {
+            this._series10name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _series11name: string = null;
+    public get Series11Name(): string {
+        return this._series11name;
+    }
+    public set Series11Name(val: string) {
+        if (val != this._series11name) {
+            this._series11name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _series12name: string = null;
+    public get Series12Name(): string {
+        return this._series12name;
+    }
+    public set Series12Name(val: string) {
+        if (val != this._series12name) {
+            this._series12name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _series13name: string = null;
+    public get Series13Name(): string {
+        return this._series13name;
+    }
+    public set Series13Name(val: string) {
+        if (val != this._series13name) {
+            this._series13name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _series14name: string = null;
+    public get Series14Name(): string {
+        return this._series14name;
+    }
+    public set Series14Name(val: string) {
+        if (val != this._series14name) {
+            this._series14name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _series15name: string = null;
+    public get Series15Name(): string {
+        return this._series15name;
+    }
+    public set Series15Name(val: string) {
+        if (val != this._series15name) {
+            this._series15name = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    /*
+     * When set to false (the default), all null and undefined values in a data series will be ignored and lines will be drawn spanning them. 
+     */
+    private _continuousine: boolean = false;
+    public get ContinuousLine(): boolean {
+        return this._continuousine;
+    }
+    public set ContinuousLine(val: boolean) {
+        if (val != this._continuousine) {
+            this._continuousine = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    /*
+     *  enable line smoothing. 
+    */
+    private _smooth: boolean = true;
+    public get Smooth(): boolean {
+        return this._smooth;
+    }
+    public set Smooth(val: boolean) {
+        if (val != this._smooth) {
+            this._smooth = val;
+            this.drawDelayed(false);
+        }
+    }
+
+    private _linewidth: number = 3;
+    public get LineWidth(): number {
+        return this._linewidth;
+    }
+    public set LineWidth(val: number) {
+        if (val != this._linewidth) {
+            this._linewidth = val;
+            this.drawDelayed(false);
+        }
+    }
+
+    private _defSelectionLast: boolean = false;
+    public get SetLastSelected(): boolean {
+        return this._defSelectionLast;
+    }
+    public set SetLastSelected(val: boolean) {
+        if (val != this._defSelectionLast) {
+            this._defSelectionLast = val;
+            this.drawDelayed(true);
+        }
+    }
+
     public values = new VXCB.TChartValuesCollection<VXCB.TLineValue>();
-    public createValue(date: Date, value1?: number, value2?: number, value3?: number,
-        value4?: number, value5?: number, value6?: number): VXCB.TLineValue {
+    public createValue(date: any,
+        value1?: number, value2?: number, value3?: number,
+        value4?: number, value5?: number, value6?: number,
+        value7?: number, value8?: number, value9?: number,
+        value10?: number, value11?: number, value12?: number,
+        value13?: number, value14?: number, value15?: number): VXCB.TLineValue {
         var col = new VXCB.TLineValue();
 
-        col.Date = new Date(date.getTime());
+        col.Date = date;
         col.Value1 = value1;
         col.Value2 = value2;
         col.Value3 = value3;
         col.Value4 = value4;
         col.Value5 = value5;
         col.Value6 = value6;
+        col.Value7 = value7;
+        col.Value8 = value8;
+        col.Value9 = value9;
+        col.Value10 = value10;
+        col.Value11 = value11;
+        col.Value12 = value12;
+        col.Value13 = value13;
+        col.Value14 = value14;
+        col.Value15 = value15;
         this.values.add(col);
 
         return col;
@@ -268,25 +519,40 @@ export class TChartLineBase extends VXCB.TGridChartBase {
 
     public getData(): any[] {
         var dataArray = [];
-
-        this.values.forEach((valueOfElement) => {
-            var obj: any = { x: valueOfElement.Date, id: valueOfElement.ID }
-            obj.value1 = !isFinite(valueOfElement.Value1) ? null : valueOfElement.Value1;
-            obj.value2 = !isFinite(valueOfElement.Value2) ? null : valueOfElement.Value2;
-            obj.value3 = !isFinite(valueOfElement.Value3) ? null : valueOfElement.Value3;
-            obj.value4 = !isFinite(valueOfElement.Value4) ? null : valueOfElement.Value4;
-            obj.value5 = !isFinite(valueOfElement.Value5) ? null : valueOfElement.Value5;
-            obj.value6 = !isFinite(valueOfElement.Value6) ? null : valueOfElement.Value6;
-            dataArray.push(obj);
+        this.values.forEach((valueOfElement: VXCB.TLineValue) => {
+            dataArray.push({
+                x: valueOfElement.Date,
+                id: valueOfElement.ID,
+                value1: !isFinite(valueOfElement.Value1) ? null : valueOfElement.Value1,
+                value2: !isFinite(valueOfElement.Value2) ? null : valueOfElement.Value2,
+                value3: !isFinite(valueOfElement.Value3) ? null : valueOfElement.Value3,
+                value4: !isFinite(valueOfElement.Value4) ? null : valueOfElement.Value4,
+                value5: !isFinite(valueOfElement.Value5) ? null : valueOfElement.Value5,
+                value6: !isFinite(valueOfElement.Value6) ? null : valueOfElement.Value6,
+                value7: !isFinite(valueOfElement.Value7) ? null : valueOfElement.Value7,
+                value8: !isFinite(valueOfElement.Value8) ? null : valueOfElement.Value8,
+                value9: !isFinite(valueOfElement.Value9) ? null : valueOfElement.Value9,
+                value10: !isFinite(valueOfElement.Value10) ? null : valueOfElement.Value10,
+                value11: !isFinite(valueOfElement.Value11) ? null : valueOfElement.Value11,
+                value12: !isFinite(valueOfElement.Value12) ? null : valueOfElement.Value12,
+                value13: !isFinite(valueOfElement.Value13) ? null : valueOfElement.Value13,
+                value14: !isFinite(valueOfElement.Value14) ? null : valueOfElement.Value14,
+                value15: !isFinite(valueOfElement.Value15) ? null : valueOfElement.Value15
+            });
             return true;
         });
-
         return dataArray;
     }
+
 }
+
 
 export class TChartLine extends TChartLineBase {
     private jChart: Line;
+
+    public selectedItem(series: number, idx: number, fireEvents: boolean) {
+        this.jChart.clickItem(series, idx, fireEvents);
+    }
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
@@ -298,33 +564,44 @@ export class TChartLine extends TChartLineBase {
     public create() {
         this.jComponent.empty(); //clear all subcomponents
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
-        var ymin = this.YMin != null ? String(this.YMin) : 'auto'
-        var ymax = this.YMax != null ? String(this.YMax) : 'auto'
+        var ymin = this.YMin != null ? String(this.YMin) : 'auto';
+        var ymax = this.YMax != null ? String(this.YMax) : 'auto';
 
         this.jChart = new Line({
             element: this.jComponent[0],
             xkey: "x",
-            ykeys: ["value1", "value2", "value3", "value4", "value5", "value6"],
-            labels: [this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name],
+            ykeys: [
+                "value1", "value2", "value3", "value4", "value5",
+                "value6", "value7", "value8", "value9", "value10",
+                "value11", "value12", "value13", "value14", "value15"
+            ],
+            labels: [
+                this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name,
+                this.Series7Name, this.Series8Name, this.Series9Name, this.Series10Name, this.Series11Name, this.Series12Name,
+                this.Series13Name, this.Series14Name, this.Series15Name
+            ],
             lineWidth: this.LineWidth,
             pointSize: 3,
-            lineColors: [this.Series1Color, this.Series2Color, this.Series3Color, this.Series4Color,
-                this.Series5Color, this.Series6Color],
+            lineColors: [
+                this.Series1Color, this.Series2Color, this.Series3Color, this.Series4Color, this.Series5Color, this.Series6Color,
+                this.Series7Color, this.Series8Color, this.Series9Color, this.Series10Color, this.Series11Color, this.Series12Color,
+                this.Series13Color, this.Series14Color, this.Series15Color
+            ],
             pointWidths: [1],
             pointStrokeColors: ['#ffffff'],
             titleX: this.TitleX,
-            paddingX: this.TitleX ? 35 : 20,
+            paddingX: this.TitleX ? 35 : 15,
             titleY: this.TitleY,
-            paddingY: this.TitleY ? 25 : 5,
+            paddingY: this.TitleY ? 35 : 15,
+            xLabelAngle: this.XLabelAngle,
             xLabelFormat: this.XLabelFormat,
             yLabelFormat: this.YLabelFormat,
             toolTipFormat: this.ToolTipFormat,
             pointFillColors: [],
             smooth: this.Smooth,
             xLabels: 'auto',
-            xLabelAngle: this.XLabelAngle,
             hideHover: this.ShowHoverLegend ? 'auto' : 'always',
-            xLabelMargin: 15,
+            xLabelMargin: this.XLabelMargin,
             grid: this.ShowGridLines,
             continuousLine: this.ContinuousLine,
             preUnits: this.PreValueUnit,
@@ -334,9 +611,13 @@ export class TChartLine extends TChartLineBase {
             titleTextColor: this.TitleTextColor,
             titleTextSize: this.TitleTextSize,
             gridTextFamily: this.Font,
-            gridTextWeight: 'normal',
+            gridTitleWeight: this.GridTitleWeight,
+            gridTextWeight: this.GridTextWeight,
             ymax: ymax,
-            ymin: ymin
+            ymin: ymin,
+            ygap: this.YGap,
+            axisx: this.ShowXAxisLabels,
+            axisy: this.ShowYAxisLabels,
         }, this);
 
         super.create();
@@ -347,7 +628,7 @@ export class TChartArea extends TChartLineBase {
     private jChart: Area;
 
 
-    private _fillopacity: number = 0.1;
+    private _fillopacity: number = 0.3;
     public get FillOpacity(): number {
         return this._fillopacity;
     }
@@ -358,12 +639,13 @@ export class TChartArea extends TChartLineBase {
         }
     }
 
+
     private _series1areacolor: string = "#0b62a4";
     public get Series1AreaColor(): string {
         return this._series1areacolor;
     }
     public set Series1AreaColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series1areacolor) {
@@ -379,7 +661,7 @@ export class TChartArea extends TChartLineBase {
         return this._series2areacolor;
     }
     public set Series2AreaColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series2areacolor) {
@@ -394,7 +676,7 @@ export class TChartArea extends TChartLineBase {
         return this._series3areacolor;
     }
     public set Series3AreaColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series3areacolor) {
@@ -409,7 +691,7 @@ export class TChartArea extends TChartLineBase {
         return this._series4areacolor;
     }
     public set Series4AreaColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series4areacolor) {
@@ -424,7 +706,7 @@ export class TChartArea extends TChartLineBase {
         return this._series5areacolor;
     }
     public set Series5AreaColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series5areacolor) {
@@ -439,11 +721,145 @@ export class TChartArea extends TChartLineBase {
         return this._series6areacolor;
     }
     public set Series6AreaColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        var isOk = V.Application.checkColorString(val);
         if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
         else {
             if (val != this._series6areacolor) {
                 this._series6areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series7areacolor: string = "#727272";
+    public get Series7AreaColor(): string {
+        return this._series7areacolor;
+    }
+    public set Series7AreaColor(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series7areacolor) {
+                this._series7areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+    private _series8areacolor: string = "#f1595f";
+    public get Series8AreaColor(): string {
+        return this._series8areacolor;
+    }
+    public set Series8AreaColor(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series8areacolor) {
+                this._series8areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+    private _series9areacolor: string = "#79c36a";
+    public get Series9AreaColor(): string {
+        return this._series9areacolor;
+    }
+    public set Series9AreaColor(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series9areacolor) {
+                this._series9areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+    private _series10areacolor: string = "#599ad3";
+    public get Series10AreaColor(): string {
+        return this._series10areacolor;
+    }
+    public set Series10AreaColor(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series10areacolor) {
+                this._series10areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series11areacolor: string = "#EAA83A";
+    public get Series11AreaColor(): string {
+        return this._series11areacolor;
+    }
+    public set Series11AreaColor(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series11areacolor) {
+                this._series11areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
+    private _series12areacolor: string = "#f9a65a";
+    public get Series12AreaColor(): string {
+        return this._series12areacolor;
+    }
+    public set Series12AreaColor(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series12areacolor) {
+                this._series12areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series13areacolor: string = "#9e66ab";
+    public get Series13AreaColor(): string {
+        return this._series13areacolor;
+    }
+    public set Series13AreaColor(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series13areacolor) {
+                this._series13areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
+    private _series14areacolor: string = "#cd7058";
+    public get Series14AreaColor(): string {
+        return this._series14areacolor;
+    }
+    public set Series14AreaColor(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series14areacolor) {
+                this._series14areacolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _series15areacolor: string = "#d77fb3";
+    public get Series15AreaColor(): string {
+        return this._series15areacolor;
+    }
+    public set Series15AreaColor(val: string) {
+        var isOk = V.Application.checkColorString(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+            if (val != this._series15areacolor) {
+                this._series15areacolor = val;
                 this.drawDelayed(true);
             }
         }
@@ -457,59 +873,73 @@ export class TChartArea extends TChartLineBase {
     }
 
     public create() {
-        this.jComponent.empty(); //clear all subcomponents
-        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
-        var ymin = this.YMin != null ? String(this.YMin) : 'auto'
-        var ymax = this.YMax != null ? String(this.YMax) : 'auto'
+        if (this.jChart == null) {
+            this.jComponent.empty(); //clear all subcomponents
+            this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+            var ymin = this.YMin != null ? String(this.YMin) : 'auto'
+            var ymax = this.YMax != null ? String(this.YMax) : 'auto'
 
 
         this.jChart = new Area({
-            element: this.jComponent[0],
-            xkey: "x",
-            ykeys: ["value1", "value2", "value3", "value4", "value5", "value6"],
-            labels: [this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name],
-            lineWidth: this.LineWidth,
-            pointSize: 3,
-            lineColors: [this.Series1Color, this.Series2Color, this.Series3Color, this.Series4Color,
-                this.Series5Color, this.Series6Color],
-            areaColors: [this.Series1AreaColor, this.Series2AreaColor, this.Series3AreaColor, this.Series4AreaColor,
-                this.Series5AreaColor, this.Series6AreaColor],
-            pointWidths: [1],
-            pointStrokeColors: ['#ffffff'],
-            titleX: this.TitleX,
-            paddingX: this.TitleX ? 35 : 20,
-            titleY: this.TitleY,
-            paddingY: this.TitleY ? 25 : 5,
-            xLabelFormat: this.XLabelFormat,
-            yLabelFormat: this.YLabelFormat,
-            toolTipFormat: this.ToolTipFormat,
-            pointFillColors: [],
-            xLabelAngle: this.XLabelAngle,
-            smooth: this.Smooth,
-            xLabels: 'auto',
-            hideHover: 'auto',
-            xLabelMargin: 24,
-            grid: this.ShowGridLines,
-            continuousLine: this.ContinuousLine,
-            preUnits: this.PreValueUnit,
-            postUnits: this.PostValueUnit,
-            gridTextSize: this.GridTextSize,
-            gridTextColor: this.GridTextColor,
-            titleTextColor: this.TitleTextColor,
-            titleTextSize: this.TitleTextSize,
-            gridTextFamily: this.Font,
-            gridTextWeight: 'normal',
-            ymax: ymax,
-            ymin: ymin,
-            fillOpacity: this.FillOpacity,
-            behaveLikeLine: false
+                element: this.jComponent[0],
+                xkey: "x",
+                ykeys: ["value1", "value2", "value3", "value4", "value5",
+                    "value6", "value7", "value8", "value9", "value10",
+                    "value11", "value12", "value13", "value14", "value15"],
+                labels: [this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name
+                    , this.Series7Name, this.Series8Name, this.Series9Name, this.Series10Name, this.Series11Name, this.Series12Name
+                    , this.Series13Name, this.Series14Name, this.Series15Name],
+                lineWidth: this.LineWidth,
+                pointSize: 3,
+                lineColors: [
+                    this.Series1Color, this.Series2Color, this.Series3Color, this.Series4Color, this.Series5Color, this.Series6Color,
+                    this.Series7Color, this.Series8Color, this.Series9Color, this.Series10Color, this.Series11Color, this.Series12Color,
+                    this.Series13Color, this.Series14Color, this.Series15Color,
+                ],
+                areaColors: [
+                    this.Series1AreaColor, this.Series2AreaColor, this.Series3AreaColor, this.Series4AreaColor, this.Series5AreaColor, this.Series6AreaColor,
+                    this.Series7AreaColor, this.Series8AreaColor, this.Series9AreaColor, this.Series10AreaColor, this.Series11AreaColor, this.Series12AreaColor,
+                    this.Series13AreaColor, this.Series14AreaColor, this.Series15AreaColor,
+                ],
+                pointWidths: [1],
+                pointStrokeColors: ['#ffffff'],
+                titleX: this.TitleX,
+                paddingX: this.TitleX ? 35 : 20,
+                titleY: this.TitleY,
+                paddingY: this.TitleY ? 25 : 5,
+                xLabelFormat: this.XLabelFormat,
+                yLabelFormat: this.YLabelFormat,
+                toolTipFormat: this.ToolTipFormat,
+                pointFillColors: [],
+                smooth: this.Smooth,
+                xLabels: 'auto',
+                xLabelAngle: this.XLabelAngle,
+                hideHover: this.ShowHoverLegend ? 'auto' : 'always',
+                xLabelMargin: this.XLabelMargin,
+                grid: this.ShowGridLines,
+                continuousLine: this.ContinuousLine,
+                preUnits: this.PreValueUnit,
+                postUnits: this.PostValueUnit,
+                gridTextSize: this.GridTextSize,
+                gridTextColor: this.GridTextColor,
+                titleTextColor: this.TitleTextColor,
+                titleTextSize: this.TitleTextSize,
+                gridTextFamily: this.Font,
+                gridTitleWeight: this.GridTitleWeight,
+                gridTextWeight: this.GridTextWeight,
+                ymax: ymax,
+                ymin: ymin,
+                ygap: this.YGap,
+                axisx: this.ShowXAxisLabels,
+                axisy: this.ShowYAxisLabels,
+                fillOpacity: this.FillOpacity,
+                behaveLikeLine: false,
 
-        }, this);
-
+            }, this);
+        }
         super.create();
     }
 }
-
 
 export class TDBChartLine extends TChartLine {
     private _value1field: string;
@@ -597,6 +1027,131 @@ export class TDBChartLine extends TChartLine {
         }
     }
 
+    private _value7field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField7(): string {
+        return this._value7field;
+    }
+    public set ValueField7(val: string) {
+        if (val != this._value7field) {
+            this._value7field = val.toUpperCase();
+            this.drawDelayed(true);
+        }
+    }
+
+    private _value8field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField8(): string {
+        return this._value8field;
+    }
+    public set ValueField8(val: string) {
+        if (val != this._value8field) {
+            this._value8field = val.toUpperCase();
+            this.drawDelayed(true);
+        }
+    }
+
+    private _value9field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField9(): string {
+        return this._value9field;
+    }
+    public set ValueField9(val: string) {
+        if (val != this._value9field) {
+            this._value9field = val.toUpperCase();
+            this.drawDelayed(true);
+        }
+    }
+
+    private _value10field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField10(): string {
+        return this._value10field;
+    }
+    public set ValueField10(val: string) {
+        if (val != this._value10field) {
+            this._value10field = val.toUpperCase();
+            this.drawDelayed(true);
+        }
+    }
+
+    private _value11field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField11(): string {
+        return this._value11field;
+    }
+    public set ValueField11(val: string) {
+        if (val != this._value11field) {
+            this._value11field = val.toUpperCase();
+            this.drawDelayed(true);
+        }
+    }
+
+    private _value12field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField12(): string {
+        return this._value12field;
+    }
+    public set ValueField12(val: string) {
+        if (val != this._value12field) {
+            this._value12field = val.toUpperCase();
+            this.drawDelayed(true);
+        }
+    }
+
+    private _value13field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField13(): string {
+        return this._value13field;
+    }
+    public set ValueField13(val: string) {
+        if (val != this._value13field) {
+            this._value13field = val.toUpperCase();
+            this.drawDelayed(true);
+        }
+    }
+
+    private _value14field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField14(): string {
+        return this._value14field;
+    }
+    public set ValueField14(val: string) {
+        if (val != this._value14field) {
+            this._value14field = val.toUpperCase();
+            this.drawDelayed(true);
+        }
+    }
+
+    private _value15field: string;
+    /**
+    * Specifies the field from which the edit control displays data.
+    */
+    public get ValueField15(): string {
+        return this._value15field;
+    }
+    public set ValueField15(val: string) {
+        if (val != this._value15field) {
+            this._value15field = val.toUpperCase();
+            this.drawDelayed(true);
+        }
+    }
 
     private _datefield: string;
     /**
@@ -638,22 +1193,34 @@ export class TDBChartLine extends TChartLine {
     public getData(): any[] {
         this.values.clear();
         var dataArray = [];
-        if (this.Dataset == null || (this.ValueField1 == null && this.ValueField2 == null && this.ValueField3 == null && this.ValueField4 == null &&
-            this.ValueField5 == null && this.ValueField6 == null) || this.DateField == null) return dataArray;
+        if (this.Dataset == null ||
+            (this.ValueField1 == null && this.ValueField2 == null && this.ValueField3 == null && this.ValueField4 == null &&
+            this.ValueField5 == null && this.ValueField6 == null && this.ValueField7 == null && this.ValueField8 == null && this.ValueField9 == null &&
+            this.ValueField10 == null && this.ValueField11 == null && this.ValueField12 == null && this.ValueField13 == null &&
+            this.ValueField14 == null && this.ValueField15) || this.DateField == null) return dataArray;
         if (!this.Dataset.Active) return dataArray;
         this.Dataset.forEach(() => {
             var dtValue: any = this.Dataset.getFieldValue(this.DateField);
             if (dtValue !== null) {
-                if (!dtValue.getMonth) V.Application.raiseException("Field " + this.DateField
-                    + " not contain date value");
+                //if (!dtValue.getMonth)
+                //    V.Application.raiseException("Field " + this.DateField + " not contain date value");
 
-                var obj: any = { x: (<Date>dtValue), id: this.Dataset.Recno }
+                var obj: any = { x: dtValue, id: this.Dataset.Recno }
                 if (this.Dataset.getFieldValue(this.ValueField1) && isFinite(this.Dataset.getFieldValue(this.ValueField1))) obj.value1 = this.Dataset.getFieldValue(this.ValueField1);
                 if (this.Dataset.getFieldValue(this.ValueField2) && isFinite(this.Dataset.getFieldValue(this.ValueField2))) obj.value2 = this.Dataset.getFieldValue(this.ValueField2);
                 if (this.Dataset.getFieldValue(this.ValueField3) && isFinite(this.Dataset.getFieldValue(this.ValueField3))) obj.value3 = this.Dataset.getFieldValue(this.ValueField3);
                 if (this.Dataset.getFieldValue(this.ValueField4) && isFinite(this.Dataset.getFieldValue(this.ValueField4))) obj.value4 = this.Dataset.getFieldValue(this.ValueField4);
                 if (this.Dataset.getFieldValue(this.ValueField5) && isFinite(this.Dataset.getFieldValue(this.ValueField5))) obj.value5 = this.Dataset.getFieldValue(this.ValueField5);
                 if (this.Dataset.getFieldValue(this.ValueField6) && isFinite(this.Dataset.getFieldValue(this.ValueField6))) obj.value6 = this.Dataset.getFieldValue(this.ValueField6);
+                if (this.Dataset.getFieldValue(this.ValueField7) && isFinite(this.Dataset.getFieldValue(this.ValueField7))) obj.value7 = this.Dataset.getFieldValue(this.ValueField7);
+                if (this.Dataset.getFieldValue(this.ValueField8) && isFinite(this.Dataset.getFieldValue(this.ValueField8))) obj.value8 = this.Dataset.getFieldValue(this.ValueField8);
+                if (this.Dataset.getFieldValue(this.ValueField9) && isFinite(this.Dataset.getFieldValue(this.ValueField9))) obj.value9 = this.Dataset.getFieldValue(this.ValueField9);
+                if (this.Dataset.getFieldValue(this.ValueField10) && isFinite(this.Dataset.getFieldValue(this.ValueField10))) obj.value10 = this.Dataset.getFieldValue(this.ValueField10);
+                if (this.Dataset.getFieldValue(this.ValueField11) && isFinite(this.Dataset.getFieldValue(this.ValueField11))) obj.value11 = this.Dataset.getFieldValue(this.ValueField11);
+                if (this.Dataset.getFieldValue(this.ValueField12) && isFinite(this.Dataset.getFieldValue(this.ValueField12))) obj.value12 = this.Dataset.getFieldValue(this.ValueField12);
+                if (this.Dataset.getFieldValue(this.ValueField13) && isFinite(this.Dataset.getFieldValue(this.ValueField13))) obj.value13 = this.Dataset.getFieldValue(this.ValueField13);
+                if (this.Dataset.getFieldValue(this.ValueField14) && isFinite(this.Dataset.getFieldValue(this.ValueField14))) obj.value14 = this.Dataset.getFieldValue(this.ValueField14);
+                if (this.Dataset.getFieldValue(this.ValueField15) && isFinite(this.Dataset.getFieldValue(this.ValueField15))) obj.value15 = this.Dataset.getFieldValue(this.ValueField15);
                 dataArray.push(obj);
 
                 var col = new VXCB.TLineValue();
@@ -664,8 +1231,17 @@ export class TDBChartLine extends TChartLine {
                 col.Value4 = obj.value4;
                 col.Value5 = obj.value5;
                 col.Value6 = obj.value6;
-                col.Date = dtValue;
-                col.ID = this.Dataset.Recno.toString();
+                col.Value7 = obj.value7;
+                col.Value8 = obj.value8;
+                col.Value9 = obj.value9;
+                col.Value10 = obj.value10;
+                col.Value11 = obj.value11;
+                col.Value12 = obj.value12;
+                col.Value13 = obj.value13;
+                col.Value14 = obj.value14;
+                col.Value15 = obj.value15;
+                col.Date = obj.x;
+                col.ID = obj.id;
             }
         });
 
@@ -808,11 +1384,10 @@ export class TDBChartArea extends TChartArea {
         this.Dataset.forEach(() => {
             var dtValue: any = this.Dataset.getFieldValue(this.DateField);
             if (dtValue !== null) {
-                if (!dtValue.getMonth) V.Application.raiseException("Field " + this.DateField
-                    + " not containt date value");
+                //if (!dtValue.getMonth) V.Application.raiseException("Field " + this.DateField + " not containt date value");
 
                 var obj: any = {
-                    x: (<Date>dtValue), id: this.Dataset.Recno
+                    x: dtValue, id: this.Dataset.Recno
                 };
                 if (this.Dataset.getFieldValue(this.ValueField1)) obj.value1 = this.Dataset.getFieldValue(this.ValueField1);
                 if (this.Dataset.getFieldValue(this.ValueField2)) obj.value2 = this.Dataset.getFieldValue(this.ValueField2);
@@ -852,13 +1427,13 @@ class Line extends VXCB.Grid {
 
 
     constructor(options, owner) {
-        super(options);
-        this.owner = owner;
-        this.hilight = __bind(this.hilight, this);
+        super(options, owner);
 
-        this.onHoverOut = __bind(this.onHoverOut, this);
+        //this.hilight = __bind(this.hilight, this);
 
-        this.onHoverMove = __bind(this.onHoverMove, this);
+        //this.onHoverOut = __bind(this.onHoverOut, this);
+
+        //this.onHoverMove = __bind(this.onHoverMove, this);
     }
 
     init() {
@@ -907,7 +1482,7 @@ class Line extends VXCB.Grid {
                 }
                 return _results1;
             }).call(this);
-            _results.push(row._ymax = Math.min.apply(null, [this.bottom].concat((function () {
+            _results.push(row._ymax = Math.max.apply(null, [this.bottom].concat((function () {
                 var _j, _len1, _ref1, _results1;
                 _ref1 = row._y;
                 _results1 = [];
@@ -938,103 +1513,154 @@ class Line extends VXCB.Grid {
         return -1;
     }
 
-    onGridClick(x, y, evt) {
-        if (this.owner == null) return;
-        var owner = <TChartLine>this.owner;
-        if (owner.onClicked == null) return;
 
-        var index = this.hitTest(x, y);
-        if (index >= 0 && index <= owner.values.length()) {
-            var id = this.data[index].id;
+    onGridClick(x, y, evt) {
+        //var index = this.hitTest(x, y);
+        var series = evt.target.series;
+        var idx = evt.target.idx;
+        this.clickItem(series, idx);
+    }
+
+    clickItem(series: number, idx: number, fireEvents: boolean = true) {
+        if (!this.owner) return;
+        var owner = <TChartLine>this.owner;
+        if (!owner.SelectionEnabled) return;
+
+        var self = this;
+        //set default selection
+        if (idx == -1 && series == -1 && owner.SetLastSelected) {
+            idx = owner.values.length() - 1;
+            var tmp = this.data[idx];
+            var max = tmp._y[0];
+            for (var i = 0; i < tmp._y.length; i++) {
+                if (typeof tmp._y[i] == 'number' && tmp._y[i] <= max)
+                    series = i;
+                max = tmp._y[i];
+            }
+        }
+
+        //mark selection
+        if (idx >= 0 && idx < owner.values.length()) {
+            var id = this.data[idx].id;
             var item = owner.values.FindItemByID(id);
 
-            if (item != null) (V.tryAndCatch(() => {
+            if (item != null) {
+
+                var o: V.TSelectedChartValue = new V.TSelectedChartValue();
+                o.Idx = idx;
+                o.Series = series;
+                o.ChartValue = item;
+
+                owner.SelectedItem = o;
+
+                this.hoverItem(null, null);
+
                 if (owner instanceof TDBChartLine && (<TDBChartLine>owner).Dataset != null) {
                     (<TDBChartLine>owner).Dataset.Recno = parseInt(id);
                 }
 
-                owner.onClicked(item);
-            }));
+                if (fireEvents)
+                    if (owner.onClicked)
+                        (V.tryAndCatch(() => { owner.onClicked(item, series, idx) }));
+            }
         }
     }
 
+    private oldTipId: string = "";
     onHoverMove(x, y, evt) {
-        if (!this.hover) return;
-        var index;
-        index = this.hitTest(x, y);
-        if (index < 0) return;
+        var tipId = evt.target.TipId;
+        var idx = evt.target.idx;
+        var series = evt.target.series;
+        var key = tipId + idx + series;
+        if (key == this.oldTipId) return;
+        this.oldTipId = key;
 
-        return this.displayHoverForRow(index);
+        //start hover
+        var _ref;
+        if (!this.hover) return;
+        this.hover.hide();
+        if (tipId && tipId.indexOf("node") != -1) {
+            idx = evt.target.idx;
+            series = evt.target.series;
+            (_ref = this.hover).update.apply(_ref, this.hoverItem(idx, series));;
+        }
+        if (tipId && tipId.indexOf("xlabel") != -1) {
+            var l = evt.target.TipValue;
+            this.hover.animation = true;
+            (_ref = this.hover).update.apply(_ref, ["<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + l + " \n</div>", x, y]);
+        }
     }
 
     onHoverOut() {
         if (!this.hover) return;
         if (this.options.hideHover !== false) {
-            return this.displayHoverForRow(null);
-        }
-    }
-
-    displayHoverForRow(index) {
-        var _ref;
-        if (index != null) {
-            (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
-            return this.hilight(index);
-        } else {
             this.hover.hide();
-            return this.hilight();
+            return this.hoverItem(null, null);
         }
     }
 
-    hoverContentForRow(index) {
-        var content, j, row, x, y, _i, _len, _ref;
+    private oldPoint = [null,null];
+    hoverItem(idx, series) {
+
+        //owner
+        var owner = <TChartLine>this.owner;
+
+        if (this.oldPoint[0] != null && this.oldPoint[1] != null)
+            this.seriesPoints[this.oldPoint[0]][this.oldPoint[1]].animate(this.pointShrink);
+
+        //check clicked
+        owner.SelectedItems.forEach((item) => {
+            this.seriesPoints[item.Series][item.Idx].animate(this.pointGrow);
+        });
+
+        this.oldPoint = [series, idx];
+
+        //continue?
+        if (idx == null && series == null)
+            return;
+
+        this.seriesPoints[series][idx].animate(this.pointGrow);
+
+        return this.hoverContentForRow(idx, series);
+    }
+
+    hoverContentForRow(index, series) {
+        var j, row, x, y, _i, _len, _ref
         row = this.data[index];
         if (row == null) {
             return null;
         }
 
-        //calc series
-        var rows = 0;
-        for (var i = 0; i < row._y.length; i++) {
-            if (row._y[i] != null)
-                rows++;
-        }
-        row.series = index % rows;
         row.index = index;
+        row.series = series;
 
-        //user have data to put on
-        if (typeof this.options.hoverCallback === 'function') {
-            content = this.options.hoverCallback(index, this.options, content);
+        var content: string = "";
+        var lblX: string = "";
+        if (!this.options.toolTipFormat) {
+            lblX = (this.options.titleX ? this.options.titleX + ": " : "") + this.xLabelFormat(row, false, false);
+            content = "<div style='pointer-events: none;' class='morris-hover-row-label'>" + lblX + "</div>";
         }
-        //generate hover div
-        else {
-            var lblX: string = "";
-            if (!this.options.toolTipFormat) {
-                lblX = this.options.titleX + ":\n  " + row.label;
-            }
-            content = "<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + lblX + "\n</div>";
-            _ref = row.y;
-            for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+        _ref = row.y;
+        for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+            if (series == j) {
                 y = _ref[j];
                 if (y != null) {
                     var lblY: string = "";
                     if (this.options.toolTipFormat) {
-                        row.series = j ;
                         lblY = this.options.toolTipFormat(row);
                     }
                     else {
                         lblY = this.options.labels[j];
-                        if (lblY == null)
-                            lblY = this.options.titleY;
-                        //lbl = lbl.substring(0, 14);
-                        lblY = lblY + ":\n  " + (this.yLabelFormat(y, false));
+                        if (lblY == null) lblY = this.options.titleY;
+                        lblY = (this.options.titleY ? this.options.titleY + ": " : "") + (this.yLabelFormat(y, false));
                     }
-                    content += "<div style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + lblY + "\n</div>";
+                    content += "<div style='pointer-events: none;color: " + (this.colorFor(row, j, 'label')) + "'>" + lblY + "</div>";
                 }
             }
         }
 
         //draw location
-        return [content, row._x, row._ymax];
+        return [content, row._x, row._y[series]];
     }
 
     generatePaths() {
@@ -1083,77 +1709,64 @@ class Line extends VXCB.Grid {
     }
 
     draw() {
-        if (this.options.axes) {
+        if (this.options.axisx) {
             this.drawXAxis();
         }
         this.drawSeries();
-        if (this.options.hideHover === false) {
-            return this.displayHoverForRow(this.data.length - 1);
-        }
+
+        this.clickItem(-1, -1);
+
+        //if (!this.options.hideHover) {
+        //    this.hoverItem(-1, -1);
+        //}
+
+        return;
     }
 
     drawXAxis() {
-        var drawLabel, l, labels, prevAngleMargin, prevLabelMargin, row, ypos, _i, _len, _results,
-            _this = this;
-
+        var label, labelBox, angleSize, offset, prevAngleMargin, prevLabelMargin, row, textBox, ypos, _i, _ref, _results;
+        prevLabelMargin = null;
+        prevAngleMargin = null;
+        _results = [];
+        //draw x title
         ypos = this.bottom + 3;
 
 
         if (this.options.titleX) {
-            var b = this.measureText(this.options.titleX);
             var center = (this.elementWidth / 2);
-            this.raphael.text(center, this.elementHeight - this.options.titleTextSize / 2, this.options.titleX).
+            this.raphael.text(center, this.elementHeight - this.options.titleTextSize / 2,
+                this.options.titleX).
                 attr('font-size', this.options.titleTextSize).attr('font-family', this.options.gridTextFamily).
-                attr('font-weight', "normal").attr('fill', this.options.titleTextColor);
+                attr('font-weight', this.options.gridTitleWeight).attr('fill', this.options.titleTextColor);
         }
 
-        prevLabelMargin = null;
-        prevAngleMargin = null;
-        drawLabel = function (labelText, xpos) {
-            var label, labelBox, margin, offset, textBox;
-            label = _this.drawXAxisLabel(_this.transX(xpos), ypos, labelText);
-            textBox = label.getBBox();
-            label.transform("r" + (-_this.options.xLabelAngle));
-            labelBox = label.getBBox();
-            label.transform("t0," + (labelBox.height / 2) + "...");
-            if (_this.options.xLabelAngle !== 0) {
-                offset = -0.5 * textBox.width * Math.cos(_this.options.xLabelAngle * Math.PI / 180.0);
-                label.transform("t" + offset + ",0...");
+        var _tmpLabels = [];
+        for (var i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+            row = this.data[i];
+            label = this.measureText(this.xLabelFormat(row, true), this.options.xLabelAngle);
+
+            //calc angle size - permit calculation of the triangle 
+            if (this.options.xLabelAngle !== 0)
+                angleSize = this.options.gridTextSize / Math.sin(this.options.xLabelAngle * Math.PI / 180.0);
+            else
+                angleSize = label.width;
+
+            if (/*i==0 || i == _ref-1 ||*/ this.options.xLabelMargin == null || prevLabelMargin == null || (row._x >= 0 && row._x >= prevLabelMargin && row._x < this.el.width())) {
+                _results.push(prevLabelMargin = row._x + angleSize + this.options.xLabelMargin);
+                _tmpLabels.push(row);
             }
-            labelBox = label.getBBox();
-            if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
-                if (_this.options.xLabelAngle !== 0) {
-                    margin = 1.25 * _this.options.gridTextSize / Math.sin(_this.options.xLabelAngle * Math.PI / 180.0);
-                    prevAngleMargin = labelBox.x - margin;
-                }
-                return prevLabelMargin = labelBox.x - _this.options.xLabelMargin;
-            } else {
-                return label.remove();
-            }
-        };
-        if (this.options.parseTime && this.options.xLabelFormat == null) {
-            if (this.data.length === 1 && this.options.xLabels === 'auto') {
-                labels = [[this.data[0].label, this.data[0].x]];
-            } else {
-                labels = labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels, this.options.xLabelFormat);
-            }
-        } else {
-            labels = (function () {
-                var _i, _len, _ref, _results;
-                _ref = this.data;
-                _results = [];
-                for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                    row = _ref[_i];
-                    _results.push([row.label, row.x]);
-                }
-                return _results;
-            }).call(this);
         }
-        labels.reverse();
-        _results = [];
-        for (_i = 0, _len = labels.length; _i < _len; _i++) {
-            l = labels[_i];
-            _results.push(drawLabel(l[0], l[1]));
+        this.measureText(null);
+
+        for (var i = 0; i < _tmpLabels.length; i++) {
+            row = _tmpLabels[i];
+            label = this.drawXAxisLabel(row._x, ypos, this.xLabelFormat(row, true), this.options.xLabelAngle);
+            label.node.lastChild.TipValue = this.xLabelFormat(row, true, false);
+            label.node.lastChild.TipId = "xlabel";
+
+            //if ((<TChartBar>this.owner).ShowValueOnTop) {
+            //    label = this.drawXAxisLabel(row._x, 5, this.valueLabelFormat(row, true), 0);
+            //}
         }
         return _results;
     }
@@ -1161,12 +1774,10 @@ class Line extends VXCB.Grid {
     drawSeries() {
         var i, _i, _j, _ref, _ref1, _results;
         this.seriesPoints = [];
-        for (i = _i = _ref = this.options.ykeys.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
-            this._drawLineFor(i);
-        }
         _results = [];
         for (i = _j = _ref1 = this.options.ykeys.length - 1; _ref1 <= 0 ? _j <= 0 : _j >= 0; i = _ref1 <= 0 ? ++_j : --_j) {
-            _results.push(this._drawPointFor(i));
+            this._drawLineFor(i);
+            this._drawPointFor(i);
         }
         return _results;
     }
@@ -1182,14 +1793,18 @@ class Line extends VXCB.Grid {
             row = _ref[_i];
             circle = null;
             if (row._y[index] != null) {
-
+                var series = index;
+                var idx = _i;
                 circle = this.drawLinePoint(row._x, row._y[index], this.options.pointSize, this.colorFor(row, index, 'point'), index);
+                circle.node.TipId = "node" + series + "" + idx;
+                circle.node.series = series;
+                circle.node.idx = idx;
                 circle.node.onclick = function (evt) {
                     var offset = $(self.el).offset();
                     self.onGridClick(evt.pageX - offset.left, evt.pageY - offset.top, evt);
                 };
             }
-            _results.push(this.seriesPoints[index].push(circle));
+            this.seriesPoints[index].push(circle);
         }
         return _results;
     }
@@ -1271,25 +1886,20 @@ class Line extends VXCB.Grid {
         return _results;
     }
 
-    private prevHilight;
-    hilight(index?) {
-        var i, _i, _j, _ref, _ref1;
-        if (this.prevHilight !== null && this.prevHilight !== index) {
-            for (i = _i = 0, _ref = this.seriesPoints.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-                if (this.seriesPoints[i][this.prevHilight]) {
-                    this.seriesPoints[i][this.prevHilight].animate(this.pointShrink);
-                }
-            }
-        }
-        if (index !== null && this.prevHilight !== index) {
-            for (i = _j = 0, _ref1 = this.seriesPoints.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-                if (this.seriesPoints[i][index]) {
-                    this.seriesPoints[i][index].animate(this.pointGrow);
-                }
-            }
-        }
-        return this.prevHilight = index;
-    }
+    //private clickHilight = [];
+    //private hoverHilight = [];
+    //hilight(index = null, series = null, grow: boolean = true) {
+    //    if (index != null && series != null) {
+    //        if (this.seriesPoints[series][index]) {
+    //            if (grow)
+    //                this.seriesPoints[series][index].animate(this.pointGrow);
+    //            else
+    //                this.seriesPoints[series][index].animate(this.pointShrink);
+
+    //        }
+    //    }
+    //    return true;
+    //}
 
     colorFor(row, sidx, type) {
         if (typeof this.options.lineColors === 'function') {
@@ -1302,10 +1912,6 @@ class Line extends VXCB.Grid {
         } else {
             return this.options.lineColors[sidx % this.options.lineColors.length];
         }
-    }
-
-    drawXAxisLabel(xPos, yPos, text) {
-        return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     }
 
     drawLinePath(path, lineColor) {
@@ -1461,36 +2067,36 @@ function pad2(number) {
 }
 
 class Area extends Line {
-    calcPoints() {
-        var row, total, y, _i, _len, _ref, _results;
-        _ref = this.data;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            row = _ref[_i];
-            row._x = this.transX(row.x);
-            total = 0;
-            row._y = (function () {
-                var _j, _len1, _ref1, _results1;
-                _ref1 = row.y;
-                _results1 = [];
-                for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-                    y = _ref1[_j];
-                    if (this.options.behaveLikeLine) {
-                        _results1.push(this.transY(y));
-                    } else {
-                        total += y || 0;
-                        _results1.push(this.transY(total));
-                    }
-                }
-                return _results1;
-            }).call(this);
-            _results.push(row._ymax = Math.max.apply(Math, row._y));
-        }
-        return _results;
-    }
+    //calcPoints() {
+    //    var row, total, y, _i, _len, _ref, _results;
+    //    _ref = this.data;
+    //    _results = [];
+    //    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    //        row = _ref[_i];
+    //        row._x = this.transX(row.x);
+    //        total = 0;
+    //        row._y = (function () {
+    //            var _j, _len1, _ref1, _results1;
+    //            _ref1 = row.y;
+    //            _results1 = [];
+    //            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+    //                y = _ref1[_j];
+    //                if (this.options.behaveLikeLine) {
+    //                    _results1.push(this.transY(y));
+    //                } else {
+    //                    total += y || 0;
+    //                    _results1.push(this.transY(total));
+    //                }
+    //            }
+    //            return _results1;
+    //        }).call(this);
+    //        _results.push(row._ymax = Math.max.apply(Math, row._y));
+    //    }
+    //    return _results;
+    //}
 
     drawSeries() {
-        var i, range, _i, _j, _k, _len, _ref, _ref1, _results, _results1, _results2;
+        var idx, range, _i, _j, _k, _len, _ref, _ref1, _results, _results1, _results2;
         this.seriesPoints = [];
         if (this.options.behaveLikeLine) {
             range = (function () {
@@ -1506,13 +2112,14 @@ class Area extends Line {
             }).apply(this);
         }
         _results2 = [];
+
         for (_k = 0, _len = range.length; _k < _len; _k++) {
-            i = range[_k];
-            this._drawFillFor(i);
+            idx = _k;
+            this._drawFillFor(idx);
 
-            this._drawLineFor(i);
+            this._drawLineFor(idx);
 
-            _results2.push(this._drawPointFor(i));
+            _results2.push(this._drawPointFor(idx));
         }
         return _results2;
     }
@@ -1533,7 +2140,9 @@ class Area extends Line {
     }
 
     drawFilledPath(path, fill) {
-        return this.raphael.path(path).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke-width', 0);
+        var a = this.raphael.path(path).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke-width', 0).toBack();;
+        return a;
+
     }
 }
 

@@ -39,6 +39,55 @@ export class TDataset extends VXO.TObject {
         return a[fieldname.toUpperCase()];
     }
 
+    public aggregateFieldSum(fieldname: string): number {
+        var sum : number = 0;
+        this.forEach(() => {
+            var a = this.getFieldValue(fieldname);
+            if (!isNaN(a)) {
+                sum += parseFloat(a);
+            }
+        });
+        return sum;
+    }
+
+    public aggregateFieldAvg(fieldname: string): number {
+        var sum: number = 0;
+        var cnt = 0;
+        this.forEach(() => {
+            var a = this.getFieldValue(fieldname);
+            if (!isNaN(a)) {
+                sum += parseFloat(a);
+                cnt++;
+            }
+        });
+        return cnt>0?sum/cnt:null;
+    }
+
+
+    public aggregateFieldMax(fieldname: string): number {
+        var mx: number = null;
+        this.forEach(() => {
+            var a = this.getFieldValue(fieldname);
+            if (!isNaN(a)) {
+                mx = mx ? Math.max(parseFloat(a), mx) : parseFloat(a);
+
+            }
+        });
+        return mx;
+    }
+    public aggregateFieldMin(fieldname: string): number {
+        var mx: number = null;
+        this.forEach(() => {
+            var a = this.getFieldValue(fieldname);
+            if (!isNaN(a)) {
+                mx = mx ? Math.min(parseFloat(a), mx) : parseFloat(a);
+
+            }
+        });
+        return mx;
+    }
+
+
     public setFieldValue(fieldname: string, value: any): void {
         if (this.Recno == -1) return null;
         var a = this.recordset[this.Recno];
@@ -182,43 +231,8 @@ export class TDataset extends VXO.TObject {
             return false;
         }
     }
-
 }
 
-export class TObjectDataset extends TDataset {
-    bind() {
-        var self = this;
-        self.recordset = [];
-        self.recordset.push({});
-        for (var property in this) {
-            if (this.hasOwnProperty(property) && typeof this[property] != 'function' && property.charAt(0) == '$') {
-                var propName = (<string>property).toUpperCase();
-                self.recordset[0][propName] = self[property];
-                Object.defineProperty(this, property, {
-                    enumerable: false
-                    , configurable: true
-                    , set: function (x) {
-                        if (self.recordset[0][propName] == x) return;
-                        self.recordset[0][propName] = x;
-                        this.dataChanged();
-                    }
-                    , get: function () {
-                        return self.recordset[0][propName];
-                    }
-                })
-            }
-        };
-    }
-
-    public get Recno(): number {
-        return 0;
-    }
-
-    public set Recno(val: number) {
-
-    }
-
-}
 
 export class TClientDataset extends TDataset implements VXDatasetInt {
     private tempRecordset: Object[];
@@ -290,9 +304,6 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     public onStateChanged: () => void;
     public onSelectionChanged: () => void;
 
-
-
-
     private _readonly: boolean = false;
     public get Readonly(): boolean {
         return this._readonly;
@@ -353,6 +364,19 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     }
 
     /*
+    * delete the current record
+    */
+    public deleteRecord(): number {
+        if (!this.Active) return;
+        if (this.Recno == -1) return;
+        var rec = this.Recno;
+        this.recordset.splice(this.Recno, 1);
+        this.Recno = rec;
+        if ((<any>this)._enabledControl) (<any>this).dataChanged();
+    }
+
+
+    /*
     * Adds a new record to the end of the dataset. the method return the new record number
     */
     public appendRecord(data: any, disableEvents: boolean = false): number {
@@ -378,17 +402,6 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         return this.RecordCount - 1;
     }
 
-    /*
-    * delete the current record
-    */
-    public deleteRecord(): number {
-        if (!this.Active) return;
-        if (this.Recno == -1) return;
-        var rec = this.Recno;
-        this.recordset.splice(this.Recno, 1);
-        this.Recno = rec;
-        if ((<any>this)._enabledControl) (<any>this).dataChanged();
-    }
 
     public metadata: any[] = [];
     public setMetaData(meta: any[]) {
@@ -460,8 +473,16 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
                     else if (a1 < b1) return -1
                 }
                 if (columnName) {
-                    a1 += "~~" + a[columnName];
-                    b1 += "~~" + b[columnName];
+                    if (a[columnName] && a[columnName].getMonth &&
+                        b[columnName] && b[columnName].getMonth) {
+                        var a2 = "000000000" + (<Date>a[columnName]).getTime();
+                        var b2 = "000000000" + (<Date>b[columnName]).getTime();
+                        a1 += "~~" + a2.substr(a2.length - 16);
+                        b1 += "~~" + b2.substr(b2.length - 16);
+                    } else {
+                        a1 += "~~" + a[columnName];
+                        b1 += "~~" + b[columnName];
+                    }
                 }
 
                 if (a1 > b1) return 1;
@@ -479,8 +500,16 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
                         else if (a1 < b1) return -1
                     }
                     if (columnName) {
-                        a1 += "~~" + a[columnName];
-                        b1 += "~~" + b[columnName];
+                        if (a[columnName] && a[columnName].getMonth &&
+                            b[columnName] && b[columnName].getMonth) {
+                            var a2 = "000000000" + (<Date>a[columnName]).getTime();
+                            var b2 = "000000000" + (<Date>b[columnName]).getTime();
+                            a1 += "~~" + a2.substr(a2.length - 16);
+                            b1 += "~~" + b2.substr(b2.length - 16);
+                        } else {
+                            a1 += "~~" + a[columnName];
+                            b1 += "~~" + b[columnName];
+                        }
                     }
 
                 if (a1 < b1) return 1;

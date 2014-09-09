@@ -4,6 +4,41 @@ import VXC = require("VCL/VXComponent");
 import VXU = require("VCL/VXUtils");
 import VXI = require("VCL/VXInputBase");
 import VXD = require("VCL/VXDataset");
+import VXB = require("VCL/VXButton");
+
+export class TDateButton extends VXB.TButton {
+    public onChanged: (date : Date) => void;
+    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
+        super(aOwner, renderTo);
+        (<any>this)._buttonicon = V.ButtonIcon.icon_calendar;
+    }
+
+    private _calendartype: V.CalendarType = V.CalendarType.Daily;
+    public get CalendarType(): V.CalendarType {
+        return this._calendartype;
+    }
+    public set CalendarType(val: V.CalendarType) {
+        if (val != this._calendartype) {
+            this._calendartype = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private dp;
+
+    public create() {
+        super.create();
+        var self = this;
+        this.dp = this.jBtn.datepicker({
+            minViewMode: this.CalendarType == V.CalendarType.Daily ? 0 : 1,inline : true
+        }).on('changeDate', function (ev: any) {
+            var startDate = new Date(ev.date);
+            if (self.onChanged) self.onChanged(startDate);
+            self.dp.datepicker("hide");
+            });
+    }
+}
+
 
 export class TDateInputBase extends VXI.TEditorBase {
     private _dateformat: string;
@@ -129,7 +164,7 @@ export class TTimeInputBase extends VXI.TEditorBase {
             this.jEdit.attr("disabled", "disabled");
             this.jButton.attr("disabled", "disabled");
         }
-        this.tm = this.jEdit.timepicker({ showSeconds: this.ShowSeconds, disableFocus: true,showMeridian:this.ShowMeridian});
+        this.tm = this.jEdit.timepicker({ showSeconds: this.ShowSeconds, disableFocus: true, showMeridian: this.ShowMeridian });
 
         super.create();
     }
@@ -143,14 +178,15 @@ export class TDateInput extends TDateInputBase {
     }
     public set Date(val: Date) {
         //if (val != this._date) {
-            this._date = val;
-            this.drawDelayed(false);
+        this._date = val;
+        this.drawDelayed(false);
         //}
     }
 
     public create() {
         super.create();
-        var self = this;
+        var self: any = this;
+        self.DateFormat = V.Application.DateFormat
         this.jComponent.on('changeDate', function (ev: any) {
             var dt: any = ev.date;
             self.Date = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
@@ -287,8 +323,8 @@ export class TInputTime extends TTimeInputBase {
     }
     public set Time(val: Date) {
         //if (val != this._date) {
-            this._date = val;
-            this.drawDelayed(false);
+        this._date = val;
+        this.drawDelayed(false);
         //}
     }
 
@@ -476,9 +512,9 @@ Datepicker.prototype = {
             this._events = [
                 // For components that are not readonly, allow keyboard nav
                 [this.element.find('input'), {
-                    focus: $.proxy(this.show, this),
-                    keyup: $.proxy(this.update, this),
-                    keydown: $.proxy(this.keydown, this)
+                    //focus: $.proxy(this.show, this),
+                    //keyup: $.proxy(this.update, this),
+                    focusout: $.proxy(this.focuslost, this)
                 }],
                 [this.component, {
                     click: $.proxy(this.show, this)
@@ -636,8 +672,18 @@ Datepicker.prototype = {
         this.picker.css({
             top: offset.top + height,
             left: parentOffset.left,
-            zIndex: zIndex
+            zIndex: 999999//zIndex fixed some background issue
         });
+    },
+
+    focuslost: function () {
+        //        this._setDate(DPGlobal.parseDate(this.element.find('input').val(), this.format, this.language, true))
+        var origDate = V.Application.formatDateTime(this.date, V.Application.DateFormat);
+        var tDate = DPGlobal.parseDate(this.element.find('input').val(), this.format, this.language, true);
+        if (tDate != null)
+            this._setDate(tDate);
+        else
+            this.element.find('input')[0].value = origDate;
     },
 
     update: function () {
@@ -1160,7 +1206,7 @@ var DPGlobal: any = {
         }
         return { separators: separators, parts: parts };
     },
-    parseDate: function (date, format, language) {
+    parseDate: function (date, format, language, validate: boolean = false) {
         if (date instanceof Date) return date;
         if (/^[\-+]\d+[dmwy]([\s,]+[\-+]\d+[dmwy])*$/.test(date)) {
             var part_re = /([\-+]\d+)([dmwy])/,
@@ -1243,6 +1289,37 @@ var DPGlobal: any = {
                 }
                 parsed[part] = val;
             }
+
+            // only valid days and months - if not valid return original date
+            var days_part = ['d', 'dd'];
+            var months_part = ['M', 'MM', 'm', 'mm'];
+            var years_part = ['yyyy', 'yy'];
+            var tMonth, tYear;
+
+            if (validate) {
+                for (var i = 0, s; i < setters_order.length; i++) {
+                    s = setters_order[i];
+                    if (years_part.indexOf(s) != -1 && s in parsed && !isNaN(parsed[s]))
+                        tYear = parsed[s];
+                }
+                for (var i = 0, s; i < setters_order.length; i++) {
+                    s = setters_order[i];
+                    if (months_part.indexOf(s) != -1 && s in parsed && !isNaN(parsed[s])) {
+                        if (parsed[s] < 1 || parsed[s] > 12)
+                            return null;
+                        else
+                            tMonth = parsed[s];
+                    }
+                }
+                for (var i = 0, s; i < setters_order.length; i++) {
+                    s = setters_order[i];
+                    if (days_part.indexOf(s) != -1 && s in parsed && !isNaN(parsed[s]))
+                        if (parsed[s] < 1 || parsed[s] > DPGlobal.getDaysInMonth(tYear, tMonth - 1))
+                            return null;
+                }
+
+            }
+            // end validate
             for (var i = 0, s; i < setters_order.length; i++) {
                 s = setters_order[i];
                 if (s in parsed && !isNaN(parsed[s]))
@@ -1935,7 +2012,7 @@ Timepicker.prototype = {
         this.$widget.css({
             top: top,
             left: left,
-            zIndex: zIndex
+            zIndex: 999999//zIndex fixed some background issue
         });
     },
 
@@ -2220,8 +2297,8 @@ Timepicker.prototype = {
         }
 
         var hour = this.hour.toString().length === 1 ? '0' + this.hour : this.hour,
-        minute = this.minute.toString().length === 1 ? '0' + this.minute : this.minute,
-        second = this.second.toString().length === 1 ? '0' + this.second : this.second;
+            minute = this.minute.toString().length === 1 ? '0' + this.minute : this.minute,
+            second = this.second.toString().length === 1 ? '0' + this.second : this.second;
 
         if (this.showInputs) {
             this.$widget.find('input.bootstrap-timepicker-hour').val(hour);

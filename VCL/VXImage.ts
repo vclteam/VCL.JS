@@ -11,6 +11,59 @@ export class TGraphic extends VXC.TPopupmenuComponent {
 export class TImage extends TGraphic {
     private jImage: JQuery;
 
+    private _labelVisible: boolean = false;
+    public get LabelVisible(): boolean {
+        return this._labelVisible;
+    }
+    public set LabelVisible(val: boolean) {
+        if (val != this._labelVisible) {
+            this._labelVisible = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _labeltext: string = "";
+    public get LabelText(): string {
+        return this._labeltext;
+    }
+    public set LabelText(val: string) {
+        if (val != this._labeltext) {
+            this._labeltext = val;
+            this.LabelVisible = true;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _labetextcolor: string;
+    public get LabelTextColor(): string {
+        return this._labetextcolor;
+    }
+    public set LabelTextColor(val: string) {
+        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+
+            if (val != this._labetextcolor) {
+                this._labetextcolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _labelposition: V.LabelPosition = V.LabelPosition.BottomCenter;
+    public get LabelPosition(): V.LabelPosition {
+        return this._labelposition;
+    }
+    public set LabelPosition(val: V.LabelPosition) {
+        if (val != this._labelposition) {
+            this._labelposition = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+
     private _url: string;
     public get Url(): string {
         return this._url;
@@ -22,6 +75,44 @@ export class TImage extends TGraphic {
             this.drawDelayed(true);
         }
     }
+
+    private _hoverUrl: string;
+    public get HoverImageUrl(): string {
+        return this._hoverUrl;
+    }
+
+    public set HoverImageUrl(val: string) {
+        if (val != this._hoverUrl) {
+            this._hoverUrl = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _disableUrl: string;
+    public get DisableUrl(): string {
+        return this._disableUrl;
+    }
+
+    public set DisableUrl(val: string) {
+        if (val != this._hoverUrl) {
+            this._disableUrl = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+
+    private _labelstyle: V.TextStyle = V.TextStyle.Default;
+    public get TextStyle(): V.TextStyle {
+        return this._labelstyle;
+    }
+    public set TextStyle(val: V.TextStyle) {
+        if (val != this._labelstyle) {
+            this._labelstyle = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     /*
     * The required src attribute specifies the URL of the image.
@@ -36,19 +127,87 @@ export class TImage extends TGraphic {
         }
     }
 
+    public jLabel: JQuery;
     public create() {
         var self = this;
+
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.empty();
-        this.jComponent.addClass('btn-group');
+        this.jComponent.addClass('btn-group').css('text-align','center');
         this.jImage = $("<img>");
+        if (this.onClicked || this.ondblclicked) this.jImage.css('cursor', 'pointer');
         this.jImage.appendTo(this.jComponent);
+        
 
         this.jImage.off("click").click(() => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(); })); return false; })
         this.jImage.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(); })); return false; })
         
-        this.jImage.attr('src', this.Url);
+        if (this.DisableUrl && this.Enabled) this.jImage.attr('src', this.DisableUrl);
+        else this.jImage.attr('src', this.Url);
         (<any>this).jDropDownTarget = this.jImage; //control the menupopup mechansim
+        if (self.HoverImageUrl) {
+            this.jImage.hover(
+            (e) => {
+                self.jImage.attr('src', self.HoverImageUrl);
+            },
+            (e) => {
+                self.jImage.attr('src', self.Url);
+            }
+            );
+        }
+
+        if (this.LabelVisible) {
+            if (this.TextStyle == V.TextStyle.h1)
+                this.jLabel = $('<h1/>');
+            else if (this.TextStyle == V.TextStyle.h2)
+                this.jLabel = $('<h2/>');
+            else if (this.TextStyle == V.TextStyle.h3)
+                this.jLabel = $('<h3/>');
+            else if (this.TextStyle == V.TextStyle.h4)
+                this.jLabel = $('<h4/>');
+            else if (this.TextStyle == V.TextStyle.h5)
+                this.jLabel = $('<h5/>');
+            else if (this.TextStyle == V.TextStyle.h6)
+                this.jLabel = $('<h6/>');
+            else if (this.TextStyle == V.TextStyle.strong)
+                this.jLabel = $('<strong/>');
+            else if (this.TextStyle == V.TextStyle.lead) {
+                this.jLabel = $('<label/>');
+                this.jLabel.addClass('lead');
+            } else if (this.TextStyle == V.TextStyle.small) {
+                this.jLabel = $('<small/>');
+            } else this.jLabel = $('<label/>');
+            this.jLabel.off("click").click(() => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(); })); return false; })
+            this.jLabel.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(); })); return false; })
+
+            this.jLabel.text(this.LabelText);
+            if (this.LabelTextColor) this.jLabel.css('color', this.LabelTextColor);
+
+            if (this.LabelPosition == V.LabelPosition.TopLeft) {
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.TopCenter) {
+                this.jLabel.addClass('text-center');
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.TopRight) {
+                this.jLabel.addClass('text-right');
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.BottomLeft) {
+                this.jComponent.append(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.Right) {
+                this.jLabel.addClass('pull-right');
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.Left) {
+                this.jLabel.addClass('pull-left');
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.BottomCenter) {
+                this.jLabel.addClass('text-center');
+                this.jComponent.append(this.jLabel);
+            } else if (this.LabelPosition == V.LabelPosition.BottomRight) {
+                this.jLabel.addClass('text-right');
+                this.jComponent.append(this.jLabel);
+            }
+            if (this.onClicked || this.ondblclicked) this.jLabel.css('cursor', 'pointer');
+        }
 
         super.create();
     }

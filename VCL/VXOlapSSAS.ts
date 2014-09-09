@@ -52,6 +52,18 @@ export class TOlapSSAS extends VXD.TClientDataset {
         }
     }
 
+    private _where: string = "";
+    public get Where(): string {
+        return this._where;
+    }
+
+    public set Where(val: string) {
+        if (val != this._where) {
+            this._where = val;
+        }
+    }
+
+
     public owner: VXC.TComponent;
     constructor(aOwner: VXC.TComponent, connectionName?: string, databaseName?: string) {
         super(aOwner);
@@ -140,6 +152,7 @@ export class TOlapSSAS extends VXD.TClientDataset {
         param.FromDate = fromDate;
         param.ToDate = toDate;
         param.Dimension = dimension;
+        param.Level = "Month";
         this.slicers.add(param);
         return param;
     }
@@ -153,6 +166,7 @@ export class TOlapSSAS extends VXD.TClientDataset {
             __CUBENAME__: this.CubeName,
             __DATABASENAME__: this.DatabaseName,
             __SLICER__: this.slicers.toArray(),
+            __WHERE__: this.Where ? this.Where : "",
             __DB__: this.ConnectionName
 
         }, (data: any) => {
@@ -162,7 +176,8 @@ export class TOlapSSAS extends VXD.TClientDataset {
                 var members: any[] = data.dictionary;
                 for (var i = 0, len: number = members.length; i < len; i++) {
                     var memeberName: string = members[i];
-                    if (memeberName.indexOf("~#S") > 0) members[i] = memeberName.split("~#S");
+                    if (memeberName.indexOf("~#S") > 0)
+                        members[i] = memeberName.split("~#S");
                     else {
                         //date member
                         members[i] = memeberName.split("~#T");
@@ -246,6 +261,17 @@ export class TDateSlicer extends TSlicer {
     public set Dimension(val: string) {
         if (val != this._dimension) {
             this._dimension = val;
+        }
+    }
+
+    private _level: string = null;
+    public get Level(): string {
+        return this._level;
+    }
+
+    public set Level(val: string) {
+        if (val != this._level) {
+            this._level = val;
         }
     }
 

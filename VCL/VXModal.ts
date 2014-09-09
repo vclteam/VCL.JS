@@ -136,6 +136,19 @@ export class TModalBuilder extends TModal {
         return inp;
     }
 
+    public createInputTime(time?: Date, labelText?: string, sizeInSpan: number = 2): V.TInputTime {
+        this.colCount += sizeInSpan;
+        if (this.colCount > 12) {
+            this.colCount = 0;
+            this.createRow();
+        }
+        var inp: V.TInputTime = new V.TInputTime(this.currentRow, null);
+        inp.Time = time;
+        inp.LabelText = labelText;
+        inp.jComponent.addClass("span" + sizeInSpan);
+        return inp;
+    }
+
 
     public createInputDate(date?: Date, labelText?: string, sizeInSpan: number = 2): V.TInputDate {
         this.colCount += sizeInSpan;

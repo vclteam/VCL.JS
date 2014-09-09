@@ -12,12 +12,14 @@ export class TContainer extends VXC.TComponent {
     private __HTML__: string;
     public components = new VXO.TCollection<VXC.TComponent>();
     public onClicked: (sender: VXC.TComponent) => void;
+    public onMouseEnter: (sender: VXC.TComponent) => void;
     public onMouseOver: (sender: VXC.TComponent) => void;
     public onMouseOut: (sender: VXC.TComponent) => void;
+    public onMouseLeave: (sender: VXC.TComponent) => void;
 
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        if (!this.__HTML__ ) this.__HTML__ = this.getContanierHTML();
+        if (!this.__HTML__) this.__HTML__ = this.getContanierHTML();
         if (this.__HTML__) $(this.jComponent).html(this.__HTML__);
         if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
         this.jComponent.off("click").click(() => {
@@ -29,6 +31,14 @@ export class TContainer extends VXC.TComponent {
         this.jComponent.off("mouseout").mouseout(() => {
             if (this.onMouseOut != null) (V.tryAndCatch(() => { this.onMouseOut(aOwner); }));
         })
+        this.jComponent.off("mouseenter").mouseenter(() => {
+            if (this.onMouseEnter != null) (V.tryAndCatch(() => { this.onMouseEnter(aOwner); }));
+        })
+        this.jComponent.off("mouseleave").mouseleave(() => {
+            if (this.onMouseLeave != null) (V.tryAndCatch(() => { this.onMouseLeave(aOwner); }));
+        })
+
+
     }
 
     private addComponent(component: VXC.TComponent): void {
@@ -39,7 +49,7 @@ export class TContainer extends VXC.TComponent {
         return this.__HTML__;
     }
 
-  
+
     /*
     * Check all input for validation - return true if everything is OK
     */
@@ -67,7 +77,7 @@ export class TContainer extends VXC.TComponent {
     public draw(reCreate: boolean, drawChilds: boolean = true) {
         //if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        
+
         if (this.ShadowOptions == V.ShadowOptions.None) {
             this.removeShadow();
         } if (this.ShadowOptions == V.ShadowOptions.Perspective) {
@@ -93,7 +103,7 @@ export class TContainer extends VXC.TComponent {
             this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-vt-2');
         }
 
-        
+
         if (drawChilds) {
             this.components.forEach((item: VXC.TComponent) => {
                 item.draw(reCreate);
