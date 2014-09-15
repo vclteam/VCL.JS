@@ -226,6 +226,23 @@ export class TTabPage extends VXCO.TContainer {
 
 export class TAccordionGroupButton {
 
+    private _tag: any;
+
+    /**
+    * Stores a value as a part of a component.
+    * Tag has no predefined meaning. The Tag property can store any additional value for the convenience of developers. 
+    *
+    */
+    public get Tag(): any {
+        return this._tag;
+    }
+
+    public set Tag(val: any) {
+        if (val != this._tag) {
+            this._tag = val;
+        }
+    }
+
     /**
     * The margin clears an area around an component . 
     * The margin does not have a background color, and is completely transparent.
@@ -334,7 +351,7 @@ export class TAccordionGroupButton {
         }
     }
 
-    public onClicked: () => void;
+    public onClicked: (sender: TAccordionGroup ) => void;
     public jButton: JQuery;
     public jImage: JQuery;
     public jGroupButton: JQuery;
@@ -398,12 +415,12 @@ export class TAccordionGroup extends VXO.TCollectionItem {
     }
 
 
-    private _refcontainer: VXCO.TContainer = null;
+    public InnerContainer: VXCO.TContainer = null;
 
-    constructor(aOwner: TAccordion, refcontainer?: VXCO.TContainer) {
+    constructor(aOwner: TAccordion, innerContainer?: VXCO.TContainer) {
         super();
         this._acc = aOwner;
-        this._refcontainer = refcontainer;
+        this.InnerContainer = innerContainer;
         this.Button1 = new TAccordionGroupButton(this);
         this.Button2 = new TAccordionGroupButton(this);
         this.Button3 = new TAccordionGroupButton(this);
@@ -420,6 +437,7 @@ export class TAccordionGroup extends VXO.TCollectionItem {
 
 
     private createButton(button: TAccordionGroupButton, clickEvent: () => void) {
+        var self = this;
         button.jGroupButton = $('<div>');
         button.jGroupButton.addClass('btn-group');
         button.jButton = $('<button>');
@@ -432,7 +450,7 @@ export class TAccordionGroup extends VXO.TCollectionItem {
         else
             button.jButton.off("click").click(() => {
                 if (button.menuItems.length() > 0) button.jGroupButton.dropdown();
-                if (button.onClicked != null) (V.tryAndCatch(() => { button.onClicked(); }));
+                if (button.onClicked != null) (V.tryAndCatch(() => { button.onClicked(self); }));
             });
         button.jGroupButton.prependTo(this.jButtons);
         button.jImage.prependTo(button.jButton);
@@ -512,7 +530,7 @@ export class TAccordionGroup extends VXO.TCollectionItem {
         this.jaccordiontoggle = $('<a>');
         
         this.jaccordiontoggle.addClass('accordion-toggle').attr('data-toggle', 'collapse').attr('data-parent', '#' + this._acc.ID);
-        if (this._refcontainer)  this.jaccordiontoggle.attr('href', '#' + this._refcontainer.ID + "yk");
+        if (this.InnerContainer)  this.jaccordiontoggle.attr('href', '#' + this.InnerContainer.ID + "yk");
         //Add the Header Container if defined else the provided text
 
         if (this.ShowSelectCheckbox) {
@@ -530,16 +548,16 @@ export class TAccordionGroup extends VXO.TCollectionItem {
         this.jaccordionheading.append(this.jaccordiontoggle);
         this.jComponent.append(this.jaccordionheading);
 
-        if (this._refcontainer) { //Build the refcontainer html -> The Inside of Accordion group
+        if (this.InnerContainer) { //Build the refcontainer html -> The Inside of Accordion group
             this.jAccBody = $('<div>');
-            this.jAccBody.addClass('accordion-body collapse').attr('ID', this._refcontainer.ID + "yk");
+            this.jAccBody.addClass('accordion-body collapse').attr('ID', this.InnerContainer.ID + "yk");
             var refcontinner: JQuery = $('<div>');
             refcontinner.addClass('accordion-inner');
             //var innerref: JQuery = this._refcontainer.jComponent;//  $('#' + this._refcontainer.ID); 
-            refcontinner.append(this._refcontainer.jComponent);
+            refcontinner.append(this.InnerContainer.jComponent);
             this.jAccBody.append(refcontinner);
             this.jComponent.append(this.jAccBody);
-            this._refcontainer.create();
+            this.InnerContainer.create();
         }
         this.jButtons = $("<div>").addClass("accordion-button").css('float','right');
         this.createButton(this.Button1, null);

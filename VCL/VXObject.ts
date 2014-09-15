@@ -31,7 +31,7 @@ export class TObject {
     }
 
     public ID: string = TObject.genGUID();
-    private static genGUID(): string {
+    public static genGUID(): string {
         return TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4();
     }
     private static s4(): string { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); }

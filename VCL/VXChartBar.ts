@@ -1033,6 +1033,7 @@ export class Bar extends VXCB.Grid {
 
     calcBars() {
         var row, y, _i, _len, _ref, _results;
+        this.options.numBars = 1;
         _ref = this.data;
         _results = [];
         for (var idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
@@ -1042,17 +1043,37 @@ export class Bar extends VXCB.Grid {
                 var _j, _len1, _ref1, _results1;
                 _ref1 = row.y;
                 _results1 = [];
-                for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+                //find nulls
+                var count = 0;
+                for (_j = _ref1.length; _j > 0; _j--) {
+                    y = _ref1[_j - 1];
+                    if (y == null)
+                        count++;
+                    else break;
+                }
+
+                //add bars
+                for (_j = 0; _j < _ref1.length - count; _j++) {
                     y = _ref1[_j];
-                    if (y != 0 && y != null) {
-                        _results1.push(this.transY(y));
+                    if (y == null || y == 0) {
+                        _ref1[_j] = 0;
+                        _results1.push(0);
                     } else {
-                        // _results1.push(null);
+                        _results1.push(this.transY(y));
                     }
                 }
+
+                //add nulls
+                for (_j = 0; _j < count; _j++) {
+                    _results1.push(null);
+                }
+
+                this.options.numBars = Math.max(_ref1.length - count, this.options.numBars);
+
                 return _results1;
             }).call(this));
         }
+
         return _results;
     }
 
@@ -1117,18 +1138,6 @@ export class Bar extends VXCB.Grid {
         var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, rowold, sidx, size, top, ypos, zeroPos, _refold;
         groupWidth = this.width / this.options.data.length;
         this.barNodes = [];
-        numBars = 0;
-        if (this.options.stacked == false) {
-            for (var i = 0; i < 15; i++) {
-                for (var j = 0; j < this.data.length; j++) {
-                    if (this.data[j].y && this.data[j].y[i]) {
-                        numBars++;
-                        break;
-                    }
-                }
-            }
-        }
-        this.options.numBars = Math.max(1, numBars);
         barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (this.options.numBars - 1)) / this.options.numBars;
         leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
         zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
@@ -1137,6 +1146,7 @@ export class Bar extends VXCB.Grid {
             _ref = this.data;
             _refold = this.olddata;
             _results = [];
+
             for (var idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
                 row = _ref[idx];
                 if (_refold && _refold.length > idx)
@@ -1149,8 +1159,10 @@ export class Bar extends VXCB.Grid {
                     row._size = [];
                     row._top = [];
                     _results1 = [];
+                    var counter = 0;
                     for (sidx = _j = 0, _len1 = _ref1.length; _j < _len1; sidx = ++_j) {
                         ypos = _ref1[sidx];
+                        if (!this.barNodes[idx]) this.barNodes[idx] = [];
                         if (ypos !== null) {
                             if (zeroPos) {
                                 top = Math.min(ypos, zeroPos);
@@ -1159,11 +1171,18 @@ export class Bar extends VXCB.Grid {
                                 top = ypos;
                                 bottom = this.bottom;
                             }
+
+                            if (ypos == 0) {
+                                top = 0;
+                                bottom = 0;
+                            }
+
                             left = this.left + idx * groupWidth + leftPadding;
                             if (!this.options.stacked) {
                                 left += sidx * (barWidth + this.options.barGap);
                             }
                             size = bottom - top;
+
 
                             if (this.options.stacked) {
                                 top -= lastTop;
@@ -1172,14 +1191,15 @@ export class Bar extends VXCB.Grid {
                             row._top.push(top);
                             row.index = idx;
                             row.series = sidx;
-                            if (!this.barNodes[idx]) this.barNodes[idx] = [];
 
                             if (rowold && rowold._size && rowold._size.length >= sidx)
                                 this.barNodes[idx].push(this.drawBar(row, idx, left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), rowold._size[sidx], rowold._top[sidx], sidx, this.options.corners));
                             else
                                 this.barNodes[idx].push(this.drawBar(row, idx, left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), 0, 0, sidx, this.options.corners));
                             _results1.push(lastTop += size);
+                            counter++;
                         } else {
+                            //temp empty bar
                             _results1.push(null);
                         }
                     }
@@ -1252,7 +1272,7 @@ export class Bar extends VXCB.Grid {
         if (!this.owner) return;
         var owner = <TChartBar>this.owner;
         if (!owner.SelectionEnabled) return;
-
+        var self = this;
         //set default selection
         if (idx == -1 && series == -1 && owner.SetLastSelected) {
             idx = this.barNodes.length - 1;
@@ -1277,7 +1297,7 @@ export class Bar extends VXCB.Grid {
                 //check clicked
                 owner.SelectedItem = o;
                 owner.SelectedItems.forEach((item) => {
-                    this.barNodes[item.Idx][item.Series].attr('opacity', this.options.selectedOpacity);
+                    self.barNodes[item.Idx][item.Series].attr('opacity', this.options.selectedOpacity);
                 });
 
                 if (owner instanceof TDBChartBar && (<TDBChartBar>owner).Dataset != null) {

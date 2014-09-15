@@ -41,7 +41,8 @@
             max = opts.max || 100,
             top = Math.max.apply(Math, size),
             R = [],
-            k = Math.sqrt(top / Math.PI) * 2 / max;
+            k = Math.sqrt(top / Math.PI) * 2 / max,
+            dotcolor = opts.colors || chartinst.colors;
 
         for (var i = 0; i < len; i++) {
             R[i] = Math.max(Math.min(Math.sqrt(size[i] / Math.PI) * 2 / k, max),3);
@@ -84,8 +85,8 @@
             if (opts.titleY) g[3] += 10;
             drawAxis.call(chartinst, ax, g);
 
-            if (opts.titleX) paper.text(width / 2, height - 5, opts.titleX).attr('font-weight', "bold").attr('font-size', 13).attr('font-family', 'sans-serif').attr('fill', '#888');
-            if (opts.titleY) paper.text(5, height / 2, opts.titleY).attr('font-weight', "bold").attr('font-size', 13).attr('font-family', 'sans-serif').attr('fill', '#888').rotate(270);
+            if (opts.titleX) paper.text(width / 2, height + 5, opts.titleX).attr('font-size', opts.gridTextSize).attr('font-family', opts.gridTextFamily).attr('font-weight', opts.gridTitleWeight || "normal").attr('fill', opts.gridTextColor);
+            if (opts.titleY) paper.text(5, height / 2, opts.titleY).attr('font-size', opts.gridTextSize).attr('font-family', opts.gridTextFamily).attr('font-weight', opts.gridTitleWeight || "normal").attr('fill', opts.gridTextColor).rotate(270);
             
             for (var i = 0, ii = ax.length; i < ii; i++) if (ax[i].all) {
                 axis.push(ax[i].all);
@@ -97,14 +98,30 @@
 
         var kx = (width  - g[3] - maxR - gutter) / ((maxx - minx) || 1),
             ky = (height - g[2] - gutter - maxR) / ((maxy - miny) || 1);
+      
+
+        if (opts.horizgridline>0) for (var i = miny; i <= maxy; i++) {
+            var Y = y + height - g[2] - (i - miny) * ky;
+            var X0 = x + g[3] + (0) * kx;
+            var X1 = x + g[3] + (maxx - minx) * kx;
+            paper.path(["M", X0, Y, "L", X1, Y]).attr({ stroke: opts.gridlinecolor, "stroke-dasharray": "-", "stroke-width": opts.horizgridline }).toBack();;
+        }
+
+        if (opts.vertgridline > 0) for (var i = minx; i <= maxx; i++) {
+            var X = x + g[3] + (i - minx) * kx;
+            var Y0 = y + g[2] + (0) * ky;
+            var Y1 = y + g[2] + (maxy - miny) * ky;
+            paper.path(["M", X, Y0, "L", X, Y1]).attr({ stroke: opts.gridlinecolor, "stroke-dasharray": "-", "stroke-width": opts.vertgridline }).toBack();;
+        }
+
 
         for (var i = 0, ii = valuesy.length; i < ii; i++) {
-            var sym = paper.raphael.is(symbol, "array") ? symbol[i] : symbol,
-                X = x + g[3] + (valuesx[i] - minx) * kx,
-                Y = y + height - g[2] - (valuesy[i] - miny) * ky;
+            var sym = paper.raphael.is(symbol, "array") ? symbol[i] : symbol;
+            var X = x + g[3] + (valuesx[i] - minx) * kx;
+            var Y = y + height - g[2] - (valuesy[i] - miny) * ky;
 
             sym && R[i] && series.push(paper[sym](X, Y, R[i]).attr({
-                fill: opts.heat ? colorValue(R[i], maxR) : chartinst.colors[0],
+                fill: opts.heat ? colorValue(R[i], maxR) : dotcolor[0],
                 "fill-opacity": opts.opacity ? R[i] / max : 1, stroke: "none"
             }));
         }

@@ -51,6 +51,14 @@ export class TCarouselPage extends VXO.TCollectionItem {
     public create(): JQuery {
         this.jitem = $("<div>");
         this.jitem.addClass('item');
+
+        var cmp: JQuery = $('<div/>');
+        cmp.appendTo(this.jitem);
+        if (this._container) {
+            this._container.jComponent.appendTo(cmp);
+            this._container.FitToWidth = true;
+        }
+
         var jcap = $("<div>").addClass("carousel-caption");
         jcap.appendTo(this.jitem);
         if (this.Caption) {
@@ -79,20 +87,20 @@ export class TCarousel extends VXCO.TContainer {
         this.Height = 200;
         this.Width = 200;
     }
-    public create() {
 
+    public create() {
         // detach panel back before cleaning
         this.items.forEach((item) => {
            var td: V.TContainer = (<any>item)._container
            if (td) {
-               if (td.jComponent.parent()) td.jComponent.parent().detach('#' + td.ID);
+               td.jComponent.detach();
            }
         });
 
 
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('carousel').addClass('slide');
-        super.create();
+                super.create();
 
         var inner = $("<div/>");
         inner.addClass('carousel-inner');//.css('width', '100%');
@@ -114,16 +122,17 @@ export class TCarousel extends VXCO.TContainer {
         var firstSlide: JQuery;
         this.jComponent.append(navleft);
         this.items.forEach((item) => {
-            /*var cmp: JQuery = $('#' + this._tabdata.ID);
-            cmp.parent().detach('#' + this._tabdata.ID);
-            this.jTabPane.append(cmp);*/
+            var cmp: JQuery = $('<div/>');
+
+            //cmp.parent().detach('#' + this._tabdata.ID);
+            //this.jTabPane.append(cmp);*/
 
             var slide = item.create();
             firstSlide = firstSlide ? firstSlide : slide;
             inner.append(slide);
         });
         if (firstSlide) firstSlide.addClass('active');
-
+        this.jComponent.carousel()
     }
 
     public draw(reCreate: boolean) {
@@ -132,21 +141,17 @@ export class TCarousel extends VXCO.TContainer {
     }
 
     public items: V.TCollection<TCarouselPage> = new V.TCollection<TCarouselPage>();
-    public createCarouselPage(container: VXCO.TContainer, caption?: string, text? : string): TCarouselPage {
-        var exists: boolean = false;
-        if (container == null) {
-            V.Application.raiseException("container cannot be null");
-            return;
-        }
+    public createCarouselPage(caption: string, text: string,container: VXCO.TContainer): TCarouselPage {
+        var alreadyExists: boolean = false;
 
-        this.items.forEach((item) => {
+        if (container) this.items.forEach((item) => {
             if (item.ID == container.ID) {
                 V.Application.raiseException("You cant enter the same container twice");
-                exists = true;
+                alreadyExists = true;
             }
         });
 
-        if (exists) return;
+        if (alreadyExists) return;
 
         var col: TCarouselPage = new TCarouselPage(this, container);
         this.items.add(col);
@@ -187,6 +192,23 @@ export class TWell extends VXCO.TContainer {
 }
 
 export class TPanelButton {
+    private _tag: any;
+
+    /**
+    * Stores a value as a part of a component.
+    * Tag has no predefined meaning. The Tag property can store any additional value for the convenience of developers. 
+    *
+    */
+    public get Tag(): any {
+        return this._tag;
+    }
+
+    public set Tag(val: any) {
+        if (val != this._tag) {
+            this._tag = val;
+        }
+    }
+
 
     /**
     * The margin clears an area around an component . 
@@ -338,6 +360,18 @@ export class TPanel extends VXCO.TContainer {
         this.Button3 = new TPanelButton(this);
 
         if (headerText != null) this._headertext = headerText;
+    }
+
+
+    private _expanded: boolean = true;
+    public get Expanded(): boolean {
+        return this._expanded;
+    }
+    public set Expanded(val: boolean) {
+        if (val != this._expanded) {
+            this._expanded = val;
+            this.drawDelayed(false);
+        }
     }
 
 
@@ -634,6 +668,9 @@ export class TPanel extends VXCO.TContainer {
                 button.jImage.attr('src', button.ImageUrl);
             }
             else {
+                button.jButton.removeClass(function (index, css) {
+                    return (css.match(/(^|\s)icon-\S+/g) || []).join(' ');
+                });
                 button.jButton.addClass('btn');
                 button.jButton.addClass("icon");
                 button.jButton.addClass(V.iconEnumToBootstrapStyle(<any>button.Icon)).text('');
@@ -668,6 +705,16 @@ export class TPanel extends VXCO.TContainer {
         this.createButton(this.Button2, null);
         this.createButton(this.Button1, null);
         this.createButton(this.CloseButton, null);
+
+        
+        if (this.Expanded) {
+            this.jComponent.css('max-height',"");
+            this.jContent.show();
+        } else {
+            this.jComponent.css('max-height', this.jHeader.outerHeight() + "px");
+            this.jContent.hide();
+        }
+        
 
         this.jHeader.removeClass(function (index, css) {
             return (css.match(/\panel-header-\S+/g) || []).join(' ');
@@ -854,6 +901,13 @@ export class TGoogleMap extends VXC.TComponent {
             if (item.marker && item.Visible) item.marker.setMap(this.map);
             if (item.marker && !item.Visible) item.marker.setMap(null);
         });
+    }
+
+
+    public showHeatmap(layer: string = "heatmap") {
+    }
+
+    public hideHeatmap(layer: string = "heatmap") {
     }
 
     private setMarkerClick(item: TGoogleMapMarker) {
@@ -1099,14 +1153,17 @@ function HeatControl(controlDiv, map: google.maps.Map, caption, heat: google.map
     controlText.style.fontSize = '12px';
     controlText.style.paddingLeft = '4px';
     controlText.style.paddingRight = '4px';
-    controlText.innerHTML = caption;
+    controlText.innerHTML = "<b>" + caption + "</b>";
     controlUI.appendChild(controlText);
 
-    // Setup the click event listeners: simply set the map to
-    // Chicago
     google.maps.event.addDomListener(controlUI, 'click', function () {
-        if (heat.getMap() == null) heat.setMap(map);
-        else heat.setMap(null);
+        if (heat.getMap() == null) {
+            heat.setMap(map);
+            controlText.innerHTML = "<b>" + caption + "</b>";
+        } else {
+            heat.setMap(null);
+            controlText.innerHTML = caption;
+        }
   });
 
 }

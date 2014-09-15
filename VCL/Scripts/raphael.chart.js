@@ -763,7 +763,7 @@ Raphael.g = {
         return { from: f, to: t, power: i };
     },
 
-    axis: function (x, y, length, from, to, steps, orientation, labels, type, dashsize, paper) {
+    axis: function (x , y, length, from, to, steps, orientation, labels, type, dashsize, paper) {
         dashsize = dashsize == null ? 2 : dashsize;
         type = type || "t";
         steps = steps || 10;
@@ -777,6 +777,7 @@ Raphael.g = {
             j = 0,
             txtattr = { font: "11px 'Fontin Sans', Fontin-Sans, sans-serif" },
             text = paper.set(),
+            vLine = paper.set(),
             d;
 
         d = (t - f) / steps;
@@ -800,6 +801,7 @@ Raphael.g = {
                 type != "-" && type != " " && (path = path.concat(["M", x - (type == "+" || type == "|" ? dashsize : !(orientation - 1) * dashsize * 2), y - length + .5, "l", dashsize * 2 + 1, 0]));
                 text.push(paper.text(x + addon, y - length, (labels && labels[j]) || (Math.round(label) == label ? label : +label.toFixed(rnd))).attr(txtattr).attr({ "text-anchor": orientation - 1 ? "start" : "end" }));
             }
+
         } else {
             label = f;
             rnd = (i > 0) * i;
@@ -831,6 +833,8 @@ Raphael.g = {
                 type != "-" && type != " " && (path = path.concat(["M", x + length + .5, y - (type == "+" ? dashsize : !!orientation * dashsize * 2), "l", 0, dashsize * 2 + 1]));
                 text.push(paper.text(x + length, y + addon, (labels && labels[j]) || (Math.round(label) == label ? label : +label.toFixed(rnd))).attr(txtattr));
             }
+          
+
         }
 
         var res = paper.path(path);

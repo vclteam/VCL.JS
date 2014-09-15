@@ -390,7 +390,7 @@ class Donut extends VXCB.Grid {
     }
 
     redraw() {
-        var C, cx, cy, i, idx, last, max_value, min, next, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+        var C, cx, cy, last, min, next, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
         this.el.empty();
         this.raphael = new Raphael(this.el[0]);
         var self = this;
@@ -407,37 +407,41 @@ class Donut extends VXCB.Grid {
 
         if (this.options.behaveLikePie) {
             txtY = txtH;
-
-            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 5, "---");
+            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 10, "No Value");
         } else if (Math.abs(Math.abs(this.options.endangle) - Math.abs(this.options.startangle)) > 91) {
             txtY = cy - txtH * 2;
             txtH = 0;
-            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 30, "---");
+            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 30, "No Value");
         } else {
             txtY = cy - txtH * 2;
             txtH = 0;
-            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 10, "---");
+            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 10, "No Value");
         }
         w = (Math.min(cx, cy - txtH * 3)) / 3 - 1;
         total = 0;
         _ref = this.data;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             value = _ref[_i].y[0];
-            total += value;
+            if (value) {
+                total += value;
+            }
         }
+        if (total == 0) total = 1;
+
         min = 5 / (2 * w);
         C = (ang / 180) * Math.PI - min * this.data.length - 0.0001;
         last = (this.options.startangle / 180) * Math.PI;
-        idx = 0;
 
+        var idx = 0;
         this.segments = [];
         _ref1 = this.data;
-        for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+        for (var i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
             value = _ref1[i].y[0];
-            next = last + min + C * (value / total);
             var inner = 0;
             var outer = 0;
             if (this.options.behaveLikePie) { inner = 0; outer = w * 2.5; } else { inner = w * 2; outer = Math.max(20, w); }
+
+            next = last + min + C * (value / total);
             seg = new DonutSegment(
                 cx, cy, inner, outer, last, next - 0.02,
                 this.options.colors[idx % this.options.colors.length],
@@ -454,20 +458,25 @@ class Donut extends VXCB.Grid {
             this.segments.push(seg);
             last = next;
             idx += 1;
+
+            if (!value) {
+                seg.hide();
+            }
         }
 
         if (_ref1.length) {
             //glow max_value idx
-            idx = 0;
-            var max_value = this.data[0].y[0], value;
-            for (var _k1 = 0; _k1 < this.data.length; _k1++) {
-                value = this.data[_k1].y[0];
-                if (max_value < value) {
+            var idx = 0;
+            var max_value = _ref1[0].y[0];
+            for (var i = 0; i < _ref1.length; i++) {
+                var value = _ref1[i].y[0];
+                if (value && max_value < value) {
                     max_value = value;
-                    idx = _k1;
+                    idx = i;
                 }
             }
-            this.hoverItem(idx, 0);
+            if (max_value)
+                this.hoverItem(idx, 0);
         }
         this.resizeEvent();
         return _results;
@@ -564,9 +573,12 @@ class Donut extends VXCB.Grid {
         var txtW = this.measureText(mytext).width;
 
         if (txtW > maxWidth) {
-            var s = mytext.split(new RegExp(" +"));
-            var idx = Math.ceil(s.length / 2);
-            mytext = mytext.substr(0, mytext.indexOf(s[idx])) + "\n" + mytext.substr(mytext.indexOf(s[idx]));
+            var half_cut = Math.floor(mytext.length / 2);
+            var space_cut = mytext.substr(0, half_cut).lastIndexOf(" ");
+            if (space_cut > 0)
+                mytext = mytext.substr(0, space_cut) + "\n" + mytext.substr(space_cut);
+            else
+                mytext = mytext.substr(0, half_cut) + "\n" + mytext.substr(half_cut);
 
             this.text1.attr({
                 text: mytext,
@@ -591,7 +603,7 @@ class Donut extends VXCB.Grid {
             });
 
             text1bbox = this.text1.getBBox();
-            text1scale = Math.min(maxWidth / text1bbox.width, maxHeightTop / text1bbox.height) * 1.6;
+            text1scale = Math.min(maxWidth / text1bbox.width, maxHeightTop / text1bbox.height) * 1.5;
             if (text1scale > 1) text1scale = 1;
 
             this.text1.attr({
@@ -682,7 +694,8 @@ class DonutSegment extends VXCB.EventEmitter {
     render() {
         var _this = this;
         this.arc = this.drawDonutArc(this.hilight, this.color);
-        return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor);
+        this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor);
+        return this.seg;
     }
 
     drawDonutArc(path, color) {
@@ -726,6 +739,11 @@ class DonutSegment extends VXCB.EventEmitter {
             }, 150, '<>');
             return this.selected = false;
         }
+    }
+
+    hide() {
+        this.arc.hide();
+        this.seg.hide();
     }
 }
 

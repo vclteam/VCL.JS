@@ -819,7 +819,7 @@ declare var Raphael;
 
 export class Grid extends EventEmitter {
     public cumulative;
-    public el;
+    public el ;
     public raphael;
     public elementWidth;
     public elementHeight;
@@ -845,6 +845,7 @@ export class Grid extends EventEmitter {
     public width;
     public height;
     private timeoutId;
+    private resizeId;
 
 
     constructor(options, owner) {
@@ -948,7 +949,6 @@ export class Grid extends EventEmitter {
     }
 
     resizeHandler(self: Grid) {
-        //$(window).off("resize");
         self.timeoutId = null;
         self.raphael.setSize(self.el.width(), self.el.height());
         self.redraw();
@@ -1266,16 +1266,21 @@ export class Grid extends EventEmitter {
 
     resizeEvent() {
         var self = this;
-        $(window).on('resize', function (evt) {
+        if (self.resizeId) return;
+
+        self.resizeId = 'resize.' + VXO.TObject.genGUID();
+        $(window).on(self.resizeId, function (evt) {
             if (self.timeoutId != null) {
                 window.clearTimeout(self.timeoutId);
+                self.timeoutId = null;
             }
-            if (!self.grid) {
-                //grid in no longer there
-                $(window).off("resize");
+            if (!self.grid || self.el.parent().length==0) {
+                //chart in no longer there
+                $(window).off(self.resizeId);
+                self.resizeId = null;
                 return;
             }
-            return self.timeoutId = window.setTimeout(self.resizeHandler, 30, self);
+            return self.timeoutId = window.setTimeout(self.resizeHandler, 20, self);
         });
     }
 

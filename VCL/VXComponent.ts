@@ -73,11 +73,19 @@ export class TComponent extends VXO.TObject {
         this.jComponent.removeClass(classStr);
     }
 
-
+    private __clickovercontainer: VXCO.TContainer;
     private __clickover;
+    private __clickovertimer;
+
     public popover(popupContainer: VXCO.TContainer, popoverplacement: V.PopoverPlacement = V.PopoverPlacement.Bottom,
         title?: string,
         autoClose: number = 0, width: number = null) {
+        var self = this;
+        if (!popupContainer) return;
+        if (!this.__clickovercontainer || this.__clickovercontainer.ID != popupContainer.ID) {
+            this.__clickovercontainer = popupContainer;
+            popupContainer.Visible = false;
+        }
         this.__clickover = this.jComponent.data('clickover');
         if (!this.__clickover) {
             this.jComponent.clickover({
@@ -89,19 +97,45 @@ export class TComponent extends VXO.TObject {
             this.__clickover = this.jComponent.data('clickover');
             this.__clickover['show']();
         }
-        if (popupContainer.Visible) {
-            popupContainer.Visible = false;
-            this.__clickover.$tip.hide();
-            this.__clickover.$element.trigger('hidden');
-            (<any>popupContainer).__popoverFrom = null;
-        } else {
-            (<any>popupContainer).__popoverFrom = this;
-            popupContainer.Visible = true;
-            this.__clickover.$tip.show();
-            this.__clickover.$element.trigger('shown');
-            this.__clickover.resetPosition();
 
+
+        if (popupContainer.Visible) {
+            self.closepopup(popupContainer);
+        } else {
+            popupContainer.Visible = true;
+            popupContainer.draw(true);
+            this.__clickover.$tip.show();
+
+            this.__clickover.resetPosition();
+            $(window).trigger('resize');
+            // trigger timeout hide
+            if (autoClose > 0) {
+                this.__clickovertimer = setTimeout(() => {
+                    self.closepopup(popupContainer);
+                }, autoClose*1000);
+            }
+
+            popupContainer.jComponent.on(this.__clickover.attr.click_event_ns, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            window.setTimeout(() => {
+                $('body').on(this.__clickover.attr.click_event_ns, function (e) {
+                    self.closepopup(popupContainer);
+                });
+            }, 10);
         }
+    }
+
+    private closepopup(popupContainer: VXCO.TContainer) {
+        if (this.__clickover) {
+            this.__clickover.$tip.hide();
+            $('body').off(this.__clickover.attr.click_event_ns);
+            popupContainer.jComponent.off(this.__clickover.attr.click_event_ns);
+        }
+        popupContainer.Visible = false;
+        if (this.__clickovertimer) clearTimeout(this.__clickovertimer);
     }
 
 

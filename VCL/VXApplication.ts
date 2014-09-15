@@ -706,7 +706,7 @@ export class TApplication {
         return this.CurrencyString + this.FormatNumber(value, precision);
     }
 
-    public formatHumanFriendly(value: number, roundfactor): string {
+    public formatHumanFriendly(value: number, roundfactor : number = 0): string {
         var p, d2, i, s;
         var isNegative = value < 0;
         value = Math.abs(value);

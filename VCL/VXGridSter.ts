@@ -161,11 +161,11 @@ export class TWidgetGrid extends VXCO.TContainer {
         item.create();
         item.Width = this.WidgetWidth * item.SizeX + (item.SizeX - 1) * this.MarginVertical * 2;
         item.Height = this.WidgetHeight * item.SizeY + (item.SizeY - 1) * this.MarginHorizontal * 2;
-        item.widgetElment = this.jGridster.add_widget(item.jComponent, item.SizeX, item.SizeY, item.X >= 0 ? item.X : null, item.Y >= 0 ? item.Y : null);
-
         var paddingTop: number = parseInt(item.jContent.css("margin-top").replace("px", ""));
         var paddingBottom: number = parseInt(item.jContent.css("margin-bottom").replace("px", ""));
         var height = item.jComponent.innerHeight() - item.jHeader.outerHeight() - paddingBottom - paddingTop;
+        item.widgetElment = this.jGridster.add_widget(item.jComponent, item.SizeX, item.SizeY, item.X >= 0 ? item.X : null, item.Y >= 0 ? item.Y : null);
+
         item.jContent.css('min-height', height + "px");
         item.jContent.css('max-height', height + "px");
         item.widgetElment.data('widgetID', item.WidgetID);

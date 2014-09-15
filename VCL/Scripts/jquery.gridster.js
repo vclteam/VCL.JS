@@ -890,7 +890,7 @@
 
         this.set_dom_grid_height();
 
-        return $w.fadeIn();
+        return $w;
     };
 
 
@@ -2995,11 +2995,11 @@
 
         // don't duplicate stylesheets for the same configuration
         var serialized_opts = $.param(opts);
-        if ($.inArray(serialized_opts, Gridster.generated_stylesheets) >= 0) {
-            return false;
-        }
+        //if ($.inArray(serialized_opts, Gridster.generated_stylesheets) >= 0) {
+        //    return false;
+        //}
 
-        Gridster.generated_stylesheets.push(serialized_opts);
+        //Gridster.generated_stylesheets.push(serialized_opts);
 
         /* generate CSS styles for cols */
         for (i = opts.cols; i >= 0; i--) {
@@ -3041,7 +3041,12 @@
     * @return {Object} Returns the instance of the Gridster class.
     */
     fn.add_style_tag = function (css) {
-        var d = document;
+        var gs = $("head").find("#__gridsterstyle__");
+        if (gs.length > 0) gs.remove();
+        gs = $("<style id='__gridsterstyle__'>");
+        gs.appendTo($("head"));
+        gs.html(css);
+        /*var d = document;
         var tag = d.createElement('style');
 
         d.getElementsByTagName('head')[0].appendChild(tag);
@@ -3054,7 +3059,7 @@
         }
 
         this.$style_tags = this.$style_tags.add(tag);
-
+        */
         return this;
     };
 

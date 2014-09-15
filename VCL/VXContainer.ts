@@ -22,7 +22,7 @@ export class TContainer extends VXC.TComponent {
         if (!this.__HTML__) this.__HTML__ = this.getContanierHTML();
         if (this.__HTML__) $(this.jComponent).html(this.__HTML__);
         if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
-        this.jComponent.off("click").click(() => {
+        this.jComponent.off("click").click((e) => {
             if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(aOwner); }));
         })
         this.jComponent.off("mouseover").mouseover(() => {

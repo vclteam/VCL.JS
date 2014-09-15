@@ -41,6 +41,11 @@ export class TModal extends VXC.TContainer {
 
     public showModal() {
         this.jComponent.addClass('modal');
+        
+        this.jComponent.modal({
+            keyboard: false, maxHeight: this.MaxHeight, backdrop: 'static', width: this.Width,
+            attentionAnimation: null, resize: true
+        });
         super.draw(true);
         switch (this.effect) {
             case V.ModalEffects.FadeIn: {
@@ -60,10 +65,7 @@ export class TModal extends VXC.TContainer {
                 break;
             }
         }
-        this.jComponent.modal({
-            keyboard: false, maxHeight: this.MaxHeight, backdrop: 'static', width: this.Width,
-            attentionAnimation: null, resize: true
-        });
+
         if (this.onShow != null) (V.tryAndCatch(() => { this.onShow(); }))
     }
 

@@ -883,12 +883,16 @@ export class TChartArea extends TChartLineBase {
         this.jChart = new Area({
                 element: this.jComponent[0],
                 xkey: "x",
-                ykeys: ["value1", "value2", "value3", "value4", "value5",
+                ykeys: [
+                    "value1", "value2", "value3", "value4", "value5",
                     "value6", "value7", "value8", "value9", "value10",
-                    "value11", "value12", "value13", "value14", "value15"],
-                labels: [this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name
-                    , this.Series7Name, this.Series8Name, this.Series9Name, this.Series10Name, this.Series11Name, this.Series12Name
-                    , this.Series13Name, this.Series14Name, this.Series15Name],
+                    "value11", "value12", "value13", "value14", "value15"
+                ],
+                labels: [
+                    this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name, this.Series5Name, this.Series6Name,
+                    this.Series7Name, this.Series8Name, this.Series9Name, this.Series10Name, this.Series11Name, this.Series12Name,
+                    this.Series13Name, this.Series14Name, this.Series15Name
+                ],
                 lineWidth: this.LineWidth,
                 pointSize: 3,
                 lineColors: [
@@ -904,16 +908,16 @@ export class TChartArea extends TChartLineBase {
                 pointWidths: [1],
                 pointStrokeColors: ['#ffffff'],
                 titleX: this.TitleX,
-                paddingX: this.TitleX ? 35 : 20,
+                paddingX: this.TitleX ? 35 : 15,
                 titleY: this.TitleY,
-                paddingY: this.TitleY ? 25 : 5,
+                paddingY: this.TitleY ? 35 : 15,
+                xLabelAngle: this.XLabelAngle,
                 xLabelFormat: this.XLabelFormat,
                 yLabelFormat: this.YLabelFormat,
                 toolTipFormat: this.ToolTipFormat,
                 pointFillColors: [],
                 smooth: this.Smooth,
                 xLabels: 'auto',
-                xLabelAngle: this.XLabelAngle,
                 hideHover: this.ShowHoverLegend ? 'auto' : 'always',
                 xLabelMargin: this.XLabelMargin,
                 grid: this.ShowGridLines,
@@ -934,7 +938,6 @@ export class TChartArea extends TChartLineBase {
                 axisy: this.ShowYAxisLabels,
                 fillOpacity: this.FillOpacity,
                 behaveLikeLine: false,
-
             }, this);
         }
         super.create();
@@ -1599,7 +1602,7 @@ class Line extends VXCB.Grid {
         }
     }
 
-    private oldPoint = [null,null];
+    private oldPoint = [null, null];
     hoverItem(idx, series) {
 
         //owner
