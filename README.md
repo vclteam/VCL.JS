@@ -44,15 +44,14 @@ export class PageHome extends V.TPage {
   }
 }
 ```
-Getting Started
-================
+
+###Getting Started
 For a getting started please refer to our website.
 #### http://www.vcljs.com
 
 You may also load the visual studio plugin in which includes everything you need to get started.
 
-Building and running the sample application
-===============================================
+###Building and running the sample application
 - Download and install TypeScript.
 - Download and instal VCL.JS plugin from this page
 - Start visual studio 2012
@@ -64,10 +63,10 @@ Building and running the sample application
 - Run the project.
 
 
-# Documentation
+### Documentation
 #### http://vcljs.com/components-3/
 
-# Contribution
+### Contribution
 [See `CONTRIBUTING.md`](https://github.com/vclteam/VCL.JS/blob/master/CONTRIBUTING.md)
 
 # Introduction video
