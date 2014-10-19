@@ -1,5 +1,7 @@
-WHAT IS VCL.JS?
+Vcl.js takes the Delphi/VB approach into the HTML5 world,providing a full stack for a true web RAD development.Build Node.js&.net web app.
 ======
+
+
 
 ### TypScript component based framework for enterprise web application.
 
@@ -9,9 +11,10 @@ VCL.JS does those things for you, so you can focus on building business logic an
 
 These are the features that make VCL.JS a joy to use:
 - Visual Component Library- include Page,Grid,Input,Gauges,Charts and many more
-- Pure javascript
+- Visual studio integration
+- Node.js / IIS backend
+- Pure typescript
 - Single page application
-- .Net Backend
 - Data binding
 - Simple database query execution 
 - Routing
