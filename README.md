@@ -64,7 +64,7 @@ You may also load the visual studio plugin in which includes everything you need
 
 
 ### Documentation
-#### http://vcljs.com/components-3/
+#### http://vcljs.com/
 
 ### Contribution
 [See `CONTRIBUTING.md`](https://github.com/vclteam/VCL.JS/blob/master/CONTRIBUTING.md)
