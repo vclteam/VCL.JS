@@ -1,6 +1,6 @@
-import VXC = require("VCL/VXComponent");
-import VXU = require("VCL/VXUtils");
-import V = require("VCL/VCL");
+import VXC = require("./VXComponent");
+import VXU = require("./VXUtils");
+import V = require("./VCL");
 
 
 export class TGauge extends VXC.TComponent {

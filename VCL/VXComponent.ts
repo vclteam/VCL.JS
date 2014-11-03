@@ -1,16 +1,27 @@
-import VXCO = require("VCL/VXContainer");
-import V = require("VCL/VCL");
-import VXO = require("VCL/VXObject");
-import VXM = require("VCL/VXMenu");
+import VXCO = require("./VXContainer");
+import V = require("./VCL");
+import VXO = require("./VXObject");
+import VXM = require("./VXMenu");
 
 export class TComponent extends VXO.TObject {
+    /**
+    Indicates the component that is responsible for streaming and freeing this component.
+    **/
     public owner: TComponent;
+
+    /**
+    Represent the JQuery element of the component
+    **/
     public jComponent: JQuery;
     public initialized: boolean = false;
 
     public onCreate() { }
     public onShow() { }
 
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: TComponent, renderTo?: string) {
         super();
         this.owner = aOwner;
@@ -64,11 +75,16 @@ export class TComponent extends VXO.TObject {
         this.jComponent.remove();
     }
 
-
+    /**
+    Adds the specified class(es) to the component.
+    **/
     public addClass(classStr: string) {
         this.jComponent.addClass(classStr);
     }
 
+    /**
+    Remove a single class, multiple classes, or all classes from component
+    **/
     public removeClass(classStr: string) {
         this.jComponent.removeClass(classStr);
     }
@@ -120,11 +136,12 @@ export class TComponent extends VXO.TObject {
                 e.stopPropagation();
             });
 
+            //wait for the next click
             window.setTimeout(() => {
                 $('body').on(this.__clickover.attr.click_event_ns, function (e) {
                     self.closepopup(popupContainer);
                 });
-            }, 10);
+            }, 100);
         }
     }
 
@@ -140,9 +157,9 @@ export class TComponent extends VXO.TObject {
 
 
     private _sticktotop: boolean = false;
-    /*
-    * component that remain in view as the user scrolls the page
-    */
+    /**
+     component that remain in view as the user scrolls the page
+    **/
     public get StickToTop(): boolean {
         return this._sticktotop;
     }
@@ -156,9 +173,9 @@ export class TComponent extends VXO.TObject {
 
 
     private _outline: boolean = false;
-    /*
-    * An outline is a line that is drawn around elements (outside the borders) to make the element "stand out".
-    */
+    /**
+     An outline is a line that is drawn around elements (outside the borders) to make the element "stand out".
+    **/
     public get Outline(): boolean {
         return this._outline;
     }
@@ -170,8 +187,9 @@ export class TComponent extends VXO.TObject {
         }
     }
 
-
+    
     private _fittowidth: boolean = false;
+    /*The component will take fulle parent width*/
     public get FitToWidth(): boolean {
         return this._fittowidth;
     }
@@ -194,6 +212,7 @@ export class TComponent extends VXO.TObject {
     }
 
     private _tooltip: string;
+    /**Tooltips can be attached to any element. When you hover the element with your mouse, the title attribute is displayed in a little box next to the element*/
     public get Tooltip(): string {
         return this._tooltip;
     }
@@ -205,6 +224,7 @@ export class TComponent extends VXO.TObject {
     }
 
     private _tooltipplacement: V.TooltipPlacement = V.TooltipPlacement.Top;
+    /**Customize the positioning, e.g., to center the tooltip top elements.**/
     public get TooltipPlacement(): V.TooltipPlacement {
         return this._tooltipplacement;
     }
@@ -238,16 +258,16 @@ export class TComponent extends VXO.TObject {
         }
     }
 
-    /*
-    * refresh the control on the screen.
-    */
+    /**
+     refresh the control on the screen.
+    **/
     public refresh() {
         this.draw(false);
     }
 
-    /*
-    * Use repaint when the entire control needs to be fully repainted. 
-    */
+    /**
+     Use repaint when the entire control needs to be fully repainted. 
+    **/
     public repaint() {
         this.draw(true);
     }
@@ -485,9 +505,9 @@ export class TPopupmenuComponent extends TComponent {
     }
 
     private _showmenucaret: boolean = true;
-    /*
-    * component that remain in view as the user scrolls the page
-    */
+    /**
+     Component that remain in view as the user scrolls the page
+    **/
     public get ShowMenuCaret(): boolean {
         return this._showmenucaret;
     }
@@ -516,6 +536,9 @@ export class TPopupmenuComponent extends TComponent {
 
 
 export class TControl extends TComponent {
+    /**
+        Use the OnClick event handler to respond when the user clicks the control. 
+    **/
     public onClicked: () => void;
     public create() {
         this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })

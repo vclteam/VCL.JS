@@ -1,5 +1,6 @@
-import VXC = require("VCL/VXComponent");
-import VXD = require("VCL/VXDataset");
+import V = require("./VCL");
+import VXC = require("./VXComponent");
+import VXD = require("./VXDataset");
 
 export class TTextBase extends VXC.TComponent {
     public onClicked: (sender: TTextBase) => void;
@@ -15,6 +16,32 @@ export class TTextBase extends VXC.TComponent {
         }
     }
 
+    private _textcolor: string;
+    public get TextColor(): string {
+        return this._textcolor;
+    }
+    public set TextColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._textcolor) {
+                this._textcolor = val;
+                this.draw(true);
+            }
+        }
+    }
+
+
+    private _textaliggment: V.TextAlignment;
+    public get TextAlignment(): V.TextAlignment {
+        return this._textaliggment;
+    }
+    public set TextAlignment(val: V.TextAlignment) {
+        if (val != this._textaliggment) {
+            this._textaliggment = val;
+            this.draw(true);
+        }
+    }
+
+
     private _text: string;
     /*
     * Text specify the text string that labels the control.
@@ -28,6 +55,12 @@ export class TTextBase extends VXC.TComponent {
             this.drawDelayed(false);
         }
     }
+
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    @text       (Optional) the initial text value of the component
+    **/
 
     constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
@@ -57,6 +90,23 @@ export class TDBTextBase extends VXC.TComponent {
         }
     }
 
+    private _textcolor: string;
+    public get TextColor(): string {
+        return this._textcolor;
+    }
+    public set TextColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._textcolor) {
+                this._textcolor = val;
+                this.draw(true);
+            }
+        }
+    }
+
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
     }

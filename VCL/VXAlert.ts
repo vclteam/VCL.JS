@@ -1,6 +1,6 @@
-import VXC = require("VCL/VXComponent");
-import VXU = require("VCL/VXUtils");
-import V = require("VCL/VCL");
+import VXC = require("./VXComponent");
+import VXU = require("./VXUtils");
+import V = require("./VCL");
 
 export class TAlert extends VXC.TComponent {
     constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
@@ -58,6 +58,9 @@ export class TAlert extends VXC.TComponent {
         }
     }
 
+    /*
+        Use the OnClick event handler to respond when the user clicks the control. 
+    */
     public onClicked: (sender: TAlert) => void;
     private jAlert: JQuery;
     private jBtn: JQuery;

@@ -1,6 +1,6 @@
-import V = require("VCL/VCL");
-import VXO = require("VCL/VXObject");
-import VXU = require("VCL/VXUtils");
+import V = require("./VCL");
+import VXO = require("./VXObject");
+import VXU = require("./VXUtils");
 
 export class TMenuItem extends VXO.TCollectionItem {
     public jComponent: JQuery;

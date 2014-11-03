@@ -1,10 +1,10 @@
-import V = require("VCL/VCL");
-import VXA = require("VCL/VXApplication");
-import VXD = require("VCL/VXDataset");
-import VXDS = require("VCL/VXServer");
-import VXO = require("VCL/VXObject");
-import VXC = require("VCL/VXComponent");
-import VXCO = require("VCL/VXContainer");
+import V = require("./VCL");
+import VXA = require("./VXApplication");
+import VXD = require("./VXDataset");
+import VXDS = require("./VXServer");
+import VXO = require("./VXObject");
+import VXC = require("./VXComponent");
+import VXCO = require("./VXContainer");
 
 export class TOlapSSAS extends VXD.TClientDataset {
     public onError: (errorMessage: string) => void;

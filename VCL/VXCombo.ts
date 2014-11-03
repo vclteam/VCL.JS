@@ -1,11 +1,11 @@
 /// <reference path="Scripts/jquery.d.ts" />
-import V = require("VCL/VCL");
-import VXC = require("VCL/VXComponent");
-import VXB = require("VCL/VXInputBase");
-import VXO = require("VCL/VXObject");
-import VXD = require("VCL/VXDataset");
-import VXU = require("VCL/VXUtils");
-import VXM = require("VCL/VXMenu");
+import V = require("./VCL");
+import VXC = require("./VXComponent");
+import VXB = require("./VXInputBase");
+import VXO = require("./VXObject");
+import VXD = require("./VXDataset");
+import VXU = require("./VXUtils");
+import VXM = require("./VXMenu");
 
 export class TComboboxBase extends VXB.TEditorBase {
     private _maxvisibleLines: number = 8;
@@ -98,16 +98,20 @@ export class TComboboxBase extends VXB.TEditorBase {
     }
 
     private _textaligment: V.TextAlignment = V.TextAlignment.Left;
-    public get TextAlgnment(): V.TextAlignment {
+    public get TextAlignment(): V.TextAlignment {
         return this._textaligment;
     }
-    public set TextAlgnment(val: V.TextAlignment) {
+    public set TextAlignment(val: V.TextAlignment) {
         if (val != this._textaligment) {
             this._textaligment = val;
             this.drawDelayed(true);
         }
     }
-
+    
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         //if(!this.Width) this.Width = 200;
@@ -257,7 +261,7 @@ export class TComboboxBase extends VXB.TEditorBase {
         options.width = 'fit';
         options.selectedTextFormat = "count>" + this.ShowSelectionCount;
         options.noneSelectedText = this.NoneSelectedText;
-        options.Rtl = this.Rtl; 
+        options.Rtl = this.Rtl;
 
         this.jEdit.selectpicker(options);
 
@@ -363,7 +367,7 @@ export class TCombobox extends TComboboxBase {
                 var dpVal = self.jEdit.selectpicker("val").toString();
                 currVal = dpVal.split(',');
             } else currVal = self.jEdit.selectpicker("val")
-            var oldText :String = self.Text;
+            var oldText: String = self.Text;
 
             var newVal = new Array();
             this.items.forEach((item) => { item.Checked = false; });
@@ -659,11 +663,12 @@ Selectpicker.prototype = {
         if (this.options.container) {
             this.selectPosition();
         }
+        this.setSize();
         this.$menu.data('this', this);
         this.$newElement.data('this', this);
     },
 
-    createDropdown: function (rtl : boolean) {
+    createDropdown: function (rtl: boolean) {
         //If we are multiple, then add the show-tick class by default
         var multiple = this.multiple ? ' show-tick' : '';
         var header = this.options.header ? '<h3 class="popover-title">' + this.options.header + '<button type="button" class="close" aria-hidden="true">&times;</button></h3>' : '';
@@ -706,7 +711,7 @@ Selectpicker.prototype = {
         }
     },
 
-    createView: function (rtl : boolean) {
+    createView: function (rtl: boolean) {
         var $drop = this.createDropdown(rtl);
         var $li = this.createLi();
         $drop.find('ul').append($li);
@@ -758,7 +763,7 @@ Selectpicker.prototype = {
                     var labelIcon = $this.parent().data('icon') ? '<i class="' + $this.parent().data('icon') + '"></i> ' : '';
                     label = labelIcon + '<span class="text">' + label + labelSubtext + '</span>';
 
-                    if ($this[0]["index"] >1) {
+                    if ($this[0]["index"] > 1) {
                         _liA.push(
                             '<div class="div-contain"><div class="divider"></div></div>' +
                             '<dt>' + label + '</dt>' +
@@ -836,7 +841,7 @@ Selectpicker.prototype = {
             var max = this.options.selectedTextFormat.split(">");
             var notDisabled = this.options.hideDisabled ? ':not([disabled])' : '';
             if ((max.length > 1 && selectedItems.length > max[1]) || (max.length == 1 && selectedItems.length >= 2)) {
-                title = this.options.countSelectedText.replace('{0}', selectedItems.length).replace('{1}', this.$element.find('option:not([data-divider="true"]):not([data-hidden="true"])' + notDisabled).length-1);
+                title = this.options.countSelectedText.replace('{0}', selectedItems.length).replace('{1}', this.$element.find('option:not([data-divider="true"]):not([data-hidden="true"])' + notDisabled).length - 1);
             }
         }
 
@@ -846,6 +851,7 @@ Selectpicker.prototype = {
         }
 
         this.$newElement.find('.filter-option').html(title);
+
     },
 
     setStyle: function (style, status) {
@@ -882,6 +888,7 @@ Selectpicker.prototype = {
             menu = this.$menu,
             menuInner = menu.find('.inner'),
             menuA = menuInner.find('li > a'),
+            searchHeight = this.$searchbox.outerHeight(),
             selectHeight = this.$newElement.outerHeight(),
             liHeight = this.$newElement.data('liHeight'),
             headerHeight = this.$newElement.data('headerHeight'),
@@ -903,34 +910,49 @@ Selectpicker.prototype = {
         posVert();
         if (this.options.header) menu.css('padding-top', 0);
 
-        if (this.options.size == 'auto') {
-            var getSize = function () {
-                var minHeight;
-                posVert();
-                menuHeight = selectOffsetBot - menuExtras;
-                that.$newElement.toggleClass('dropup', (selectOffsetTop > selectOffsetBot) && (menuHeight - menuExtras) < menu.height() && that.options.dropupAuto);
-                if (that.$newElement.hasClass('dropup')) {
-                    menuHeight = selectOffsetTop - menuExtras;
-                }
-                if ((menu.find('li').length + menu.find('dt').length) > 3) {
-                    minHeight = liHeight * 3 + menuExtras - 2;
-                } else {
-                    minHeight = 0;
-                }
-                menu.css({ 'max-height': menuHeight + 'px', 'overflow': 'hidden', 'min-height': minHeight + 'px' });
-                menuInner.css({ 'max-height': menuHeight - headerHeight - menuPadding + 'px', 'overflow-y': 'auto', 'min-height': minHeight - menuPadding + 'px' });
+        //if (this.options.size == 'auto') {
+        var getSize = function () {
+            var minHeight;
+            posVert();
+            menuHeight = selectOffsetBot - menuExtras;
+            if ((menu.find('li').length + menu.find('dt').length) > 3) {
+                minHeight = liHeight * 3 + menuExtras - 2;
+            } else {
+                minHeight = 0;
             }
-                getSize();
-            $(window).resize(getSize);
-            $(window).scroll(getSize);
-        } else if (this.options.size && this.options.size != 'auto' && menu.find('li' + notDisabled).length > this.options.size) {
-            var optIndex = menu.find("li" + notDisabled + " > *").filter(':not(.div-contain)').slice(0, this.options.size).last().parent().index();
-            var divLength = menu.find("li").slice(0, optIndex + 1).find('.div-contain').length;
-            menuHeight = liHeight * this.options.size + divLength * divHeight + menuPadding;
-            this.$newElement.toggleClass('dropup', (selectOffsetTop > selectOffsetBot) && menuHeight < menu.height() && this.options.dropupAuto);
-            menu.css({ 'max-height': menuHeight + headerHeight + 'px', 'overflow': 'hidden' });
+
+            if (that.options.size != 'auto') {
+                var optIndex = menu.find("li" + notDisabled + " > *").filter(':not(.div-contain)').slice(0, that.options.size).last().parent().index();
+                var divLength = menu.find("li").slice(0, optIndex + 1).find('.div-contain').length;
+                menuHeight = liHeight * Math.min(that.options.size, optIndex) + divLength * divHeight + menuPadding;
+            }
+
+            menu.css({ /* 'max-height': menuHeight + 'px', */'overflow': 'hidden', 'min-height': minHeight + 'px' });
             menuInner.css({ 'max-height': menuHeight - menuPadding + 'px', 'overflow-y': 'auto' });
+
+            if (that.options.dropupAuto == 1)
+                that.$newElement.removeClass('dropup');
+            else
+                if (that.options.dropupAuto == 2)
+                    that.$newElement.addClass('dropup');
+                else {
+                    that.$newElement.removeClass('dropup');
+                    var dropup = (selectOffsetTop > selectOffsetBot) && menuHeight > selectOffsetBot;
+                    if (dropup)
+                        that.$newElement.addClass('dropup');
+                }
         }
+            getSize();
+        $(window).resize(getSize);
+        $(window).scroll(getSize);
+        //} else if (this.options.size && this.options.size != 'auto' && menu.find('li' + notDisabled).length > this.options.size) {
+        //    var optIndex = menu.find("li" + notDisabled + " > *").filter(':not(.div-contain)').slice(0, this.options.size).last().parent().index();
+        //    var divLength = menu.find("li").slice(0, optIndex + 1).find('.div-contain').length;
+        //    menuHeight = liHeight * this.options.size + divLength * divHeight + menuPadding;
+        //    this.$newElement.toggleClass('dropup', (selectOffsetTop > selectOffsetBot) && menuHeight < menu.height() && this.options.dropupAuto);
+        //    menu.css({ 'max-height': menuHeight + headerHeight + 'px', 'overflow': 'hidden' });
+        //    menuInner.css({ 'max-height': menuHeight - menuPadding + 'px', 'overflow-y': 'auto' });
+        //}
     },
 
     setWidth: function () {
@@ -1301,6 +1323,7 @@ $.fn.selectpicker.defaults = {
     width: null,
     container: false,
     hideDisabled: false,
+    dropupAuto: false,
     showSubtext: false,
     showIcon: true
 }

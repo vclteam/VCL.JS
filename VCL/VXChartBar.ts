@@ -1,8 +1,9 @@
-﻿import V = require("VCL/VCL");
-import VXU = require("VCL/VXUtils");
-import VXC = require("VCL/VXComponent");
-import VXD = require("VCL/VXDataset");
-import VXCB = require("VCL/VXChartBase");
+﻿///<reference path="Scripts/jquery.d.ts" />
+import V = require("./VCL");
+import VXU = require("./VXUtils");
+import VXC = require("./VXComponent");
+import VXD = require("./VXDataset");
+import VXCB = require("./VXChartBase");
 
 export class TChartBar extends VXCB.TGridChartBase {
     /** Custom Format value on top */
@@ -650,7 +651,7 @@ export class TChartBar extends VXCB.TGridChartBase {
                 yLabelFormat: this.YLabelFormat,
                 toolTipFormat: this.ToolTipFormat,
                 labelOnTopFormat: this.LabelOnTopFormat,
-                hideHover: this.ShowHoverLegend ? 'auto' : 'always',
+                hideHover: this.ShowHoverLegend,
                 stacked: this.Stacked,
                 barColors: [
                     this.Series1Color, this.Series2Color, this.Series3Color, this.Series4Color, this.Series5Color, this.Series6Color,
@@ -1013,22 +1014,16 @@ export class Bar extends VXCB.Grid {
 
     init() {
         this.cumulative = true;//this.options.stacked; cause Bag in one item
-        if (this.options.hideHover !== 'always') {
-            this.hover = new VXCB.Hover({
-                parent: this.el
-            });
+        this.hover = new VXCB.Hover({
+            parent: this.el
+        });
 
-            this.on('hovermove', this.onHoverMove);
-            this.on('hoverout', this.onHoverOut);
-        }
+        this.on('hovermove', this.onHoverMove);
+        this.on('hoverout', this.onHoverOut);
     }
 
     calc() {
-        var _ref;
         this.calcBars();
-        if (this.options.hideHover === false) {
-            return (_ref = this.hover).update.apply(_ref, this.displayHoverForRow(this.data.length - 1, -1));
-        }
     }
 
     calcBars() {
@@ -1322,22 +1317,21 @@ export class Bar extends VXCB.Grid {
         var tipId = evt.target.TipId;
         var idx = evt.target.idx;
         var series = evt.target.series;
-        var key = tipId + idx + series;
+        var key = tipId + idx + series + "";
         if (key == this.oldTipId) return;
         this.oldTipId = key;
 
         var _ref;
         //start hover
-        if (!this.hover) return;
         this.hover.hide();
         if (tipId && tipId.indexOf("node") != -1) {
-            this.hover.animation = false;
-            (_ref = this.hover).update.apply(_ref, this.hoverItem(idx, series));;
+            if (this.options.hideHover)
+                (_ref = this.hover).update.apply(_ref, this.hoverItem(idx, series));;
         }
         if (tipId && tipId.indexOf("xlabel") != -1) {
             var l = evt.target.TipValue;
-            this.hover.animation = true;
-            (_ref = this.hover).update.apply(_ref, ["<div style='pointer-events: none;' class='morris-hover-row-label'>" + l + "</div>", x, y]);
+            if (this.options.hideHover)
+                (_ref = this.hover).update.apply(_ref, ["<div style='pointer-events: none;' class='morris-hover-row-label'>" + l + "</div>", x, y]);
         }
     }
 
@@ -1353,11 +1347,8 @@ export class Bar extends VXCB.Grid {
     }
 
     onHoverOut() {
-        if (!this.hover) return;
-        if (this.options.hideHover !== false) {
-            this.hover.hide();
-            return this.hoverItem(null, null);
-        }
+        this.hover.hide();
+        return this.hoverItem(null, null);
     }
 
     displayHoverForRow(index, series) {

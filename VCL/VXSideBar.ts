@@ -1,6 +1,6 @@
-import VXC = require("VCL/VXComponent");
-import VXU = require("VCL/VXUtils");
-import VXM = require("VCL/VXMenu");
+import VXC = require("./VXComponent");
+import VXU = require("./VXUtils");
+import VXM = require("./VXMenu");
 
 export class TBarBase extends VXC.TComponent {
 
@@ -26,6 +26,10 @@ export class TNavBar extends TBarBase {
         }
     }
 
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         (<any>this)._fittowidth = true;

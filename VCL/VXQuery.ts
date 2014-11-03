@@ -1,17 +1,24 @@
-import V = require("VCL/VCL");
-import VXA = require("VCL/VXApplication");
-import VXD = require("VCL/VXDataset");
-import VXDS = require("VCL/VXServer");
-import VXO = require("VCL/VXObject");
-import VXC = require("VCL/VXComponent");
-import VXCO = require("VCL/VXContainer");
+import V = require("./VCL");
+import VXA = require("./VXApplication");
+import VXD = require("./VXDataset");
+import VXDS = require("./VXServer");
+import VXO = require("./VXObject");
+import VXC = require("./VXComponent");
+import VXCO = require("./VXContainer");
 
 
 export class TQueryBase extends VXD.TClientDataset {
-    public onError: (errorMessage: string) => void;
     public onExecuteCompleted: () => void;
 
-    public paramAsJSON() {
+    public params = new VXO.TCollection<TQueryParam>();
+    public createParam(value: any): TQueryParam {
+        var param = new TQueryParam();
+        param.Value = value;
+        this.params.add(param);
+        return param;
+    }
+
+    private paramAsJSON() {
         var paramJSON = {};
         var index = 0;
         this.params.forEach((item: TQueryParam) => {
@@ -26,34 +33,18 @@ export class TQueryBase extends VXD.TClientDataset {
         });
         return paramJSON;
     }
-    public params = new VXO.TCollection<TQueryParam>();
-    public createParam(value: any): TQueryParam {
-        var param = new TQueryParam();
-        param.Value = value;
-        this.params.add(param);
-        return param;
-    }
 
-    public loadRemoteResults(data: any) {
-        //replace the dates with JS dates
-        if (data.META) {
-            for (var i = 0, l = data.META.length; i < l; i++) {
-                if (data.META[i].TYPE.toLowerCase() != 'date') continue;
-                for (var j = 0; j < data.DATA.length; j++) {
-                    if (data.DATA[j][data.META[i].NAME] != null) {
-                        // sometime type Date value can be sent as string
-                        var milisecs = (typeof data.DATA[j][data.META[i].NAME] === "number") ? data.DATA[j][data.META[i].NAME] : parseInt(data.DATA[j][data.META[i].NAME]);
-                        //data.DATA[j][data.META[i].NAME] = new Date(data.DATA[j][data.META[i].NAME]);
-                        data.DATA[j][data.META[i].NAME] = new Date(milisecs);
-                    }
-                }
-            }
+    private _cachetimeout: number = -1;
+    public get CacheTimeOut(): number {
+        return this._cachetimeout;
+    }
+    public set CacheTimeOut(val: number) {
+        if (val != this._cachetimeout) {
+            this._cachetimeout = val;
+
         }
-        this.setData(data.DATA);
-        this.setMetaData(data.META);
-
-        if (this.onAfterOpen != null) (V.tryAndCatch(() => { this.onAfterOpen(this); }))
     }
+
 
     public close() {
         this.setData(null);
@@ -76,8 +67,19 @@ export class TQuery extends TQueryBase {
         }
     }
 
-    private _connectionname: string = "DB";
+    private _servermethod: string = "Query";
+    public get ServerMethod(): string {
+        return this._servermethod;
+    }
 
+    public set ServerMethod(val: string) {
+        if (val != this._servermethod) {
+            this._servermethod = val;
+        }
+    }
+
+
+    private _connectionname: string = "DB";
     public get ConnectionName(): string {
         return this._connectionname;
     }
@@ -96,16 +98,6 @@ export class TQuery extends TQueryBase {
         if (connectionName != null) this.ConnectionName = connectionName;
     }
 
-    private _cachetimeout: number = -1;
-    public get CacheTimeOut(): number {
-        return this._cachetimeout;
-    }
-    public set CacheTimeOut(val: number) {
-        if (val != this._cachetimeout) {
-            this._cachetimeout = val;
-
-        }
-    }
 
     /*
     *
@@ -113,9 +105,9 @@ export class TQuery extends TQueryBase {
     public open() {
         if (this.onBeforeOpen != null) (V.tryAndCatch(() => { this.onBeforeOpen(this); }))
         var server = new VXDS.TServer();
-        var paramJSON = this.paramAsJSON();
+        var paramJSON = (<any>this).paramAsJSON();
         if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
-        server.send("Query", { __EXECUTE__: false, __SQL__: this.SQL, __SQLPARAM__: paramJSON, __DB__: this.ConnectionName }, (data) => {
+        server.send(this._servermethod, { __EXECUTE__: false, __SQL__: this.SQL, __SQLPARAM__: paramJSON, __DB__: this.ConnectionName }, (data) => {
             this.loadRemoteResults(data);
             if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
         },
@@ -133,7 +125,7 @@ export class TQuery extends TQueryBase {
     */
     public ExecSQL(onComplete?: (data) => void) {
         var server = new VXDS.TServer();
-        var paramJSON = this.paramAsJSON();
+        var paramJSON = (<any>this).paramAsJSON();
         if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         server.send("Query", { __EXECUTE__: true, __SQL__: this.SQL, __SQLPARAM__: paramJSON, __DB__: this.ConnectionName }, (data) => {
             if (this.onExecuteCompleted != null) (V.tryAndCatch(() => { this.onExecuteCompleted(); }))
@@ -171,7 +163,7 @@ export class TQueryRemote extends TQueryBase {
     public open() {
         if (this.onBeforeOpen != null) (V.tryAndCatch(() => { this.onBeforeOpen(this); }))
         var server = new VXDS.TServer();
-        var paramJSON = this.paramAsJSON();
+        var paramJSON = (<any>this).paramAsJSON();
 
         if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         server.send("RemoteQuery", { __QUERYID__: this.QueryID, __SQLPARAM__: paramJSON }, (data) => {
@@ -183,7 +175,7 @@ export class TQueryRemote extends TQueryBase {
 
                 if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
            else V.Application.raiseException(errorMessage);
-            }
+            }, this.CacheTimeOut
             );
     }
 
@@ -192,7 +184,7 @@ export class TQueryRemote extends TQueryBase {
     */
     public ExecSQL(onComplete?: (data) => void) {
         var server = new VXDS.TServer();
-        var paramJSON = this.paramAsJSON();
+        var paramJSON = (<any>this).paramAsJSON();
         if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         server.send("RemoteQuery", { __EXECUTE__: true, __QUERYID__: this.QueryID, __SQLPARAM__: paramJSON }, (data) => {
             if (this.onExecuteCompleted != null) (V.tryAndCatch(() => { this.onExecuteCompleted(); }));

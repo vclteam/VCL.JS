@@ -1,22 +1,26 @@
 /// <reference path="Scripts/jquery.d.ts" />
-import V = require("VCL/VCL");
-import VXC = require("VCL/VXComponent");
-import VXCO = require("VCL/VXContainer");
-import VXD = require("VCL/VXDataset");
-import VXO = require("VCL/VXObject");
-import VXU = require("VCL/VXUtils");
+import V = require("./VCL");
+import VXC = require("./VXComponent");
+import VXCO = require("./VXContainer");
+import VXD = require("./VXDataset");
+import VXO = require("./VXObject");
+import VXU = require("./VXUtils");
 
 export class TGridBase extends VXC.TComponent {
     public onRowClicked: (record: any, clickedColumn: V.TDBGridColumn) => void;
     public onSortClicked: (column: V.TDBGridColumn, order: V.SortColumnOrder) => void;
     public onChecboxClicked: (recno: number) => void;
     public onGetRowStyle: (record: any) => V.GridRowStyle;
-    public onGetPageCounterText : (TotalPagesCount: number, currentPage: number) => string;
+    public onGetPageCounterText: (TotalPagesCount: number, currentPage: number) => string;
     public onNextPageClicked: () => void;
     public onPriorPageClicked: () => void;
     private selectedRecordId: number;
     public gridDataSource: TBaseGridDataSource;
 
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         (<any>this)._fittowidth = true;
@@ -100,7 +104,19 @@ export class TGridBase extends VXC.TComponent {
     }
 
 
-    
+    private _groupboxMaxVisibleLines: number = 5;
+    public get GroupBoxMaxVisibleLines(): number {
+        return this._groupboxMaxVisibleLines;
+    }
+    public set GroupBoxMaxVisibleLines(val: number) {
+        if (val != this._groupboxMaxVisibleLines) {
+            this._groupboxMaxVisibleLines = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+
     private _groupboxVisible: boolean = true;
     public get GroupBoxVisible(): boolean {
         return this._groupboxVisible;
@@ -225,7 +241,7 @@ export class TGridBase extends VXC.TComponent {
     }
 
     private visbleColumnCount(): number {
-        var cnt = this.ShowSelectCheckbox?1:0;
+        var cnt = this.ShowSelectCheckbox ? 1 : 0;
         this.columns.forEach((item) => {
             if (item.Visible) cnt++;
         });
@@ -233,7 +249,7 @@ export class TGridBase extends VXC.TComponent {
     }
 
     public jGrid: JQuery;
-    private getLastIndex() : number {
+    private getLastIndex(): number {
         var rc: number = -1;
         this.columns.forEach((item) => {
             rc = Math.max(item.Index, rc);
@@ -241,7 +257,7 @@ export class TGridBase extends VXC.TComponent {
         return rc;
     }
 
-    private indexExists(index: number): boolean{
+    private indexExists(index: number): boolean {
         var rc: boolean = false;
         this.columns.forEach((item) => {
             if (index == item.Index) rc = true;
@@ -267,7 +283,7 @@ export class TGridBase extends VXC.TComponent {
         var selitem: TDBGridColumn;
         while (i < this.columns.length()) {
             var min = 9999;
-            this.columns.forEach((item : TDBGridColumn) => {
+            this.columns.forEach((item: TDBGridColumn) => {
                 if (item.FieldName && item.FieldName.toUpperCase() == "___RECORDID___") return;
                 if (item.FieldName && item.FieldName.toUpperCase() == "___CHECKED___") return;
 
@@ -333,6 +349,17 @@ export class TGridBase extends VXC.TComponent {
         }
     }
 
+
+    private _sortmode: V.SortMode = V.SortMode.Default;
+    public get SortMode(): V.SortMode {
+        return this._sortmode;
+    }
+    public set SortMode(val: V.SortMode) {
+        if (val != this._sortmode) {
+            this._sortmode = val;
+            this.drawDelayed(true);
+        }
+    }
 
 
     private _sortcolumnOrder: V.SortColumnOrder = V.SortColumnOrder.Ascending;
@@ -473,7 +500,7 @@ export class TGridBase extends VXC.TComponent {
     private groupableCount(): number {
         if (!this.columns) return 0;
         var cnt: number = 0;
-        this.columns.forEach((col) => {if (col.Groupable) cnt++;});
+        this.columns.forEach((col) => { if (col.Groupable) cnt++; });
         return cnt;
     }
 
@@ -508,7 +535,7 @@ export class TGridBase extends VXC.TComponent {
         switch (this.PagerButtonSize) {
             case V.PagerButtonSize.Large: pagebtnstyle += " btn-large"; break;
             case V.PagerButtonSize.Small: pagebtnstyle += " btn-small"; break;
-            case V.PagerButtonSize.Mini : pagebtnstyle += " btn-mini"; break;
+            case V.PagerButtonSize.Mini: pagebtnstyle += " btn-mini"; break;
         }
 
 
@@ -516,16 +543,17 @@ export class TGridBase extends VXC.TComponent {
         if (cnt == 0 || !this.GroupBoxVisible) {
             this.jComponent.append($("<thead></thead>"));
         } else {
-            var cmb: string = '<tr><th colspan="' + this.visbleColumnCount() + '"><div class="row-fluid"><div class="span3 control-group" >'
-            cmb += '<label class="control-label" style="width:100%">'+this.GroupBoxGroupByCaption+'</label >';
-            cmb += '<select class="selectpicker gpislp"  style="width:100%">';
+            var cmb: string = '<tr class="gridgroupheader"><th colspan="' + this.visbleColumnCount() + '"><div class="row-fluid"><div class="span3 control-group" >'
+            cmb += '<label class="control-label" style="width:100%">' + this.GroupBoxGroupByCaption + '</label >';
+            cmb += '<select class="selectpicker gpislp"  data-size="' + this.GroupBoxMaxVisibleLines + '" style="width:100%">';
             cmb += "<option value='xxxxxxxxxxx'>*</option>";
             this.columns.forEach((col) => {
                 if (col.Groupable) {
+                    var lbl: string = col.Header ? col.Header : col.FieldName;
                     if (col == (<any>this).GroupColumn)
-                        cmb += "<option selected value='" + col.ID + "'>" + col.FieldName + "</option>";
+                        cmb += "<option selected value='" + col.ID + "'>" + lbl + "</option>";
                     else
-                        cmb += "<option value='"+col.ID+"'>" + col.FieldName + "</option>";
+                        cmb += "<option value='" + col.ID + "'>" + lbl + "</option>";
                 }
             });
             cmb += "</select></div></div></th></tr>";
@@ -549,45 +577,46 @@ export class TGridBase extends VXC.TComponent {
         foot += '<div class="row-fluid"><div class="grid-pagecounter"/></div>'
 
 
-        if (this instanceof TDBGrid && this.FirstPageButtonVisible) {
+        //if (this instanceof TDBGrid && this.FirstPageButtonVisible) {
             if (this.FirstPageButtonText == "" || this.FirstPageButtonText == null) {
-                foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-firstpage"><i class="icon-backward"></i></button>';
-            } else {
-                foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-firstpage">' + this.FirstPageButtonText + '</i></button>';
-            }
+            foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-firstpage"><i class="icon-backward"></i></button>';
+        } else {
+            foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-firstpage">' + this.FirstPageButtonText + '</i></button>';
         }
+        //}
 
         if (this.PrevPageButtonText == "" || this.PrevPageButtonText == null) {
-            foot += '<button type="button" class="btn ' + pagebtnstyle +' grid-prevpage" style="margin-left:6px"><i class="icon-play icon-rotate-180"></i></button>';
+            foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-prevpage" style="margin-left:6px"><i class="icon-play icon-rotate-180"></i></button>';
         } else {
-            foot += '<button type="button" class="btn ' + pagebtnstyle +' grid-prevpage" style="margin-left:6px">'+this.PrevPageButtonText+'</i></button>';
+            foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-prevpage" style="margin-left:6px">' + this.PrevPageButtonText + '</i></button>';
         }
 
         if (this.NextPageButtonText == "" || this.NextPageButtonText == null) {
-            foot += '<button type="button" class="btn ' + pagebtnstyle +' grid-nextpage" style="margin-left:6px"><i class="icon-play"></i></button>';
+            foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-nextpage" style="margin-left:6px"><i class="icon-play"></i></button>';
         } else {
-            foot += '<button type="button" class="btn ' + pagebtnstyle+' grid-nextpage" style="margin-left:6px">'+this.NextPageButtonText+'</i></button>';
+            foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-nextpage" style="margin-left:6px">' + this.NextPageButtonText + '</i></button>';
         }
 
-        if (this instanceof TDBGrid && this.LastPageButtonVisible) {
-            if (this.LastPageButtonText == "" || this.LastPageButtonText == null) {
-                foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-lastpage" style="margin-left:6px"><i class="icon-forward"></i></button>';
-            } else {
-                foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-lastpage" style="margin-left:6px">' + this.LastPageButtonText + '</i></button>';
-            }
+        //if (this instanceof TDBGrid && this.LastPageButtonVisible) {
+        if (this.LastPageButtonText == "" || this.LastPageButtonText == null) {
+            foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-lastpage" style="margin-left:6px"><i class="icon-forward"></i></button>';
+        } else {
+            foot += '<button type="button" class="btn ' + pagebtnstyle + ' grid-lastpage" style="margin-left:6px">' + this.LastPageButtonText + '</i></button>';
         }
+        //}
 
         foot += '</div>';
         foot += '</div></th></tr></tfoot>';
         this.jComponent.append($(foot));
 
-        var dataOptions =  {
+        var dataOptions = {
             pageSize: this.PageSize,
             sortProperty: this.SortColumn ? this.SortColumn.ID : null,
+            sortMode: this.SortMode,
             sortDirection: this.SortColumnOrder == V.SortColumnOrder.Ascending ? 'asc' : 'desc',
             groupProperty: (<any>this).GroupColumn ? (<any>this).GroupColumn.ID : null,
         }
-        
+
 
         this.jGrid = this.jComponent.datagrid({
             dataSource: this.gridDataSource, stretchHeight: false,
@@ -609,7 +638,7 @@ export class TGridBase extends VXC.TComponent {
 
 export class TGrid extends TGridBase {
     public onGetPage: (pageInedx: number, pageSize: number, sortDirection: string, sortColumn: TDBGridColumn,
-                       callback: (data: Array<any>) => void) => void;
+    callback: (data: Array<any>) => void) => void;
 
     private _recordCount: number = 10;
     public get RecordCount(): number {
@@ -671,7 +700,7 @@ export class TGridColumnCollection<T> extends VXO.TCollection<TDBGridColumn> {
 
 export class TDBGrid extends TGridBase {
     private _dataset: VXD.TDataset;
-
+    /**Identifies the the dataset where the data-aware grid finds its data*/
     public get Dataset(): VXD.TDataset {
         return this._dataset;
     }
@@ -699,9 +728,9 @@ export class TDBGrid extends TGridBase {
             }
             this._dataset = val;
             if (this._dataset) {
-                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.refreshRecord(); });
-                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.draw(false); });
-                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { this.selectionChanged(); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { if (this.initialized) this.refreshRecord(); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { if (this.initialized) this.draw(true); });
+                (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { if (this.initialized) this.selectionChanged(); });
             }
 
         }
@@ -726,15 +755,18 @@ export class TDBGrid extends TGridBase {
         return str;
     }
 
-    public create() {
-        this.gridDataSource = new TDBGridDataSource(this);
-        //calculate summery
-
+    private recalcAggergation() {
         if (this.Dataset) {
             this.columns.forEach((item) => {
                 if ((<any>item).calculateAggregateValue) (<any>item).calculateAggregateValue();
             })
         }
+    }
+    public create() {
+        this.gridDataSource = new TDBGridDataSource(this);
+        //calculate summery
+
+        this.recalcAggergation();
 
         super.create();
     }
@@ -751,6 +783,7 @@ export class TDBGrid extends TGridBase {
 
 
     private refreshRecord() {
+        this.recalcAggergation();
         this.jComponent.datagrid("renderData")
     }
 
@@ -787,6 +820,19 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         }
     }
 
+    private _aggergateable: boolean = false;
+    public get Aggregatable(): boolean {
+        return this._aggergateable;
+    }
+    public set Aggregatable(val: boolean) {
+        if (val != this._aggergateable) {
+            this._aggergateable = val;
+            this.grid.SummaryBoxVisible = true;
+            this.grid.drawDelayed(true);
+        }
+    }
+
+
 
     private _aggergateFunction: V.AggergateFunction = V.AggergateFunction.None;
     public get AggergateFunction(): V.AggergateFunction {
@@ -794,6 +840,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
     }
     public set AggergateFunction(val: V.AggergateFunction) {
         if (val != this._aggergateFunction) {
+            if (val && val != V.AggergateFunction.None) this.Aggregatable = true;
             this._aggergateFunction = val;
             this.grid.SummaryBoxVisible = true;
             this.grid.drawDelayed(true);
@@ -804,10 +851,10 @@ export class TDBGridColumn extends VXO.TCollectionItem {
     private calculateAggregateValue() {
         this._aggregateValue = null;
         if ((<TDBGrid>this.grid).Dataset && this.FieldName) {
-            if (this.AggergateFunction == V.AggergateFunction.Sum) this._aggregateValue = (<TDBGrid>this.grid).Dataset.aggregateFieldSum(this.FieldName) 
-            if (this.AggergateFunction == V.AggergateFunction.Avg) this._aggregateValue = (<TDBGrid>this.grid).Dataset.aggregateFieldAvg(this.FieldName) 
-            if (this.AggergateFunction == V.AggergateFunction.Max) this._aggregateValue = (<TDBGrid>this.grid).Dataset.aggregateFieldMax(this.FieldName) 
-            if (this.AggergateFunction == V.AggergateFunction.Min) this._aggregateValue = (<TDBGrid>this.grid).Dataset.aggregateFieldMin(this.FieldName) 
+            if (this.AggergateFunction == V.AggergateFunction.Sum) this._aggregateValue = (<TDBGrid>this.grid).Dataset.aggregateFieldSum(this.FieldName)
+            if (this.AggergateFunction == V.AggergateFunction.Avg) this._aggregateValue = (<TDBGrid>this.grid).Dataset.aggregateFieldAvg(this.FieldName)
+            if (this.AggergateFunction == V.AggergateFunction.Max) this._aggregateValue = (<TDBGrid>this.grid).Dataset.aggregateFieldMax(this.FieldName)
+            if (this.AggergateFunction == V.AggergateFunction.Min) this._aggregateValue = (<TDBGrid>this.grid).Dataset.aggregateFieldMin(this.FieldName)
         }
     }
 
@@ -905,10 +952,10 @@ export class TDBGridColumn extends VXO.TCollectionItem {
     }
 
     private _textaligment: V.TextAlignment = V.TextAlignment.Left;
-    public get TextAlgnment(): V.TextAlignment {
+    public get TextAlignment(): V.TextAlignment {
         return this._textaligment;
     }
-    public set TextAlgnment(val: V.TextAlignment) {
+    public set TextAlignment(val: V.TextAlignment) {
         if (val != this._textaligment) {
             this._textaligment = val;
             this.grid.drawDelayed(true);
@@ -926,7 +973,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         }
     }
 
-    
+
     //nati k
     private _index: number = -1;
     public get Index(): number {
@@ -984,7 +1031,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
             if (this.Currency) {
                 if (this.DecimalDigits > -1) return V.Application.FormatCurrency(value, this.DecimalDigits);
                 else return V.Application.FormatCurrency(value);
-            } 
+            }
             if (this.DecimalDigits > -1) return V.Application.FormatNumber(value, this.DecimalDigits);
             return value
         } else return value;
@@ -1038,25 +1085,75 @@ export class TBaseGridDataSource {
             }
             return true;
         });
+
+        _grid.columns.forEach((columnItem: TDBGridColumn) => {
+            columnItem.grid.jComponent.find("." + columnItem.ID + "MIN").click(function (item) {
+                if (columnItem.Aggregatable) {
+                    columnItem.AggergateFunction = V.AggergateFunction.Min;
+                }
+            });
+            columnItem.grid.jComponent.find("." + columnItem.ID + "MAX").click(function (item) {
+                if (columnItem.Aggregatable) {
+                    columnItem.AggergateFunction = V.AggergateFunction.Max;
+                }
+            });
+            columnItem.grid.jComponent.find("." + columnItem.ID + "SUM").click(function (item) {
+                if (columnItem.Aggregatable) {
+                    columnItem.AggergateFunction = V.AggergateFunction.Sum;
+                }
+            });
+            columnItem.grid.jComponent.find("." + columnItem.ID + "AVG").click(function (item) {
+                if (columnItem.Aggregatable) {
+                    columnItem.AggergateFunction = V.AggergateFunction.Avg;
+                }
+            });
+            columnItem.grid.jComponent.find("." + columnItem.ID + "NONE").click(function (item) {
+                if (columnItem.Aggregatable) {
+                    columnItem.AggergateFunction = V.AggergateFunction.None;
+                }
+            });
+
+        })
+
+
     }
 
     rendersummarydata(dataset: V.TDataset, _grid: TGridBase): any {
         var mappedData: any = {};
-        var foundAny: boolean = false;
+        var cnt = 0;
         _grid.columns.forEach((columnItem: V.TDBGridColumn) => {
             var StringCellVal = (<any>columnItem)._aggregateValue ? columnItem.formatValue((<any>columnItem)._aggregateValue) : "";
-            if (StringCellVal != "") foundAny = true;
-            var cellClass = columnItem.ID;
-            mappedData[columnItem.ID] = "<div class='" + cellClass + "'>" + StringCellVal + "</div>";;
+            var cellid = "AGG" + columnItem.ID + "-" + cnt++;
+            var cellClass = 'AGG' + columnItem.ID;
+            var html = "<div id='" + cellid + "'";
+            html += " class='";
+            html += cellClass;
+            html += "'";
+            if (columnItem.Aggregatable) html += ' data-toggle="dropdown" ';
+            html += ">";
+            html += StringCellVal;
+            if (columnItem.Aggregatable) html += '<b class="caret"/>';
+            html += "</div>";
+            if (columnItem.Aggregatable) {
+                html += '<ul class="dropdown-menu" role="menu" aria-labelledby="' + cellid + '">'
+                html += '<li class="' + columnItem.ID + 'NONE" role="presentation"><a role="menuitem" tabindex="-1">None</a></li>';
+                html += '<li class="' + columnItem.ID + 'SUM" role="presentation"><a role="menuitem" tabindex="-1">Sum</a></li>';
+                html += '<li class="' + columnItem.ID + 'MIN"  role="presentation"><a role="menuitem" tabindex="-1">Min</a></li>';
+                html += '<li class="' + columnItem.ID + 'MAX"  role="presentation"><a role="menuitem" tabindex="-1">Max</a></li>';
+                html += '<li class="' + columnItem.ID + 'AVG"  role="presentation"><a role="menuitem" tabindex="-1">Avg</a></li>';
+                html += '</ul>';
+            }
+
+            mappedData[columnItem.ID] = "<div class='dropdown'>" + html + "</>";
         });
-        return foundAny?mappedData:null;
+        return mappedData;
     }
 
     renderdata(_data: Array<any>, _grid: TGridBase): Array<any> {
         var mappedData: Array<any> = new Array<any>();
 
         $.each(_data, function (rowIndex, item) {
-            mappedData.push({ ___CHECKED___: _data[rowIndex].___CHECKED___, ___RECORDID___: _data[rowIndex].___RECORDID___});
+            mappedData.push({ ___CHECKED___: _data[rowIndex].___CHECKED___, ___RECORDID___: _data[rowIndex].___RECORDID___ });
 
             if (_grid.onGetRowStyle != null) {
                 var colorClass = _grid.onGetRowStyle(item);
@@ -1070,7 +1167,7 @@ export class TBaseGridDataSource {
             var group: boolean = false;
             if ((<any>_grid).GroupColumn == columnItem) {
                 group = true;
-            } 
+            }
             var prevGroup = null;
             var emptygroup: boolean = false;
             var firstemptygroup: boolean = false;
@@ -1132,16 +1229,16 @@ export class TBaseGridDataSource {
                     }
 
                     mappedData[rowIndex][columnItem.ID] =
-                        "<small data-record='" + _data[rowIndex]["___RECORDID___"]+"'" + rtl +
-                        " class='" + emclass + " muted " + cellClass + "' " + tooltopflag + " style='white-space:" +
-                        wrap + ";'>" + cnt + "</small>";;
+                    "<small data-record='" + _data[rowIndex]["___RECORDID___"] + "'" + rtl +
+                    " class='" + emclass + " muted " + cellClass + "' " + tooltopflag + " style='white-space:" +
+                    wrap + ";'>" + cnt + "</small>";;
                 } else if (columnItem.onClicked != null) {
                     var cellStr = "<a style='cursor: pointer;white-space:" + wrap
-                                + "' data-record='" + _data[rowIndex]["___RECORDID___"] + "'" + rtl + " class='" + cellClass + "'" + tooltopflag + ">" + imageflag + StringCellVal + "</a>";
+                        + "' data-record='" + _data[rowIndex]["___RECORDID___"] + "'" + rtl + " class='" + cellClass + "'" + tooltopflag + ">" + imageflag + StringCellVal + "</a>";
                     mappedData[rowIndex][columnItem.ID] = cellStr;
                 } else {
                     mappedData[rowIndex][columnItem.ID] = "<div data-record='" + _data[rowIndex]["___RECORDID___"] + "' " + rtl + " class='" + cellClass + "'" + tooltopflag +
-                            " style='white-space:" + wrap + "'>" + imageflag + StringCellVal + "</div>";;
+                    " style='white-space:" + wrap + "'>" + imageflag + StringCellVal + "</div>";;
                 }
             })
             return true;
@@ -1153,7 +1250,7 @@ export class TBaseGridDataSource {
         var _columns = new Array();
         if (this.grid.ShowSelectCheckbox) {
             _columns.push({
-                property: "___CHECKED___", label: this.grid.CheckboxColumnHeader, sortable: false, width: 18, align: "c",visible : true
+                property: "___CHECKED___", label: this.grid.CheckboxColumnHeader, sortable: false, width: 18, align: "c", visible: true
             });
         }
 
@@ -1163,19 +1260,20 @@ export class TBaseGridDataSource {
             if (label == null) label = item.FieldName;
             var align: string;
             var halign: string;
-            if (item.TextAlgnment == V.TextAlignment.Left) align = "l";
-            else if (item.TextAlgnment == V.TextAlignment.Right) align = "r";
-            else if (item.TextAlgnment == V.TextAlignment.Center) align = "c";
+            if (item.TextAlignment == V.TextAlignment.Left) align = "l";
+            else if (item.TextAlignment == V.TextAlignment.Right) align = "r";
+            else if (item.TextAlignment == V.TextAlignment.Center) align = "c";
 
             if (item.HeaderTextAlignment == V.HeaderTextAlignment.Left) halign = "l";
             else if (item.HeaderTextAlignment == V.HeaderTextAlignment.Right) halign = "r";
+            else if (item.HeaderTextAlignment == V.HeaderTextAlignment.Center) halign = "c";
 
 
             _columns.push({
                 property: item.ID, label: label, sortable: false, width: item.Width,
                 align: align,
-                halign: halign,visible : item.Visible,
-                grouped:true
+                halign: halign, visible: item.Visible,
+                grouped: true
             });
         }
         var cols: Array<TDBGridColumn> = this.grid.columns.toArray().sort((a, b) => {
@@ -1189,17 +1287,18 @@ export class TBaseGridDataSource {
                 if (label == null) label = item.FieldName;
                 var align: string;
                 var halign: string;
-                if (item.TextAlgnment == V.TextAlignment.Left) align = "l";
-                else if (item.TextAlgnment == V.TextAlignment.Right) align = "r";
-                else if (item.TextAlgnment == V.TextAlignment.Center) align = "c";
+                if (item.TextAlignment == V.TextAlignment.Left) align = "l";
+                else if (item.TextAlignment == V.TextAlignment.Right) align = "r";
+                else if (item.TextAlignment == V.TextAlignment.Center) align = "c";
 
                 if (item.HeaderTextAlignment == V.HeaderTextAlignment.Left) halign = "l";
                 else if (item.HeaderTextAlignment == V.HeaderTextAlignment.Right) halign = "r";
+                else if (item.HeaderTextAlignment == V.HeaderTextAlignment.Center) halign = "c";
 
 
                 _columns.push({
                     property: item.ID, label: label, sortable: item.Sortable, width: item.Width,
-                    align: align,visible : item.Visible,
+                    align: align, visible: item.Visible,
                     halign: halign
                 });
             }
@@ -1236,9 +1335,15 @@ class TDBGridDataSource extends TBaseGridDataSource {
             if (col) groupname = col.FieldName;
         }
 
-        this._data = (<TDBGrid>self.grid).Dataset.getRecords(options.pageIndex * options.pageSize,
-            (options.pageIndex + 1) * options.pageSize - 1,
-            options.sortDirection, columnname, groupname);
+        if (options.sortMode == V.SortMode.Default) {
+            this._data = (<TDBGrid>self.grid).Dataset.getRecords(options.pageIndex * options.pageSize,
+                (options.pageIndex + 1) * options.pageSize - 1,
+                options.sortDirection, columnname, groupname);
+        } else {
+            this._data = (<TDBGrid>self.grid).Dataset.getRecords(options.pageIndex * options.pageSize,
+                (options.pageIndex + 1) * options.pageSize - 1,
+                null, null, null);
+        }
 
         var mappedData: any[] = this.renderdata(this._data, self.grid);
         var summrydata: any[] = this.rendersummarydata((<TDBGrid>self.grid).Dataset, self.grid);
@@ -1359,7 +1464,7 @@ var Datagrid = function (element, options) {
     this.$endlabel = this.$element.find('.grid-end');
 
     this.$tbody = $('<tbody>').insertAfter(this.$thead);
-    this.$colheader = $('<tr>').appendTo(this.$thead);
+    this.$colheader = $('<tr>').addClass("gridheader").appendTo(this.$thead);
 
     this.options = $.extend(true, {}, $.fn.datagrid.defaults, options);
 
@@ -1412,7 +1517,7 @@ Datagrid.prototype = {
         var self = this;
 
         var _grid = this.options.dataSource.grid;
-        var colCount = _grid ? _grid.visbleColumnCount() : this.columns.length; 
+        var colCount = _grid ? _grid.visbleColumnCount() : this.columns.length;
         this.$footer.attr('colspan', colCount);
 
         var colHTML = '';
@@ -1422,9 +1527,10 @@ Datagrid.prototype = {
             colHTML += '<th data-property="' + column.property + '"';
             if (column.sortable) colHTML += ' class="sortable"';
             if (column.halign == "r") style += 'text-align:right;';
+            else if (column.halign == "c") style += 'text-align:center;';
             if (column.width > 0) style += 'width:' + column.width + "px;";
             if (!column.visible) style += 'display:none;';
-            if (style!="") colHTML += " style='" + style + "' ";
+            if (style != "") colHTML += " style='" + style + "' ";
             colHTML += '>' + column.label + '</th>';
         });
 
@@ -1524,9 +1630,9 @@ Datagrid.prototype = {
                         LineHTML += " data-record=" + row.___RECORDID___ + '"/></td>';
                     } else {
                         var showtop: boolean = _grid.ShowHorzLines;
-						if (row[column.property]) {
-							if (showtop && column.grouped && (<string>row[column.property]).indexOf('__emptygroupclass__') > 0) showtop = false;
-							if ((<string>row[column.property]).indexOf('__emptygroupclassfirst') > 0) cls +="padding-top: 0px;"
+                        if (row[column.property]) {
+                            if (showtop && column.grouped && (<string>row[column.property]).indexOf('__emptygroupclass__') > 0) showtop = false;
+                            if ((<string>row[column.property]).indexOf('__emptygroupclassfirst') > 0) cls += "padding-top: 0px;"
 						}
 
                         cls += showtop ? "" : "border-top: none;";
@@ -1551,7 +1657,7 @@ Datagrid.prototype = {
                 rowCnt--;
             });
 
-          
+
             //add emptry rows - nati k
             var row = 0;
             while (rowCnt > 0) {
@@ -1571,7 +1677,7 @@ Datagrid.prototype = {
                 var LineHTML: string = "";
                 $.each(self.columns, function (index, column) {
                     var cls = _grid.ShowVertLines || index == 0 ? "" : "border-left :  none;";
-                    cls += "overflow:hidden;";
+                    cls += "overflow:visible;";
                     cls += "text-align:right;";
                     if (column.visible == false) cls += "display:none;";
                     LineHTML += '<td class="summary" style="' + cls;
@@ -1598,7 +1704,7 @@ Datagrid.prototype = {
 
     placeholderRowHTML: function (content) {
         var _grid = this.options.dataSource.grid;
-        var colCount = _grid ? _grid.visbleColumnCount() : this.columns.length; 
+        var colCount = _grid ? _grid.visbleColumnCount() : this.columns.length;
         return '<tr><td style="text-align:center;padding:20px;border-bottom:none;" colspan="' +
             colCount + '">' + content + '</td></tr>';
     },
@@ -1620,20 +1726,19 @@ Datagrid.prototype = {
 
         var _grid: TDBGrid = this.options.dataSource.grid;
         if (_grid) {
-            if (this.options.dataOptions.sortDirection == "asc") _grid.SortColumnOrder = V.SortColumnOrder.Ascending;
-            else _grid.SortColumnOrder = V.SortColumnOrder.Descending;
             _grid.columns.forEach((column) => {
                 if (column.ID == this.options.dataOptions.sortProperty) {
                     _grid.SortColumn = column;
-                    if (_grid.onSortClicked) _grid.onSortClicked(column, this.options.dataOptions.sortDirection == "asc" ?
-                        V.SortColumnOrder.Ascending : V.SortColumnOrder.Descending);
+                    if (this.options.dataOptions.sortDirection == "asc") _grid.SortColumnOrder = V.SortColumnOrder.Ascending;
+                    else _grid.SortColumnOrder = V.SortColumnOrder.Descending;
+                    if (_grid.onSortClicked) _grid.onSortClicked(column, V.SortColumnOrder.Ascending);
                 }
             })
         }
 
         this.options.dataOptions.pageIndex = 0;
         this.updateColumns($target, this.options.dataOptions.sortDirection);
-        
+
         this.renderData();
     },
 
@@ -1690,7 +1795,7 @@ Datagrid.prototype = {
     },
 
     last: function () {
-        this.options.dataOptions.pageIndex = this.pagecount-1;
+        this.options.dataOptions.pageIndex = this.pagecount - 1;
         this.renderData();
 
         var _grid: TGridBase = this.options.dataSource.grid;

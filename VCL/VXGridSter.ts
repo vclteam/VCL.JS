@@ -1,9 +1,9 @@
-import VXC = require("VCL/VXComponent");
-import VXU = require("VCL/VXUtils");
-import VXO = require("VCL/VXObject");
-import VXCO = require("VCL/VXContainer");
-import V = require("VCL/VCL");
-import VXP = require("VCL/VXWell");
+import VXC = require("./VXComponent");
+import VXU = require("./VXUtils");
+import VXO = require("./VXObject");
+import VXCO = require("./VXContainer");
+import V = require("./VCL");
+import VXP = require("./VXWell");
 
 export class TWidgetGrid extends VXCO.TContainer {
     private _minmum_column: number = 2;

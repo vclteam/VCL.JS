@@ -1,12 +1,12 @@
 ///<reference path="Scripts/jquery.d.ts" />
 ///<reference path="Scripts/require.d.ts" />
 ///<reference path="Scripts/sammyjs.d.ts" />
-import VXP = require("VCL/VXPage");
-import VXO = require("VCL/VXObject");
-import V = require("VCL/VCL");
-import VXM = require("VCL/VXMenu");
-import VXServer = require("VCL/VXServer");
-import VXDS = require("VCL/VXServer");
+import VXP = require("./VXPage");
+import VXO = require("./VXObject");
+import V = require("./VCL");
+import VXM = require("./VXMenu");
+import VXServer = require("./VXServer");
+import VXDS = require("./VXServer");
 
 declare var bootbox;
 export class TApplication {
@@ -54,11 +54,52 @@ export class TApplication {
     }
 
 
-    public logOff() {
-        this.Authenticated = false;
-        if (this.AuthenticationRequired) {
-            this.navigateToPage(this.MainPage, [+Math.random()]);
+
+    public hexColorToRGB(color: string, opacity: number = 1) {
+        if (V.Application.checkColorString(color)) {
+            var hex: string = color.replace('#', '');
+            var r = parseInt(hex.substring(0, 2), 16);
+            var g = parseInt(hex.substring(2, 4), 16);
+            var b = parseInt(hex.substring(4, 6), 16);
+
+            if (opacity > 1) opacity = opacity / 100;
+
+            return 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
         }
+    }
+
+    public colourNameToHex(colour): string {
+        var colours = {
+            "aliceblue": "#f0f8ff", "antiquewhite": "#faebd7", "aqua": "#00ffff", "aquamarine": "#7fffd4", "azure": "#f0ffff",
+            "beige": "#f5f5dc", "bisque": "#ffe4c4", "black": "#000000", "blanchedalmond": "#ffebcd", "blue": "#0000ff", "blueviolet": "#8a2be2", "brown": "#a52a2a", "burlywood": "#deb887",
+            "cadetblue": "#5f9ea0", "chartreuse": "#7fff00", "chocolate": "#d2691e", "coral": "#ff7f50", "cornflowerblue": "#6495ed", "cornsilk": "#fff8dc", "crimson": "#dc143c", "cyan": "#00ffff",
+            "darkblue": "#00008b", "darkcyan": "#008b8b", "darkgoldenrod": "#b8860b", "darkgray": "#a9a9a9", "darkgreen": "#006400", "darkkhaki": "#bdb76b", "darkmagenta": "#8b008b", "darkolivegreen": "#556b2f",
+            "darkorange": "#ff8c00", "darkorchid": "#9932cc", "darkred": "#8b0000", "darksalmon": "#e9967a", "darkseagreen": "#8fbc8f", "darkslateblue": "#483d8b", "darkslategray": "#2f4f4f", "darkturquoise": "#00ced1",
+            "darkviolet": "#9400d3", "deeppink": "#ff1493", "deepskyblue": "#00bfff", "dimgray": "#696969", "dodgerblue": "#1e90ff",
+            "firebrick": "#b22222", "floralwhite": "#fffaf0", "forestgreen": "#228b22", "fuchsia": "#ff00ff",
+            "gainsboro": "#dcdcdc", "ghostwhite": "#f8f8ff", "gold": "#ffd700", "goldenrod": "#daa520", "gray": "#808080", "green": "#008000", "greenyellow": "#adff2f",
+            "honeydew": "#f0fff0", "hotpink": "#ff69b4",
+            "indianred ": "#cd5c5c", "indigo": "#4b0082", "ivory": "#fffff0", "khaki": "#f0e68c",
+            "lavender": "#e6e6fa", "lavenderblush": "#fff0f5", "lawngreen": "#7cfc00", "lemonchiffon": "#fffacd", "lightblue": "#add8e6", "lightcoral": "#f08080", "lightcyan": "#e0ffff", "lightgoldenrodyellow": "#fafad2",
+            "lightgrey": "#d3d3d3", "lightgreen": "#90ee90", "lightpink": "#ffb6c1", "lightsalmon": "#ffa07a", "lightseagreen": "#20b2aa", "lightskyblue": "#87cefa", "lightslategray": "#778899", "lightsteelblue": "#b0c4de",
+            "lightyellow": "#ffffe0", "lime": "#00ff00", "limegreen": "#32cd32", "linen": "#faf0e6",
+            "magenta": "#ff00ff", "maroon": "#800000", "mediumaquamarine": "#66cdaa", "mediumblue": "#0000cd", "mediumorchid": "#ba55d3", "mediumpurple": "#9370d8", "mediumseagreen": "#3cb371", "mediumslateblue": "#7b68ee",
+            "mediumspringgreen": "#00fa9a", "mediumturquoise": "#48d1cc", "mediumvioletred": "#c71585", "midnightblue": "#191970", "mintcream": "#f5fffa", "mistyrose": "#ffe4e1", "moccasin": "#ffe4b5",
+            "navajowhite": "#ffdead", "navy": "#000080",
+            "oldlace": "#fdf5e6", "olive": "#808000", "olivedrab": "#6b8e23", "orange": "#ffa500", "orangered": "#ff4500", "orchid": "#da70d6",
+            "palegoldenrod": "#eee8aa", "palegreen": "#98fb98", "paleturquoise": "#afeeee", "palevioletred": "#d87093", "papayawhip": "#ffefd5", "peachpuff": "#ffdab9", "peru": "#cd853f", "pink": "#ffc0cb", "plum": "#dda0dd", "powderblue": "#b0e0e6", "purple": "#800080",
+            "red": "#ff0000", "rosybrown": "#bc8f8f", "royalblue": "#4169e1",
+            "saddlebrown": "#8b4513", "salmon": "#fa8072", "sandybrown": "#f4a460", "seagreen": "#2e8b57", "seashell": "#fff5ee", "sienna": "#a0522d", "silver": "#c0c0c0", "skyblue": "#87ceeb", "slateblue": "#6a5acd", "slategray": "#708090", "snow": "#fffafa", "springgreen": "#00ff7f", "steelblue": "#4682b4",
+            "tan": "#d2b48c", "teal": "#008080", "thistle": "#d8bfd8", "tomato": "#ff6347", "turquoise": "#40e0d0",
+            "violet": "#ee82ee",
+            "wheat": "#f5deb3", "white": "#ffffff", "whitesmoke": "#f5f5f5",
+            "yellow": "#ffff00", "yellowgreen": "#9acd32"
+        };
+
+        if (typeof colours[colour.toLowerCase()] != 'undefined')
+            return colours[colour.toLowerCase()];
+
+        return null;
     }
 
 
@@ -117,16 +158,20 @@ export class TApplication {
         })
     }
 
-    /*
-    * create and load page & html file synchronously  an return an object instance 
-    */
-    public createPage(Class, __args: any[], htmlPath?: string) {
+    /**
+     create and load page & html file synchronously  an return an object instance 
+     @class : the container class
+     @__args  : pass argumant as array
+    **/
+    public createPage<T extends VXO.TObject>(Class: { new (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z): T; }, __args: any[], htmlPath?: string): T {
         var self = this;
         var instance;
-        var path = (htmlPath ? htmlPath + '/' : "") + Class.getClassName() + ".html"
+
+        var defaultPath = (<any>Class).getClassPath ? (<any>Class).getClassPath() + '/' : "";
+        var path = (htmlPath ? htmlPath + '/' : defaultPath) + (<any>Class).getClassName() + ".html"
         new VXDS.TServer(false).getHTML(path,
             (html: any) => {
-                instance = self.createPageInstance(Class.prototype, html, __args);
+                instance = self.createPageInstance((<any>Class).prototype, html, __args);
 
             },
             (errorMessage: string) => {
@@ -135,6 +180,7 @@ export class TApplication {
             );
         return instance;
     }
+
 
 
 
@@ -252,10 +298,12 @@ export class TApplication {
     }
 
 
+    public onLoggedIn: () => void;
+    public onLoggedOff: () => void;
     /*
     * specify the server side method for login 
     */
-    public loginServerClass: string = "LOGIN";
+    public loginServerClass: string = "Login";
     public login(email: string, password: string, onSuccuess: (data?: any) => void,
         onFail?: (errorMessage: string) => void) {
         var server = new VXServer.TServer();
@@ -265,12 +313,23 @@ export class TApplication {
                 this.UserName = data.USER;
                 this.UserEmail = data.EMAIL;
                 onSuccuess(data);
+                if (this.onLoggedIn) this.onLoggedIn();
             }
             else if (onFail) onFail(data);
         }, (error: string) => {
                 if (onFail) onFail(error);
             });
     }
+
+    public logOff() {
+        this.Authenticated = false;
+        var server = new VXServer.TServer();
+        server.send(this.loginServerClass, {}, (data) => { }, (txt) => { });
+        this.navigateToPage(this.MainPage, [+Math.random()]);
+        if (this.onLoggedOff) this.onLoggedOff();
+    }
+
+
 
 
     public navigateToPage(className: string, ConstructorArgs?: any[], igonreaAthentication: boolean = false) {
@@ -317,50 +376,6 @@ export class TApplication {
         this.navbaritems.add(item);
         return item;
     }
-
-    /*private _language: string = "";
-    public get Language(): string {
-        return this._language;
-    }
-    public set Language(val: string) {
-        if (val != this._language) {
-            this._language = val;
-        }
-    }
-
-    private startPresist = false;
-    private LanguageDictionary = [];
-    public persistWordToLanguageDictionary(language: string, word: string) {
-        if (!this.LanguageDictionary[language]) this.LanguageDictionary[language]=[];
-        if (!this.LanguageDictionary[language][word]) {
-            this.LanguageDictionary[language].push(word);
-            if (!this.startPresist) {
-                setTimeout(() => {
-                    try {
-                    this.startPresist = true;
-                        this.saveLanguageDictionary()
-                } finally {
-                    }
-                }, 60000);
-            }
-        }
-    }
-
-    public loadLanguageDictionary(language: string) {
-        if (!this.LanguageDictionary[language]) return;
-    }
-
-    public getLanguageTranslation(word: string) : string{
-        if (!this.Language) return word;
-        if (!this.LanguageDictionary[this.Language]) return word;
-        var ed = this.LanguageDictionary[this.Language][word];
-        if (ed) return ed;
-        return word;
-    }
-
-    public saveLanguageDictionary() {
-        this.startPresist = false;
-    }*/
 
     private _mainpage: string = "PageHome";
     /**
@@ -610,29 +625,32 @@ export class TApplication {
         navLeft.empty();
         navRight.empty();
         this.navbaritems.forEach((item: TNavbarItem) => {
-            var baritem: JQuery = $('<a/>');
-            baritem.attr('href', '#');
-            baritem.off("click").click(() => { if (item.onClick != null) V.tryAndCatch(() => { item.onClick(); }); return false; });
-            if (item.Icon) {
-                $('<i/>').addClass(item.Icon).appendTo(baritem)
+            if (item.Visible) {
+                var baritem: JQuery = $('<a/>');
+                baritem.attr('href', '#');
+                baritem.off("click").click(() => { if (item.onClick != null) V.tryAndCatch(() => { item.onClick(); }); return false; });
+                if (item.Icon) {
+                    $('<i/>').addClass(item.Icon).appendTo(baritem)
             } else if (item.ImageURL && item.ImageURL != "") {
-                $('<img/>').attr('src', item.ImageURL).appendTo(baritem);
-            }
+                    $('<img/>').attr('src', item.ImageURL).appendTo(baritem);
+                }
 
-            if (item.Text) $("<span/>").text(item.Text).appendTo(baritem);
-            var lineItem: JQuery = $('<li>/');
-            baritem.appendTo(lineItem);
-            if (item.menuItems.length() > 0) {
+                if (item.Text) $("<span/>").text(item.Text).appendTo(baritem);
+                var lineItem: JQuery = $('<li>/');
+                if (item.Active) lineItem.addClass('active');
+                baritem.appendTo(lineItem);
+                if (item.menuItems.length() > 0) {
 
-                item.menuItems.createmenu('dropdown-menu').appendTo(lineItem);
-                baritem.addClass('dropdown-toggle');
-                baritem.attr('data-toggle', "dropdown");
-                lineItem.addClass('dropdown');
-                $('<b class="caret">').appendTo(baritem);
+                    item.menuItems.createmenu('dropdown-menu').appendTo(lineItem);
+                    baritem.addClass('dropdown-toggle');
+                    baritem.attr('data-toggle', "dropdown");
+                    lineItem.addClass('dropdown');
+                    $('<b class="caret">').appendTo(baritem);
+                }
+                $('.dropdown-toggle').dropdown()
+                if (item.ItemAlignment == V.ItemAlignment.Left) lineItem.appendTo(navLeft)
+                else lineItem.appendTo(navRight);
             }
-            $('.dropdown-toggle').dropdown()
-            if (item.ItemAlignment == V.ItemAlignment.Left) lineItem.appendTo(navLeft)
-            else lineItem.appendTo(navRight);
             return true;
         });
         document.title = this.ApplicationTitle;
@@ -706,7 +724,7 @@ export class TApplication {
         return this.CurrencyString + this.FormatNumber(value, precision);
     }
 
-    public formatHumanFriendly(value: number, roundfactor : number = 0): string {
+    public formatHumanFriendly(value: number, roundfactor: number = 0): string {
         var p, d2, i, s;
         var isNegative = value < 0;
         value = Math.abs(value);
@@ -763,35 +781,36 @@ export class TApplication {
 
 
     /**
-    // Rich formatting of a Date variable into a string
-    // d	Day of the month as digits; no leading zero for single-digit days.
-    // dd	Day of the month as digits; leading zero for single-digit days.
-    // ddd	Day of the week as a three-letter abbreviation.
-    // dddd	Day of the week as its full name.
-    // m	Month as digits; no leading zero for single-digit months.
-    // mm	Month as digits; leading zero for single-digit months.
-    // mmm	Month as a three-letter abbreviation.
-    // mmmm	Month as its full name.
-    // yy	Year as last two digits; leading zero for years less than 10.
-    // yyyy	Year represented by four digits.
-    // h	Hours; no leading zero for single-digit hours (12-hour clock).
-    // hh	Hours; leading zero for single-digit hours (12-hour clock).
-    // H	Hours; no leading zero for single-digit hours (24-hour clock).
-    // HH	Hours; leading zero for single-digit hours (24-hour clock).
-    // M	Minutes; no leading zero for single-digit minutes.Uppercase M unlike CF timeFormat's m to avoid conflict with months.
-    // MM	Minutes; leading zero for single-digit minutes.
-    // Uppercase MM unlike CF timeFormat's mm to avoid conflict with months.
-    // s	Seconds; no leading zero for single-digit seconds.
-    // ss	Seconds; leading zero for single-digit seconds.
-    // l or L	Milliseconds. l gives 3 digits. L gives 2 digits.
-    // t	Lowercase, single-character time marker string: a or p.No equivalent in CF.
-    // tt	Lowercase, two-character time marker string: am or pm.No equivalent in CF.
-    // T	Uppercase, single-character time marker string: A or P.Uppercase T unlike CF's t to allow for user-specified casing.
-    // TT	Uppercase, two-character time marker string: AM or PM.Uppercase TT unlike CF's tt to allow for user-specified casing.
-    // Z	US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500No equivalent in CF.
-    // o	GMT/UTC timezone offset, e.g. -0500 or +0230.No equivalent in CF.
+     Rich formatting of a Date variable into a string
+     d	Day of the month as digits; no leading zero for single-digit days.
+     dd	Day of the month as digits; leading zero for single-digit days.
+     ddd	Day of the week as a three-letter abbreviation.
+     dddd	Day of the week as its full name.
+     m	Month as digits; no leading zero for single-digit months.
+     mm	Month as digits; leading zero for single-digit months.
+     mmm	Month as a three-letter abbreviation.
+     mmmm	Month as its full name.
+     yy	Year as last two digits; leading zero for years less than 10.
+     yyyy	Year represented by four digits.
+     h	Hours; no leading zero for single-digit hours (12-hour clock).
+     hh	Hours; leading zero for single-digit hours (12-hour clock).
+     H	Hours; no leading zero for single-digit hours (24-hour clock).
+     HH	Hours; leading zero for single-digit hours (24-hour clock).
+     M	Minutes; no leading zero for single-digit minutes.Uppercase M unlike CF timeFormat's m to avoid conflict with months.
+     MM	Minutes; leading zero for single-digit minutes.
+     Uppercase MM unlike CF timeFormat's mm to avoid conflict with months.
+     s	Seconds; no leading zero for single-digit seconds.
+     ss	Seconds; leading zero for single-digit seconds.
+     l or L	Milliseconds. l gives 3 digits. L gives 2 digits.
+     t	Lowercase, single-character time marker string: a or p.No equivalent in CF.
+     tt	Lowercase, two-character time marker string: am or pm.No equivalent in CF.
+     T	Uppercase, single-character time marker string: A or P.Uppercase T unlike CF's t to allow for user-specified casing.
+     TT	Uppercase, two-character time marker string: AM or PM.Uppercase TT unlike CF's tt to allow for user-specified casing.
+     Z	US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500No equivalent in CF.
+     o	GMT/UTC timezone offset, e.g. -0500 or +0230.No equivalent in CF.
     */
     public formatDateTime(date: Date, mask?: string, utc?: any): any {
+        if (!date || !date.getMonth) return "";
         var token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
             timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
             timezoneClip = /[^-+\dA-Z]/g,
@@ -985,6 +1004,28 @@ export class TNavbarItem extends VXO.TCollectionItem {
         menuItem.Text = text;
         this.menuItems.add(menuItem);
         return menuItem;
+    }
+
+    private _active: boolean = false;
+    public get Active(): boolean {
+        return this._active;
+    }
+    public set Active(val: boolean) {
+        if (val != this._active) {
+            this._active = val;
+            V.Application.refreshDefaultPage();
+        }
+    }
+
+    private _visible: boolean = true;
+    public get Visible(): boolean {
+        return this._visible;
+    }
+    public set Visible(val: boolean) {
+        if (val != this._visible) {
+            this._visible = val;
+            V.Application.refreshDefaultPage();
+        }
     }
 
 

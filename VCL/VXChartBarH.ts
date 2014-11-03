@@ -1,6 +1,6 @@
-import V = require("VCL/VCL");
-import VXU = require("VCL/VXUtils");
-import VX2 = require("VCL/VXChartBar");
+import V = require("./VCL");
+import VXU = require("./VXUtils");
+import VX2 = require("./VXChartBar");
 
 export class TChartBarH extends VX2.TChartBar {
     public createBar() {

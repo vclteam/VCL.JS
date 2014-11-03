@@ -1,6 +1,6 @@
-import V = require("VCL/VCL");
-import VC = require("VCL/VXComponent");
-import VXO = require("VCL/VXObject");
+import V = require("./VCL");
+import VC = require("./VXComponent");
+import VXO = require("./VXObject");
 
 export class TChartBase extends VC.TComponent {
 
@@ -801,12 +801,12 @@ export class EventEmitter {
     }
 
     fire(...arg: any[]) {
-        var args, handler, name, _i, _len, _ref, _results;
+        var args, handler, name,  _len, _ref, _results;
         name = arg[0], args = 2 <= arg.length ? __slice.call(arg, 1) : [];
         if ((this.handlers != null) && (this.handlers[name] != null)) {
             _ref = this.handlers[name];
             _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            for (var _i = 0, _len = _ref.length; _i < _len; _i++) {
                 handler = _ref[_i];
                 _results.push(handler.apply(null, args));
             }
@@ -819,7 +819,7 @@ declare var Raphael;
 
 export class Grid extends EventEmitter {
     public cumulative;
-    public el ;
+    public el;
     public raphael;
     public elementWidth;
     public elementHeight;
@@ -949,6 +949,8 @@ export class Grid extends EventEmitter {
     }
 
     resizeHandler(self: Grid) {
+        if (!self) return;
+
         self.timeoutId = null;
         self.raphael.setSize(self.el.width(), self.el.height());
         self.redraw();
@@ -1274,7 +1276,7 @@ export class Grid extends EventEmitter {
                 window.clearTimeout(self.timeoutId);
                 self.timeoutId = null;
             }
-            if (!self.grid || self.el.parent().length==0) {
+            if (!self.grid || self.el.parent().length == 0) {
                 //chart in no longer there
                 $(window).off(self.resizeId);
                 self.resizeId = null;
@@ -1664,7 +1666,7 @@ export class Hover {
         var factor: number;
         if (this.offset > 0) factor = x + this.offset / 2 - 5;
         else if (this.offset < 0) factor = x + this.offset / 2 - hoverWidth + 5;
-        else factor = x - hoverWidth / 2;
+        else factor = x - hoverWidth / 4;
 
         left = Math.min(Math.max(0, factor), parentWidth - hoverWidth);
         if (y != null) {

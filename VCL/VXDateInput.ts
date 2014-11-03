@@ -1,13 +1,13 @@
 /// <reference path="Scripts/jquery.d.ts" />
-import V = require("VCL/VCL");
-import VXC = require("VCL/VXComponent");
-import VXU = require("VCL/VXUtils");
-import VXI = require("VCL/VXInputBase");
-import VXD = require("VCL/VXDataset");
-import VXB = require("VCL/VXButton");
+import V = require("./VCL");
+import VXC = require("./VXComponent");
+import VXU = require("./VXUtils");
+import VXI = require("./VXInputBase");
+import VXD = require("./VXDataset");
+import VXB = require("./VXButton");
 
 export class TDateButton extends VXB.TButton {
-    public onChanged: (date : Date) => void;
+    public onChanged: (date: Date) => void;
     constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
         (<any>this)._buttonicon = V.ButtonIcon.icon_calendar;
@@ -30,11 +30,11 @@ export class TDateButton extends VXB.TButton {
         super.create();
         var self = this;
         this.dp = this.jBtn.datepicker({
-            minViewMode: this.CalendarType == V.CalendarType.Daily ? 0 : 1,inline : true
+            minViewMode: this.CalendarType == V.CalendarType.Daily ? 0 : 1, inline: true
         }).on('changeDate', function (ev: any) {
-            var startDate = new Date(ev.date);
-            if (self.onChanged) self.onChanged(startDate);
-            self.dp.datepicker("hide");
+                var startDate = new Date(ev.date);
+                if (self.onChanged) self.onChanged(startDate);
+                self.dp.datepicker("hide");
             });
     }
 }
@@ -135,6 +135,15 @@ export class TTimeInputBase extends VXI.TEditorBase {
         }
     }
 
+    private _minuteStep: number = 15;
+    public get MinuteStep(): number {
+        return this._minuteStep;
+    }
+    public set MinuteStep(val: number) {
+        this._minuteStep = val;
+        this.drawDelayed(false);
+    }
+
     private tm: JQuery;
 
 
@@ -164,7 +173,7 @@ export class TTimeInputBase extends VXI.TEditorBase {
             this.jEdit.attr("disabled", "disabled");
             this.jButton.attr("disabled", "disabled");
         }
-        this.tm = this.jEdit.timepicker({ showSeconds: this.ShowSeconds, disableFocus: true, showMeridian: this.ShowMeridian });
+        this.tm = this.jEdit.timepicker({ showSeconds: this.ShowSeconds, disableFocus: true, showMeridian: this.ShowMeridian, minuteStep: this.MinuteStep });
 
         super.create();
     }
@@ -300,8 +309,8 @@ export class TDBDateInput extends TDateInputBase {
         var self = this;
         this.jComponent.on('changeDate', function (ev: any) {
             var dt: any = ev.date;
-            this.DateValue = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
-            if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
+            self.DateValue = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
+            if (self.onChanged != null) (V.tryAndCatch(() => { self.onChanged(self); }))
         });
     }
 }
@@ -335,8 +344,6 @@ export class TInputTime extends TTimeInputBase {
         this._date.setHours(val);
         this.drawDelayed(false);
     }
-
-
 
     public create() {
         super.create();
@@ -606,7 +613,9 @@ Datepicker.prototype = {
     },
 
     setDate: function (d) {
-        this.setUTCDate(new Date(d.getTime() - (d.getTimezoneOffset() * 60000)));
+        if (d && d.getTime) {
+            this.setUTCDate(new Date(d.getTime() - (d.getTimezoneOffset() * 60000)));
+        }
     },
 
     setUTCDate: function (d) {

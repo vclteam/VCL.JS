@@ -1,22 +1,36 @@
-/// <reference path="../VCL/Scripts/jquery.d.ts" />
-import V = require("VCL/VCL");
-import VXO = require("VCL/VXObject");
-import VXC = require("VCL/VXComponent");
-import VXD = require("VCL/VXDataset");
-import VXU = require("VCL/VXUtils");
-import VXB = require("VCL/VXInputBase");
+/// <reference path="Scripts/jquery.d.ts" />
+import V = require("./VCL");
+import VXO = require("./VXObject");
+import VXC = require("./VXComponent");
+import VXD = require("./VXDataset");
+import VXU = require("./VXUtils");
+import VXB = require("./VXInputBase");
+import VXDS = require("./VXServer");
 
 declare function Spinner(options: any): void;
 
 export class TContainer extends VXC.TComponent {
     private __HTML__: string;
+
+
+    /**
+    Lists all components owned by the component.
+    Use Components to access any of the components owned by this component, such as the components owned by a page
+    **/
     public components = new VXO.TCollection<VXC.TComponent>();
+    /**
+        Use the OnClick event handler to respond when the user clicks the control. 
+    **/
     public onClicked: (sender: VXC.TComponent) => void;
     public onMouseEnter: (sender: VXC.TComponent) => void;
     public onMouseOver: (sender: VXC.TComponent) => void;
     public onMouseOut: (sender: VXC.TComponent) => void;
     public onMouseLeave: (sender: VXC.TComponent) => void;
 
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node of the component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         if (!this.__HTML__) this.__HTML__ = this.getContanierHTML();
@@ -37,8 +51,87 @@ export class TContainer extends VXC.TComponent {
         this.jComponent.off("mouseleave").mouseleave(() => {
             if (this.onMouseLeave != null) (V.tryAndCatch(() => { this.onMouseLeave(aOwner); }));
         })
+    }
+
+    private static __classPath: string;
+    private static __setClassPath(path: string) {
+        if (!path) return;
+        var paths = path.split('/');
+        if (paths.length == 1) this.__classPath = "";
+        else this.__classPath = paths.slice(0, paths.length - 1).join('/');
+    }
+
+    public static getClassPath() {
+        return this.__classPath ? this.__classPath : "";
+    }
 
 
+    private _overflow: V.Overflow;
+    /**The overflow property specifies what happens if content overflows an element's box**/
+    public get Overflow(): V.Overflow {
+        return this._overflow;
+    }
+    public set Overflow(val: V.Overflow) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._overflow) {
+                this._overflow = val;
+                this.drawDelayed(false);
+            }
+        }
+    }
+
+    private _overflow_x: V.Overflow_X;
+    /**The overflow property specifies what happens if content overflows an element's box**/
+    public get Overflow_X(): V.Overflow_X {
+        return this._overflow_x;
+    }
+    public set Overflow_X(val: V.Overflow_X) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._overflow_x) {
+                this._overflow_x = val;
+                this.drawDelayed(false);
+            }
+        }
+    }
+
+    private _overflow_y: V.Overflow_Y;
+    /**The overflow property specifies what happens if content overflows an element's box**/
+    public get Overflow_Y(): V.Overflow_Y {
+        return this._overflow_y;
+    }
+    public set Overflow_Y(val: V.Overflow_Y) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._overflow_y) {
+                this._overflow_y = val;
+                this.drawDelayed(false);
+            }
+        }
+    }
+
+
+    private _backgroundcolor: string;
+    /**The background-color property sets the background color of an element.**/
+    public get BackgroundColor(): string {
+        return this._backgroundcolor;
+    }
+    public set BackgroundColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._backgroundcolor) {
+                this._backgroundcolor = val;
+                this.drawDelayed(false);
+            }
+        }
+    }
+
+    private _backgroundopacity: number = 1;
+    public get BackgroundColorOpacity(): number {
+        return this._backgroundopacity;
+    }
+    public set BackgroundColorOpacity(val: number) {
+        if (val != this._backgroundopacity) {
+            this._backgroundopacity = val;
+            this.drawDelayed(false);
+        }
     }
 
     private addComponent(component: VXC.TComponent): void {
@@ -50,12 +143,16 @@ export class TContainer extends VXC.TComponent {
     }
 
 
-    /*
-    * Check all input for validation - return true if everything is OK
-    */
-    public ValidateInput(): boolean {
+    /**
+     Check all input for validation - return true if everything is OK
+    **/
+    public ValidateInputs(): boolean {
+        return this.validateContainer(this.components);
+    }
+
+    private validateContainer(components: VXO.TCollection<VXC.TComponent>): boolean {
         var rc = true;
-        this.components.forEach((item) => {
+        components.forEach((item) => {
             if (item instanceof VXB.TEditorBase) {
                 var itm: VXB.TEditorBase = <VXB.TEditorBase>item;
                 if (itm.Required && itm.isEmpty()) {
@@ -64,6 +161,8 @@ export class TContainer extends VXC.TComponent {
                 } else {
                     itm.HideErrorMessage();
                 }
+            } else if (item instanceof TContainer) {
+                if (!this.validateContainer((<TContainer>item).components)) rc = false;
             }
         })
         return rc;
@@ -77,29 +176,47 @@ export class TContainer extends VXC.TComponent {
     public draw(reCreate: boolean, drawChilds: boolean = true) {
         //if (!this.parentInitialized()) return;
         super.draw(reCreate);
+        if (this.BackgroundColor) {
+            if (!this.BackgroundColorOpacity) this.jComponent.css('background-color', this.BackgroundColor);
+            else this.jComponent.css('background-color', V.Application.hexColorToRGB(this.BackgroundColor, this.BackgroundColorOpacity));
 
-        if (this.ShadowOptions == V.ShadowOptions.None) {
-            this.removeShadow();
-        } if (this.ShadowOptions == V.ShadowOptions.Perspective) {
-            this.removeShadow();
+        }
+
+        if (this.Overflow) {
+            if (this.Overflow == V.Overflow.Visible) this.jComponent.css('overflow', 'visible');
+            else if (this.Overflow == V.Overflow.Hidden) this.jComponent.css('overflow', 'hidden');
+            else if (this.Overflow == V.Overflow.Scroll) this.jComponent.css('overflow', 'scroll');
+            else if (this.Overflow == V.Overflow.Auto) this.jComponent.css('overflow', 'auto');
+        }
+
+        if (this.Overflow_X) {
+            if (this.Overflow_X == V.Overflow_X.Visible) this.jComponent.css('overflow-x', 'visible');
+            else if (this.Overflow_X == V.Overflow_X.Hidden) this.jComponent.css('overflow-x', 'hidden');
+            else if (this.Overflow_X == V.Overflow_X.Scroll) this.jComponent.css('overflow-x', 'scroll');
+            else if (this.Overflow_X == V.Overflow_X.Auto) this.jComponent.css('overflow-x', 'auto');
+        }
+
+        if (this.Overflow_Y) {
+            if (this.Overflow_Y == V.Overflow_Y.Visible) this.jComponent.css('overflow-y', 'visible');
+            else if (this.Overflow_Y == V.Overflow_Y.Hidden) this.jComponent.css('overflow-y', 'hidden');
+            else if (this.Overflow_Y == V.Overflow_Y.Scroll) this.jComponent.css('overflow-y', 'scroll');
+            else if (this.Overflow_Y == V.Overflow_Y.Auto) this.jComponent.css('overflow-y', 'auto');
+        }
+
+        this.removeShadow();
+        if (this.ShadowOptions == V.ShadowOptions.Perspective) {
             this.jComponent.addClass('jquery-shadow jquery-perspective');
         } else if (this.ShadowOptions == V.ShadowOptions.Raised) {
-            this.removeShadow();
             this.jComponent.addClass('jquery-shadow jquery-shadow-raised');
         } else if (this.ShadowOptions == V.ShadowOptions.Lifted) {
-            this.removeShadow();
             this.jComponent.addClass('jquery-shadow jquery-shadow-lifted');
         } else if (this.ShadowOptions == V.ShadowOptions.Side_hz_1) {
-            this.removeShadow();
             this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-hz-1');
         } else if (this.ShadowOptions == V.ShadowOptions.Side_hz_2) {
-            this.removeShadow();
             this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-hz-2');
         } else if (this.ShadowOptions == V.ShadowOptions.Side_vt_1) {
-            this.removeShadow();
             this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-vt-1');
         } else if (this.ShadowOptions == V.ShadowOptions.Side_vt_2) {
-            this.removeShadow();
             this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-vt-2');
         }
 
@@ -126,17 +243,24 @@ export class TContainer extends VXC.TComponent {
         return true;
     }
 
+
+    /** add component with class="row" to the container
+    @returns    TBootstrapRow component
+    **/
     public createBootstrapRow(): TBootstrapRow {
         return new TBootstrapRow(this);
     }
 
+    /** add component with class="row-fluid" to the container
+    @returns    createBootstrapRowFluid component
+    **/
     public createBootstrapRowFluid(): TBootstrapRowFluid {
         return new TBootstrapRowFluid(this);
     }
 
 
     public showLoadingProgressBar() {
-        if (V.Global.__SPINNER__) return;
+        if ((<any>V.Application).Global__SPINNER__) return;
         var opts = {
             lines: 13, // The number of lines to draw
             length: 20, // The length of each line
@@ -165,13 +289,13 @@ export class TContainer extends VXC.TComponent {
             jq.css('z-index', '9999');
             $("body").append(jq);
         }
-        V.Global.__SPINNER__ = new Spinner(opts).spin(document.getElementById('progresscerrncnter'));
+        (<any>V.Application).Global__SPINNER__ = new Spinner(opts).spin(document.getElementById('progresscerrncnter'));
     }
 
     public hideLoadingProgressBar() {
-        if (V.Global.__SPINNER__) {
-            V.Global.__SPINNER__.stop();
-            V.Global.__SPINNER__ = null;
+        if ((<any>V.Application).Global__SPINNER__) {
+            (<any>V.Application).Global__SPINNER__.stop();
+            (<any>V.Application).Global__SPINNER__ = null;
             var jq = $("#progresscerrncnter");
             jq.empty();
         }
@@ -207,6 +331,10 @@ export class TContainer extends VXC.TComponent {
 
 
 export class TBootstrapRow extends TContainer {
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         this.jComponent.addClass('row');

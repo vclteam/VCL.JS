@@ -1,7 +1,7 @@
-import V = require("VCL/VCL");
-import VXU = require("VCL/VXUtils");
-import VXD = require("VCL/VXDataset");
-import VXCB = require("VCL/VXChartBase");
+import V = require("./VCL");
+import VXU = require("./VXUtils");
+import VXD = require("./VXDataset");
+import VXCB = require("./VXChartBase");
 
 declare var Raphael;
 export class TChartDotBase extends VXCB.TGridChartBase {
@@ -138,6 +138,9 @@ class Dot extends VXCB.Grid {
 export class TChartDot extends TChartDotBase {
     //depricated - use ToolTipFormat instead
     public onGetLabelText: (item: V.TDotValue) => any;
+    /*
+        Use the OnClick event handler to respond when the user clicks the control. 
+    */
     public onClicked: (item: V.TDotValue) => void;
 
     constructor(aOwner: V.TComponent, renderTo?: string) {

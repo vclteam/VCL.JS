@@ -1,10 +1,10 @@
 /// <reference path="Scripts/bootstrap.d.ts" />
-import V = require("VCL/VCL");
-import VXC = require("VCL/VXContainer");
-import VXDS = require("VCL/VXServer");
-import VXD = require("VCL/VXDataset");
-import VXU = require("VCL/VXUtils");
-import VXCO = require("VCL/VXComponent");
+import V = require("./VCL");
+import VXC = require("./VXContainer");
+import VXDS = require("./VXServer");
+import VXD = require("./VXDataset");
+import VXU = require("./VXUtils");
+import VXCO = require("./VXComponent");
 
 export class TPopup extends VXC.TContainer {
     public onCreate() { }

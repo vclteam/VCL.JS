@@ -1,13 +1,115 @@
-import V = require("VCL/VCL");
-import VXC = require("VCL/VXComponent");
-import VXT = require("VCL/VXTextBase");
-import VXU = require("VCL/VXUtils");
-import VXO = require("VCL/VXObject");
-import VXCO = require("VCL/VXContainer");
-import VXW = require("VCL/VXWell");
-import VXM = require("VCL/VXMenu");
+import V = require("./VCL");
+import VXC = require("./VXComponent");
+import VXT = require("./VXTextBase");
+import VXU = require("./VXUtils");
+import VXO = require("./VXObject");
+import VXCO = require("./VXContainer");
+import VXW = require("./VXWell");
+import VXM = require("./VXMenu");
+
+export class TWizardButtonsStep extends VXO.TCollectionItem {
+    public onClicked: (sender: TWizardButtonsStep) => void;
+
+    private wizardButtons: TWizardButtons
+    constructor(aOwner: TWizardButtons) {
+        super();
+        this.wizardButtons = aOwner;
+    }
+
+    private _text: string = null;
+    public get Text(): string {
+        return this._text;
+    }
+    public set Text(val: string) {
+        if (val != this._text) {
+            this._text = val;
+            this.wizardButtons.drawDelayed(true);
+        }
+    }
+
+    public create(index: number, active: boolean): JQuery {
+        var self = this;
+        var li = $("<li>");
+        if (self.onClicked && active) li.css('cursor', 'pointer');
+        if (active) li.addClass('active');
+
+        var span = $("<span>").text(index);
+        if (active) span.addClass("badge badge-info");
+        else span.addClass("badge badge-default")
+        span.appendTo(li);
+        var txt = $("<span>").text(this.Text);
+        txt.appendTo(li);
+        var chv = $("<span>").addClass('chevron');
+        chv.appendTo(li);
+        li.off("click").click(() => {
+            if (self.onClicked != null && li.hasClass('active')) (V.tryAndCatch(() => { self.onClicked(self); }));
+        });
+
+        return li;
+    }
+
+}
+
+export class TWizardButtons extends VXC.TComponent{
+    public items: V.TCollection<TWizardButtonsStep> = new V.TCollection<TWizardButtonsStep>();
+
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
+    constructor(aOwner: VXC.TComponent, renderTo?: string) {
+        super(aOwner, renderTo);
+    }
+
+    public create() {
+        super.create();
+        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+        this.jComponent.addClass('wizard');
+        this.jComponent.empty();
+
+        var ul = $("<ul>");
+        ul.appendTo(this.jComponent);
+        var idx = 0;
+        var isactive: boolean = true;
+        this.items.forEach((item) => {
+            idx++;
+            ul.append(item.create(idx, this.ActiveItem ? isactive : false));
+            if (item == this.ActiveItem) isactive = false;
+        });
+    }
+
+    public createStep(text: string): TWizardButtonsStep {
+        var col = new TWizardButtonsStep(this);
+        col.Text = text;
+        this.items.add(col);
+        col.Text = text;
+        return col;
+    }
+
+    public draw(reCreate: boolean) {
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
+    }
+
+    private _activeItem: TWizardButtonsStep = null;
+    public get ActiveItem(): TWizardButtonsStep {
+        return this._activeItem;
+    }
+    public set ActiveItem(val: TWizardButtonsStep) {
+        if (val != this._activeItem) {
+            this._activeItem = val;
+            this.drawDelayed(true);
+        }
+    }
+
+}
 
 export class TTabPanel extends VXW.TPanel {
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    @headerText (Optional) specfity the text of the header
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string, headerText?: string) {
         super(aOwner, renderTo, headerText);
         this.BorderWidth = 0;
@@ -371,6 +473,10 @@ export class TAccordionGroupButton {
 
 //A Panel to hold all graphics for an inner group - the content of a group
 export class TAccordionGroupPanel extends VXW.TPanel {
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string, headerText?: string) {
         super(aOwner, renderTo, headerText);
         this.BorderWidth = 0;
@@ -584,6 +690,7 @@ export class TAccordionGroup extends VXO.TCollectionItem {
 
 //The main Accordion element - holds an array of TAccordionGroups
 export class TAccordion extends VXCO.TContainer {
+    /** items represents a container for TAccordionGroup objects.*/
     public items: V.TCollection<TAccordionGroup> = new V.TCollection<TAccordionGroup>();
     private jaccordion: JQuery = null;
 

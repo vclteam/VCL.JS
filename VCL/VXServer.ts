@@ -1,13 +1,15 @@
-/// <reference path="../VCL/Scripts/jquery.d.ts" />
-import V = require("VCL/VCL");
-import VO = require("VCL/VXObject");
+/// <reference path="Scripts/jquery.d.ts" />
+import V = require("./VCL");
+import VO = require("./VXObject");
+
+
 export class TServer {
     private async: boolean;
     private timeout: number = 20000;
-    public  CallType: string = "POST";
+    public CallType: string = "POST";
 
-    public 
-    constructor(async?: boolean,atimeout? : number) {
+    public
+        constructor(async?: boolean, atimeout?: number) {
         this.async = true;
         if (async != null) this.async = async;
         if (atimeout) this.timeout = atimeout;
@@ -42,7 +44,7 @@ export class TServer {
         $.ajax(ajxParam);
     }
 
-    ping(okCallback? : ()=>void,errorCallback?: (textStatus: string) => any) {
+    ping(okCallback?: () => void, errorCallback?: (textStatus: string) => any) {
         var ajxParam: JQueryAjaxSettings = {
             async: this.async, timeout: 1000, cache: false,
             url: V.Application.serverURL, dataType: "json",
@@ -65,7 +67,9 @@ export class TServer {
             var key = crc32(method + "~" + data + "~");
             var _data = cache.getItem(key);
             if (_data != null && _data.method == method) {
-                callback(_data.data);
+                setTimeout(() => {
+                    callback(_data.data);
+                }, 1)
                 return;
             }
         }
@@ -73,7 +77,7 @@ export class TServer {
         var ajxParam: JQueryAjaxSettings = {
             async: this.async, timeout: this.timeout, cache: false,
             url: V.Application.serverURL, dataType: "json",
-            data: { PARAMS: data, METHOD: method }, 
+            data: { PARAMS: data, METHOD: method },
             success: (data: any) => {
                 if (cacheTimeOut > 0) {
                     var myData: ServerCacheItem = new ServerCacheItem();
@@ -119,7 +123,7 @@ export class TServer {
         $.ajax(ajxParam);
     }
 
-      private static jspCount : number = 0;
+    private static jspCount: number = 0;
     callJSONP(serverURL, param, callback?: (data) => any, errorCallback?: (textStatus: string) => any) {
         var data: string = encodeURIComponent(JSON.stringify(param, function (key, value) {
             if (key === "__ownerCollection") return undefined;
@@ -134,7 +138,7 @@ export class TServer {
             jsonpCallback: jspName,
             contentType: "application/json",
             dataType: 'jsonp',
-            data: { PARAMS: data, JSP: jspName},
+            data: { PARAMS: data, JSP: jspName },
             success: (data: any) => {
                 if (callback != null) callback(data);
             },

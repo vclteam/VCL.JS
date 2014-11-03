@@ -1,6 +1,6 @@
-import VXC = require("VCL/VXComponent");
-import V = require("VCL/VCL");
-import VXU = require("VCL/VXUtils");
+import VXC = require("./VXComponent");
+import V = require("./VCL");
+import VXU = require("./VXUtils");
 
 export class TEditorBase extends VXC.TComponent {
 
@@ -277,9 +277,9 @@ export class TInputBase extends TEditorBase {
 
         if (!this.Enabled || ((<any>this).isEditable && !(<any>this).isEditable())) this.jEdit.attr("disabled", "disabled");
         if (this.Password) this.jEdit.attr("type", "Password");
-        if (this.TextAlgnment == V.TextAlignment.Left) this.jEdit.css('text-align', 'left');
-        if (this.TextAlgnment == V.TextAlignment.Right) this.jEdit.css('text-align', 'right');
-        if (this.TextAlgnment == V.TextAlignment.Center) this.jEdit.css('text-align', 'center');
+        if (this.TextAlignment == V.TextAlignment.Left) this.jEdit.css('text-align', 'left');
+        if (this.TextAlignment == V.TextAlignment.Right) this.jEdit.css('text-align', 'right');
+        if (this.TextAlignment == V.TextAlignment.Center) this.jEdit.css('text-align', 'center');
         if (this.MaxLength > 0) this.jEdit.attr("maxlength", this.MaxLength);
         if (this.Placeholder != null) this.jEdit.attr("placeholder", this.Placeholder);
         if (this.Rtl == true) this.jEdit.attr("dir", "RTL");
@@ -320,10 +320,10 @@ export class TInputBase extends TEditorBase {
     }
 
     private _textaligment: V.TextAlignment = V.TextAlignment.Left;
-    public get TextAlgnment(): V.TextAlignment {
+    public get TextAlignment(): V.TextAlignment {
         return this._textaligment;
     }
-    public set TextAlgnment(val: V.TextAlignment) {
+    public set TextAlignment(val: V.TextAlignment) {
         if (val != this._textaligment) {
             this._textaligment = val;
             this.drawDelayed(true);

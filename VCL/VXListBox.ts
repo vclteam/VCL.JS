@@ -1,8 +1,8 @@
-import VXC = require("VCL/VXComponent");
-import VXO = require("VCL/VXObject");
-import VXU = require("VCL/VXUtils");
-import VXM = require("VCL/VXMenu");
-import V = require("VCL/VCL");
+import VXC = require("./VXComponent");
+import VXO = require("./VXObject");
+import VXU = require("./VXUtils");
+import VXM = require("./VXMenu");
+import V = require("./VCL");
 
 export class TListbox extends VXC.TComponent {
 

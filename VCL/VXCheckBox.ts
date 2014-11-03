@@ -1,10 +1,10 @@
-import VXC = require("VCL/VXComponent");
-import VXU = require("VCL/VXUtils");
-import V = require("VCL/VCL");
-import VXD = require("VCL/VXDataset");
-import VXM = require("VCL/VXMenu");
-import VXO = require("VCL/VXObject");
-import VXCO = require("VCL/VXContainer");
+import VXC = require("./VXComponent");
+import VXU = require("./VXUtils");
+import V = require("./VCL");
+import VXD = require("./VXDataset");
+import VXM = require("./VXMenu");
+import VXO = require("./VXObject");
+import VXCO = require("./VXContainer");
 
 export class TCheckBoxBase extends VXC.TComponent {
     public onClicked: (sender: TCheckBoxBase) => void;
@@ -44,11 +44,66 @@ export class TCheckBoxBase extends VXC.TComponent {
         if (!this.Enabled) this.jCheckbox.attr('disabled', 'disabled');
         super.create();
     }
-
 }
 
-export class TCheckBox extends TCheckBoxBase {
+export class TRadioButtonBase extends VXC.TComponent {
+    public onClicked: (sender: TRadioButtonBase) => void;
+    public onChanged: (sender: TRadioButtonBase) => void;
 
+    public jRadioButton: JQuery;
+    public jText: JQuery;
+
+    private _text: string;
+    /*
+    * Text specify the text string that labels the control.
+    */
+    public get Text(): string {
+        return this._text;
+    }
+    public set Text(val: string) {
+        if (val != this._text) {
+            this._text = val;
+            this.draw(false);
+        }
+    }
+
+    private _group: string = "~";
+    /*
+    * Text specify the group string grouping the radio button together.
+    */
+    public get Group(): string {
+        return this._group;
+    }
+    public set Group(val: string) {
+        if (val != this._group) {
+            this._group = val;
+            this.draw(true);
+        }
+    }
+
+
+
+    public create() {
+        var self = this;
+        this.jComponent.empty(); //clear all subcomponents
+        this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'label', this.FitToWidth, this.FitToHeight);
+        this.jComponent.addClass('radio');
+
+        this.jRadioButton = $('<input >');
+        this.jRadioButton.attr('type', 'radio');
+        if (this.Group) this.jRadioButton.attr('name', this.Group);
+        this.jRadioButton.appendTo(this.jComponent);
+
+        this.jText = $('<span>');
+        this.jText.appendTo(this.jComponent);
+
+        if (!this.Enabled) this.jRadioButton.attr('disabled', 'disabled');
+        super.create();
+    }
+}
+
+
+export class TCheckBox extends TCheckBoxBase {
     private _checked: boolean;
     public get Checked(): boolean {
         return this._checked;
@@ -86,6 +141,44 @@ export class TCheckBox extends TCheckBoxBase {
         this.jCheckbox.prop('checked', this.Checked);
     }
 }
+
+
+export class TRadioButton extends TRadioButtonBase {
+    private _checked: boolean;
+    public get Checked(): boolean {
+        return this._checked;
+    }
+    public set Checked(val: boolean) {
+        if (val != this._checked) {
+            this._checked = val;
+            this.draw(false);
+        }
+    }
+
+    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
+        super(aOwner, renderTo);
+        (<any>this)._text = text;
+    }
+
+    public create() {
+        super.create();
+        var self = this;
+        this.jRadioButton.off("click").click(() => { if (self.onClicked != null) (V.tryAndCatch(() => { self.onClicked(self); })); return true; })
+        this.jRadioButton.change((event) => {
+            self.Checked = this.jRadioButton.prop('checked');
+            if (self.onChanged != null) (V.tryAndCatch(() => { self.onChanged(this); }));
+        })
+    }
+
+    public draw(reCreate: boolean) {
+        if (!this.parentInitialized()) return;
+        super.draw(reCreate);
+
+        this.jText.text(this.Text);
+        this.jRadioButton.prop('checked', this.Checked);
+    }
+}
+
 
 export class TDBCheckBox extends TCheckBoxBase {
     private _dataset: VXD.TDataset;
@@ -246,6 +339,10 @@ export class TVerticalCheckBoxItem extends VXO.TCollectionItem {
 export class TVerticalCheckBoxList extends VXCO.TContainer {
     public onChanged: (sender: TVerticalCheckBoxItem) => void;
 
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         this.items = new TVerticalCheckBoxItemCollection<TVerticalCheckBoxItem>(this);

@@ -1,8 +1,10 @@
-import V = require("VCL/VCL");
-import VXC = require("VCL/VXComponent");
-import VXT = require("VCL/VXTextBase");
-import VXU = require("VCL/VXUtils");
-import VXO = require("VCL/VXObject");
+import V = require("./VCL");
+import VXC = require("./VXComponent");
+import VXT = require("./VXTextBase");
+import VXU = require("./VXUtils");
+import VXO = require("./VXObject");
+import VXM = require("./VXMenu");
+
 
 export class TText extends VXT.TTextBase {
     public create() {
@@ -49,31 +51,6 @@ export class TText extends VXT.TTextBase {
         if (val != this._textstyle) {
             this._textstyle = val;
             this.draw(true);
-        }
-    }
-
-    private _textaliggment: V.TextAlignment;
-    public get TextAlignment(): V.TextAlignment {
-        return this._textaliggment;
-    }
-    public set TextAlignment(val: V.TextAlignment) {
-        if (val != this._textaliggment) {
-            this._textaliggment = val;
-            this.draw(true);
-        }
-    }
-
-
-    private _textcolor: string;
-    public get TextColor(): string {
-        return this._textcolor;
-    }
-    public set TextColor(val: string) {
-        if (V.Application.checkColorString(val)) {
-            if (val != this._textcolor) {
-                this._textcolor = val;
-                this.draw(true);
-            }
         }
     }
 
@@ -125,6 +102,11 @@ export class TLabel extends VXT.TTextBase {
         else if (this.LabelStyle == V.LabelStyle.Warning) this.jComponent.addClass('label-warning');
         else if (this.LabelStyle == V.LabelStyle.Important) this.jComponent.addClass('label-important');
         else if (this.LabelStyle == V.LabelStyle.Info) this.jComponent.addClass('label-info');
+        if (this.TextColor) this.jComponent.css('color', this.TextColor);
+
+        if (this.TextAlignment == V.TextAlignment.Left) this.jComponent.css('text-align', 'left');
+        if (this.TextAlignment == V.TextAlignment.Right) this.jComponent.css('text-align', 'right');
+        if (this.TextAlignment == V.TextAlignment.Center) this.jComponent.css('text-align', 'center');
 
         super.create();
     }
@@ -161,6 +143,7 @@ export class TDBLabel extends VXT.TDBTextBase {
         else if (this.LabelStyle == V.LabelStyle.Warning) this.jComponent.addClass('label-warning');
         else if (this.LabelStyle == V.LabelStyle.Important) this.jComponent.addClass('label-important');
         else if (this.LabelStyle == V.LabelStyle.Info) this.jComponent.addClass('label-info');
+        if (this.TextColor) this.jComponent.css('color', this.TextColor);
         super.create();
     }
 
@@ -195,6 +178,11 @@ export class TBadge extends VXT.TTextBase {
         else if (this.BadgeStyle == V.BadgeStyle.Warning) this.jComponent.addClass('badge-warning');
         else if (this.BadgeStyle == V.BadgeStyle.Important) this.jComponent.addClass('badge-important');
         else if (this.BadgeStyle == V.BadgeStyle.Info) this.jComponent.addClass('badge-info');
+        if (this.TextColor) this.jComponent.css('color', this.TextColor);
+        if (this.TextAlignment == V.TextAlignment.Left) this.jComponent.css('text-align', 'left');
+        if (this.TextAlignment == V.TextAlignment.Right) this.jComponent.css('text-align', 'right');
+        if (this.TextAlignment == V.TextAlignment.Center) this.jComponent.css('text-align', 'center');
+
         super.create();
     }
 
@@ -232,6 +220,7 @@ export class TDBBadge extends VXT.TDBTextBase {
         else if (this.BadgeStyle == V.BadgeStyle.Warning) this.jComponent.addClass('badge-warning');
         else if (this.BadgeStyle == V.BadgeStyle.Important) this.jComponent.addClass('badge-important');
         else if (this.BadgeStyle == V.BadgeStyle.Info) this.jComponent.addClass('badge-info');
+        if (this.TextColor) this.jComponent.css('color', this.TextColor);
         super.create();
     }
 
@@ -247,11 +236,18 @@ export class TDBBadge extends VXT.TDBTextBase {
 export class TTagCloud extends VXC.TComponent {
     /** Custom Format tooltip */
     public ToolTipFormat: (item: TTagCloudItem) => string;
-    /** Custom on click */
+
+    /*
+        Use the OnClick event handler to respond when the user clicks the control. 
+    */
     public onClicked: (item: TTagCloudItem) => void;
 
     private selectedTagItem: JQuery;
 
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
     }
@@ -464,6 +460,18 @@ export class TTagCloudItem extends VXO.TCollectionItem {
 }
 
 export class TPillBoxItem extends VXO.TCollectionItem {
+    public menuItems = new VXM.TMenuItemCollection<VXM.TMenuItem>();
+    public createMenuItem(text: string, onClicked?: () => void): VXM.TMenuItem {
+        var menuItem = new VXM.TMenuItem();
+        menuItem.Text = text;
+        menuItem.onClicked = onClicked;
+        this.menuItems.add(menuItem);
+        if (this.OwnerCollection != null) this.OwnerCollection.refresh();
+
+        return menuItem;
+    }
+
+
     private _value: string = null;
     public get Value(): string {
         return this._value;
@@ -483,6 +491,8 @@ export class TPillBoxItem extends VXO.TCollectionItem {
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
+            if (this.OwnerCollection != null)
+                this.OwnerCollection.refresh();
         }
     }
 
@@ -517,6 +527,16 @@ export class TPillBoxItem extends VXO.TCollectionItem {
         }
     }
 
+    private _tooltip: string = "";
+    public get Tooltip(): string {
+        return this._tooltip;
+    }
+    public set Tooltip(val: string) {
+        this._tooltip = val;
+    }
+
+
+
 }
 
 
@@ -530,11 +550,11 @@ export class TPillBox extends VXC.TComponent {
         this.items.add(col);
         col.PillBoxItemStyle = style;
         col.Text = text;
+        this.drawDelayed(true);
         return col;
     }
 
     public removeItem(item: TPillBoxItem) {
-
         this.items.remove(item);
         if (this.onRemoved) this.onRemoved(item);
 
@@ -548,16 +568,27 @@ export class TPillBox extends VXC.TComponent {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('pillbox');
         this.items.forEach((item) => {
-            var jItem = $('<li>');
+            var jItem = $('<li>').addClass('pillboxitem dropdown');
+            if (item.Tooltip) jItem.attr("title", item.Tooltip);
+            var jtext = $('<span>').html(item.Text);
+            jtext.appendTo(jItem);
             if (item.Width) jItem.css('width', item.Width + "px");
             if (item.EnableRemove) jItem.attr('data-content', String.fromCharCode(215));
-            jItem.html(item.Text);
+            
             jItem.data("ID", item);
             jItem.addClass('status-' + V.PillBoxStyle[item.PillBoxItemStyle].toLowerCase());
+            if (item.menuItems.length() > 0) {
+                jtext.append($('<span class="caret"/>'));
+                jtext.addClass("dropdown-toggle");
+                jtext.attr('data-toggle', "dropdown");
+                item.menuItems.createmenu('dropdown-menu').appendTo(jItem);
+                $('.dropdown-toggle').dropdown()
+            }
+
             jItem.off("click").click(function (e) {
                 var $li = $(e.currentTarget);
                 var item: TPillBoxItem = $li.data("ID");
-                if (item.EnableRemove && $li.width() - e.offsetX < 16) {
+                if (item.EnableRemove && $li.width() + $li.offset().left - e.pageX < 16)  {
                     var rc: any;
                     if (self.onRemove) rc = self.onRemove(item);
                     if (rc != false) {
@@ -695,8 +726,6 @@ export class TBreadCrumb extends VXC.TComponent {
 
 
 export class TPaginationItem extends VXO.TCollectionItem {
-
-
     private _pagination: V.TPagination = null;
     private jImage: JQuery = null;
     private jItem: JQuery = null;

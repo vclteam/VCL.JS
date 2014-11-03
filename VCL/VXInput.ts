@@ -1,10 +1,10 @@
 /// <reference path="Scripts/jquery.d.ts" />
-import VXC = require("VCL/VXComponent");
-import VXB = require("VCL/VXInputBase");
-import VXD = require("VCL/VXDataset");
-import VXM = require("VCL/VXMenu");
-import V = require("VCL/VCL");
-import VXO = require("VCL/VXObject");
+import VXC = require("./VXComponent");
+import VXB = require("./VXInputBase");
+import VXD = require("./VXDataset");
+import VXM = require("./VXMenu");
+import V = require("./VCL");
+import VXO = require("./VXObject");
 
 export class TInput extends VXB.TInputBase {
     private _text: string;
@@ -145,9 +145,13 @@ export class TDBInput extends VXB.TInputBase {
 }
 
 export class TInputNumeric extends VXB.TInputBase {
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner,renderTo);
-        this.TextAlgnment = V.TextAlignment.Right;
+        this.TextAlignment = V.TextAlignment.Right;
     }
 
     private _value: number = 0;
@@ -254,9 +258,13 @@ export class TInputNumeric extends VXB.TInputBase {
 
 
 export class TDBInputNumeric extends VXB.TInputBase {
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
-        this.TextAlgnment = V.TextAlignment.Right;
+        this.TextAlignment = V.TextAlignment.Right;
     }
 
     private _dataset: VXD.TDataset;
@@ -375,7 +383,7 @@ export class TDBInputNumeric extends VXB.TInputBase {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        this.jEdit.val(this.DataValue.toString());
+        this.jEdit.val(this.DataValue ? this.DataValue.toString() : "");
     }
 }
 

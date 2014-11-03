@@ -1,7 +1,7 @@
-import VXC = require("VCL/VXComponent");
-import VXU = require("VCL/VXUtils");
-import V = require("VCL/VCL");
-import VXM = require("VCL/VXMenu");
+import VXC = require("./VXComponent");
+import VXU = require("./VXUtils");
+import V = require("./VCL");
+import VXM = require("./VXMenu");
 
 export class TGraphic extends VXC.TPopupmenuComponent {
     public onClicked: () => void;
@@ -507,10 +507,11 @@ export class TIcon extends TGraphic {
 
     public create() {
         var self = this;
+
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'i', this.FitToWidth, this.FitToHeight);
         this.jComponent.off("click").click(() => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(); })); return false; })
         this.jComponent.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(); })); return false; })
-
+        if (this.onClicked || this.ondblclicked) this.jComponent.css('cursor', 'pointer');
         if (this.jComponent.attr("class")) {
             var classes = this.jComponent.attr("class").split(" ").filter(function (c) {
                 return c.lastIndexOf("icon_", 0) !== 0;

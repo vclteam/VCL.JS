@@ -1,5 +1,5 @@
-/// <reference path="../VCL/Scripts/jquery.d.ts" />
-import V = require("VCL/VCL");
+/// <reference path="Scripts/jquery.d.ts" />
+import V = require("./VCL");
 
 export class VXUtils {
     public static changeJComponentType(element: JQuery, newType: string, fit2Width: boolean, fit2Height: boolean) :JQuery {

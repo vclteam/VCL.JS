@@ -1,11 +1,11 @@
-/// <reference path="../VCL/Scripts/require.d.ts" />
-/// <reference path="../VCL/Scripts/jquery.d.ts" />
-import V = require("VCL/VCL");
-import VXC = require("VCL/VXComponent");
-import VXDS = require("VCL/VXServer");
-import VXA = require("VCL/VXApplication");
-import VXCO = require("VCL/VXContainer");
-import VXD = require("VCL/VXDataset");
+/// <reference path="Scripts/require.d.ts" />
+/// <reference path="Scripts/jquery.d.ts" />
+import V = require("./VCL");
+import VXC = require("./VXComponent");
+import VXDS = require("./VXServer");
+import VXA = require("./VXApplication");
+import VXCO = require("./VXContainer");
+import VXD = require("./VXDataset");
 
 
 export class TPage extends VXCO.TContainer {

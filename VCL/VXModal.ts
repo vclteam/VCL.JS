@@ -1,8 +1,8 @@
 /// <reference path="Scripts/bootstrap.d.ts" />
-import V = require("VCL/VCL");
-import VXC = require("VCL/VXContainer");
-import VXDS = require("VCL/VXServer");
-import VXD = require("VCL/VXDataset");
+import V = require("./VCL");
+import VXC = require("./VXContainer");
+import VXDS = require("./VXServer");
+import VXD = require("./VXDataset");
 
 export class TModal extends VXC.TContainer {
     public onCreate() { }
@@ -40,13 +40,14 @@ export class TModal extends VXC.TContainer {
     }
 
     public showModal() {
+        super.draw(true);
         this.jComponent.addClass('modal');
         
         this.jComponent.modal({
             keyboard: false, maxHeight: this.MaxHeight, backdrop: 'static', width: this.Width,
             attentionAnimation: null, resize: true
         });
-        super.draw(true);
+       
         switch (this.effect) {
             case V.ModalEffects.FadeIn: {
                 this.jComponent.fadeIn(this.duration);

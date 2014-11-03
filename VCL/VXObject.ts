@@ -30,6 +30,10 @@ export class TObject {
         return (results && results.length > 1) ? results[1] : "";
     }
 
+    /**
+     Auto Generate unique identifier of the component.
+     when a rendering occur this ID become the id of the html element.
+    **/
     public ID: string = TObject.genGUID();
     public static genGUID(): string {
         return TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4() + TObject.s4();
@@ -60,6 +64,8 @@ export class TObject {
             }
         });
     }
+
+
 }
 
 class eventObject {
@@ -85,10 +91,9 @@ export class TCollectionItem extends TObject {
     }
 
     public set OwnerCollection(val: TCollection<TCollectionItem>) {
-        if (val != this.__ownerCollection) {
-            this.__ownerCollection = val;
-        }
+       this.__ownerCollection = val;
     }
+
     constructor() {
         super();
     }

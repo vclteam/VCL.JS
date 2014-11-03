@@ -1,9 +1,9 @@
 /// <reference path="Scripts/jquery.d.ts" />
-import V = require("VCL/VCL");
-import VXC = require("VCL/VXComponent");
-import VXU = require("VCL/VXUtils");
-import VXO = require("VCL/VXObject");
-import VXD = require("VCL/VXDataset");
+import V = require("./VCL");
+import VXC = require("./VXComponent");
+import VXU = require("./VXUtils");
+import VXO = require("./VXObject");
+import VXD = require("./VXDataset");
 
 export class TSparkBase extends VXC.TComponent {
     public values = new VXO.TCollection<TSparkValue>();
@@ -140,6 +140,10 @@ export class TSparkBase extends VXC.TComponent {
 export class TSparkPie extends TSparkBase {
     public colours = ["#ff9900", "#fff4dd", "#ffc66e", "#4D4D4D", "#5DA5DA", "#FAA43A", "#60BD68", "#F17CB0", "#B2912F", "#B276B2", "#DECF3F", "#F15854"];
 
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         this.Height = 40;
@@ -191,6 +195,11 @@ export class TSparkLine extends TSparkBase {
             this.drawDelayed(true);
         }
     }
+
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         this.Height = 20;
@@ -284,6 +293,11 @@ export class TSparkBar extends TSparkBase {
             this.draw(true);
         }
     }
+
+    /**
+    @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+    @renderTo   (Optional) the id of the html element that will be the parent node for this component
+    **/
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner,renderTo);
         this.Height = 20;

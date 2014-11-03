@@ -1,7 +1,9 @@
 /// <reference path="Scripts/jquery.d.ts" />
-import V = require("VCL/VCL");
-import VXO = require("VCL/VXObject");
-import VXC = require("VCL/VXComponent");
+import V = require("./VCL");
+import VXO = require("./VXObject");
+import VXC = require("./VXComponent");
+import VXDS = require("./VXServer");
+import VXCO = require("./VXContainer");
 
 export interface VXDatasetInt {
     ShowProgressBar: boolean;
@@ -40,7 +42,7 @@ export class TDataset extends VXO.TObject {
     }
 
     public aggregateFieldSum(fieldname: string): number {
-        var sum : number = 0;
+        var sum: number = 0;
         this.forEach(() => {
             var a = this.getFieldValue(fieldname);
             if (!isNaN(a)) {
@@ -60,7 +62,7 @@ export class TDataset extends VXO.TObject {
                 cnt++;
             }
         });
-        return cnt>0?sum/cnt:null;
+        return cnt > 0 ? sum / cnt : null;
     }
 
 
@@ -95,10 +97,17 @@ export class TDataset extends VXO.TObject {
         this.dataChanged();
     }
 
+    private indataChanged: boolean = false;
     private dataChanged() {
-        if ((<any>this)._enabledControl) {
-            if (this.onDataChanged != null) this.onDataChanged();
-            (<any>this).triggerEvent(TDataset.EVENT_DATA_CHANGED);
+        if (this.indataChanged) return;
+        try {
+            this.indataChanged = true;
+            if ((<any>this)._enabledControl) {
+                if (this.onDataChanged != null) this.onDataChanged();
+                (<any>this).triggerEvent(TDataset.EVENT_DATA_CHANGED);
+            }
+        } finally {
+            this.indataChanged = false;
         }
     }
 
@@ -175,6 +184,14 @@ export class TDataset extends VXO.TObject {
         return this.recordset.slice(start, end + 1);
     }
 
+    public getCheckCount(): number {
+        var cnt = 0;
+        this.forEach(() => {
+            if (this.isChecked()) cnt++;
+        })
+        return cnt;
+    }
+
     public checkRecord(): void {
         if (this.Recno == -1) return null;
         this.recordset[this.Recno]['___CHECKED___'] = true;
@@ -183,6 +200,11 @@ export class TDataset extends VXO.TObject {
     public uncheckRecord(): void {
         if (this.Recno == -1) return null;
         this.recordset[this.Recno]['___CHECKED___'] = false;
+    }
+
+    public isChecked(): boolean {
+        if (this.recordset[this.Recno]['___CHECKED___']) return true;
+        return false;
     }
     /**
     * Moves to the next record in the dataset.
@@ -227,7 +249,7 @@ export class TDataset extends VXO.TObject {
             this.Recno = this.RecordCount - 1;
             return true;
         } else {
-             this.Recno = -1;
+            this.Recno = -1;
             return false;
         }
     }
@@ -235,6 +257,7 @@ export class TDataset extends VXO.TObject {
 
 
 export class TClientDataset extends TDataset implements VXDatasetInt {
+    public onError: (errorMessage: string) => void;
     private tempRecordset: Object[];
     private tempGroupset: number[];
 
@@ -251,6 +274,50 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         super();
         this.owner = aOwner;
     }
+
+    public loadRemoteResults(data: any) {
+        //replace the dates with JS dates - data is loaded from .net backend
+        if (data.META || data.DATA) {
+            for (var i = 0, l = data.META.length; i < l; i++) {
+                if (data.META[i].TYPE.toLowerCase() != 'date') continue;
+                for (var j = 0; j < data.DATA.length; j++) {
+                    if (data.DATA[j][data.META[i].NAME] != null) {
+                        // sometime type Date value can be sent as string
+                        var milisecs = (typeof data.DATA[j][data.META[i].NAME] === "number") ? data.DATA[j][data.META[i].NAME] : parseInt(data.DATA[j][data.META[i].NAME]);
+                        //data.DATA[j][data.META[i].NAME] = new Date(data.DATA[j][data.META[i].NAME]);
+                        data.DATA[j][data.META[i].NAME] = new Date(milisecs);
+                    }
+                }
+            }
+            this.setData(data.DATA);
+            this.setMetaData(data.META);
+            if (this.onAfterOpen != null) (V.tryAndCatch(() => { this.onAfterOpen(this); }))
+        } else if (data instanceof Array) {
+            this.setData(data);
+            if (this.onAfterOpen != null) (V.tryAndCatch(() => { this.onAfterOpen(this); }))
+        } else if (data instanceof Object) { //single record data
+            this.setData([data]);
+            if (this.onAfterOpen != null) (V.tryAndCatch(() => { this.onAfterOpen(this); }))
+        }
+    }
+
+
+    public openRemoteMethod(methodname: string, param: Object) {
+        if (this.onBeforeOpen != null) (V.tryAndCatch(() => { this.onBeforeOpen(this); }))
+        var server = new VXDS.TServer();
+        if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
+        server.send(methodname, param, (data) => {
+            this.loadRemoteResults(data);
+            if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
+        },
+            (errorMessage: string) => {
+                if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).removeQuery(this); }
+
+                if (this.onError != null) (V.tryAndCatch(() => { this.onError(errorMessage); }))
+            else V.Application.raiseException(errorMessage);
+            });
+    }
+
 
     private selectionChanged() {
         if (this.onSelectionChanged != null) this.onSelectionChanged();
@@ -353,11 +420,12 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
 
     /*
     * Adds a new records to the end of the dataset. the method return the new record number
+    * example x.appendRecords([{fileid : 1},{fileid : 2}]);
     */
-    public appendRecords(data: any[], disableEvents: boolean = false): number {
+    public appendRecords(recordsArray: Object[], disableEvents: boolean = false): number {
         if (!this.Active) this.setData([]);
-        for (var i = 0; i < data.length; i++) {
-            this.appendRecord(data[i], true);
+        for (var i = 0; i < recordsArray.length; i++) {
+            this.appendRecord(recordsArray[i], true);
         }
         if ((<any>this)._enabledControl && !disableEvents) (<any>this).dataChanged();
         return this.RecordCount - 1;
@@ -379,10 +447,11 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     /*
     * Adds a new record to the end of the dataset. the method return the new record number
     */
-    public appendRecord(data: any, disableEvents: boolean = false): number {
+    public appendRecord(record: Object, disableEvents: boolean = false): number {
         if (!this.Active) this.setData([]);
-        if (data instanceof Array) {
-            this.appendRecords(data);
+        if (record instanceof Array) {
+            var recs: Object[] = <Object[]>record;
+            this.appendRecords(recs);
             return;
         }
         var maxid = 0;
@@ -393,12 +462,14 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         var obj: any = {};
         obj.___RECORDID___ = maxid + 1;
         obj.___CHECKED___ = false;
-        for (var key in data) {
-            obj[key.toUpperCase()] = data[key];
+        for (var key in record) {
+            obj[key.toUpperCase()] = record[key];
         }
         this.recordset.push(obj);
-        this.Recno = this.RecordCount - 1;
-        if ((<any>this)._enabledControl && !disableEvents) (<any>this).dataChanged();
+        if ((<any>this)._enabledControl && !disableEvents) {
+            this.Recno = this.RecordCount - 1;
+            (<any>this).dataChanged();
+        }
         return this.RecordCount - 1;
     }
 
@@ -418,7 +489,10 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         }
     }
 
-
+    /* 
+    * Data represents the client dataset's local, in-memory copy of its data, encoded as a array of any
+    */
+    private static reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
     public setData(data: any[]) {
         this.recordset = [];
         this.sourceRecordset = null;
@@ -432,7 +506,9 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
                 obj.___RECORDID___ = i;
                 obj.___CHECKED___ = false;
                 for (var key in data[i]) {
-                    obj[key.toUpperCase()] = data[i][key];
+                    if (typeof data[i][key] == 'string' && TClientDataset.reISO.exec(data[i][key])) obj[key.toUpperCase()] = new Date(data[i][key]);
+                    else obj[key.toUpperCase()] = data[i][key];
+
                 }
                 this.recordset.push(obj);
             }
@@ -449,7 +525,7 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     }
 
 
-    public sort(columnName: string, ascending: boolean = true, groupname : string = null) {
+    public sort(columnName: string, ascending: boolean = true, groupname: string = null) {
         this.tempRecordset = this.recordset.slice(0);
         this.tempGroupset = [];
 
@@ -479,6 +555,12 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
                         var b2 = "000000000" + (<Date>b[columnName]).getTime();
                         a1 += "~~" + a2.substr(a2.length - 16);
                         b1 += "~~" + b2.substr(b2.length - 16);
+                    } else if (a[columnName] && typeof b[columnName] == "number" &&
+                        b[columnName] && typeof b[columnName] == "number") {
+                        var a2 = "000000000000" + <Date>a[columnName];
+                        var b2 = "000000000000" + <Date>b[columnName];
+                        a1 += "~~" + a2.substr(a2.length - 12);
+                        b1 += "~~" + b2.substr(b2.length - 12);
                     } else {
                         a1 += "~~" + a[columnName];
                         b1 += "~~" + b[columnName];
@@ -490,27 +572,33 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
                 else return 0;
             })
             } else {
-                this.tempRecordset.sort(function (a, b) {
-                    var a1: string = "";
-                    var b1: string = "";
-                    if (groupname) {
-                        a1 += a[groupname];
-                        b1 += b[groupname];
-                        if (a1 > b1) return 1;
-                        else if (a1 < b1) return -1
+            this.tempRecordset.sort(function (a, b) {
+                var a1: string = "";
+                var b1: string = "";
+                if (groupname) {
+                    a1 += a[groupname];
+                    b1 += b[groupname];
+                    if (a1 > b1) return 1;
+                    else if (a1 < b1) return -1
                     }
-                    if (columnName) {
-                        if (a[columnName] && a[columnName].getMonth &&
-                            b[columnName] && b[columnName].getMonth) {
-                            var a2 = "000000000" + (<Date>a[columnName]).getTime();
-                            var b2 = "000000000" + (<Date>b[columnName]).getTime();
-                            a1 += "~~" + a2.substr(a2.length - 16);
-                            b1 += "~~" + b2.substr(b2.length - 16);
-                        } else {
-                            a1 += "~~" + a[columnName];
-                            b1 += "~~" + b[columnName];
-                        }
+                if (columnName) {
+                    if (a[columnName] && a[columnName].getMonth &&
+                        b[columnName] && b[columnName].getMonth) {
+                        var a2 = "000000000" + (<Date>a[columnName]).getTime();
+                        var b2 = "000000000" + (<Date>b[columnName]).getTime();
+                        a1 += "~~" + a2.substr(a2.length - 16);
+                        b1 += "~~" + b2.substr(b2.length - 16);
+                    } else if (a[columnName] && typeof b[columnName] == "number" &&
+                        b[columnName] && typeof b[columnName] == "number") {
+                        var a2 = "000000000000" + <Date>a[columnName];
+                        var b2 = "000000000000" + <Date>b[columnName];
+                        a1 += "~~" + a2.substr(a2.length - 12);
+                        b1 += "~~" + b2.substr(b2.length - 12);
+                    } else {
+                        a1 += "~~" + a[columnName];
+                        b1 += "~~" + b[columnName];
                     }
+                }
 
                 if (a1 < b1) return 1;
                 else if (a1 > b1) return -1
@@ -523,7 +611,7 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         this.recordset = this.tempRecordset;
     }
 
-    public getRecords(start: number, end: number, sortDirection: string, sortProperty: string, groupProperty? : string): any {
+    public getRecords(start: number, end: number, sortDirection: string, sortProperty: string, groupProperty?: string): any {
         if ((sortProperty == null || sortProperty == "") && (groupProperty == null || groupProperty == "")) return this.recordset.slice(start, end + 1); //not sort was mentions
         sortProperty = sortProperty.toUpperCase();
         sortDirection = sortDirection.toUpperCase();

@@ -1,15 +1,42 @@
-import VXC = require("VCL/VXComponent");
-import VXO = require("VCL/VXObject");
-import VXM = require("VCL/VXMenu");
-import VXU = require("VCL/VXUtils");
-import V = require("VCL/VCL");
-import VXB = require("VCL/VXInputBase");
+import V = require("./VCL");
+import VXC = require("./VXComponent");
+import VXO = require("./VXObject");
+import VXM = require("./VXMenu");
+import VXU = require("./VXUtils");
+
+import VXB = require("./VXInputBase");
 
 export class TButton extends VXC.TPopupmenuComponent {
     constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
         this._text = text;
     }
+
+    private _textstyle: V.TextStyle = V.TextStyle.Default;
+    public get TextStyle(): V.TextStyle {
+        return this._textstyle;
+    }
+    public set TextStyle(val: V.TextStyle) {
+        if (val != this._textstyle) {
+            this._textstyle = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _textcolor: string;
+    public get TextColor(): string {
+        return this._textcolor;
+    }
+    public set TextColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._textcolor) {
+                this._textcolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
 
     private _groupindex: number = -1;
     public get GroupIndex(): number {
@@ -82,6 +109,21 @@ export class TButton extends VXC.TPopupmenuComponent {
         }
     }
 
+
+    private _buttoniconcolor: string;
+    public get ButtonIconColor(): string {
+        return this._buttoniconcolor;
+    }
+    public set ButtonIconColor(val: string) {
+        if (V.Application.checkColorString(val)) {
+            if (val != this._buttoniconcolor) {
+                this._buttoniconcolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+
     private _tabindex: number;
     public get TabIndex(): number {
         return this._tabindex;
@@ -105,8 +147,8 @@ export class TButton extends VXC.TPopupmenuComponent {
         }
     }
 
-    /**
-    * Occurs when the user clicks the component.
+    /*
+        Use the OnClick event handler to respond when the user clicks the control. 
     */
     public onClicked: (sender: TButton) => void;
 
@@ -120,7 +162,30 @@ export class TButton extends VXC.TPopupmenuComponent {
         this.jComponent.addClass('btn-group');
 
         this.jImage = $('<i/>');
-        this.jText = $('<span/>');
+
+        if (this.TextStyle == V.TextStyle.h1)
+            this.jText = $('<h1/>'); 
+        else if (this.TextStyle == V.TextStyle.h2)
+            this.jText = $('<h2/>'); 
+        else if (this.TextStyle == V.TextStyle.h3)
+            this.jText = $('<h3/>'); 
+        else if (this.TextStyle == V.TextStyle.h4)
+            this.jText = $('<h4/>'); 
+        else if (this.TextStyle == V.TextStyle.h5)
+            this.jText = $('<h5/>'); 
+        else if (this.TextStyle == V.TextStyle.h6)
+            this.jText = $('<h6/>'); 
+        else if (this.TextStyle == V.TextStyle.strong)
+            this.jText = $('<strong/>'); 
+        else if (this.TextStyle == V.TextStyle.lead) {
+            this.jText = $('<span/>').addClass('lead');; 
+        } else if (this.TextStyle == V.TextStyle.small) {
+            this.jText = $('<small/>'); 
+        } else this.jText = $('<span/>'); 
+
+        if (this.TextColor) {
+            this.jText.css('color', this.TextColor);
+        }
 
         this.jBtn = $('<button/>');
         if (this.TabIndex) this.jBtn.attr('tabindex', this.TabIndex);
@@ -130,6 +195,10 @@ export class TButton extends VXC.TPopupmenuComponent {
 
         if (this.ButtonIcon) {
             $(this.jImage).addClass(V.iconEnumToBootstrapStyle(this.ButtonIcon));
+            if (this.ButtonIconColor) {
+                this.jImage.css('color', this.ButtonIconColor);
+            }
+
             if (this.ButtonIcon == V.ButtonIcon.icon_spinner) $(this.jImage).addClass('icon-spin');
             this.jBtn.append(this.jImage);
             if (this.ButtonSize == V.ButtonSize.Large) {

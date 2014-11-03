@@ -1,9 +1,8 @@
-import V = require("VCL/VCL");
-import VXU = require("VCL/VXUtils");
-import VXC = require("VCL/VXComponent");
-import VXD = require("VCL/VXDataset");
-import VXCB = require("VCL/VXChartBase");
-
+import V = require("./VCL");
+import VXU = require("./VXUtils");
+import VXC = require("./VXComponent");
+import VXD = require("./VXDataset");
+import VXCB = require("./VXChartBase");
 
 export class TChartLineBase extends VXCB.TGridChartBase {
     public onClicked: (value: V.TLineValue, series: number, idx: number) => void;
@@ -600,7 +599,7 @@ export class TChartLine extends TChartLineBase {
             pointFillColors: [],
             smooth: this.Smooth,
             xLabels: 'auto',
-            hideHover: this.ShowHoverLegend ? 'auto' : 'always',
+            hideHover: this.ShowHoverLegend,
             xLabelMargin: this.XLabelMargin,
             grid: this.ShowGridLines,
             continuousLine: this.ContinuousLine,
@@ -918,7 +917,7 @@ export class TChartArea extends TChartLineBase {
                 pointFillColors: [],
                 smooth: this.Smooth,
                 xLabels: 'auto',
-                hideHover: this.ShowHoverLegend ? 'auto' : 'always',
+                hideHover: this.ShowHoverLegend,
                 xLabelMargin: this.XLabelMargin,
                 grid: this.ShowGridLines,
                 continuousLine: this.ContinuousLine,
@@ -1446,15 +1445,14 @@ class Line extends VXCB.Grid {
         this.pointShrink = Raphael.animation({
             r: this.options.pointSize
         }, 25, 'linear');
-        if (this.options.hideHover !== 'always') {
-            this.hover = new VXCB.Hover({
-                parent: this.el
-            });
-            this.hover.animation = false;
-            this.on('hovermove', this.onHoverMove);
-            this.on('hoverout', this.onHoverOut);
-            return this.on('gridclick', this.onGridClick);
-        }
+
+        this.hover = new VXCB.Hover({
+            parent: this.el
+        });
+        this.on('hovermove', this.onHoverMove);
+        this.on('hoverout', this.onHoverOut);
+        return this.on('gridclick', this.onGridClick);
+
     }
 
 
@@ -1574,32 +1572,27 @@ class Line extends VXCB.Grid {
         var tipId = evt.target.TipId;
         var idx = evt.target.idx;
         var series = evt.target.series;
-        var key = tipId + idx + series;
+        var key = tipId + idx + series + "";
         if (key == this.oldTipId) return;
         this.oldTipId = key;
 
         //start hover
         var _ref;
-        if (!this.hover) return;
         this.hover.hide();
         if (tipId && tipId.indexOf("node") != -1) {
-            idx = evt.target.idx;
-            series = evt.target.series;
-            (_ref = this.hover).update.apply(_ref, this.hoverItem(idx, series));;
+            if (this.options.hideHover)
+                (_ref = this.hover).update.apply(_ref, this.hoverItem(idx, series));
         }
         if (tipId && tipId.indexOf("xlabel") != -1) {
             var l = evt.target.TipValue;
-            this.hover.animation = true;
-            (_ref = this.hover).update.apply(_ref, ["<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + l + " \n</div>", x, y]);
+            if (this.options.hideHover)
+                (_ref = this.hover).update.apply(_ref, ["<div style='pointer-events: none;' class='morris-hover-row-label'>\n  " + l + " \n</div>", x, y]);
         }
     }
 
     onHoverOut() {
-        if (!this.hover) return;
-        if (this.options.hideHover !== false) {
-            this.hover.hide();
-            return this.hoverItem(null, null);
-        }
+        this.hover.hide();
+        return this.hoverItem(null, null);
     }
 
     private oldPoint = [null, null];

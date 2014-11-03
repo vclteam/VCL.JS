@@ -1,14 +1,33 @@
-﻿import V = require("VCL/VCL");
-import VXU = require("VCL/VXUtils");
-import VXC = require("VCL/VXComponent");
-import VXD = require("VCL/VXDataset");
-import VXCB = require("VCL/VXChartBase");
+﻿import V = require("./VCL");
+import VXU = require("./VXUtils");
+import VXC = require("./VXComponent");
+import VXD = require("./VXDataset");
+import VXCB = require("./VXChartBase");
 
 export class TChartDonut extends VXCB.TChartBase {
     public onClicked: (value: V.TDountValue) => void;
 
+    private _showhoverlegend: boolean = true;
+    public get ShowHoverLegend(): boolean {
+        return this._showhoverlegend;
+    }
+    public set ShowHoverLegend(val: boolean) {
+        if (val != this._showhoverlegend) {
+            this._showhoverlegend = val;
+            this.drawDelayed(true);
+        }
+    }
 
-
+    private _showTextLegend: boolean = true;
+    public get ShowTextLegend(): boolean {
+        return this._showTextLegend;
+    }
+    public set ShowTextLegend(val: boolean) {
+        if (val != this._showhoverlegend) {
+            this._showTextLegend = val;
+            this.drawDelayed(true);
+        }
+    }
 
     private _humanFriendlyvalue: boolean = false;
     /**
@@ -226,6 +245,7 @@ export class TChartDonut extends VXCB.TChartBase {
             element: this.jComponent[0],
             data: dataArray,
             colors: colors,
+            hideHover: this.ShowHoverLegend,
             startangle: this.StartAngle,
             endangle: this.EndAngle,
             xLabelFormat: this.XLabelFormat,
@@ -234,6 +254,7 @@ export class TChartDonut extends VXCB.TChartBase {
             gridTextWeight: this.TitleTextWeight,
             gridTextSize: this.TextSize,
             gridTextFamily: this.TextFont,
+            hideText: this.ShowTextLegend,
             drawlabel: this.DrawLabel,
             drawvalue: this.DrawValue,
             humanfriendly: this.HumanFriendlyValueFormat
@@ -353,16 +374,13 @@ class Donut extends VXCB.Grid {
     }
 
     init() {
-        if (this.options.hideHover !== 'always') {
-            this.hover = new VXCB.Hover({
-                parent: this.el
-            });
+        this.hover = new VXCB.Hover({
+            parent: this.el
+        });
 
-            this.on('hovermove', this.onHoverMove);
-            this.on('hoverout', this.onHoverOut);
-        }
+        this.on('hovermove', this.onHoverMove);
+        this.on('hoverout', this.onHoverOut);
     }
-
 
     private oldTipId: string = "";
     onHoverMove(x, y, evt) {
@@ -374,26 +392,25 @@ class Donut extends VXCB.Grid {
         this.oldTipId = key;
 
         //start hover
-        if (tipId == "node")
+        this.hover.hide();
+        if (tipId == "node") {
             this.hoverItem(idx, series);
-        else {
-            this.hoverItem(null, null);
+            if (this.options.hideHover)
+                this.hover.update.apply(this.hover, this.displayHoverForRow(idx, series));
         }
-        if (!this.hover) return;
     }
 
-    onHoverOut(x, y, evt) {
-        if (!this.hover) return;
-        if (this.options.hideHover !== false) {
-            return this.hover.hide();
-        }
+    onHoverOut() {
+        this.hover.hide();
+        return this.hoverItem(null, null);
     }
 
     redraw() {
+        var self = this;
         var C, cx, cy, last, min, next, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
         this.el.empty();
         this.raphael = new Raphael(this.el[0]);
-        var self = this;
+        this.init();
 
         var ang: number = Math.min(this.options.endangle - this.options.startangle, 360);
 
@@ -405,17 +422,21 @@ class Donut extends VXCB.Grid {
         var txtH = this.measureText('---').height;
         var txtY;;
 
+        var emptyTxt = "No Value";
+        if (!this.options.hideText)
+            emptyTxt = "";
+
         if (this.options.behaveLikePie) {
             txtY = txtH;
-            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 10, "No Value");
+            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 10, emptyTxt);
         } else if (Math.abs(Math.abs(this.options.endangle) - Math.abs(this.options.startangle)) > 91) {
             txtY = cy - txtH * 2;
             txtH = 0;
-            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 30, "No Value");
+            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 30, emptyTxt);
         } else {
             txtY = cy - txtH * 2;
             txtH = 0;
-            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 10, "No Value");
+            this.text1 = this.drawEmptyDonutLabel(cx, txtY + 10, emptyTxt);
         }
         w = (Math.min(cx, cy - txtH * 3)) / 3 - 1;
         total = 0;
@@ -556,9 +577,52 @@ class Donut extends VXCB.Grid {
         if (owner instanceof TDBChartDonut && (<TDBChartDonut>owner).Dataset != null) {
             (<TDBChartDonut>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
         }
-        var y = this.setLabels(row, segment.color);
+
+        if (this.options.hideText)
+            this.setLabels(row, segment.color);
 
         return;
+    }
+
+    displayHoverForRow(index, series) {
+        var j, row, x, y, _i, _len, _ref
+        row = this.data[index];
+        if (row == null) {
+            return null;
+        }
+
+        series = 0;
+        row.index = index;
+        row.series = series;
+        var seg = this.segments[index];
+
+        var content: string = "";
+        var lblX: string = "";
+        if (!this.options.toolTipFormat) {
+            lblX = (this.options.drawlabel ? this.xLabelFormat(row, true) : "");
+            content = "<div style='pointer-events: none; color: " + seg.color + "' class='morris-hover-row-label'>" + lblX + "</div>";
+        }
+        _ref = row.y;
+        for (j = 0; j < _ref.length; j++) {
+            if (series == j) {
+                y = _ref[j];
+                if (y != null) {
+                    var lblY: string = "";
+                    if (this.options.toolTipFormat) {
+                        lblY = this.options.toolTipFormat(row);
+                    }
+                    else {
+                        lblY = (this.options.drawvalue ? this.yLabelFormat(row.y[0], this.options.humanfriendly) : "");
+                    }
+                    content += "<div style='pointer-events: none; color: " + seg.color + "'>" + lblY + "</div>";
+                }
+            }
+        }
+
+
+        //draw location
+        var b = seg.seg.node.getBBox();
+        return [content, b.x, b.y];
     }
 
     setLabels(row, color) {
@@ -629,7 +693,6 @@ class DonutSegment extends VXCB.EventEmitter {
     private cy;
     private inner;
     private outer;
-    private color;
     private backgroundColor;
     private index;
     private raphael;
@@ -642,7 +705,8 @@ class DonutSegment extends VXCB.EventEmitter {
     private selectedPath;
     private hilight;
     private arc;
-    private seg;
+    public seg;
+    public color;
     public selected;
     public count;
     public ID;
