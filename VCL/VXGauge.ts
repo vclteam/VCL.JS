@@ -11,7 +11,7 @@ export class TGauge extends VXC.TComponent {
     public set Value(val: number) {
         if (val != this._value) {
             this._value = val;
-            this.draw(false);
+            this.drawDelayed(true);
         }
     }
 
@@ -22,7 +22,7 @@ export class TGauge extends VXC.TComponent {
     public set MaxValue(val: number) {
         if (val != this._maxvalue) {
             this._maxvalue = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -230,7 +230,7 @@ export class TGauge extends VXC.TComponent {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        refreshGage(this.Value, null, this.justGage);
+        //refreshGage(this.Value, null, this.justGage);
 
     }
 }

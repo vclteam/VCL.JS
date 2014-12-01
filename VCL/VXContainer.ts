@@ -34,7 +34,17 @@ export class TContainer extends VXC.TComponent {
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner, renderTo);
         if (!this.__HTML__) this.__HTML__ = this.getContanierHTML();
-        if (this.__HTML__) $(this.jComponent).html(this.__HTML__);
+        if (this.__HTML__) {
+            $(this.jComponent).html(this.__HTML__);
+            //translate the page
+            if (V.Application.ActiveLanguage) {
+                var trnsElem = $(this.jComponent).find('[data-localizable]');
+                trnsElem.each((index, elem: HTMLElement) => {
+                    if (!elem.childElementCount)
+                        elem.innerHTML = V.Application.getLanguageTranslation(V.Application.ActiveLanguage,elem.innerHTML);
+                })
+            }
+        }
         if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
         this.jComponent.off("click").click((e) => {
             if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(aOwner); }));
@@ -65,6 +75,16 @@ export class TContainer extends VXC.TComponent {
         return this.__classPath ? this.__classPath : "";
     }
 
+    private _backgroundimageurl: string;
+    public get BackgroundImageURL(): string {
+        return this._backgroundimageurl;
+    }
+    public set BackgroundImageURL(val: string) {
+        if (val != this._backgroundimageurl) {
+            this._backgroundimageurl = val;
+            this.drawDelayed(true);
+        }
+    }
 
     private _overflow: V.Overflow;
     /**The overflow property specifies what happens if content overflows an element's box**/
@@ -158,6 +178,9 @@ export class TContainer extends VXC.TComponent {
                 if (itm.Required && itm.isEmpty()) {
                     itm.ShowErrorMessage(V.Application.LocaleSettings.MSG_This_value_is_required)
                     rc = false;
+                } else if (itm.MinLength > 0 && itm.textLength() < itm.MinLength) {
+                    itm.ShowErrorMessage(V.Application.LocaleSettings.MSG_This_value_is_not_minimum.replace('%s', itm.MinLength.toString()));
+                    rc = false;
                 } else {
                     itm.HideErrorMessage();
                 }
@@ -218,6 +241,11 @@ export class TContainer extends VXC.TComponent {
             this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-vt-1');
         } else if (this.ShadowOptions == V.ShadowOptions.Side_vt_2) {
             this.jComponent.addClass('jquery-shadow jquery-shadow-sides jquery-shadow-sides-vt-2');
+        }
+
+
+        if (this.BackgroundImageURL != null && this.BackgroundImageURL.length > 0) {
+            this.jComponent.css('background-image', 'url(' + this.BackgroundImageURL + ')').css('background-size', 'cover').css('background-repeat', 'no-repeat');
         }
 
 

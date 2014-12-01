@@ -8,7 +8,6 @@ import V = require("./VCL");
 import VXO = require("./VXObject");
 import VXM = require("./VXMenu");
 
-
 export class TCarouselPage extends VXO.TCollectionItem {
     private _carousel: TCarousel;
     private _container: V.TContainer;
@@ -360,7 +359,7 @@ export class TPanelButton {
     }
 }
 
-export class TPanel extends VXCO.TContainer {
+export class TPanel extends VXCO.TContainer implements V.iTranslatable {
     public jHeader: JQuery;
     private jHeaderText: JQuery;
     public jContent: JQuery;
@@ -371,6 +370,21 @@ export class TPanel extends VXCO.TContainer {
     public Button2: TPanelButton;
     public Button3: TPanelButton;
     private jButtons: JQuery;
+
+    private _localizable: boolean = false;
+    /**
+    * In order to localize application each page or component of the application has to have Localizable property set true.
+    */
+    public get Localizable(): boolean {
+        return this._localizable;
+    }
+    public set Localizable(val: boolean) {
+        if (val != this._localizable) {
+            this._localizable = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     constructor(aOwner: VXC.TComponent, renderTo?: string, headerText?: string) {
         super(aOwner, renderTo);
@@ -419,18 +433,6 @@ export class TPanel extends VXCO.TContainer {
         }
     }
 
-
-
-    private _backgroundimageurl: string;
-    public get BackgroundImageURL(): string {
-        return this._backgroundimageurl;
-    }
-    public set BackgroundImageURL(val: string) {
-        if (val != this._backgroundimageurl) {
-            this._backgroundimageurl = val;
-            this.drawDelayed(true);
-        }
-    }
 
 
     private _hedderstyle: V.HeaderStyle = V.HeaderStyle.Default;
@@ -665,10 +667,6 @@ export class TPanel extends VXCO.TContainer {
 
         this.jComponent.css('border-width', this.BorderWidth);
 
-        if (this.BackgroundImageURL != null && this.BackgroundImageURL.length > 0) {
-            this.jComponent.css('background-image', 'url(' + this.BackgroundImageURL + ')').css('background-size', 'cover').css('background-repeat', 'no-repeat');
-        }
-
         //this.jContent.css('height', '100%');
         this.jHeader.off("click").click(() => {
             if (this.onHeaderClicked != null) (V.tryAndCatch(() => { this.onHeaderClicked(self); }));
@@ -754,7 +752,7 @@ export class TPanel extends VXCO.TContainer {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        this.jHeaderText.text(this.HeaderText);
+        this.jHeaderText.text(this.LocalizeText(this.HeaderText));
         this.HeaderVisible ? this.jHeader.show().css('border-top', '0px') : this.jHeader.hide().attr('min-height', '0px');
         this.createButton(this.Button3, null);
         this.createButton(this.Button2, null);
@@ -1028,10 +1026,10 @@ export class TGoogleMap extends VXC.TComponent {
 
         google.maps.event.addListener(item.marker, 'mouseout', function (a) {
             self.markerItems.forEach((item) => {
-                if (item.Title) {
-                    if (item.infowindow)
-                        item.infowindow.close();
-                }
+                //if (item.Title) {
+                if (item.infowindow)
+                    item.infowindow.close();
+                //}
             });
         });
 
@@ -1360,19 +1358,19 @@ export interface IGraphEditorLayout {
     /**
         Name of layout that serves as a key
     */
-    name():string;
+    name(): string;
 
     /**
         on layoutready
     */
-    onReady: () => void; 
+    onReady: () => void;
 
     /**
         on layoutstop
     */
-    onStop: () => void; 
+    onStop: () => void;
 
-    getOptions: () =>any;
+    getOptions: () => any;
 }
 
 /**
@@ -1382,7 +1380,19 @@ export class GraphEditorNullLayout implements IGraphEditorLayout {
     public name() {
         return "null";
     }
-    public onReady: () => void = function () {};
+    private _fit: boolean = true;
+    /**
+     Whether to fit the network view after when done
+    */
+    public get Fit(): boolean {
+        return this._fit;
+    }
+    public set Fit(val: boolean) {
+        if (val != this._fit) {
+            this._fit = val;
+        }
+    }
+    public onReady: () => void = function () { };
     public onStop: () => void = function () { };
 
     public getOptions() {
@@ -1480,9 +1490,9 @@ export class GraphEditorPresetLayout implements IGraphEditorLayout {
             stop: this.onStop, // on layoutstop
 
             fit: this.Fit, // whether to fit to viewport
-            
+
             padding: this.Padding,// Padding on fit
-           
+
             positions: undefined, // map of (node id) => (position obj)
             zoom: undefined, // the zoom level to set (prob want fit = false if set)
             pan: undefined // the pan level to set (prob want fit = false if set)
@@ -1502,7 +1512,7 @@ export class GraphEditorGridLayout implements IGraphEditorLayout {
     }
     public onReady: () => void = undefined;
     public onStop: () => void = undefined;
-    public onPosition: (any)=>void = function (node) { } // returns { row, col } for element
+    public onPosition: (any) => void = function (node) { } // returns { row, col } for element
 
     private _padding: number = 30;
     /**
@@ -1624,8 +1634,8 @@ export class GraphEditorCircleLayout implements IGraphEditorLayout {
         }
     }
 
-    
-    
+
+
     private _startAngle: number = 3 / 2 * Math.PI;
     /**
         the position of the first node
@@ -1638,7 +1648,7 @@ export class GraphEditorCircleLayout implements IGraphEditorLayout {
             this._startAngle = val;
         }
     }
-    
+
     private _counterclockwise: boolean = false;
     /**
         whether the layout should go counterclockwise (true) or clockwise (false)
@@ -1688,14 +1698,14 @@ export class GraphEditorConcentricLayout implements IGraphEditorLayout {
     /**
         returns numeric value for each node, placing higher nodes in levels towards the centre
     */
-    public onConcentric: () => void = function () { 
+    public onConcentric: () => void = function () {
         return this.degree();
     };
 
     /**
         the variation of concentric values in each level
     */
-    public onLevelWidth: (nodes: any) => void = function (nodes) { 
+    public onLevelWidth: (nodes: any) => void = function (nodes) {
         return nodes.maxDegree() / 4;
     };
 
@@ -1727,7 +1737,7 @@ export class GraphEditorConcentricLayout implements IGraphEditorLayout {
         }
     }
 
-    
+
     private _minNodeSpacing: number = 10;
     /**
         min spacing between outside of nodes (used for radius adjustment)
@@ -1744,7 +1754,7 @@ export class GraphEditorConcentricLayout implements IGraphEditorLayout {
 
 
 
-    private _height: number = undefined; 
+    private _height: number = undefined;
     /**
         height of layout area (overrides container height)
     */
@@ -1757,7 +1767,7 @@ export class GraphEditorConcentricLayout implements IGraphEditorLayout {
         }
     }
 
-    
+
     private _width: number = undefined;
     /**
         width of layout area (overrides container height)
@@ -1771,7 +1781,7 @@ export class GraphEditorConcentricLayout implements IGraphEditorLayout {
         }
     }
 
-    
+
     private _startAngle: number = 3 / 2 * Math.PI;
     /**
         the position of the first node
@@ -1785,7 +1795,7 @@ export class GraphEditorConcentricLayout implements IGraphEditorLayout {
         }
     }
 
-    
+
     private _counterclockwise: boolean = false;
     /**
         whether the layout should go counterclockwise (true) or clockwise (false)
@@ -1818,7 +1828,7 @@ export class GraphEditorConcentricLayout implements IGraphEditorLayout {
             height: this.Height, // height of layout area (overrides container height)
 
             width: this.Width, // width of layout area (overrides container width)
-             
+
             concentric: this.onConcentric,// returns numeric value for each node, placing higher nodes in levels towards the centre
 
             levelWidth: this.onLevelWidth // the variation of concentric values in each level
@@ -1867,7 +1877,7 @@ export class GraphEditorBreadthfirstLayout implements IGraphEditorLayout {
         }
     }
 
-    
+
     private _directed: boolean = false;
     /**
         whether the tree is directed downwards (or edges can point in any direction if false)
@@ -1881,7 +1891,7 @@ export class GraphEditorBreadthfirstLayout implements IGraphEditorLayout {
         }
     }
 
-    
+
     private _circle: boolean = false;
     /**
         put depths in concentric circles if true, put depths top down if false
@@ -1918,7 +1928,7 @@ export class GraphEditorBreadthfirstLayout implements IGraphEditorLayout {
             ready: this.onReady, // on layoutready
             stop: this.onStop, // on layoutstop
 
-            fit: this.Fit , // whether to fit to viewport
+            fit: this.Fit, // whether to fit to viewport
 
             padding: this.Padding,// Padding on fit
 
@@ -1959,7 +1969,7 @@ export class GraphEditorCOSELayout implements IGraphEditorLayout {
             this._refresh = val;
         }
     }
-    
+
     private _padding: number = 30;
     /**
         Padding on fit
@@ -1974,7 +1984,7 @@ export class GraphEditorCOSELayout implements IGraphEditorLayout {
     }
 
 
-    private _fit: boolean = true; 
+    private _fit: boolean = true;
     /**
      Whether to fit the network view after when done
     */
@@ -2002,7 +2012,7 @@ export class GraphEditorCOSELayout implements IGraphEditorLayout {
             this._randomize = val;
         }
     }
-    
+
 
     public getOptions() {
         var res = {
@@ -2096,8 +2106,8 @@ export class GraphEditorArborLayout implements IGraphEditorLayout {
             this._liveUpdate = val;
         }
     }
-    
-     private _ungrabifyWhileSimulating: boolean = false;
+
+    private _ungrabifyWhileSimulating: boolean = false;
     /**
         so you can't drag nodes during layout
     */
@@ -2178,13 +2188,13 @@ export class GraphEditorArborLayout implements IGraphEditorLayout {
     }
 };
 
-export enum ElementEnum { Node, Edge};
+export enum ElementEnum { Node, Edge };
 
 export class GraphElement extends VXO.TObject {
 
 
-    constructor(label?: string, tiplabel?:string) {
-        super();        
+    constructor(label?: string, tiplabel?: string) {
+        super();
         if (label != undefined) {
             this._label = label;
         }
@@ -2285,11 +2295,11 @@ export class GraphElement extends VXO.TObject {
     }
 
     public set Selected(val: boolean) {
-       // if (val != this._selected) {
-       // I am not dealing with selected notifications....
-            this._selected = val;
-            this.onChanged();
-       // }
+        // if (val != this._selected) {
+        // I am not dealing with selected notifications....
+        this._selected = val;
+        this.onChanged();
+        // }
     }
 
 
@@ -2482,11 +2492,11 @@ export class GraphElement extends VXO.TObject {
     }
 
 
-    private _positionmyH:V.GraphTipPositionHEnum = V.GraphTipPositionHEnum.Center;
+    private _positionmyH: V.GraphTipPositionHEnum = V.GraphTipPositionHEnum.Center;
     /**
         Which tooltip corner should be positioned see at http://qtip2.com/demos
         horizontal
-    */    
+    */
     public get TipPositionmyH(): V.GraphTipPositionHEnum {
         return this._positionmyH;
     }
@@ -2498,11 +2508,11 @@ export class GraphElement extends VXO.TObject {
     }
 
 
-    private _positionmyV:V.GraphTipPositionVEnum = V.GraphTipPositionVEnum.Top;
+    private _positionmyV: V.GraphTipPositionVEnum = V.GraphTipPositionVEnum.Top;
     /**
         Which tooltip corner should be positioned - see at http://qtip2.com/demos
         vertical
-    */    
+    */
     public get TipPositionmyV(): V.GraphTipPositionVEnum {
         return this._positionmyV;
     }
@@ -2514,11 +2524,11 @@ export class GraphElement extends VXO.TObject {
     }
 
 
-    private _positionatH:V.GraphTipPositionHEnum = V.GraphTipPositionHEnum.Center;
+    private _positionatH: V.GraphTipPositionHEnum = V.GraphTipPositionHEnum.Center;
     /**
         Which corner of the target should I diplay at  - see at http://qtip2.com/demos
         horizontal
-    */    
+    */
     public get TipPositionatH(): V.GraphTipPositionHEnum {
         return this._positionatH;
     }
@@ -2529,11 +2539,11 @@ export class GraphElement extends VXO.TObject {
         }
     }
 
-    private _positionatV:V.GraphTipPositionVEnum = V.GraphTipPositionVEnum.Bottom;
+    private _positionatV: V.GraphTipPositionVEnum = V.GraphTipPositionVEnum.Bottom;
     /**
         Which corner of the target should I diplay at  - see at http://qtip2.com/demos
         vertical
-    */    
+    */
     public get TipPositionatV(): V.GraphTipPositionVEnum {
         return this._positionatV;
     }
@@ -2545,7 +2555,7 @@ export class GraphElement extends VXO.TObject {
     }
 
 
-    
+
     private _TipHeight: number = 8;
     /**
         height : The height of the tip's body.
@@ -2613,7 +2623,7 @@ export class GraphElement extends VXO.TObject {
                     onAction(self);
                 }
             }
-        );
+            );
         this.onChanged();
     }
 
@@ -2710,8 +2720,8 @@ export class GraphElement extends VXO.TObject {
 
 
 export class GraphEdge extends GraphElement {
-    constructor(source?: string, target?: string, label?:string,tiplabel?:string) {
-        super(label,tiplabel);
+    constructor(source?: string, target?: string, label?: string, tiplabel?: string) {
+        super(label, tiplabel);
         this.ElementType = ElementEnum.Edge;
         if (source != undefined) {
             this.Source = source;
@@ -2903,7 +2913,7 @@ export class GraphEdge extends GraphElement {
         var res =
             {
                 group: ((this.ElementType == ElementEnum.Node) ? 'nodes' : 'edges'), // 'nodes' for a node, 'edges' for an edge
-                
+
                 // NB: id fields must be strings
                 data: { // element data (put dev data here)
                     id: this.ID, // mandatory for each element, assigned automatically on undefined
@@ -2916,7 +2926,7 @@ export class GraphEdge extends GraphElement {
 
                 selectable: this.Selectable, // whether the selection state is mutable (default true)
 
-                css: this.getStyle() 
+                css: this.getStyle()
             };
         return res;
     }
@@ -2992,7 +3002,7 @@ export class GraphNode extends GraphElement {
             this.onChanged();
         }
     }
-    
+
 
 
     private _height: number = 130;
@@ -3112,7 +3122,7 @@ export class GraphNode extends GraphElement {
         }
     }
 
-    
+
     private _positionX: number = 100;
     /**
         the model position of the node (optional on init, mandatory after)
@@ -3141,10 +3151,10 @@ export class GraphNode extends GraphElement {
     }
 
 
-    
 
 
-    
+
+
     private _locked: boolean = false;
     /**
         when locked a node's position is immutable (default false)
@@ -3160,7 +3170,7 @@ export class GraphNode extends GraphElement {
         }
     }
 
-    
+
     private _grabbable: boolean = true;
     /**
         whether the node can be grabbed and moved by the user
@@ -3176,7 +3186,7 @@ export class GraphNode extends GraphElement {
         }
     }
 
-    
+
     private _classes: string = "";
     /**
         a space separated list of class names that the element has
@@ -3222,10 +3232,10 @@ export class GraphNode extends GraphElement {
                 classes: this.Classes, // a space separated list of class names that the element has
 
                 color: this.LabelColor,
-                
+
 
                 // NB: you should only use `css` for very special cases; use classes instead
-                css: this.getStyle() 
+                css: this.getStyle()
             };
         return res;
     }
@@ -3456,7 +3466,11 @@ export class TGraphEditor extends VXC.TComponent {
                 }
             })
         }
+
+
     }
+
+
 
     private attachMenuTip(elObj: GraphElement, el: any) {
 
@@ -3554,8 +3568,7 @@ export class TGraphEditor extends VXC.TComponent {
 
     private setOuterStyles() {
         this.jComponent.css('background', this.BackgroundColor);
-        //Nati - Vadim added the comment below
-        // this.jComponent.css('border-color', this.BorderColor);
+
     }
 
     private synchronizeNodePositions() {
@@ -3701,6 +3714,7 @@ export class TGraphEditor extends VXC.TComponent {
     public resetGraph() {
         this._nodesObj = new Array<GraphNode>();
         this._edgesObj = new Array<GraphEdge>();
+        this.Zoom = 1;
 
         this.drawDelayed(false);
     }
@@ -3801,10 +3815,7 @@ export class TGraphEditor extends VXC.TComponent {
     public set PanzoomDisplay(val: boolean) {
         if (val != this._panzoomDisplay) {
             this._panzoomDisplay = val;
-            //Nati - Vadim uses the below line
             var div: any = $('.ui-cytoscape-panzoom', this.jComponent);
-            //Instead of your line which I commented below:
-            //var div: any = this.jComponent.find('>.ui-cytoscape-panzoom');
             if (this._panzoomDisplay) {
                 div[0].style.display = "block";
             }
@@ -3826,18 +3837,8 @@ export class TGraphEditor extends VXC.TComponent {
         if (val != this._navigatorDisplay) {
             this._navigatorDisplay = val;
 
-            //Nati - Vadim uses the below line
             this.drawDelayed(true);
-            //Instead of your block of code below:
-            /*
-                        var div: any = $('.cytoscape-navigator');
-                        if (this._navigatorDisplay) {
-                            div[0].style.display = "block";
-                        }
-                        else {
-                            div[0].style.display = "none";
-                        }
-            */        }
+        }
     }
 
 
@@ -4088,22 +4089,7 @@ export class TGraphEditor extends VXC.TComponent {
         }
     }
 
-    //Nati - Vadim commented below block for BorderColor
-    /*
-    private _border_color: string = 'black';
-    / **
-       Border color
-    * /
-    public get BorderColor(): string {
-        return this._border_color;
-    }
-    public set BorderColor(val: string) {
-        if (val != this._border_color) {
-            this._border_color = val;
-            this.drawDelayed(false);
-        }
-    }
-    */
+
     private _background_color: string = 'white';
     /**
        Background color
@@ -4131,6 +4117,7 @@ export class TGraphEditor extends VXC.TComponent {
     public set Zoom(val: number) {
         if (val != this._zoom) {
             this._zoom = val;
+            this.cytoscapeObj.zoom = this._zoom;
             this.drawDelayed(false);
         }
     }

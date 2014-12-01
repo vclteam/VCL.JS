@@ -6,7 +6,7 @@ import VXD = require("./VXDataset");
 import VXO = require("./VXObject");
 import VXU = require("./VXUtils");
 
-export class TGridBase extends VXC.TComponent {
+export class TGridBase extends VXC.TComponent implements V.iTranslatable{
     public onRowClicked: (record: any, clickedColumn: V.TDBGridColumn) => void;
     public onSortClicked: (column: V.TDBGridColumn, order: V.SortColumnOrder) => void;
     public onChecboxClicked: (recno: number) => void;
@@ -41,6 +41,20 @@ export class TGridBase extends VXC.TComponent {
         }
     }
 
+
+    private _localizable: boolean = false;
+    /**
+    * In order to localize application each page or component of the application has to have Localizable property set true.
+    */
+    public get Localizable(): boolean {
+        return this._localizable;
+    }
+    public set Localizable(val: boolean) {
+        if (val != this._localizable) {
+            this._localizable = val;
+            this.drawDelayed(true);
+        }
+    }
 
     private _showselectedrecord: boolean = true;
     /*
@@ -561,7 +575,6 @@ export class TGridBase extends VXC.TComponent {
         }
 
 
-
         var foot: string = '<tfoot><tr><th>';
 
         if (this.PagerAlignment == V.PagerAlignment.Right) {
@@ -696,6 +709,7 @@ export class TGridColumnCollection<T> extends VXO.TCollection<TDBGridColumn> {
     }
 
 }
+
 
 
 export class TDBGrid extends TGridBase {
@@ -1531,7 +1545,7 @@ Datagrid.prototype = {
             if (column.width > 0) style += 'width:' + column.width + "px;";
             if (!column.visible) style += 'display:none;';
             if (style != "") colHTML += " style='" + style + "' ";
-            colHTML += '>' + column.label + '</th>';
+            colHTML += '>' + _grid.LocalizeText(column.label) + '</th>';
         });
 
         self.$colheader.append(colHTML);

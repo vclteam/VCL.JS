@@ -538,6 +538,10 @@ export enum SwitchSize {
     Mini,
 }
 
+export interface iTranslatable {
+    Localizable : boolean;
+}
+
 export enum ButtonIcon {
     icon_glass, icon_music, icon_search, icon_envelope_o, icon_heart, icon_star, icon_star_o, icon_user,
     icon_film, icon_th_large, icon_th, icon_th_list, icon_check, icon_remove, icon_search_plus, icon_search_minus,

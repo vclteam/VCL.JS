@@ -7,7 +7,8 @@
 			/*
 			{ // example command
 				content: 'a command name' // html/text content to be displayed in the menu
-				select: function(){ // a function to execute when the command is selected
+				sele
+                : function(){ // a function to execute when the command is selected
 					console.log( this.id() ) // `this` holds the reference to the active element
 				}
 			}
@@ -390,10 +391,10 @@
 				});
 			}
 		};
-		
 		if( functions[fn] ){
 			return functions[fn].apply(this, Array.prototype.slice.call( arguments, 1 ));
-		} else if( typeof fn == 'object' || !fn ) {
+		} else if (typeof fn == 'object' || !fn) {
+		   // $.error("arguments `" + arguments + "` for init");
 			return functions.init.apply( this, arguments );
 		} else {
 			$.error("No such function `"+ fn +"` for jquery.cytoscapeCxtmenu");
@@ -404,10 +405,10 @@
 
 	$.fn.cyCxtMenu = $.fn.cytoscapeCxtmenu;
 
-	$$('core', 'cxtmenu', function( options ){
+	/*$$('core', 'cxtmenu', function( options ){
     var cy = this;
 
     $( cy.container() ).cytoscapeCxtmenu( options );
-  });
+  }); */
 	
 })(jQuery, cytoscape);

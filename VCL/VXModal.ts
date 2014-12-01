@@ -42,12 +42,12 @@ export class TModal extends VXC.TContainer {
     public showModal() {
         super.draw(true);
         this.jComponent.addClass('modal');
-        
+
         this.jComponent.modal({
             keyboard: false, maxHeight: this.MaxHeight, backdrop: 'static', width: this.Width,
             attentionAnimation: null, resize: true
         });
-       
+
         switch (this.effect) {
             case V.ModalEffects.FadeIn: {
                 this.jComponent.fadeIn(this.duration);
@@ -113,10 +113,10 @@ export class TModalBuilder extends TModal {
         this.createRow();
     }
 
-    public createInput(text? : string,labelText?: string, sizeInSpan: number = 2): V.TInput{
+    public createInput(text?: string, labelText?: string, sizeInSpan: number = 2): V.TInput {
         this.colCount += sizeInSpan;
         if (this.colCount > 12) {
-            this.colCount = 0;
+            this.colCount = sizeInSpan;
             this.createRow();
         }
         var inp: V.TInput = new V.TInput(this.currentRow, null);
@@ -166,7 +166,7 @@ export class TModalBuilder extends TModal {
         return inp;
     }
 
-    public createCheckbox(checked?: boolean, labelText?: string, sizeInSpan: number = 2): V.TCheckBox{
+    public createCheckbox(checked?: boolean, labelText?: string, sizeInSpan: number = 2): V.TCheckBox {
         this.colCount += sizeInSpan;
         if (this.colCount > 12) {
             this.colCount = 0;
@@ -206,7 +206,7 @@ export class TModalBuilder extends TModal {
     }
 
 
-    private _cancelbtntext :string = "Cancel";
+    private _cancelbtntext: string = "Cancel";
     public get CancelBtnText(): string {
         return this._cancelbtntext;
     }
@@ -215,7 +215,7 @@ export class TModalBuilder extends TModal {
     }
 
 
-    private _showcancelbtn :boolean = true;
+    private _showcancelbtn: boolean = true;
     public get ShowCancelBtn(): boolean {
         return this._showcancelbtn;
     }

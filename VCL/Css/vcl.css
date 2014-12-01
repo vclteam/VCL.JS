@@ -2047,8 +2047,8 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"] {
 
 }
 
-
 .wizard {
+  width:100%;
   position: relative;
   overflow: hidden;
   background-color: #f9f9f9;
@@ -2072,9 +2072,7 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"] {
 .fuelux .wizard:after {
   clear: both;
 }
-
 .wizard ul {
-  width: 4000px;
   padding: 0;
   margin: 0;
   list-style: none outside none;
@@ -2129,21 +2127,26 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"] {
   content: "";
 }
 
-.wizard ul li.complete {
-  color: #468847;
-  background: #f3f4f5;
-}
-
-.wizard ul li.complete:hover {
+.wizard ul li.active.complete {
   cursor: pointer;
   background: #e7eff8;
 }
 
-.wizard ul li.complete:hover .chevron:before {
+.wizard ul li.active.complete .chevron:before {
   border-left: 14px solid #e7eff8;
 }
 
-.wizard ul li.complete .chevron:before {
+
+.wizard ul li.active:hover {
+  cursor: pointer;
+  background: #e7eff8;
+}
+
+.wizard ul li.active:hover .chevron:before {
+  border-left: 14px solid #e7eff8;
+}
+
+.wizard ul li.active .chevron:before {
   border-left: 14px solid #f3f4f5;
 }
 

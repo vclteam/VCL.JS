@@ -45,6 +45,18 @@ export class TQueryBase extends VXD.TClientDataset {
         }
     }
 
+    private _timeout: number;
+    public get Timeout(): number {
+        return this._timeout;
+    }
+    public set Timeout(val: number) {
+        if (val != this._timeout) {
+            this._timeout = val;
+
+        }
+    }
+
+
 
     public close() {
         this.setData(null);
@@ -104,7 +116,7 @@ export class TQuery extends TQueryBase {
     */
     public open() {
         if (this.onBeforeOpen != null) (V.tryAndCatch(() => { this.onBeforeOpen(this); }))
-        var server = new VXDS.TServer();
+        var server = new VXDS.TServer(null, this.Timeout? this.Timeout : null);
         var paramJSON = (<any>this).paramAsJSON();
         if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         server.send(this._servermethod, { __EXECUTE__: false, __SQL__: this.SQL, __SQLPARAM__: paramJSON, __DB__: this.ConnectionName }, (data) => {
@@ -124,7 +136,7 @@ export class TQuery extends TQueryBase {
     * Call ExecSQL to execute the SQL statement currently assigned to the SQL property. Use ExecSQL to execute queries that do not return a cursor to data (such as INSERT, UPDATE, DELETE, and CREATE TABLE).
     */
     public ExecSQL(onComplete?: (data) => void) {
-        var server = new VXDS.TServer();
+        var server = new VXDS.TServer(null, this.Timeout ? this.Timeout : null);
         var paramJSON = (<any>this).paramAsJSON();
         if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         server.send("Query", { __EXECUTE__: true, __SQL__: this.SQL, __SQLPARAM__: paramJSON, __DB__: this.ConnectionName }, (data) => {
@@ -162,7 +174,7 @@ export class TQueryRemote extends TQueryBase {
 
     public open() {
         if (this.onBeforeOpen != null) (V.tryAndCatch(() => { this.onBeforeOpen(this); }))
-        var server = new VXDS.TServer();
+        var server = new VXDS.TServer(null, this.Timeout ? this.Timeout : null);
         var paramJSON = (<any>this).paramAsJSON();
 
         if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
@@ -183,7 +195,7 @@ export class TQueryRemote extends TQueryBase {
     * Call ExecSQL to execute the SQL statement currently assigned to the SQL property. Use ExecSQL to execute queries that do not return a cursor to data (such as INSERT, UPDATE, DELETE, and CREATE TABLE).
     */
     public ExecSQL(onComplete?: (data) => void) {
-        var server = new VXDS.TServer();
+        var server = new VXDS.TServer(null, this.Timeout ? this.Timeout : null);
         var paramJSON = (<any>this).paramAsJSON();
         if (this.owner != null && (this.owner instanceof VXCO.TContainer)) { (<any>this.owner).addQuery(this); }
         server.send("RemoteQuery", { __EXECUTE__: true, __QUERYID__: this.QueryID, __SQLPARAM__: paramJSON }, (data) => {

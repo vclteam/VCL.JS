@@ -6,7 +6,7 @@ import VXU = require("./VXUtils");
 
 import VXB = require("./VXInputBase");
 
-export class TButton extends VXC.TPopupmenuComponent {
+export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable {
     constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
         this._text = text;
@@ -22,6 +22,21 @@ export class TButton extends VXC.TPopupmenuComponent {
             this.drawDelayed(true);
         }
     }
+
+    private _localizable: boolean = false;
+    /**
+    * In order to localize application each page or component of the application has to have Localizable property set true.
+    */
+    public get Localizable(): boolean {
+        return this._localizable;
+    }
+    public set Localizable(val: boolean) {
+        if (val != this._localizable) {
+            this._localizable = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
 
     private _textcolor: string;
@@ -263,7 +278,7 @@ export class TButton extends VXC.TPopupmenuComponent {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
 
-        $(this.jText).text(this.Text);
+        $(this.jText).text(this.LocalizeText(this.Text));
     
     }
 }

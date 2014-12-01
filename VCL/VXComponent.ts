@@ -75,6 +75,11 @@ export class TComponent extends VXO.TObject {
         this.jComponent.remove();
     }
 
+    public LocalizeText(sourceString: string) {
+        if (!V.Application.ActiveLanguage || (!(<any>this)._localizable)) return sourceString;
+        return V.Application.getLanguageTranslation(V.Application.ActiveLanguage, sourceString);
+    }
+
     /**
     Adds the specified class(es) to the component.
     **/
@@ -132,7 +137,7 @@ export class TComponent extends VXO.TObject {
             }
 
             popupContainer.jComponent.on(this.__clickover.attr.click_event_ns, (e) => {
-                e.preventDefault();
+                //e.preventDefault();
                 e.stopPropagation();
             });
 

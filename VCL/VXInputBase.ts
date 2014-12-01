@@ -2,7 +2,7 @@ import VXC = require("./VXComponent");
 import V = require("./VCL");
 import VXU = require("./VXUtils");
 
-export class TEditorBase extends VXC.TComponent {
+export class TEditorBase extends VXC.TComponent implements V.iTranslatable{
 
     private _required: boolean = false;
     public get Required(): boolean {
@@ -14,6 +14,42 @@ export class TEditorBase extends VXC.TComponent {
             this.drawDelayed(true);
         }
     }
+
+    private _minlength: number;
+    public get MinLength(): number {
+        return this._minlength;
+    }
+    public set MinLength(val: number) {
+        if (val != this._minlength) {
+            this._minlength = Math.floor(val);
+            if (this._minlength < 0) this._minlength = 0;
+            this.drawDelayed(true);
+        }
+    }
+
+
+
+    private _localizable: boolean = false;
+    /**
+    * In order to localize application each page or component of the application has to have Localizable property set true.
+    */
+    public get Localizable(): boolean {
+        return this._localizable;
+    }
+    public set Localizable(val: boolean) {
+        if (val != this._localizable) {
+            this._localizable = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    public textLength(): number {
+        var c: String = this.jEdit.val();
+        if (!c) return 0;
+        if (c) c = c.trim();
+        return c.length;
+    }
+
 
     public isEmpty(): boolean {
         var c: String = this.jEdit.val();
@@ -150,7 +186,7 @@ export class TEditorBase extends VXC.TComponent {
             this.jLabel = $('<label/>');
             this.jLabel.addClass('control-label');
             this.jLabel.attr('for', this.jEdit.attr('id'));
-            this.jLabel.text(this.LabelText);
+            this.jLabel.text(this.LocalizeText(this.LabelText));
             if (this.LabelTextColor) this.jComponent.css('color', this.LabelTextColor);
             if (this.LabelPosition == V.LabelPosition.TopLeft) {
                 this.jComponent.prepend(this.jLabel)

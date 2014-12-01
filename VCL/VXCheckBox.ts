@@ -46,7 +46,7 @@ export class TCheckBoxBase extends VXC.TComponent {
     }
 }
 
-export class TRadioButtonBase extends VXC.TComponent {
+export class TRadioButtonBase extends VXC.TComponent implements V.iTranslatable {
     public onClicked: (sender: TRadioButtonBase) => void;
     public onChanged: (sender: TRadioButtonBase) => void;
 
@@ -66,6 +66,22 @@ export class TRadioButtonBase extends VXC.TComponent {
             this.draw(false);
         }
     }
+
+    private _localizable: boolean = false;
+    /**
+    * In order to localize application each page or component of the application has to have Localizable property set true.
+    */
+    public get Localizable(): boolean {
+        return this._localizable;
+    }
+    public set Localizable(val: boolean) {
+        if (val != this._localizable) {
+            this._localizable = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
 
     private _group: string = "~";
     /*
@@ -137,7 +153,7 @@ export class TCheckBox extends TCheckBoxBase {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
 
-        this.jText.text(this.Text);
+        this.jText.text(this.LocalizeText(this.Text));
         this.jCheckbox.prop('checked', this.Checked);
     }
 }
@@ -174,7 +190,7 @@ export class TRadioButton extends TRadioButtonBase {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
 
-        this.jText.text(this.Text);
+        this.jText.text(this.LocalizeText(this.Text));
         this.jRadioButton.prop('checked', this.Checked);
     }
 }
@@ -258,7 +274,7 @@ export class TDBCheckBox extends TCheckBoxBase {
             super.draw(reCreate);
         }
 
-        this.jText.text(this.Text);
+        this.jText.text(this.LocalizeText(this.Text));
         this.jCheckbox.prop('checked', this.DataValue);
     }
 }

@@ -2,7 +2,7 @@ import VXC = require("./VXComponent");
 import VXU = require("./VXUtils");
 import V = require("./VCL");
 
-export class TAlert extends VXC.TComponent {
+export class TAlert extends VXC.TComponent implements V.iTranslatable {
     constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
         super(aOwner, renderTo);
         this.Visible = false;
@@ -20,6 +20,21 @@ export class TAlert extends VXC.TComponent {
             this.drawDelayed(true);
         }
     }
+
+    private _localizable: boolean = false;
+    /**
+    * In order to localize application each page or component of the application has to have Localizable property set true.
+    */
+    public get Localizable(): boolean {
+        return this._localizable;
+    }
+    public set Localizable(val: boolean) {
+        if (val != this._localizable) {
+            this._localizable = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
 
     private _text: string;
@@ -106,7 +121,7 @@ export class TAlert extends VXC.TComponent {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        this.jText.html(this.Text);
+        this.jText.html(this.LocalizeText(this.Text));
     }
 
     public show() {
@@ -116,7 +131,7 @@ export class TAlert extends VXC.TComponent {
 
 
 
-export class TNotification extends VXC.TComponent {
+export class TNotification extends VXC.TComponent implements V.iTranslatable  {
     public onClosed: () => void;
 
     constructor(aOwner: VXC.TComponent) {
@@ -134,6 +149,21 @@ export class TNotification extends VXC.TComponent {
             this.draw(true);
         }
     }
+
+    private _localizable: boolean = false;
+    /**
+    * In order to localize application each page or component of the application has to have Localizable property set true.
+    */
+    public get Localizable(): boolean {
+        return this._localizable;
+    }
+    public set Localizable(val: boolean) {
+        if (val != this._localizable) {
+            this._localizable = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     private _timeout: number = 3000;
     /*
@@ -220,7 +250,7 @@ export class TNotification extends VXC.TComponent {
         this.jComponent.empty();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
         this.jComponent = $('<div/>').addClass('alert');
-        this.jComponent.html(this.Text);
+        this.jComponent.html(this.LocalizeText(this.Text));
         if (this.CloseButtonVisible) {
             var link = $('<a class="close pull-right" href="#">&times;</a>');
             link.on('click', $.proxy(this.close, this));

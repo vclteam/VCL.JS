@@ -110,8 +110,9 @@ export class TTimer {
     }
 
     once(milliSeconds: number): void {
+        var self = this;
         if (isNaN(milliSeconds)) { milliSeconds = 0; }
-        this.timeoutObject = window.setTimeout(function () { this.action(); }, milliSeconds);
+        this.timeoutObject = window.setTimeout(function () { self.action(); }, milliSeconds);
     }
 
     play(milliSeconds: number): void {

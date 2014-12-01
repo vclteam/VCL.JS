@@ -42,7 +42,11 @@ export class TWizardButtonsStep extends VXO.TCollectionItem {
         var chv = $("<span>").addClass('chevron');
         chv.appendTo(li);
         li.off("click").click(() => {
-            if (self.onClicked != null && li.hasClass('active')) (V.tryAndCatch(() => { self.onClicked(self); }));
+            if (self.onClicked != null && li.hasClass('active')) (V.tryAndCatch(() => {
+                li.parent().children().removeClass("complete");
+                li.addClass("complete");
+                self.onClicked(self);
+            }));
         });
 
         return li;
@@ -50,7 +54,7 @@ export class TWizardButtonsStep extends VXO.TCollectionItem {
 
 }
 
-export class TWizardButtons extends VXC.TComponent{
+export class TWizardButtons extends VXC.TComponent {
     public items: V.TCollection<TWizardButtonsStep> = new V.TCollection<TWizardButtonsStep>();
 
     /**
@@ -70,12 +74,16 @@ export class TWizardButtons extends VXC.TComponent{
         var ul = $("<ul>");
         ul.appendTo(this.jComponent);
         var idx = 0;
-        var isactive: boolean = true;
+        var isActive = true;
         this.items.forEach((item) => {
             idx++;
-            ul.append(item.create(idx, this.ActiveItem ? isactive : false));
-            if (item == this.ActiveItem) isactive = false;
+            var li = item.create(idx, isActive);
+            ul.append(li);
+            if (item == this.ActiveItem)
+                isActive = false;
         });
+        if (ul.hasClass("complete") == false)
+            ul.children().first().addClass("complete");
     }
 
     public createStep(text: string): TWizardButtonsStep {
@@ -292,8 +300,6 @@ export class TTabPage extends VXCO.TContainer {
             picker.append((<any>item).jItem);
             (<any>item).jTabPane.data("ID", item);
             picker2.append((<any>item).jTabPane);
-
-
         });
         this.jComponent.append(picker);
         this.jComponent.append(picker2);
@@ -317,6 +323,11 @@ export class TTabPage extends VXCO.TContainer {
         }
 
         this.created = true;
+        $('.nav-tabs a').click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).tab('show');
+        });
     }
 
     public draw(reCreate: boolean) {
@@ -491,12 +502,14 @@ export class TAccordionGroup extends VXO.TCollectionItem {
     public jComponent: JQuery = null;
     private jaccordionheading: JQuery = null;
     private jaccordiontoggle: JQuery = null;
+    private jaccordiontoggleCaret: JQuery = null;
+    private jaccordiontoggleText: JQuery = null;
     private jaccordiontoggleCont: JQuery = null;
 
     public Button1: TAccordionGroupButton;
     public Button2: TAccordionGroupButton;
     public Button3: TAccordionGroupButton;
-    public onChecboxClicked: (sender: TAccordionGroup ) => void;
+    public onChecboxClicked: (sender: TAccordionGroup) => void;
 
     private _showselectcheckbox: boolean = false;
     public get ShowSelectCheckbox(): boolean {
@@ -561,7 +574,7 @@ export class TAccordionGroup extends VXO.TCollectionItem {
         button.jGroupButton.prependTo(this.jButtons);
         button.jImage.prependTo(button.jButton);
         button.jButton.prependTo(button.jGroupButton);
-    
+
         if (button.MarginBottom) button.jButton.css('margin-bottom', button.MarginBottom + "px");
         if (button.MarginTop) button.jButton.css('margin-top', button.MarginTop + "px");
         if (button.MarginLeft) button.jButton.css('margin-left', button.MarginLeft + "px");
@@ -634,9 +647,28 @@ export class TAccordionGroup extends VXO.TCollectionItem {
         this.jaccordionheading = $('<div>');
         this.jaccordionheading.addClass('accordion-heading');//.css('display', 'inline-block');
         this.jaccordiontoggle = $('<a>');
-        
-        this.jaccordiontoggle.addClass('accordion-toggle').attr('data-toggle', 'collapse').attr('data-parent', '#' + this._acc.ID);
-        if (this.InnerContainer)  this.jaccordiontoggle.attr('href', '#' + this.InnerContainer.ID + "yk");
+        this.jaccordiontoggleCaret = $('<span class="icon-caret-right cvidya">');
+        this.jaccordiontoggleText = $('<span style="margin-left: 5px;">' + this.Text + "</span >");
+
+        this.jaccordiontoggle.addClass('accordion-toggle').attr('data-toggle', 'collapse');//.addClass('icon-caret-right').addClass("cvidya");
+        this.jaccordiontoggle.click((e) => {
+            if (this._acc.MultipleExpanded) {
+                self.jaccordiontoggleCaret.toggleClass("icon-caret-down icon-caret-right");
+            } else {
+                //Remove all Caret down from groups 
+                this._acc.items.forEach((item) => {
+                    if (item && item.jComponent) {
+                        if (self.jaccordiontoggleCaret != item.jaccordiontoggleCaret) {
+                            item.jComponent.find('span.cvidya').removeClass("icon-caret-down").addClass("icon-caret-right");
+                        }
+                    }
+                });
+                //toggle caret correctly
+                self.jaccordiontoggleCaret.toggleClass("icon-caret-down icon-caret-right");
+            }
+        });
+        if (!this._acc.MultipleExpanded) this.jaccordiontoggle.attr('data-parent', '#' + this._acc.ID);
+        if (this.InnerContainer) this.jaccordiontoggle.attr('href', '#' + this.InnerContainer.ID + "yk");
         //Add the Header Container if defined else the provided text
 
         if (this.ShowSelectCheckbox) {
@@ -648,7 +680,6 @@ export class TAccordionGroup extends VXO.TCollectionItem {
                 self.Checked = this.jCheckbox.prop('checked');
                 if (self.onChecboxClicked != null) (V.tryAndCatch(() => { self.onChecboxClicked(this); }));
             })
-
         }
 
         this.jaccordionheading.append(this.jaccordiontoggle);
@@ -665,7 +696,7 @@ export class TAccordionGroup extends VXO.TCollectionItem {
             this.jComponent.append(this.jAccBody);
             this.InnerContainer.create();
         }
-        this.jButtons = $("<div>").addClass("accordion-button").css('float','right');
+        this.jButtons = $("<div>").addClass("accordion-button").css('float', 'right');
         this.createButton(this.Button1, null);
         this.createButton(this.Button2, null);
         this.createButton(this.Button3, null);
@@ -673,26 +704,45 @@ export class TAccordionGroup extends VXO.TCollectionItem {
         this.jButtons.prependTo(this.jaccordionheading);
     }
 
-    public draw(recreate: boolean)  {
+    public draw(recreate: boolean) {
         if (recreate) this.create();
 
         if (this.jCheckbox) this.jCheckbox.prop('checked', this.Checked);
-        if (this.jaccordiontoggle) this.jaccordiontoggle.html(this.Text)
+        if (this.jaccordiontoggle) this.jaccordiontoggle.append(this.jaccordiontoggleCaret).append(this.jaccordiontoggleText);//html('<span class="icon-caret-right cvidya"></span> <span style="margin-left: 5px;">' + this.Text + "</span>");
+        //if (this.jaccordiontoggle) this.jaccordiontoggle.html(this.Text);
         if (this.Expanded) {
-            if (this.jaccordiontoggle) this.jaccordiontoggle.removeClass('collapsed');
+            if (this.jaccordiontoggle) {
+                this.jaccordiontoggle.removeClass('collapsed');
+                this.jaccordiontoggleCaret.removeClass('icon-caret-right');
+                this.jaccordiontoggleCaret.addClass('icon-caret-down');
+            }
             if (this.jAccBody) this.jAccBody.addClass('in');
         } else {
-            if (this.jaccordiontoggle)  this.jaccordiontoggle.addClass('collapsed');
-        if (this.jAccBody) this.jAccBody.removeClass('in');
+            if (this.jaccordiontoggle) {
+                this.jaccordiontoggle.addClass('collapsed');
+                this.jaccordiontoggleCaret.removeClass('icon-caret-down');
+                this.jaccordiontoggleCaret.addClass('icon-caret-right');
+            }
+            if (this.jAccBody) this.jAccBody.removeClass('in');
         }
     }
 }
 
 //The main Accordion element - holds an array of TAccordionGroups
 export class TAccordion extends VXCO.TContainer {
-    /** items represents a container for TAccordionGroup objects.*/
     public items: V.TCollection<TAccordionGroup> = new V.TCollection<TAccordionGroup>();
     private jaccordion: JQuery = null;
+
+    private _multipleOpen: boolean = false;
+    public get MultipleExpanded(): boolean {
+        return this._multipleOpen;
+    }
+    public set MultipleExpanded(val: boolean) {
+        if (val != this._multipleOpen) {
+            this._multipleOpen = val;
+            this.draw(true);
+        }
+    }
 
     public createAccordionGroup(text: string, refcontainer: VXCO.TContainer): TAccordionGroup {
         var ag = new TAccordionGroup(this, refcontainer);
@@ -718,7 +768,9 @@ export class TAccordion extends VXCO.TContainer {
         });
         //Attach the accordion element to the jComponent
         this.jComponent.append(this.jaccordion);
-        //var x = this.jaccordion.collapse()
+        //this.jaccordion.on("show", (e) => {
+        //   $(e.target).siblings(".accordion-heading").find(".accordion-toggle i").toggleClass("icon-caret-down icon-caret-right");
+        //})
     }
 
     public draw(reCreate: boolean) {

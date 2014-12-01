@@ -6,7 +6,7 @@ export class VXUtils {
         var attrs = {};
 
         for (var i = 0, len = $(element)[0].attributes.length; i < len; i++) {
-            attrs[$(element)[0].attributes[i].nodeName] = $(element)[0].attributes[i].nodeValue;
+            attrs[$(element)[0].attributes[i].nodeName] = $(element)[0].attributes[i].value;
         }       
         var rep: JQuery = $("<" + newType + "/>", attrs).append($(element).contents());
         element.after(rep).remove();

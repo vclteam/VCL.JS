@@ -2,7 +2,7 @@ import V = require("./VCL");
 import VXC = require("./VXComponent");
 import VXD = require("./VXDataset");
 
-export class TTextBase extends VXC.TComponent {
+export class TTextBase extends VXC.TComponent implements V.iTranslatable  {
     public onClicked: (sender: TTextBase) => void;
 
     private _rtl: boolean = false;
@@ -15,6 +15,21 @@ export class TTextBase extends VXC.TComponent {
             this.drawDelayed(true);
         }
     }
+
+    private _localizable: boolean = false;
+    /**
+    * In order to localize application each page or component of the application has to have Localizable property set true.
+    */
+    public get Localizable(): boolean {
+        return this._localizable;
+    }
+    public set Localizable(val: boolean) {
+        if (val != this._localizable) {
+            this._localizable = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     private _textcolor: string;
     public get TextColor(): string {

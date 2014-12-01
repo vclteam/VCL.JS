@@ -364,9 +364,7 @@ export class TApplication {
     }
 
     public raiseException(errorMessage: string) {
-        if (this.onException == null) {
-            alert(errorMessage);
-        }
+        if (this.onException == null) { alert(errorMessage); }
         else this.onException(errorMessage);
     }
 
@@ -578,6 +576,54 @@ export class TApplication {
         }
     }
 
+    private _activeLanguage: string;
+    /**
+    * change the current selected language of the system
+    */
+    public get ActiveLanguage(): string {
+        return this._activeLanguage;
+    }
+    public set ActiveLanguage(val: string) {
+        if (val && !this.languageTable[val]) {
+            this.raiseException("Language:" + val + " was not found. use V.Application.addLanguage function");
+            return;
+        }
+        if (val != this._activeLanguage) {
+            this._activeLanguage = val;
+        }
+    }
+
+    private newItemIntranslationTable: boolean = false;
+    private languageTable: any = new Object();
+    public addLanguage(languageCode: string, languageName: string) {
+        this.languageTable[languageCode] = languageName;
+        if (!this.translationTable[languageCode]) this.translationTable[languageCode] = new Object();
+    }
+
+    private translationTable: any = new Object();
+    public addLanguageTranslation(languageCode: string, sourceString: string, translatedString: string) {
+        if (!this.languageTable[languageCode]) this.raiseException("Language:" + languageCode + " was not found. use V.Application.addLanguage function");
+        else this.translationTable[languageCode][sourceString.trim().toLocaleLowerCase()] = translatedString;
+    }
+    public getLanguageTranslation(languageCode: string, sourceString: string): string {
+        if (!sourceString) return sourceString;
+        if (!this.languageTable[languageCode]) this.raiseException("Language:" + languageCode + " was not found. use V.Application.addLanguage function");
+        if (!this.translationTable[languageCode]) this.translationTable[languageCode] = new Object();
+        var res = this.translationTable[languageCode][sourceString.trim().toLocaleLowerCase()];
+        if (!res) {
+            for (var lang in this.languageTable) {
+                if (!this.translationTable[lang]) this.translationTable[lang] = new Object();
+                if (!this.translationTable[lang][sourceString.trim().toLocaleLowerCase()]) {
+                    this.translationTable[lang][sourceString.trim().toLocaleLowerCase()] = null;
+                    this.newItemIntranslationTable = true;
+                }
+            }
+            return sourceString;
+        }
+        return res;
+    }
+
+
     private _enableapplicationcache: boolean = true;
     /**
     * Contains the text that appears in the browser title.
@@ -640,20 +686,20 @@ export class TApplication {
                 if (item.Active) lineItem.addClass('active');
                 baritem.appendTo(lineItem);
                 if (item.menuItems.length() > 0) {
-
                     item.menuItems.createmenu('dropdown-menu').appendTo(lineItem);
+
                     baritem.addClass('dropdown-toggle');
                     baritem.attr('data-toggle', "dropdown");
                     lineItem.addClass('dropdown');
                     $('<b class="caret">').appendTo(baritem);
                 }
-                $('.dropdown-toggle').dropdown()
                 if (item.ItemAlignment == V.ItemAlignment.Left) lineItem.appendTo(navLeft)
                 else lineItem.appendTo(navRight);
             }
             return true;
         });
         document.title = this.ApplicationTitle;
+        $('.dropdown-toggle').dropdown()
     }
 
 
@@ -985,6 +1031,7 @@ export class TFacebookAPI {
 
 export class TLocaleSettings {
     public MSG_This_value_is_required: string = "This value is required.";
+    public MSG_This_value_is_not_minimum: string = " Must be more than %s characters.";
     public PercentString: string = "%";
     public LabelPosition: V.LabelPosition = V.LabelPosition.TopLeft;
 }
@@ -1195,4 +1242,3 @@ class passwordStrength {
         return score * -5;
     }
 }
-

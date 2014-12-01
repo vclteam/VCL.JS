@@ -31,7 +31,8 @@ export class TText extends VXT.TTextBase {
         } else this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'p', this.FitToWidth, this.FitToHeight);
 
         this.jComponent.off("click").click(() => {
-            if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(self); })); return false;
+            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self); })); return false; }
+            else return true;
         })
 
         if (this.TextColor) this.jComponent.css('color', this.TextColor);
@@ -60,7 +61,7 @@ export class TText extends VXT.TTextBase {
         super.draw(reCreate);
         this.jComponent.html(this.Text)
         if (this.onClicked != null) this.jComponent.css('cursor', 'pointer');
-        else this.jComponent.css('cursor', 'default');
+        else this.jComponent.css('cursor', '');
 
     }
 }
@@ -95,7 +96,11 @@ export class TLabel extends VXT.TTextBase {
     public create() {
         var self = this;
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
-        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(self); })); return false; })
+        this.jComponent.off("click").click(() => {
+            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self); })); return false; }
+            else return true;
+        })
+
 
         this.jComponent.addClass('label');
         if (this.LabelStyle == V.LabelStyle.Success) this.jComponent.addClass('label-success');
@@ -116,7 +121,7 @@ export class TLabel extends VXT.TTextBase {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
 
-        this.jComponent.text(this.Text)
+        this.jComponent.text(this.LocalizeText(this.Text))
     }
 
 }
@@ -138,7 +143,11 @@ export class TDBLabel extends VXT.TDBTextBase {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('label');
         if (this.Rtl == true) this.jComponent.attr("dir", "RTL");
-        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        this.jComponent.off("click").click(() => {
+            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(); })); return false; }
+            else return true;
+        })
+
         if (this.LabelStyle == V.LabelStyle.Success) this.jComponent.addClass('label-success');
         else if (this.LabelStyle == V.LabelStyle.Warning) this.jComponent.addClass('label-warning');
         else if (this.LabelStyle == V.LabelStyle.Important) this.jComponent.addClass('label-important');
@@ -172,7 +181,11 @@ export class TBadge extends VXT.TTextBase {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('badge');
         if (this.Rtl == true) this.jComponent.attr("dir", "RTL");
-        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(self); })); return false; })
+        this.jComponent.off("click").click(() => {
+            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self); })); return false; }
+            else return true;
+        })
+
 
         if (this.BadgeStyle == V.BadgeStyle.Success) this.jComponent.addClass('badge-success');
         else if (this.BadgeStyle == V.BadgeStyle.Warning) this.jComponent.addClass('badge-warning');
@@ -192,7 +205,7 @@ export class TBadge extends VXT.TTextBase {
         super.draw(reCreate);
 
 
-        this.jComponent.text(this.Text)
+        this.jComponent.text(this.LocalizeText(this.Text))
     }
 
 }
@@ -214,7 +227,11 @@ export class TDBBadge extends VXT.TDBTextBase {
 
         this.jComponent.addClass('badge');
         if (this.Rtl == true) this.jComponent.attr("dir", "RTL");
-        this.jComponent.off("click").click(() => { if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(); })); return false; })
+        this.jComponent.off("click").click(() => {
+            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(); })); return false; }
+            else return true;
+        })
+
 
         if (this.BadgeStyle == V.BadgeStyle.Success) this.jComponent.addClass('badge-success');
         else if (this.BadgeStyle == V.BadgeStyle.Warning) this.jComponent.addClass('badge-warning');

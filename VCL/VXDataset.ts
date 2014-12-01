@@ -278,14 +278,16 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     public loadRemoteResults(data: any) {
         //replace the dates with JS dates - data is loaded from .net backend
         if (data.META || data.DATA) {
-            for (var i = 0, l = data.META.length; i < l; i++) {
-                if (data.META[i].TYPE.toLowerCase() != 'date') continue;
-                for (var j = 0; j < data.DATA.length; j++) {
-                    if (data.DATA[j][data.META[i].NAME] != null) {
-                        // sometime type Date value can be sent as string
-                        var milisecs = (typeof data.DATA[j][data.META[i].NAME] === "number") ? data.DATA[j][data.META[i].NAME] : parseInt(data.DATA[j][data.META[i].NAME]);
-                        //data.DATA[j][data.META[i].NAME] = new Date(data.DATA[j][data.META[i].NAME]);
-                        data.DATA[j][data.META[i].NAME] = new Date(milisecs);
+            if (data.META) {
+                for (var i = 0, l = data.META.length; i < l; i++) {
+                    if (data.META[i].TYPE.toLowerCase() != 'date') continue;
+                    for (var j = 0; j < data.DATA.length; j++) {
+                        if (data.DATA[j][data.META[i].NAME] != null) {
+                            // sometime type Date value can be sent as string
+                            var milisecs = (typeof data.DATA[j][data.META[i].NAME] === "number") ? data.DATA[j][data.META[i].NAME] : parseInt(data.DATA[j][data.META[i].NAME]);
+                            //data.DATA[j][data.META[i].NAME] = new Date(data.DATA[j][data.META[i].NAME]);
+                            data.DATA[j][data.META[i].NAME] = new Date(milisecs);
+                        }
                     }
                 }
             }

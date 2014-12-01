@@ -139,7 +139,12 @@ export class TImage extends TGraphic {
         this.jImage.appendTo(this.jComponent);
         
 
-        this.jImage.off("click").click(() => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(); })); return false; })
+        this.jImage.off("click").click(() => {
+            if (self.onClicked != null && self.Enabled) { V.tryAndCatch(() => { self.onClicked(); }); return false; }
+            else return true;
+        });
+
+
         this.jImage.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(); })); return false; })
         
         if (this.DisableUrl && this.Enabled) this.jImage.attr('src', this.DisableUrl);
