@@ -134,9 +134,9 @@ export class TApplication {
         });
     }
 
-    /*
+    /**
     * create and load page & html file asynchronously  an return an object instance in a callback function
-    */
+    **/
     public loadPage(classPathName: string, __args: any[], __callback?: (page: V.TPage) => void) {
         var self = this;
         var classes: string[] = [];
@@ -204,9 +204,9 @@ export class TApplication {
     }
 
 
-    /*
+    /**
     *  capture page loading if the event return false page loading will not occurred
-    */
+    **/
     public OnPageLoad: (PageName: string, Params: any) => boolean;
 
     public getLocalValue(name: string, defaultValue?: any) {
@@ -227,16 +227,16 @@ export class TApplication {
         this.sammy.local("VCL", session);
     }
 
-    /*
+    /**
     * The showMessage procedure displays a string of Text in a simple dialog with an OK button. with an optional callback
     */
     public showMessage(message: string, callback?: () => void) {
         (<any>bootbox).alert(message, callback)
     }
 
-    /*
+    /**
     * The MessageDlg function is used to display messages to the user. These messages may be informational, or warnings or whatever.  
-    */
+    **/
     public messageDlg(message: string, title: string, buttons: Array<string>, callback?: (results: string) => void) {
         var json: any = {};
         json.message = message;
@@ -254,9 +254,9 @@ export class TApplication {
 
     }
 
-    /*
+    /**
     * The MessagePrompt function is used to display messages to the user. These messages may be informational, or warnings or whatever.  
-    */
+    **/
     public messageDlgPrompt(message: string, callback?: (promptedText: string) => void) {
         (<any>bootbox).prompt(message, (promptedText) => {
             if (callback) callback(promptedText);
@@ -290,9 +290,9 @@ export class TApplication {
         this.sammy.run(this.buildPageURL(this.MainPage));
     }
 
-    /*
+    /**
     * return the encoded page url as string
-    */
+    **/
     public buildPageURL(className: string, ConstructorArgs?: any[]) {
         return "#show/" + stringToHex(className) + '/' + (decodeURIComponent(stringToHex(
             JSON.stringify(ConstructorArgs ? ConstructorArgs : new Object(), jsonCreateDateParserTemp))));
@@ -301,9 +301,9 @@ export class TApplication {
 
     public onLoggedIn: () => void;
     public onLoggedOff: () => void;
-    /*
+    /**
     * specify the server side method for login 
-    */
+    **/
     public loginServerClass: string = "Login";
     public login(email: string, password: string, onSuccuess: (data?: any) => void,
         onFail?: (errorMessage: string) => void) {
@@ -346,9 +346,9 @@ export class TApplication {
         this.sammy.setLocation(URL);
     }
 
-    /*
+    /**
     * The windowOpenURL() method opens a new browser window.
-    */
+    **/
     public windowOpenURL(URL: string, target: string) {
         window.open(URL, target)
     }
@@ -730,7 +730,8 @@ export class TApplication {
         }
         return str;
     }
-    /*
+
+    /**
     *  rate password strength
     */
     public PasswordStrength(password: string): V.PasswordStrength {
@@ -942,9 +943,9 @@ export class TFacebookAPI {
     private _accessToken: string = null;
 
     private _appid: string = null;
-    /*
+    /**
     * Text specify the text string that labels the control.
-    */
+    **/
     public get ApplicationID(): string {
         return this._appid;
     }
@@ -1088,9 +1089,9 @@ export class TNavbarItem extends VXO.TCollectionItem {
     }
 
     private _imageURL: string = null;
-    /*
+    /**
     * Text specify the text string that labels the control.
-    */
+    **/
     public get ImageURL(): string {
         return this._imageURL;
     }
@@ -1102,9 +1103,9 @@ export class TNavbarItem extends VXO.TCollectionItem {
 
 
     private _text: string;
-    /*
+    /**
     * Text specify the text string that labels the control.
-    */
+    **/
     public get Text(): string {
         return this._text;
     }

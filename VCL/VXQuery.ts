@@ -66,7 +66,7 @@ export class TQueryBase extends VXD.TClientDataset {
 
 export class TQuery extends TQueryBase {
     private _SQL: string;
-    /*
+    /**
     * Contains the text of the SQL statement to execute for the ADO query.
     */
     public get SQL(): string {
@@ -111,9 +111,6 @@ export class TQuery extends TQueryBase {
     }
 
 
-    /*
-    *
-    */
     public open() {
         if (this.onBeforeOpen != null) (V.tryAndCatch(() => { this.onBeforeOpen(this); }))
         var server = new VXDS.TServer(null, this.Timeout? this.Timeout : null);
@@ -132,7 +129,7 @@ export class TQuery extends TQueryBase {
             , this.CacheTimeOut);
     }
 
-    /*
+    /**
     * Call ExecSQL to execute the SQL statement currently assigned to the SQL property. Use ExecSQL to execute queries that do not return a cursor to data (such as INSERT, UPDATE, DELETE, and CREATE TABLE).
     */
     public ExecSQL(onComplete?: (data) => void) {
@@ -191,7 +188,7 @@ export class TQueryRemote extends TQueryBase {
             );
     }
 
-    /*
+    /**
     * Call ExecSQL to execute the SQL statement currently assigned to the SQL property. Use ExecSQL to execute queries that do not return a cursor to data (such as INSERT, UPDATE, DELETE, and CREATE TABLE).
     */
     public ExecSQL(onComplete?: (data) => void) {

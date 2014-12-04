@@ -43,7 +43,7 @@ export class TComboboxBase extends VXB.TEditorBase {
     }
 
     private _noneselectedtext: string = "Nothing selected";
-    /*
+    /**
     * display selected count insted of values
     * The number of minimum items that will show count insted of values
     */
@@ -59,7 +59,7 @@ export class TComboboxBase extends VXB.TEditorBase {
 
 
     private _showselectioncount: number = 3;
-    /*
+    /**
     * display selected count insted of values
     * The number of minimum items that will show count insted of values
     */
@@ -410,7 +410,7 @@ export class TCombobox extends TComboboxBase {
 
 export class TDBCombobox extends TComboboxBase {
     private _dataset: VXD.TDataset;
-    /*
+    /**
     * Specifies the dataset that contains the field it represents.
     */
     public get Dataset(): VXD.TDataset {

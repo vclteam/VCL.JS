@@ -368,7 +368,7 @@ export class TInputBase extends TEditorBase {
 
 
     private _placeholder: string;
-    /*
+    /**
     * The placeholder attribute specifies a short hint that describes the expected value of an input field 
     * (e.g. a sample value or a short description of the expected format).
     */

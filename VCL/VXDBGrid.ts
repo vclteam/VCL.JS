@@ -28,7 +28,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
     }
 
     private _autotablelayout: boolean = false;
-    /*
+    /**
     * The column width is set by the widest unbreakable content in the cells
     */
     public get AutomaticTableLayout(): boolean {
@@ -57,7 +57,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
     }
 
     private _showselectedrecord: boolean = true;
-    /*
+    /**
     * Adds zebra-striping to any tdbgridt control.
     */
     public get ShowSelectedRecord(): boolean {
@@ -71,7 +71,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
     }
 
     private _striped: boolean = false;
-    /*
+    /**
     * Adds zebra-striping to any tdbgridt control.
     */
     public get Striped(): boolean {
@@ -214,7 +214,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
 
 
     private _bordered: boolean = true;
-    /*
+    /**
     * Add borders and rounded corners to the table.
     */
     public get Bordered(): boolean {
@@ -228,7 +228,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
     }
 
     private _condensed: boolean = true;
-    /*
+    /**
     * Makes grid more compact by cutting cell padding in half.
     */
     public get Condensed(): boolean {
@@ -339,7 +339,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
 
 
     private _selectedrecordstyle: V.SelectedRowStyle = V.SelectedRowStyle.Info;
-    /*
+    /**
     * Adds zebra-striping to any tdbgridt control.
     */
     public get SelectedRecordStyle(): V.SelectedRowStyle {

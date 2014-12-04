@@ -342,7 +342,7 @@ export class TSparkBar extends TSparkBase {
 
 export class TDBSparkBar extends TSparkBar {
     private _dataset: VXD.TDataset;
-    /*
+    /**
     * Specifies the dataset that contains the field it represents.
     */
     public get Dataset(): VXD.TDataset {
@@ -394,7 +394,7 @@ export class TDBSparkBar extends TSparkBar {
 
 export class TDBSparkPie extends TSparkPie {
     private _dataset: VXD.TDataset;
-    /*
+    /**
     * Specifies the dataset that contains the field it represents.
     */
     public get Dataset(): VXD.TDataset {
@@ -446,7 +446,7 @@ export class TDBSparkPie extends TSparkPie {
 
 export class TDBSparkLine extends TSparkLine {
     private _dataset: VXD.TDataset;
-    /*
+    /**
     * Specifies the dataset that contains the field it represents.
     */
     public get Dataset(): VXD.TDataset {

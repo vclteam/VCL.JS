@@ -2267,7 +2267,7 @@ export module collections {
 export class TCollection<T> extends collections.Set<T>{
 
     public locked: boolean = false;
-    /*
+    /**
     * Signals the end of an update operation.
     * Call EndUpdate after completing an operation that was preceded by a call to the BeginUpdate method.
     */
@@ -2275,7 +2275,7 @@ export class TCollection<T> extends collections.Set<T>{
         this.locked = true;
     }
 
-    /*
+    /**
     * Signals the start of an update operation.
     * All BeginUpdate before starting an operation that performs changes to TCollection. After completing all the changes, call EndUpdate to signal the end of the operation.
     */
@@ -2303,7 +2303,7 @@ export class TCollection<T> extends collections.Set<T>{
 export class TList<T> extends collections.LinkedList<T>{
 
     public locked: boolean = false;
-    /*
+    /**
     * Signals the end of an update operation.
     * Call EndUpdate after completing an operation that was preceded by a call to the BeginUpdate method.
     */
@@ -2311,7 +2311,7 @@ export class TList<T> extends collections.LinkedList<T>{
         this.locked = true;
     }
 
-    /*
+    /**
     * Signals the start of an update operation.
     * All BeginUpdate before starting an operation that performs changes to TCollection. After completing all the changes, call EndUpdate to signal the end of the operation.
     */

@@ -254,7 +254,7 @@ export class TTagCloud extends VXC.TComponent {
     /** Custom Format tooltip */
     public ToolTipFormat: (item: TTagCloudItem) => string;
 
-    /*
+    /**
         Use the OnClick event handler to respond when the user clicks the control. 
     */
     public onClicked: (item: TTagCloudItem) => void;

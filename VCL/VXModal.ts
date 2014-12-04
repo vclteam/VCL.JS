@@ -199,7 +199,7 @@ export class TModalBuilder extends TModal {
         return '<div class="modal-header"><div id="captionText" /></div><div id="__boddy__" class="modal-body"></div><div class="modal-footer"><div id="closeBtn" /><div id="okBtn" /></div>';
     }
 
-    /*
+    /**
     * Text specify the modal header text.
     */
     public get HeaderText(): string {

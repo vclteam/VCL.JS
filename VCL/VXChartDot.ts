@@ -93,9 +93,9 @@ export class TChartDotBase extends VXCB.TGridChartBase {
     }
 
     private _heatmap: boolean = false;
-    /*
+    /**
     * whether or not to enable coloring higher value symbols with warmer hue
-    */
+    **/
     public get HeatMap(): boolean {
         return this._heatmap;
     }
@@ -138,9 +138,9 @@ class Dot extends VXCB.Grid {
 export class TChartDot extends TChartDotBase {
     //depricated - use ToolTipFormat instead
     public onGetLabelText: (item: V.TDotValue) => any;
-    /*
+    /**
         Use the OnClick event handler to respond when the user clicks the control. 
-    */
+    **/
     public onClicked: (item: V.TDotValue) => void;
 
     constructor(aOwner: V.TComponent, renderTo?: string) {

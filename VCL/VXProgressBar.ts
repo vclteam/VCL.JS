@@ -6,7 +6,7 @@ export class TProgressBar extends VXC.TComponent {
     private jBar: JQuery;
 
     private _value: number = 0;
-    /*
+    /**
     * specify the value in percentage of the progress control.
     * Value accept value from 0 to 100
     */
@@ -98,7 +98,7 @@ export class TProgressBar extends VXC.TComponent {
 export class TRatingStart extends VXC.TComponent {
     public onClicked: (sender: TRatingStart) => void;
     private _starsize: number = 1.5;
-    /*
+    /**
     * specify the value from 0-5 of the rating control.
     * Value accept value from 0 to 5
     */
@@ -130,7 +130,7 @@ export class TRatingStart extends VXC.TComponent {
 
 
     private _value: number = 0;
-    /*
+    /**
     * specify the value from 0-5 of the rating control.
     * Value accept value from 0 to 5
     */

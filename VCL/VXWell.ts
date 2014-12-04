@@ -448,7 +448,7 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
 
 
     private _largeheaderbutton: boolean = false;
-    /*
+    /**
     * specify the size of the panel header button.
     */
     public get LargeHeaderButton(): boolean {
@@ -464,7 +464,7 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
 
 
     private _buttonaligment: V.ButtonAlignment = V.ButtonAlignment.Right;
-    /*
+    /**
     * Text specify the panel header text string .
     */
     public get ButtonAlignment(): V.ButtonAlignment {
@@ -506,7 +506,7 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
 
 
     private _headertext: string;
-    /*
+    /**
     * Text specify the panel header text string .
     */
     public get HeaderText(): string {
@@ -832,7 +832,7 @@ export class TGoogleMap extends VXC.TComponent {
     }
 
     private _googleAPIKey: string = "";
-    /*
+    /**
     * Text specify the panel header text string .
     */
     public get GoogleAPIKey(): string {
@@ -860,7 +860,7 @@ export class TGoogleMap extends VXC.TComponent {
     }
 
     private _HeatMapMarkerZoom: number = 14;
-    /*
+    /**
     * only in HeatMap show marker on zoom 0 - 18 (google map), defualt 12, null - not used
     */
     public get ShowHeatMapAsMarkerOnZoom(): number {

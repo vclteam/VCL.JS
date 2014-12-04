@@ -65,7 +65,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
     }
 
     private _text: string;
-    /*
+    /**
     * Text specify the text string that labels the control.
     */
     public get Text(): string {
@@ -162,7 +162,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
         }
     }
 
-    /*
+    /**
         Use the OnClick event handler to respond when the user clicks the control. 
     */
     public onClicked: (sender: TButton) => void;

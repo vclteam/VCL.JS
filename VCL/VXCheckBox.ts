@@ -14,7 +14,7 @@ export class TCheckBoxBase extends VXC.TComponent {
     public jText: JQuery;
 
     private _text: string;
-    /*
+    /**
     * Text specify the text string that labels the control.
     */
     public get Text(): string {
@@ -54,7 +54,7 @@ export class TRadioButtonBase extends VXC.TComponent implements V.iTranslatable 
     public jText: JQuery;
 
     private _text: string;
-    /*
+    /**
     * Text specify the text string that labels the control.
     */
     public get Text(): string {
@@ -84,7 +84,7 @@ export class TRadioButtonBase extends VXC.TComponent implements V.iTranslatable 
 
 
     private _group: string = "~";
-    /*
+    /**
     * Text specify the group string grouping the radio button together.
     */
     public get Group(): string {

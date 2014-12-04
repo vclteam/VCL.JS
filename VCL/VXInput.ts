@@ -44,7 +44,7 @@ export class TInput extends VXB.TInputBase {
 }
 export class TDBInput extends VXB.TInputBase {
     private _dataset: VXD.TDataset;
-    /*
+    /**
     * Specifies the dataset that contains the field it represents.
     */
     public get Dataset(): VXD.TDataset {
@@ -268,7 +268,7 @@ export class TDBInputNumeric extends VXB.TInputBase {
     }
 
     private _dataset: VXD.TDataset;
-    /*
+    /**
     * Specifies the dataset that contains the field it represents.
     */
     public get Dataset(): VXD.TDataset {
@@ -473,7 +473,7 @@ export class TDBTextArea extends VXB.TInputBase {
     private textarea: boolean = true;
 
     private _dataset: VXD.TDataset;
-    /*
+    /**
     * Specifies the dataset that contains the field it represents.
     */
     public get Dataset(): VXD.TDataset {

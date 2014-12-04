@@ -58,7 +58,7 @@ export class TTextBase extends VXC.TComponent implements V.iTranslatable  {
 
 
     private _text: string;
-    /*
+    /**
     * Text specify the text string that labels the control.
     */
     public get Text(): string {
@@ -127,7 +127,7 @@ export class TDBTextBase extends VXC.TComponent {
     }
 
     private _dataset: VXD.TDataset;
-    /*
+    /**
     * Specifies the dataset that contains the field it represents.
     */
     public get Dataset(): VXD.TDataset {

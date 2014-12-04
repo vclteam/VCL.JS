@@ -435,9 +435,9 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         }
     }
 
-    /*
+    /**
      * When set to false (the default), all null and undefined values in a data series will be ignored and lines will be drawn spanning them. 
-     */
+    **/
     private _continuousine: boolean = false;
     public get ContinuousLine(): boolean {
         return this._continuousine;
@@ -449,7 +449,7 @@ export class TChartLineBase extends VXCB.TGridChartBase {
         }
     }
 
-    /*
+    /**
      *  enable line smoothing. 
     */
     private _smooth: boolean = true;

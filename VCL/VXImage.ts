@@ -114,7 +114,7 @@ export class TImage extends TGraphic {
     }
 
 
-    /*
+    /**
     * The required src attribute specifies the URL of the image.
     */
     public get Src(): string {

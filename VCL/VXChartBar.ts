@@ -64,7 +64,7 @@ export class TChartBar extends VXCB.TGridChartBase {
     }
 
     private _selectcolorOpacity: number = 1;
-    /*
+    /**
     * set the opacity of the selected bar  - values (0-1)
     */
     public get SelectedBarOpacity(): number {
@@ -79,7 +79,7 @@ export class TChartBar extends VXCB.TGridChartBase {
     }
 
     private _unselectcolorOpacity: number = 0.7;
-    /*
+    /**
     * set the opacity of the unselected bars - values (0-1)
     */
     public get UnselectedBarOpacity(): number {
@@ -917,9 +917,9 @@ export class TDBChartBar extends TChartBar {
 
 
     private _dataset: VXD.TDataset;
-    /*
+    /**
       * Specifies the dataset that contains the field it represents.
-      */
+    */
     public get Dataset(): VXD.TDataset {
         return this._dataset;
     }

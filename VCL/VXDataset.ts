@@ -148,7 +148,7 @@ export class TDataset extends VXO.TObject {
     public get Readonly(): boolean {
         return false;
     }
-    /*
+    /**
     * return an object with the content of the currnt record
     */
     public getCurrentRecord(): any {
@@ -156,7 +156,7 @@ export class TDataset extends VXO.TObject {
         return this.recordset[this.Recno];
     }
 
-    /*
+    /**
     * return a unique indentifier of the record
     */
     public getRecordIndex(): number {
@@ -164,7 +164,7 @@ export class TDataset extends VXO.TObject {
         return this.recordset[this.Recno]["___RECORDID___"];
     }
 
-    /*
+    /**
     * return the record number of specfix recordIndex
     */
     public getRecordIndexRecNo(recordIndex): number {
@@ -420,7 +420,7 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         }
     }
 
-    /*
+    /**
     * Adds a new records to the end of the dataset. the method return the new record number
     * example x.appendRecords([{fileid : 1},{fileid : 2}]);
     */
@@ -433,7 +433,7 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         return this.RecordCount - 1;
     }
 
-    /*
+    /**
     * delete the current record
     */
     public deleteRecord(): number {
@@ -446,7 +446,7 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     }
 
 
-    /*
+    /**
     * Adds a new record to the end of the dataset. the method return the new record number
     */
     public appendRecord(record: Object, disableEvents: boolean = false): number {
@@ -491,7 +491,7 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         }
     }
 
-    /* 
+    /**
     * Data represents the client dataset's local, in-memory copy of its data, encoded as a array of any
     */
     private static reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;

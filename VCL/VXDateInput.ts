@@ -260,9 +260,9 @@ export class TDBDateInput extends TDateInputBase {
 
 
     private _dataset: VXD.TDataset;
-    /*
+    /**
       * Specifies the dataset that contains the field it represents.
-      */
+    */
     public get Dataset(): VXD.TDataset {
         return this._dataset;
     }

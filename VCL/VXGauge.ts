@@ -49,7 +49,7 @@ export class TGauge extends VXC.TComponent {
     }
 
     private _label: string ;
-    /*
+    /**
     * the that appers below the value
     */
     public get Label(): string {
@@ -63,7 +63,7 @@ export class TGauge extends VXC.TComponent {
     }
 
     private _symbol: string = "";
-    /*
+    /**
     * Special symbol to show next to value
     */
     public get Symbol(): string {
@@ -160,7 +160,7 @@ export class TGauge extends VXC.TComponent {
 
 
     private _humanFriendly: boolean = false;
-    /*
+    /**
     * convert large numbers for min, max, value to human friendly (e.g. 1234567 -> 1.23M)
     */
     public get HumanFriendly(): boolean {
@@ -174,7 +174,7 @@ export class TGauge extends VXC.TComponent {
     }
 
     private _shadow: boolean = true;
-    /*
+    /**
     * convert large numbers for min, max, value to human friendly (e.g. 1234567 -> 1.23M)
     */
     public get Shadow(): boolean {
