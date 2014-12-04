@@ -1,4 +1,4 @@
-Vcl.js takes the Delphi/VB approach into the HTML5 world,providing a full stack for a true web RAD development.Provide backend and fronendfor node.js & .net web application.
+Vcl.js takes the desktop devlopment approach into the HTML5 world,providing a full stack for a true web RAD development.Provide backend and fronendfor node.js & .net web application.
 =====
 
 
