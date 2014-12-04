@@ -167,7 +167,8 @@ export class TApplication {
         var self = this;
         var instance;
 
-        var defaultPath = (<any>Class).getClassPath ? (<any>Class).getClassPath() + '/' : "";
+        var defaultPath = (<any>Class).getClassPath ? (<any>Class).getClassPath() + "" : "";
+        if (defaultPath) defaultPath = defaultPath + "/";
         var path = (htmlPath ? htmlPath + '/' : defaultPath) + (<any>Class).getClassName() + ".html"
         new VXDS.TServer(false).getHTML(path,
             (html: any) => {
@@ -177,7 +178,7 @@ export class TApplication {
             (errorMessage: string) => {
                 V.Application.raiseException("cant find :" + path);
             }
-            );
+        );
         return instance;
     }
 

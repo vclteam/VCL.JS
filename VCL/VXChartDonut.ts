@@ -58,6 +58,20 @@ export class TChartDonut extends VXCB.TChartBase {
         }
     }
 
+    private _showZeroSlices: boolean = false;
+    /**
+    * Donut show ZeroSlices
+    */
+    public get ShowZeroSlices(): boolean {
+        return this._showZeroSlices;
+    }
+    public set ShowZeroSlices(val: boolean) {
+        if (val != this._showZeroSlices) {
+            this._showZeroSlices = val;
+            this.drawDelayed(true);
+        }
+    }
+
     private _startangle: number = 0;
     /**
     * Specifies the field from which the edit control displays data.
@@ -245,6 +259,7 @@ export class TChartDonut extends VXCB.TChartBase {
             element: this.jComponent[0],
             data: dataArray,
             colors: colors,
+            showZeroVal: this.ShowZeroSlices,
             hideHover: this.ShowHoverLegend,
             startangle: this.StartAngle,
             endangle: this.EndAngle,
@@ -407,7 +422,7 @@ class Donut extends VXCB.Grid {
 
     redraw() {
         var self = this;
-        var C, cx, cy, last, min, next, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+        var C, cx, cy, last, min, next, seg, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
         this.el.empty();
         this.raphael = new Raphael(this.el[0]);
         this.init();
@@ -439,18 +454,22 @@ class Donut extends VXCB.Grid {
             this.text1 = this.drawEmptyDonutLabel(cx, txtY + 10, emptyTxt);
         }
         w = (Math.min(cx, cy - txtH * 3)) / 3 - 1;
-        total = 0;
         _ref = this.data;
+        var totalValue = 0;
+        var totalSeg = 0;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            value = _ref[_i].y[0];
+            var value = _ref[_i].y[0];
             if (value) {
-                total += value;
+                totalValue += value;
+            }
+            if (value || this.options.showZeroVal) {
+                totalSeg++;
             }
         }
-        if (total == 0) total = 1;
+        if (totalValue == 0) totalValue = 1;
 
         min = 5 / (2 * w);
-        C = (ang / 180) * Math.PI - min * this.data.length - 0.0001;
+        C = (ang / 180) * Math.PI - min * totalSeg - 0.0001;
         last = (this.options.startangle / 180) * Math.PI;
 
         var idx = 0;
@@ -460,28 +479,31 @@ class Donut extends VXCB.Grid {
             value = _ref1[i].y[0];
             var inner = 0;
             var outer = 0;
-            if (this.options.behaveLikePie) { inner = 0; outer = w * 2.5; } else { inner = w * 2; outer = Math.max(20, w); }
-
-            next = last + min + C * (value / total);
-            seg = new DonutSegment(
-                cx, cy, inner, outer, last, next - 0.02,
-                this.options.colors[idx % this.options.colors.length],
-                this.options.backgroundColor, idx, this.raphael, _ref1.length);
-            seg.ID = this.data[i].id;
-            var s = seg.render();
-            s.node.TipId = "node";
-            s.node.idx = idx;
-            s.node.series = -1;
-            s.node.onclick = function (evt, x, y) {
-                var offset = $(self.el).offset();
-                self.click(evt.pageX - offset.left, evt.pageY - offset.top, evt);
-            };
-            this.segments.push(seg);
-            last = next;
-            idx += 1;
-
-            if (!value) {
-                seg.hide();
+            if (this.options.behaveLikePie)
+            { inner = 0; outer = w * 2.5; } else { inner = w * 2; outer = Math.max(20, w); }
+            if (value || this.options.showZeroVal) {
+                next = last + min + C * (value / totalValue);
+                seg = new DonutSegment(
+                    cx, cy, inner, outer, last, next - 0.02,
+                    this.options.colors[idx % this.options.colors.length],
+                    this.options.backgroundColor, idx, this.raphael, _ref1.length);
+                seg.ID = this.data[i].id;
+                var s = seg.render();
+                s.node.TipId = "node";
+                s.node.idx = idx;
+                s.node.series = -1;
+                s.node.onclick = function (evt, x, y) {
+                    var offset = $(self.el).offset();
+                    self.click(evt.pageX - offset.left, evt.pageY - offset.top, evt);
+                };
+                this.segments.push(seg);
+                last = next;
+                idx += 1;
+            }
+            else {
+                idx += 1;
+                this.segments.push(null);
+                continue;
             }
         }
 
@@ -523,13 +545,13 @@ class Donut extends VXCB.Grid {
 
             //unselect all
             owner.SelectedItems.forEach((item) => {
-                this.segments[item.Idx].deselect();
+                if (item) this.segments[item.Idx].deselect();
             });
 
             //check clicked
             owner.SelectedItem = o;
             owner.SelectedItems.forEach((item) => {
-                this.segments[item.Idx].select();
+                if (item) this.segments[item.Idx].select();
             });
 
             if (owner instanceof TDBChartDonut && (<TDBChartDonut>owner).Dataset != null) {
@@ -547,12 +569,12 @@ class Donut extends VXCB.Grid {
 
         //deselect oldIdx
         this.segments.forEach((item) => {
-            item.deselect();
+            if (item) item.deselect();
         });
 
         //check clicked
         owner.SelectedItems.forEach((item) => {
-            this.segments[item.Idx].select();
+            if (item) this.segments[item.Idx].select();
         });
 
         var id;

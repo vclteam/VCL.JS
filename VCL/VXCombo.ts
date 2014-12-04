@@ -192,6 +192,8 @@ export class TComboboxBase extends VXB.TEditorBase {
     private jImage: JQuery;
     private jbtnText: JQuery;
     public create() {
+        var options: any = new Object();
+
         this.jComponent.empty(); //clear all subcomponents
 
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
@@ -205,14 +207,14 @@ export class TComboboxBase extends VXB.TEditorBase {
 
 
         if (this.MultipleSelect) this.jEdit.attr('multiple', 'multiple');
-        if (this.DropUp) this.jEdit.addClass('dropup');
+        if (this.DropUp) options.dropupAuto = 2;
         if (!this.Enabled) this.jEdit.attr('disabled', 'disabled');
 
         this.jEdit.attr('data-size', this.MaxVisibleLines);
 
         this.jEdit.addClass('selectpicker show-menu-arrow');
         if (this.ShowSearchBox) this.jEdit.attr('data-live-search', "true");
-        var options: any = new Object();
+
         switch (this.ComboStyle) {
             case V.ComboStyle.Default: break;
             case V.ComboStyle.Primary: options.style = "btn-primary"; break;

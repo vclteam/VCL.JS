@@ -859,11 +859,26 @@ export class TGoogleMap extends VXC.TComponent {
         }
     }
 
+    private _HeatMapMarkerZoom: number = 14;
+    /*
+    * only in HeatMap show marker on zoom 0 - 18 (google map), defualt 12, null - not used
+    */
+    public get ShowHeatMapAsMarkerOnZoom(): number {
+        return this._HeatMapMarkerZoom;
+    }
+    public set ShowHeatMapAsMarkerOnZoom(val: number) {
+        if (val != this._HeatMapMarkerZoom) {
+            if (val < 0 || val > 18) val = 14;
+            this._HeatMapMarkerZoom = val;
+            this.draw(false);
+        }
+    }
 
     private map: google.maps.Map;
     public create() {
         var self = this;
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
+        this.jComponent.empty();
         var myLatlng = new google.maps.LatLng(0, 0);
         var mapOptions: google.maps.MapOptions = { zoom: 6, center: myLatlng, mapTypeId: google.maps.MapTypeId.ROADMAP };
         this.map = new google.maps.Map(this.jComponent[0], mapOptions);
@@ -873,9 +888,37 @@ export class TGoogleMap extends VXC.TComponent {
             self.refreshHeatmap();
             self.optimizeZoomLevel1();
             self.optimizeZoomLevel2();
+            //HeatMap to marker
+            if (self.heatmapMarkerItems != null) {
+                self.zoomChanged();
+                google.maps.event.addListener(self.map, 'zoom_changed', function () {
+                    self.zoomChanged();
+                });
+            }
         });
+    }
 
-
+    private zoomChanged() {
+        var self = this;
+        if (self.heatmapMarkerItems.length() > 0) {
+            var z = self.map.getZoom();
+            if (z == self.ShowHeatMapAsMarkerOnZoom - 1) {
+                self.markerItems = new VXO.TCollection<TGoogleMapMarker>();
+                self.refreshMarkers();
+            }
+            if (z > self.ShowHeatMapAsMarkerOnZoom && self.markerItems.length() == 0) {
+                self.markerItems = new VXO.TCollection<TGoogleMapMarker>();
+                for (var i = 0; i < self.heatmapMarkerItems.length(); i++) {
+                    var heatMarker = new TGoogleMapMarker();
+                    heatMarker.Address = self.heatmapMarkerItems.get(i).Address;
+                    heatMarker.Lat = self.heatmapMarkerItems.get(i).Lat;
+                    heatMarker.Lng = self.heatmapMarkerItems.get(i).Lng;
+                    heatMarker.Tag = self.heatmapMarkerItems.get(i).Tag;
+                    self.markerItems.add(heatMarker);
+                }
+                self.refreshMarkers();
+            }
+        }
     }
 
     public draw(reCreate: boolean) {
@@ -888,12 +931,14 @@ export class TGoogleMap extends VXC.TComponent {
     private createheatmaplayer(layername: string): Array<google.maps.LatLng> {
         var heatData: Array<google.maps.LatLng> = [];
         this.heatmapMarkerItems.forEach((item) => {
-            if ((item.Lat && item.Lng) && item.Layer == layername) {
-                var myLatlng = new google.maps.LatLng(item.Lat, item.Lng);
-                var obj = { location: myLatlng, weight: item.Weight }
+            if (item.Layer == layername) {
+                if ((item.Lat && item.Lng)) {
+                    var myLatlng = new google.maps.LatLng(item.Lat, item.Lng);
+                    var obj = { location: myLatlng, weight: item.Weight }
                     heatData.push(<any>obj);
-            } else if (item.Address) {
-                this.decodeHeatmapAddress(item.Address, item);
+                } else if (item.Address) {
+                    this.decodeHeatmapAddress(item.Address, item);
+                }
             }
         });
         return heatData;
@@ -909,14 +954,18 @@ export class TGoogleMap extends VXC.TComponent {
             });
         }
 
+        //remove old controls
+        self.map.controls[google.maps.ControlPosition.TOP_RIGHT].clear();
+
+
         this.heatmapLayer = [];
-        var layrs: Array<string> = [];
+        var layers: Array<string> = [];
         this.heatmapMarkerItems.forEach((item) => {
-            if (item.Lat && item.Lng && item.Layer && layrs.indexOf(item.Layer) == -1) layrs.push(item.Layer);
+            if (item.Layer && layers.indexOf(item.Layer) == -1) layers.push(item.Layer);
         });
 
-        if (this.heatmapMarkerItems.length) {
-            layrs.forEach((layer) => {
+        if (this.heatmapMarkerItems.length()) {
+            layers.forEach((layer) => {
                 var heatData: Array<google.maps.LatLng> = this.createheatmaplayer(layer);
                 var opt: google.maps.visualization.HeatmapLayerOptions = { data: heatData, radius: 20 };
                 var heat = new google.maps.visualization.HeatmapLayer(opt);
@@ -930,7 +979,7 @@ export class TGoogleMap extends VXC.TComponent {
                 (<any>heat).homeControlDiv = homeControlDiv;
             })
         }
-        return layrs;
+        return layers;
     }
 
 
@@ -1074,6 +1123,7 @@ export class TGoogleMap extends VXC.TComponent {
                 myItem.Lat = results[0].geometry.location.lat();
                 myItem.Lng = results[0].geometry.location.lng();
                 self.refreshHeatmap();
+                if (self.onDecodeAddress) self.onDecodeAddress(<any>myItem);
             }
             if (!this.decodeReq) {
                 this.optimizeZoomLevel1();
@@ -1132,6 +1182,7 @@ export class TGoogleMap extends VXC.TComponent {
         this.map.setZoom(this.getZoomByBounds(this.map, bounds));
         this.map.setCenter(bounds.getCenter());
     }
+
     private optimizeZoomLevel2() {
         var bounds = new google.maps.LatLngBounds();
         var found = false;

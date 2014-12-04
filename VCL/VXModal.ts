@@ -29,9 +29,9 @@ export class TModal extends VXC.TContainer {
         super(null, null);
         if (!(<any>this).__HTML__) V.Application.raiseException("Error in " + this.getClassName() + " - You can't instantiate TPage directly, use V.Application.loadPage ,V.Application.createPage");
 
-        this.jBody = this.jComponent.clone(true);
-        this.jComponent.empty();
-        this.jComponent.append(this.jBody);
+        //this.jBody = this.jComponent.clone(true);
+        //this.jComponent.empty();
+        //this.jComponent.append(this.jBody);
 
         if (effect != null) {
             this.effect = effect;
@@ -74,6 +74,7 @@ export class TModal extends VXC.TContainer {
         this.jComponent.modal('hide');
         if (this.onClosed != null) { (V.tryAndCatch(() => { this.onClosed(); })) }
     }
+
     public cancel() {
         this.jComponent.modal('hide');
         if (this.onCancel != null) { (V.tryAndCatch(() => { this.onCancel(); })) }
@@ -135,6 +136,18 @@ export class TModalBuilder extends TModal {
         var inp: V.TTextArea = new V.TTextArea(this.currentRow, null);
         inp.Text = text;
         inp.LabelText = labelText;
+        inp.jComponent.addClass("span" + sizeInSpan);
+        return inp;
+    }
+
+    public createText(text?: string, sizeInSpan: number = 2): V.TText {
+        this.colCount += sizeInSpan;
+        if (this.colCount > 12) {
+            this.colCount = 0;
+            this.createRow();
+        }
+        var inp: V.TText = new V.TText(this.currentRow, null);
+        inp.Text = text;
         inp.jComponent.addClass("span" + sizeInSpan);
         return inp;
     }

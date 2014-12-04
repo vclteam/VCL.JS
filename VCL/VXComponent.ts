@@ -688,7 +688,7 @@ Clickover.prototype = $.extend({}, $.fn.popover.Constructor.prototype, {
 
        actualWidth = this.options.width ? this.options.width : $tip[0].offsetWidth;
        actualHeight = $tip[0].offsetHeight
-       var maxleft: number = $(window).width() - pos.width;
+       var maxleft: number = $(window).width() - actualWidth;
 
        var lft = Math.min(maxleft, pos.left + pos.width / 2 - actualWidth / 2);
        //lft = Math.max(lft, 0);

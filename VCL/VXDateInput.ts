@@ -195,7 +195,7 @@ export class TDateInput extends TDateInputBase {
     public create() {
         super.create();
         var self: any = this;
-        self.DateFormat = V.Application.DateFormat
+        if (self.DateFormat == undefined) self.DateFormat = V.Application.DateFormat
         this.jComponent.on('changeDate', function (ev: any) {
             var dt: any = ev.date;
             self.Date = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
