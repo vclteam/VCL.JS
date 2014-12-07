@@ -1,7 +1,6 @@
 ﻿var cfg = {
     baseUrl: '',
     waitSeconds: 60,
-    //urlArgs: "bust=" + (new Date()).getTime(),
     paths: {
         'bootstrap-modal': 'VCL/Scripts/bootstrap-modal',
         'bootstrap-modalmanager': 'VCL/Scripts/bootstrap-modalmanager',

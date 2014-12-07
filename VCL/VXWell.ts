@@ -955,29 +955,29 @@ export class TGoogleMap extends VXC.TComponent {
         }
 
         //remove old controls
-        self.map.controls[google.maps.ControlPosition.TOP_RIGHT].clear();
-
+        self.map.controls[google.maps.ControlPosition.RIGHT_CENTER].clear();
 
         this.heatmapLayer = [];
         var layers: Array<string> = [];
         this.heatmapMarkerItems.forEach((item) => {
             if (item.Layer && layers.indexOf(item.Layer) == -1) layers.push(item.Layer);
         });
-
+        
         if (this.heatmapMarkerItems.length()) {
+            var homeControlDivs: HTMLElement = document.createElement('div');
             layers.forEach((layer) => {
                 var heatData: Array<google.maps.LatLng> = this.createheatmaplayer(layer);
                 var opt: google.maps.visualization.HeatmapLayerOptions = { data: heatData, radius: 20 };
                 var heat = new google.maps.visualization.HeatmapLayer(opt);
                 heat.setMap(this.map);
                 this.heatmapLayer.push(heat);
-
                 var homeControlDiv: any = document.createElement('div');
-                var homeControl = new HeatControl(homeControlDiv, self.map, layer, heat);
+                self.generateHeatControl(homeControlDiv, self.map, layer, heat);
                 homeControlDiv.index = 1;
-                self.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
                 (<any>heat).homeControlDiv = homeControlDiv;
-            })
+                homeControlDivs.appendChild(homeControlDiv);
+            });
+            self.map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(homeControlDivs);
         }
         return layers;
     }
@@ -1242,43 +1242,44 @@ export class TGoogleMap extends VXC.TComponent {
     }
 
     public onMarkerClicked: (item) => void;
+    public onLayerClicked: (item) => void;
 
 
+    generateHeatControl(controlDiv, map: google.maps.Map, caption, heat: google.maps.visualization.HeatmapLayer) {
+        var self = this;
+        controlDiv.style.padding = '5px';
+
+        // Set CSS for the control border
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = 'white';
+        controlUI.style.borderStyle = 'solid';
+        controlUI.style.borderWidth = '2px';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.textAlign = 'center';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior
+        var controlText = document.createElement('div');
+        controlText.style.fontFamily = 'Arial,sans-serif';
+        controlText.style.fontSize = '12px';
+        controlText.style.paddingLeft = '4px';
+        controlText.style.paddingRight = '4px';
+        controlText.innerHTML = "<b>" + caption + "</b>";
+        controlUI.appendChild(controlText);
+
+        google.maps.event.addDomListener(controlUI, 'click', function () {
+            if (heat.getMap() == null) {
+                heat.setMap(map);
+                controlText.innerHTML = "<b>" + caption + "</b>";
+            } else {
+                heat.setMap(null);
+                controlText.innerHTML = caption;
+            }
+            if (self.onLayerClicked != null) (V.tryAndCatch(() => { self.onLayerClicked(caption); }));
+        });
+    }
 }
 
-
-function HeatControl(controlDiv, map: google.maps.Map, caption, heat: google.maps.visualization.HeatmapLayer) {
-    controlDiv.style.padding = '5px';
-
-    // Set CSS for the control border
-    var controlUI = document.createElement('div');
-    controlUI.style.backgroundColor = 'white';
-    controlUI.style.borderStyle = 'solid';
-    controlUI.style.borderWidth = '2px';
-    controlUI.style.cursor = 'pointer';
-    controlUI.style.textAlign = 'center';
-    controlDiv.appendChild(controlUI);
-
-    // Set CSS for the control interior
-    var controlText = document.createElement('div');
-    controlText.style.fontFamily = 'Arial,sans-serif';
-    controlText.style.fontSize = '12px';
-    controlText.style.paddingLeft = '4px';
-    controlText.style.paddingRight = '4px';
-    controlText.innerHTML = "<b>" + caption + "</b>";
-    controlUI.appendChild(controlText);
-
-    google.maps.event.addDomListener(controlUI, 'click', function () {
-        if (heat.getMap() == null) {
-            heat.setMap(map);
-            controlText.innerHTML = "<b>" + caption + "</b>";
-        } else {
-            heat.setMap(null);
-            controlText.innerHTML = caption;
-        }
-    });
-
-}
 
 export class TGoogleMapMarker extends VXO.TCollectionItem {
     public marker: any;

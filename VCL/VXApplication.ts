@@ -15,6 +15,8 @@ export class TApplication {
     private igonreaAthenticationPage: string = "";
     public navbaritems = new VXO.TCollection<TNavbarItem>();
 
+    public onNavigateToPage: (path : string) => void;
+
     public initialize() {
         var self: TApplication = this;
         $('head').append('<style type = "text/css" > .no-space [class*="span"] {    margin-left: 0;}</style>');
@@ -24,7 +26,11 @@ export class TApplication {
             this.use("Local");
 
             this.get('#/', function () {
-                this.navigateToPage(this.buildPageURL(self.MainPage));
+                self.navigateToPage(this.buildPageURL(self.MainPage));
+            });
+
+            this.get('#api/:params', function () {
+                if (self.onNavigateToPage) self.onNavigateToPage(this.params ? this.params.params : this.params);
             });
             this.get('#show/:class/:params', function () {
                 var className: string = self.hexToString(this.params["class"]);
@@ -422,7 +428,7 @@ export class TApplication {
     public get UserRole(): string {
         return this.getSessionValue('_userrole', "");
     }
-    public set UseRole(val: string) {
+    public set UserRole(val: string) {
         if (val != this.UserRole) {
             this.setSessionValue('_userrole', val);
         }
