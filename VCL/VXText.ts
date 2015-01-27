@@ -7,6 +7,22 @@ import VXM = require("./VXMenu");
 
 
 export class TText extends VXT.TTextBase {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
+        super(aOwner, renderTo,text);
+    }
+
+    private _href: string;
+    public get Href(): string {
+        return this._href;
+    }
+    public set Href(val: string) {
+        if (val != this._href) {
+            this._href = val;
+            this.drawDelayed(true);
+        }
+    }
+ 
+
     public create() {
         var self = this;
         if (this.TextStyle == V.TextStyle.h1)
@@ -32,9 +48,11 @@ export class TText extends VXT.TTextBase {
 
         this.jComponent.off("click").click(() => {
             if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self); })); return false; }
+            else if (this.Href) location.href = this.Href;
             else return true;
         })
-
+        if (this.Href) this.jComponent.attr('href', this.Href);
+        if (this.onClicked || this.Href) this.jComponent.addClass('btn-link');
         if (this.TextColor) this.jComponent.css('color', this.TextColor);
         if (this.TextAlignment == V.TextAlignment.Left) this.jComponent.css('text-align', 'left');
         if (this.TextAlignment == V.TextAlignment.Right) this.jComponent.css('text-align', 'right');
@@ -51,7 +69,7 @@ export class TText extends VXT.TTextBase {
     public set TextStyle(val: V.TextStyle) {
         if (val != this._textstyle) {
             this._textstyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -68,6 +86,7 @@ export class TText extends VXT.TTextBase {
 
 export class TDBText extends VXT.TDBTextBase {
     public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
         super.create();
     }
@@ -89,7 +108,7 @@ export class TLabel extends VXT.TTextBase {
     public set LabelStyle(val: V.LabelStyle) {
         if (val != this._labelstyle) {
             this._labelstyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -140,6 +159,7 @@ export class TDBLabel extends VXT.TDBTextBase {
 
 
     public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('label');
         if (this.Rtl == true) this.jComponent.attr("dir", "RTL");
@@ -172,7 +192,7 @@ export class TBadge extends VXT.TTextBase {
     public set BadgeStyle(val: V.BadgeStyle) {
         if (val != this._badgestyle) {
             this._badgestyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -223,6 +243,7 @@ export class TDBBadge extends VXT.TDBTextBase {
     }
 
     public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
 
         this.jComponent.addClass('badge');
@@ -318,6 +339,7 @@ export class TTagCloud extends VXC.TComponent {
         return this._fontstart;
     }
     public set FontStart(val: number) {
+        val = Number(val);
         if (val != this._fontstart) {
             this._fontstart = val;
             this.drawDelayed(true);
@@ -329,6 +351,7 @@ export class TTagCloud extends VXC.TComponent {
         return this._fontend;
     }
     public set FontEnd(val: number) {
+        val = Number(val);
         if (val != this._fontend) {
             this._fontend = val;
             this.drawDelayed(true);
@@ -340,6 +363,7 @@ export class TTagCloud extends VXC.TComponent {
         return this._brackets;
     }
     public set BracketsAroundText(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._brackets) {
             this._brackets = val;
             this.drawDelayed(true);
@@ -354,7 +378,7 @@ export class TTagCloud extends VXC.TComponent {
         if (V.Application.checkColorString(val)) {
             if (val != this._colorstart) {
                 this._colorstart = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -367,7 +391,7 @@ export class TTagCloud extends VXC.TComponent {
         if (V.Application.checkColorString(val)) {
             if (val != this._colorend) {
                 this._colorend = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -518,6 +542,7 @@ export class TPillBoxItem extends VXO.TCollectionItem {
         return this._width;
     }
     public set Width(val: number) {
+        val = Number(val);
         if (val != this._width) {
             this._width = val;
         }
@@ -539,6 +564,7 @@ export class TPillBoxItem extends VXO.TCollectionItem {
         return this._enableremove;
     }
     public set EnableRemove(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._enableremove) {
             this._enableremove = val;
         }
@@ -671,6 +697,7 @@ export class TBreadCrumbItem extends VXO.TCollectionItem {
         return this._enabled;
     }
     public set Enabled(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._enabled) {
             this._enabled = val;
         }
@@ -770,6 +797,7 @@ export class TPaginationItem extends VXO.TCollectionItem {
         return this._enabled;
     }
     public set Enabled(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._enabled) {
             this._enabled = val;
         }

@@ -11,6 +11,7 @@ export class TWidgetGrid extends VXCO.TContainer {
         return this._minmum_column;
     }
     public set MinimumColumns(val: number) {
+        val = Number(val);
         if (val != this._minmum_column) {
             this._minmum_column = val;
             this.drawDelayed(true);

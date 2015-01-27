@@ -14,6 +14,7 @@ export class TProgressBar extends VXC.TComponent {
         return this._value;
     }
     public set Value(val: number) {
+        val = Number(val);
         if (val != this._value) {
             if (val > 100) val = 100;
             if (val < 0) val = 0;
@@ -31,6 +32,7 @@ export class TProgressBar extends VXC.TComponent {
         return this._striped;
     }
     public set Striped(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._striped) {
             this._striped = val;
             this.drawDelayed(true);
@@ -45,6 +47,7 @@ export class TProgressBar extends VXC.TComponent {
         return this._animate;
     }
     public set Animate(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._animate) {
             this._animate = val;
             this.drawDelayed(true);
@@ -155,6 +158,7 @@ export class TRatingStart extends VXC.TComponent {
         return this._readonly;
     }
     public set ReadOnly(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._readonly) {
             this._readonly = val;
             this.drawDelayed(true);
@@ -266,6 +270,7 @@ export class TSliderBase extends VXC.TComponent {
         return this._showTooltip;
     }
     public set ShowToolTip(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showTooltip) {
             this._showTooltip = val;
             this.drawDelayed(true);
@@ -277,6 +282,7 @@ export class TSliderBase extends VXC.TComponent {
         return this._showLabels;
     }
     public set ShowLabels(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showLabels) {
             this._showLabels = val;
             this.drawDelayed(true);

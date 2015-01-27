@@ -20,12 +20,12 @@ export class TObject {
     * Returns a string indicating the type of the object instance.
     */
     public static getClassName(): string {
-        var funcNameRegex = /function (.{1,})\(/;
+        var funcNameRegex = /function ([^\(]{1,})\(/;
         var results = (funcNameRegex).exec((<any> this).toString());
         return (results && results.length > 1) ? results[1] : "";
     }
     public getClassName(): string {
-        var funcNameRegex = /function (.{1,})\(/;
+        var funcNameRegex = /function ([^\(]{1,})\(/;
         var results = (funcNameRegex).exec(this["constructor"].toString());
         return (results && results.length > 1) ? results[1] : "";
     }

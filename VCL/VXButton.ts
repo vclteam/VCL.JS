@@ -7,9 +7,21 @@ import VXU = require("./VXUtils");
 import VXB = require("./VXInputBase");
 
 export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable {
-    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string, onClicked?: (sender: TButton) => void) {
         super(aOwner, renderTo);
         this._text = text;
+        if (this.jComponent.hasClass('btn-primary')) this._buttonstyle = V.ButtonStyle.Primary;
+        else if (this.jComponent.hasClass('btn-info')) this._buttonstyle = V.ButtonStyle.Info;
+        else if (this.jComponent.hasClass('btn-success')) this._buttonstyle = V.ButtonStyle.Success;
+        else if (this.jComponent.hasClass('btn-warning')) this._buttonstyle = V.ButtonStyle.Warning;
+        else if (this.jComponent.hasClass('btn-danger')) this._buttonstyle = V.ButtonStyle.Danger;
+        else if (this.jComponent.hasClass('btn-link')) this._buttonstyle = V.ButtonStyle.Link;
+
+        if (this.jComponent.hasClass('btn-large') || this.jComponent.hasClass('btn-lg')) this._buttonsize = V.ButtonSize.Large;
+        else if (this.jComponent.hasClass('btn-mini') || this.jComponent.hasClass('btn-xs')) this._buttonsize = V.ButtonSize.Mini;
+        else if (this.jComponent.hasClass('btn-small') || this.jComponent.hasClass('btn-sm')) this._buttonsize = V.ButtonSize.Small;
+
+        this.onClicked = onClicked;
     }
 
     private _textstyle: V.TextStyle = V.TextStyle.Default;
@@ -31,6 +43,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
         return this._localizable;
     }
     public set Localizable(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._localizable) {
             this._localizable = val;
             this.drawDelayed(true);
@@ -58,6 +71,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
         return this._groupindex;
     }
     public set GroupIndex(val: number) {
+        val = Number(val);
         if (val != this._groupindex) {
             this._groupindex = val;
             this.drawDelayed(true);
@@ -145,7 +159,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
     }
     public set TabIndex(val: number) {
         if (val != this._tabindex) {
-            this._tabindex = val;
+            this._tabindex = Math.floor(val);
             this.drawDelayed(true);
         }
     }
@@ -258,9 +272,10 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
             case V.ButtonStyle.Link: this.jBtn.addClass("btn-link"); break;
         }
         switch (this.ButtonSize) {
-            case V.ButtonSize.Large: this.jBtn.addClass("btn-large"); break;
-            case V.ButtonSize.Small: this.jBtn.addClass("btn-small"); break;
-            case V.ButtonSize.Mini: this.jBtn.addClass("btn-mini"); break;
+            case V.ButtonSize.Large: this.jBtn.addClass(V.Application.getBootstrapVersion() == 2 ? "btn-large" : "btn-lg"); break;
+            case V.ButtonSize.Small: this.jBtn.addClass(V.Application.getBootstrapVersion() == 2 ? "btn-small" : "btn-sm"); break;
+            case V.ButtonSize.Mini: this.jBtn.addClass(V.Application.getBootstrapVersion() == 2 ? "btn-mini" : "btn-xs"); break;
+            case V.ButtonSize.Default: this.jBtn.addClass(V.Application.getBootstrapVersion() == 2 ? "" : "btn-default"); break;
        }
 
         //setup the click event
@@ -291,6 +306,7 @@ export class TFacebookButton extends VXC.TComponent {
         return this._showfirendface;
     }
     public set ShowFriendFace(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showfirendface) {
             this._showfirendface = val;
             this.drawDelayed(true);
@@ -356,6 +372,7 @@ export class TToggleSwitch extends VXB.TEditorBase {
         return this._value;
     }
     public set Value(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._value) {
             this._value = val;
             this.drawDelayed(false);

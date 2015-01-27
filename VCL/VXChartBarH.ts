@@ -16,6 +16,8 @@ export class TDBChartBarH extends VX2.TDBChartBar {
     }
 }
 
+
+
 export class Bar extends VX2.Bar {
     _calc1(horizontal: boolean) {
         var bottomOffsets, gridLine, h, i, w, yLabelWidths;

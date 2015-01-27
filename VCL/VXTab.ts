@@ -163,6 +163,7 @@ export class TTabSheet extends VXO.TCollectionItem {
         return this._enabled;
     }
     public set Enabled(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._enabled) {
             this._enabled = val;
             this._tab.drawDelayed(true);
@@ -218,7 +219,7 @@ export class TTabSheet extends VXO.TCollectionItem {
                         self._tab.onTabShow(fromitem, toitem);
                     });
                 };
-
+                $(this._tab.jComponent).trigger('resize');
                 return true;
             });
         }
@@ -401,6 +402,7 @@ export class TAccordionGroupButton {
         return this._visible;
     }
     public set Visible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._visible) {
             this._visible = val;
         }
@@ -516,6 +518,7 @@ export class TAccordionGroup extends VXO.TCollectionItem {
         return this._showselectcheckbox;
     }
     public set ShowSelectCheckbox(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showselectcheckbox) {
             this._showselectcheckbox = val;
             this.draw(true);

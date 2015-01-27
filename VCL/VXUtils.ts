@@ -37,3 +37,7 @@ export class VXUtils {
 }
 
 
+
+export interface VXDatasetInt {
+    ShowProgressBar: boolean;
+}

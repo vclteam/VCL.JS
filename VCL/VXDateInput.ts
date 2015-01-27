@@ -63,6 +63,18 @@ export class TDateInputBase extends VXI.TEditorBase {
         }
     }
 
+    private _borderradius: number = null;
+    public get BorderRadius(): number {
+        return this._borderradius;
+    }
+    public set BorderRadius(val: number) {
+        if (val != this._borderradius) {
+            this._borderradius = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
 
     private autoclose: boolean = true;
     public get AutoClose(): boolean {
@@ -85,6 +97,7 @@ export class TDateInputBase extends VXI.TEditorBase {
         this.jEdit = $('<input/>').css('width', '100%').css('box-sizing', 'border-box').css('height', '100%');
         this.jEdit.attr('type', 'text');
         this.jEdit.attr('id', V.Application.genGUID());
+        if (this.BorderRadius) this.jEdit.css('border-radius', this.BorderRadius + 'px').css('-webkit-border-radius', this.BorderRadius + 'px');
 
         this.jButton = $('<span />')
         this.jButton.addClass('add-on');
@@ -117,6 +130,7 @@ export class TTimeInputBase extends VXI.TEditorBase {
         return this._showseconds;
     }
     public set ShowSeconds(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showseconds) {
             this._showseconds = val;
             this.drawDelayed(true);
@@ -129,6 +143,7 @@ export class TTimeInputBase extends VXI.TEditorBase {
         return this._showMeridian;
     }
     public set ShowMeridian(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showMeridian) {
             this._showMeridian = val;
             this.drawDelayed(true);
@@ -140,6 +155,7 @@ export class TTimeInputBase extends VXI.TEditorBase {
         return this._minuteStep;
     }
     public set MinuteStep(val: number) {
+        val = Number(val);
         this._minuteStep = val;
         this.drawDelayed(false);
     }
@@ -219,6 +235,9 @@ export class TDateInput extends TDateInputBase {
 }
 
 export class TDBDateInput extends TDateInputBase {
+    constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
+        super(aOwner, renderTo);
+    }
 
     public get Date(): Date {
         return this.DateValue;
@@ -254,10 +273,8 @@ export class TDBDateInput extends TDateInputBase {
         if (this.DataField == null || this.DataField.toString() == "") return;
 
         this.Dataset.setFieldValue(this.DataField.toString(), val);
-        this.draw(false);
+        this.drawDelayed(false);
     }
-
-
 
     private _dataset: VXD.TDataset;
     /**
@@ -267,6 +284,7 @@ export class TDBDateInput extends TDateInputBase {
         return this._dataset;
     }
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset != null) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -279,7 +297,6 @@ export class TDBDateInput extends TDateInputBase {
                 (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_SELECTION_CHANGED, this, () => { this.draw(false); });
                 (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.validateEnabled(); });
             }
-
         }
     }
 
@@ -305,6 +322,7 @@ export class TDBDateInput extends TDateInputBase {
     }
 
     public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
         super.create();
         var self = this;
         this.jComponent.on('changeDate', function (ev: any) {
@@ -341,7 +359,8 @@ export class TInputTime extends TTimeInputBase {
         return this._date.getHours();
     }
     public set Hour(val: number) {
-        this._date.setHours(val);
+        val = Number(val);
+        this._date.setHours(Math.floor(val));
         this.drawDelayed(false);
     }
 
@@ -882,6 +901,7 @@ Datepicker.prototype = {
 
     click: function (e) {
         e.preventDefault();
+        e.stopPropagation();
         var target = $(e.target).closest('span, td, th');
         if (target.length == 1) {
             switch (target[0].nodeName.toLowerCase()) {

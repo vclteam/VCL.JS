@@ -2,18 +2,115 @@ import VXC = require("./VXComponent");
 import V = require("./VCL");
 import VXU = require("./VXUtils");
 
-export class TEditorBase extends VXC.TComponent implements V.iTranslatable{
+export class TLabeledBase extends VXC.TComponent {
+    private _labetextcolor: string;
+    public get LabelTextColor(): string {
+        return this._labetextcolor;
+    }
+    public set LabelTextColor(val: string) {
+        var isOk = /^#[0-9A-F]{6}$/i.test(val);
+        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
+        else {
+
+            if (val != this._labetextcolor) {
+                this._labetextcolor = val;
+                this.drawDelayed(true);
+            }
+        }
+    }
+
+    private _labelVisible: boolean = false;
+    public get LabelVisible(): boolean {
+        return this._labelVisible;
+    }
+    public set LabelVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
+        if (val != this._labelVisible) {
+            this._labelVisible = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _labeltext: string = "";
+    public get LabelText(): string {
+        return this._labeltext;
+    }
+    public set LabelText(val: string) {
+        if (val != this._labeltext) {
+            this._labeltext = val;
+            this.LabelVisible = true;
+            this.drawDelayed(true);
+        }
+    }
+    private _labelposition: V.LabelPosition = V.Application.LocaleSettings.LabelPosition;
+    public get LabelPosition(): V.LabelPosition {
+        return this._labelposition;
+    }
+    public set LabelPosition(val: V.LabelPosition) {
+        if (val != this._labelposition) {
+            this._labelposition = val;
+            this.drawDelayed(true);
+        }
+    }
+    public jLabel: JQuery;
+    public jEdit: JQuery;
+
+    public create() {
+        super.create();
+        if (this.LabelVisible) {
+            this.jLabel = $('<label/>');
+            this.jLabel.addClass('control-label');
+
+            if (this.jEdit) this.jLabel.attr('for', this.jEdit.attr('id'));
+            this.jLabel.text(this.LocalizeText(this.LabelText));
+            if (this.LabelTextColor) this.jComponent.css('color', this.LabelTextColor);
+            if (this.LabelPosition == V.LabelPosition.TopLeft) {
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.TopCenter) {
+                this.jLabel.addClass('text-center');
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.TopRight) {
+                this.jLabel.addClass('text-right');
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.BottomLeft) {
+                this.jComponent.append(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.Right) {
+                this.jLabel.addClass('pull-right');
+                this.jLabel.css('padding-top', '5px');
+                this.jLabel.css('padding-left', '5px');
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.Left) {
+                this.jLabel.addClass('pull-left');
+                this.jLabel.css('padding-top', '5px');
+                this.jLabel.css('padding-right', '5px');
+                this.jComponent.prepend(this.jLabel)
+            } else if (this.LabelPosition == V.LabelPosition.BottomCenter) {
+                this.jLabel.addClass('text-center');
+                this.jComponent.append(this.jLabel);
+            } else if (this.LabelPosition == V.LabelPosition.BottomRight) {
+                this.jLabel.addClass('text-right');
+                this.jComponent.append(this.jLabel);
+            }
+        }
+    }
+
+}
+
+export class TEditorBase extends TLabeledBase implements V.iTranslatable{
 
     private _required: boolean = false;
     public get Required(): boolean {
         return this._required;
     }
     public set Required(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._required) {
             this._required = val;
             this.drawDelayed(true);
         }
     }
+
+    public onValidate: (sender: VXC.TComponent) => string;
 
     private _minlength: number;
     public get MinLength(): number {
@@ -27,8 +124,6 @@ export class TEditorBase extends VXC.TComponent implements V.iTranslatable{
         }
     }
 
-
-
     private _localizable: boolean = false;
     /**
     * In order to localize application each page or component of the application has to have Localizable property set true.
@@ -37,6 +132,7 @@ export class TEditorBase extends VXC.TComponent implements V.iTranslatable{
         return this._localizable;
     }
     public set Localizable(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._localizable) {
             this._localizable = val;
             this.drawDelayed(true);
@@ -71,33 +167,15 @@ export class TEditorBase extends VXC.TComponent implements V.iTranslatable{
         this.drawDelayed(true);
     }
 
-
-
     private _rtl: boolean = false;
     public get Rtl(): boolean {
         return this._rtl;
     }
     public set Rtl(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._rtl) {
             this._rtl = val;
             this.drawDelayed(true);
-        }
-    }
-
-
-    private _labetextcolor: string;
-    public get LabelTextColor(): string {
-        return this._labetextcolor;
-    }
-    public set LabelTextColor(val: string) {
-        var isOk = /^#[0-9A-F]{6}$/i.test(val);
-        if (!isOk) V.Application.raiseException("'" + val + "' is not valid hex color string");
-        else {
-
-            if (val != this._labetextcolor) {
-                this._labetextcolor = val;
-                this.drawDelayed(true);
-            }
         }
     }
 
@@ -112,22 +190,13 @@ export class TEditorBase extends VXC.TComponent implements V.iTranslatable{
         }
     }
 
-    private _labelVisible: boolean = false;
-    public get LabelVisible(): boolean {
-        return this._labelVisible;
-    }
-    public set LabelVisible(val: boolean) {
-        if (val != this._labelVisible) {
-            this._labelVisible = val;
-            this.drawDelayed(true);
-        }
-    }
 
     private _helpVisible: boolean = false;
     public get HelpVisible(): boolean {
         return this._helpVisible;
     }
     public set HelpVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._helpVisible) {
             this._helpVisible = val;
             this.drawDelayed(true);
@@ -147,75 +216,17 @@ export class TEditorBase extends VXC.TComponent implements V.iTranslatable{
         }
     }
 
-
-    private _labeltext: string = "";
-    public get LabelText(): string {
-        return this._labeltext;
-    }
-    public set LabelText(val: string) {
-        if (val != this._labeltext) {
-            this._labeltext = val;
-            this.LabelVisible = true;
-            this.drawDelayed(true);
-        }
-    }
-    private _labelposition: V.LabelPosition = V.Application.LocaleSettings.LabelPosition;
-    public get LabelPosition(): V.LabelPosition {
-        return this._labelposition;
-    }
-    public set LabelPosition(val: V.LabelPosition) {
-        if (val != this._labelposition) {
-            this._labelposition = val;
-            this.drawDelayed(true);
-        }
-    }
-
     public setFocus() {
         if (this.jEdit) this.jEdit.focus();
     }
 
-
-    public onKeyUp: (keyCode: number) => void; 
+    public onKeyUp: (keyCode: string) => void; 
+    public onKeyDown: (keyCode: string) => boolean; 
     public onChanged: (sender: TEditorBase) => void;
 
-    public jLabel: JQuery;
+
     public jHelpLabel: JQuery;
-    public jEdit: JQuery;
     public create() {
-        if (this.LabelVisible) {
-            this.jLabel = $('<label/>');
-            this.jLabel.addClass('control-label');
-            this.jLabel.attr('for', this.jEdit.attr('id'));
-            this.jLabel.text(this.LocalizeText(this.LabelText));
-            if (this.LabelTextColor) this.jComponent.css('color', this.LabelTextColor);
-            if (this.LabelPosition == V.LabelPosition.TopLeft) {
-                this.jComponent.prepend(this.jLabel)
-            } else if (this.LabelPosition == V.LabelPosition.TopCenter) {
-                this.jLabel.addClass('text-center');
-                this.jComponent.prepend(this.jLabel)
-            } else if (this.LabelPosition == V.LabelPosition.TopRight) {
-                this.jLabel.addClass('text-right');
-                this.jComponent.prepend(this.jLabel)
-            } else if (this.LabelPosition == V.LabelPosition.BottomLeft) {
-                this.jComponent.append(this.jLabel)
-            } else if (this.LabelPosition == V.LabelPosition.Right) {
-                this.jLabel.addClass('pull-right');
-                this.jLabel.css('padding-top', '5px');
-                this.jLabel.css('padding-left', '5px');
-                this.jComponent.prepend(this.jLabel)
-            } else if (this.LabelPosition == V.LabelPosition.Left) {
-                this.jLabel.addClass('pull-left');
-                this.jLabel.css('padding-top', '5px');
-                this.jLabel.css('padding-right', '5px');
-                this.jComponent.prepend(this.jLabel)
-            } else if (this.LabelPosition == V.LabelPosition.BottomCenter) {
-                this.jLabel.addClass('text-center');
-                this.jComponent.append(this.jLabel);
-            } else if (this.LabelPosition == V.LabelPosition.BottomRight) {
-                this.jLabel.addClass('text-right');
-                this.jComponent.append(this.jLabel);
-            }
-        }
         if (this.HelpVisible || this._errortext) {
             this.jHelpLabel = $('<small/>');
             this.jHelpLabel.addClass('help-inline text-center');
@@ -242,6 +253,16 @@ export class TInputBase extends TEditorBase {
         }
     }
 
+    private _borderradius: number = null;
+    public get BorderRadius(): number {
+        return this._borderradius;
+    }
+    public set BorderRadius(val: number) {
+        if (val != this._borderradius) {
+            this._borderradius = val;
+            this.drawDelayed(true);
+        }
+    }
 
     private _maxlength: number;
     public get MaxLength(): number {
@@ -255,17 +276,46 @@ export class TInputBase extends TEditorBase {
         }
     }
 
+    private _displayastext: boolean = false;
+    public get DisplayAsText(): boolean {
+        return this._displayastext;
+    }
+    public set DisplayAsText(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
+        if (val != this._displayastext) {
+            this._displayastext = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
+    private _nulltext: string = "\xa0";
+    /**
+    * Specified text is displayed when the value of the editor is null and the editor is not focused. 
+    * The prompt text disappears when the editor receives focus
+    */
+    public get NullText(): string {
+        return this._nulltext;
+    }
+    public set NullText(val: string) {
+        if (val != this._nulltext) {
+            this._nulltext = val;
+            this.drawDelayed(true);
+        }
+    }
+
+
     private _labelOverflow: boolean = false;
     public get LabelOverflow(): boolean {
         return this._labelOverflow;
     }
     public set LabelOverflow(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._labelOverflow) {
             this._labelOverflow = val;
             this.drawDelayed(true);
         }
     }
-
 
     public canEdit() {
         return true;
@@ -276,7 +326,7 @@ export class TInputBase extends TEditorBase {
     */
     public onButtonClicked: () => void;
 
-    private jBtn: JQuery;
+    public jBtn: JQuery;
     private jImage: JQuery;
     private jbtnText: JQuery;
     private jinternalSpan: JQuery;
@@ -291,23 +341,37 @@ export class TInputBase extends TEditorBase {
         if (this.InputStyle == V.InputStyle.Info) this.jComponent.addClass("info");
         if(!this.LabelOverflow) this.jComponent.css('overflow', 'hidden');
 
-        //this.jinternalSpan = $("<span>").css('display', 'block').css('overflow', 'hidden').css('padding-right', '15px').css('width', '100%');
-        this.jinternalSpan = $("<span>").css('display', 'block').css('overflow', 'hidden').css('padding-right', '15px');
-        if ((<any>this).textarea) {
-            this.jEdit = $('<textarea/>').attr('rows', (<V.TTextArea>this).Rows).css('resize','none');
+        this.jinternalSpan = $("<span>").css('display', 'block').css('overflow', 'hidden');
+        if (!this._displayastext) this.jinternalSpan.css('padding-right', '15px')
+        if (this._displayastext) {
+            if ((<any>this).TextStyle == V.TextStyle.h1) this.jEdit = $('<h1/>').addClass('Label-Input');
+            else if ((<any>this).TextStyle == V.TextStyle.h2) this.jEdit = $('<h2/>').addClass('Label-Input');
+            else if ((<any>this).TextStyle == V.TextStyle.h3) this.jEdit = $('<h3/>').addClass('Label-Input');
+            else if ((<any>this).TextStyle == V.TextStyle.h4) this.jEdit = $('<h4/>').addClass('Label-Input');
+            else if ((<any>this).TextStyle == V.TextStyle.h5) this.jEdit = $('<h5/>').addClass('Label-Input');
+            else if ((<any>this).TextStyle == V.TextStyle.h6) this.jEdit = $('<h6/>').addClass('Label-Input');
+            else if ((<any>this).TextStyle == V.TextStyle.strong) this.jEdit = $('<strong/>').addClass('Label-Input');
+            else if ((<any>this).TextStyle == V.TextStyle.lead) {
+                this.jEdit = $('<label/>').addClass('Label-Input');
+                this.jEdit.addClass('lead');
+            } else if ((<any>this).TextStyle == V.TextStyle.small) this.jEdit = $('<small/>').addClass('Label-Input');
+            else this.jEdit = $('<label/>').addClass('Label-Input');
+            
+        } else if ((<any>this).textarea) {
+            this.jEdit = $('<textarea/>').attr('rows', (<V.TTextArea>this).Rows).css('resize', 'none');
+            this.jEdit.attr("type", 'text');
             if ((<V.TTextArea>this).Wrap) this.jEdit.attr('Wrap', 'Wrap');
         } else {
-            this.jEdit = $('<input/>').css('margin-bottom','0px');
+            this.jEdit = $('<input/>').css('margin-bottom', '0px');
+            this.jEdit.attr("type", 'text');
             if (this.TabIndex) this.jEdit.attr('tabindex', this.TabIndex);
         }
 
-        this.jEdit.attr("type", 'text').attr('id', V.Application.genGUID()).css('width', '100%');
+        if (this.BorderRadius) this.jEdit.css('border-radius', this.BorderRadius + 'px').css('-webkit-border-radius', this.BorderRadius + 'px');
+
+        this.jEdit.attr('id', V.Application.genGUID()).css('width', '100%');
         if ((<any>this)._readonly) this.jEdit.attr("readonly", "readonly");
 
-        if (this.ButtonClickOnEnter) {
-            this.jEdit.keydown((eventObject: JQueryKeyEventObject) => {
-            })
-        };
         this.jImage = $('<i/>');
         this.jbtnText = $('<span/>');
 
@@ -317,12 +381,12 @@ export class TInputBase extends TEditorBase {
         if (this.TextAlignment == V.TextAlignment.Right) this.jEdit.css('text-align', 'right');
         if (this.TextAlignment == V.TextAlignment.Center) this.jEdit.css('text-align', 'center');
         if (this.MaxLength > 0) this.jEdit.attr("maxlength", this.MaxLength);
-        if (this.Placeholder != null) this.jEdit.attr("placeholder", this.Placeholder);
+        if (this.Placeholder != null && !this._displayastext) this.jEdit.attr("placeholder", this.Placeholder);
         if (this.Rtl == true) this.jEdit.attr("dir", "RTL");
         this.jinternalSpan.append(this.jEdit);
        
         this.jComponent.addClass('input-append');
-        if (this.ButtonVisible) {
+        if (this.ButtonVisible && !this._displayastext) {
             this.jBtn = $('<button/>').attr('tab-index','-1').css('outline','none');
             this.jBtn.addClass('btn');
             this.jBtn.attr('type', "button").css('float', 'right');
@@ -388,19 +452,9 @@ export class TInputBase extends TEditorBase {
         return this._password;
     }
     public set Password(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._password) {
             this._password = val;
-            this.drawDelayed(true);
-        }
-    }
-
-    private _buttonclickonenter: boolean = null;
-    public get ButtonClickOnEnter(): boolean {
-        return this._buttonclickonenter;
-    }
-    public set ButtonClickOnEnter(val: boolean) {
-        if (val != this._buttonclickonenter) {
-            this._buttonclickonenter = val;
             this.drawDelayed(true);
         }
     }
@@ -434,6 +488,7 @@ export class TInputBase extends TEditorBase {
         return this._buttonVisible;
     }
     public set ButtonVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._buttonVisible) {
             this._buttonVisible = val;
             this.drawDelayed(true);

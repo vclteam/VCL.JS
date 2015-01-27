@@ -23,7 +23,7 @@ export class TCheckBoxBase extends VXC.TComponent {
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -63,7 +63,7 @@ export class TRadioButtonBase extends VXC.TComponent implements V.iTranslatable 
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -93,7 +93,7 @@ export class TRadioButtonBase extends VXC.TComponent implements V.iTranslatable 
     public set Group(val: string) {
         if (val != this._group) {
             this._group = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -127,7 +127,7 @@ export class TCheckBox extends TCheckBoxBase {
     public set Checked(val: boolean) {
         if (val != this._checked) {
             this._checked = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -160,15 +160,17 @@ export class TCheckBox extends TCheckBoxBase {
 
 
 export class TRadioButton extends TRadioButtonBase {
-    private _checked: boolean;
+    private _checked: boolean = false;
     public get Checked(): boolean {
+        if (this.jRadioButton)
+            this._checked = this.jRadioButton.prop('checked');
         return this._checked;
     }
     public set Checked(val: boolean) {
-        if (val != this._checked) {
+        //if (val != this._checked) {
             this._checked = val;
-            this.draw(false);
-        }
+            this.drawDelayed(false);
+        //}
     }
 
     constructor(aOwner: VXC.TComponent, renderTo?: string, text?: string) {
@@ -179,6 +181,7 @@ export class TRadioButton extends TRadioButtonBase {
     public create() {
         super.create();
         var self = this;
+        this.jRadioButton.prop('checked', this._checked);
         this.jRadioButton.off("click").click(() => { if (self.onClicked != null) (V.tryAndCatch(() => { self.onClicked(self); })); return true; })
         this.jRadioButton.change((event) => {
             self.Checked = this.jRadioButton.prop('checked');
@@ -191,7 +194,7 @@ export class TRadioButton extends TRadioButtonBase {
         super.draw(reCreate);
 
         this.jText.text(this.LocalizeText(this.Text));
-        this.jRadioButton.prop('checked', this.Checked);
+        this.jRadioButton.prop('checked', this._checked);
     }
 }
 
@@ -206,6 +209,7 @@ export class TDBCheckBox extends TCheckBoxBase {
     }
 
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -254,10 +258,11 @@ export class TDBCheckBox extends TCheckBoxBase {
         if (this.DataField == null || this.DataField.toString() == "") return;
 
         this.Dataset.setFieldValue(this.DataField.toString(), val);
-        this.draw(false);
+        this.drawDelayed(false);
     }
 
     public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
         super.create();
         var self = this;
         this.jCheckbox.on("click change", () => {

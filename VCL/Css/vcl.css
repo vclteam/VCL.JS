@@ -2215,3 +2215,23 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"] {
   display: inline-block;
 }
 
+.Label-Input {
+    font-weight : 600;
+    margin-top:0px;
+    margin-bottom:0px;
+}
+
+
+
+#toTop_____ {
+    display: none;
+    position: fixed;
+    bottom: 5px;
+    right: 5px;
+    width: 64px;
+    height: 64px;
+    background-image: url('images/ScrollToTop.png');
+    background-repeat: no-repeat;
+    opacity: .7;
+    filter: alpha(opacity=60)
+}

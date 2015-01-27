@@ -1,6 +1,7 @@
 import V = require("./VCL");
 import VXC = require("./VXComponent");
 import VXD = require("./VXDataset");
+import VXI = require("./VXInputBase");
 
 export class TTextBase extends VXC.TComponent implements V.iTranslatable  {
     public onClicked: (sender: TTextBase) => void;
@@ -39,7 +40,7 @@ export class TTextBase extends VXC.TComponent implements V.iTranslatable  {
         if (V.Application.checkColorString(val)) {
             if (val != this._textcolor) {
                 this._textcolor = val;
-                this.draw(true);
+                this.drawDelayed(true);
             }
         }
     }
@@ -52,7 +53,7 @@ export class TTextBase extends VXC.TComponent implements V.iTranslatable  {
     public set TextAlignment(val: V.TextAlignment) {
         if (val != this._textaliggment) {
             this._textaliggment = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -134,6 +135,7 @@ export class TDBTextBase extends VXC.TComponent {
         return this._dataset;
     }
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset != null) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);

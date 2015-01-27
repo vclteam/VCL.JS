@@ -4,13 +4,11 @@ import VXO = require("./VXObject");
 import VXC = require("./VXComponent");
 import VXDS = require("./VXServer");
 import VXCO = require("./VXContainer");
+import VXU = require("./VXUtils");
 
-export interface VXDatasetInt {
-    ShowProgressBar: boolean;
-}
 
-export class TDataset extends VXO.TObject {
-    public recordset: any[] = [];
+export class TGenericDataset<T> extends VXO.TObject {
+    public recordset: T[] = [];
     public onDataChanged: () => void;
 
     public static EVENT_SELECTION_CHANGED = "rec_select_changed";
@@ -151,7 +149,7 @@ export class TDataset extends VXO.TObject {
     /**
     * return an object with the content of the currnt record
     */
-    public getCurrentRecord(): any {
+    public getCurrentRecord(): T {
         if (this.Recno < 0) return null;
         return this.recordset[this.Recno];
     }
@@ -171,7 +169,7 @@ export class TDataset extends VXO.TObject {
         if (!this.recordset) return -1;
         var rc = -1;
         for (var i = 0, len = this.recordset.length; i < len; i++) {
-            if (this.recordset[i].___RECORDID___ == recordIndex) {
+            if (this.recordset[i]['___RECORDID___'] == recordIndex) {
                 rc = i;
                 break;
             }
@@ -256,7 +254,10 @@ export class TDataset extends VXO.TObject {
 }
 
 
-export class TClientDataset extends TDataset implements VXDatasetInt {
+export class TDataset extends TGenericDataset<any> {
+}
+
+export class TClientDataset extends TDataset implements VXU.VXDatasetInt {
     public onError: (errorMessage: string) => void;
     private tempRecordset: Object[];
     private tempGroupset: number[];
@@ -272,7 +273,13 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     public owner: VXC.TComponent;
     constructor(aOwner: VXC.TComponent) {
         super();
+        if (aOwner != null && !aOwner.isContainer) {
+            V.Application.raiseException("only container components can own datasets");
+            throw "only container components can own components";
+
+        }
         this.owner = aOwner;
+        if (aOwner != null) (<any>aOwner).addComponent(this);
     }
 
     public loadRemoteResults(data: any) {
@@ -378,6 +385,7 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         return this._readonly;
     }
     public set Readonly(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._readonly) {
             this._readonly = val;
             this.stateChanged();
@@ -415,6 +423,7 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     }
 
     public set Active(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._active) {
             this._active = val;
         }
@@ -496,6 +505,9 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
     */
     private static reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
     public setData(data: any[]) {
+        if (!(data instanceof Array) && (data instanceof Object)) {
+            return this.setData([data]);
+        }
         this.recordset = [];
         this.sourceRecordset = null;
         this.tempRecordset = null;
@@ -551,22 +563,24 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
                     else if (a1 < b1) return -1
                 }
                 if (columnName) {
-                    if (a[columnName] && a[columnName].getMonth &&
-                        b[columnName] && b[columnName].getMonth) {
-                        var a2 = "000000000" + (<Date>a[columnName]).getTime();
-                        var b2 = "000000000" + (<Date>b[columnName]).getTime();
-                        a1 += "~~" + a2.substr(a2.length - 16);
-                        b1 += "~~" + b2.substr(b2.length - 16);
-                    } else if (a[columnName] && typeof b[columnName] == "number" &&
-                        b[columnName] && typeof b[columnName] == "number") {
-                        var a2 = "000000000000" + <Date>a[columnName];
-                        var b2 = "000000000000" + <Date>b[columnName];
-                        a1 += "~~" + a2.substr(a2.length - 12);
-                        b1 += "~~" + b2.substr(b2.length - 12);
-                    } else {
-                        a1 += "~~" + a[columnName];
-                        b1 += "~~" + b[columnName];
-                    }
+                    var tmpStr: string;
+                    if (!a[columnName]) a1 += "~~";
+                    else if (a[columnName].getMonth) {
+                        tmpStr = "000000000" + (<Date>a[columnName]).getTime();
+                        a1 += "~~" + tmpStr.substr(tmpStr.length - 16);
+                    } else if (typeof a[columnName] == "number") {
+                        tmpStr = "000000000000" + (<number>a[columnName]).toFixed(6);
+                        a1 += "~~" + tmpStr.substr(tmpStr.length - 18);
+                    } else a1 += "~~" + a[columnName];
+
+                    if (!b[columnName]) b1 += "~~";
+                    else if (b[columnName].getMonth) {
+                        tmpStr = "000000000" + (<Date>b[columnName]).getTime();
+                        b1 += "~~" + tmpStr.substr(tmpStr.length - 16);
+                    } else if (typeof b[columnName] == "number") {
+                        tmpStr = "000000000000" + (<number>b[columnName]).toFixed(6);
+                        b1 += "~~" + tmpStr.substr(tmpStr.length - 18);
+                    } else b1 += "~~" + b[columnName];
                 }
 
                 if (a1 > b1) return 1;
@@ -584,29 +598,31 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
                     else if (a1 < b1) return -1
                     }
                 if (columnName) {
-                    if (a[columnName] && a[columnName].getMonth &&
-                        b[columnName] && b[columnName].getMonth) {
-                        var a2 = "000000000" + (<Date>a[columnName]).getTime();
-                        var b2 = "000000000" + (<Date>b[columnName]).getTime();
-                        a1 += "~~" + a2.substr(a2.length - 16);
-                        b1 += "~~" + b2.substr(b2.length - 16);
-                    } else if (a[columnName] && typeof b[columnName] == "number" &&
-                        b[columnName] && typeof b[columnName] == "number") {
-                        var a2 = "000000000000" + <Date>a[columnName];
-                        var b2 = "000000000000" + <Date>b[columnName];
-                        a1 += "~~" + a2.substr(a2.length - 12);
-                        b1 += "~~" + b2.substr(b2.length - 12);
-                    } else {
-                        a1 += "~~" + a[columnName];
-                        b1 += "~~" + b[columnName];
-                    }
+                    var tmpStr: string;
+                    if (!a[columnName]) a1 += "~~";
+                    else if (a[columnName].getMonth) {
+                        tmpStr = "000000000" + (<Date>a[columnName]).getTime();
+                        a1 += "~~" + tmpStr.substr(tmpStr.length - 16);
+                    } else if (typeof a[columnName] == "number") {
+                        tmpStr = "000000000000" + (<number>a[columnName]).toFixed(6);
+                        a1 += "~~" + tmpStr.substr(tmpStr.length - 18);
+                    } else a1 += "~~" + a[columnName];
+
+                    if (!b[columnName]) b1 += "~~";
+                    else if (b[columnName].getMonth) {
+                        tmpStr = "000000000" + (<Date>b[columnName]).getTime();
+                        b1 += "~~" + tmpStr.substr(tmpStr.length - 16);
+                    } else if (typeof b[columnName] == "number") {
+                        tmpStr = "000000000000" + (<number>b[columnName]).toFixed(6);
+                        b1 += "~~" + tmpStr.substr(tmpStr.length - 18);
+                    } else b1 += "~~" + b[columnName];
                 }
 
                 if (a1 < b1) return 1;
                 else if (a1 > b1) return -1
                 else return 0;
             })
-            }
+        }
         this.sortProperty = columnName;
         this.sortDirection = ascending ? "ASC" : "DESC";
         this.groupProperty = groupname;
@@ -623,7 +639,60 @@ export class TClientDataset extends TDataset implements VXDatasetInt {
         }
         return this.recordset.slice(start, end + 1);
     }
+}
 
 
 
+export class TNestedClientDataset extends TClientDataset {
+    private ownerColumn: string;
+    constructor(aOwner: VXC.TComponent, ownerDataset: TClientDataset, ownerColumn: string) {
+        super(aOwner);
+        this.owner = aOwner;
+        this.ownerColumn = ownerColumn;
+        this.parentDataset = ownerDataset;
+    }
+
+    private _parentdataset: TDataset;
+    /**
+   * Specifies the dataset that contains the field it represents.
+   */
+    private get parentDataset(): TDataset {
+        return this._parentdataset;
+    }
+
+    private set parentDataset(val: TDataset) {
+        if (val != this._parentdataset) {
+            if (this._parentdataset) {
+                (<any>this._parentdataset).removeEventListener(TDataset.EVENT_DATA_CHANGED, this);
+                (<any>this._parentdataset).removeEventListener(TDataset.EVENT_SELECTION_CHANGED, this);
+                (<any>this._parentdataset).removeEventListener(TDataset.EVENT_STATE_CHANGED, this);
+            }
+            this._parentdataset = val;
+            if (this._parentdataset) {
+                (<any>this._parentdataset).registerEventListener(TDataset.EVENT_DATA_CHANGED, this, () => { this.setNestedData(this._parentdataset.getFieldValue(this.ownerColumn)); });
+                (<any>this._parentdataset).registerEventListener(TDataset.EVENT_SELECTION_CHANGED, this, () => { this.setNestedData(this._parentdataset.getFieldValue(this.ownerColumn)); });
+                (<any>this._parentdataset).registerEventListener(TDataset.EVENT_STATE_CHANGED, this, () => { this.setNestedData(this._parentdataset.getFieldValue(this.ownerColumn)); });
+            }
+        }
+    }
+
+    private setNestedData(data: any): void {
+        if (!data) this.setData(null)
+        else if (data instanceof Array) {
+            this.setData(data);
+        }
+        else if (data instanceof Object) {
+            var allObject: boolean = true;
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    if (!(data instanceof Object)) {
+                        allObject = false;
+                        break;
+                    }
+                }
+            }
+            if (!allObject) this.setData([data]);
+            else this.setData($.map(data, function (value, index) { return [value]; }));
+        } else this.setData(null);
+    }
 }

@@ -40,7 +40,6 @@ export class TModal extends VXC.TContainer {
     }
 
     public showModal() {
-        super.draw(true);
         this.jComponent.addClass('modal');
 
         this.jComponent.modal({
@@ -66,7 +65,7 @@ export class TModal extends VXC.TContainer {
                 break;
             }
         }
-
+        super.draw(true);
         if (this.onShow != null) (V.tryAndCatch(() => { this.onShow(); }))
     }
 

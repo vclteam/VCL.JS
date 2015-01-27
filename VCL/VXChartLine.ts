@@ -982,7 +982,7 @@ export class TDBChartLine extends TChartLine {
     public set ValueField3(val: string) {
         if (val != this._value3field) {
             this._value3field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -1170,6 +1170,12 @@ export class TDBChartLine extends TChartLine {
     }
 
 
+    public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
+        super.create();
+    }
+
+
     private _dataset: VXD.TDataset;
     /*
      * Specifies the dataset that contains the field it represents.
@@ -1178,6 +1184,7 @@ export class TDBChartLine extends TChartLine {
         return this._dataset;
     }
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -1262,7 +1269,7 @@ export class TDBChartArea extends TChartArea {
     public set ValueField1(val: string) {
         if (val != this._value1field) {
             this._value1field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -1290,7 +1297,7 @@ export class TDBChartArea extends TChartArea {
     public set ValueField3(val: string) {
         if (val != this._value3field) {
             this._value3field = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -1361,6 +1368,7 @@ export class TDBChartArea extends TChartArea {
         return this._dataset;
     }
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -1371,9 +1379,15 @@ export class TDBChartArea extends TChartArea {
                 (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this, () => { this.draw(false); });
                 (<any>this._dataset).registerEventListener(VXD.TDataset.EVENT_STATE_CHANGED, this, () => { this.draw(false); });
             }
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
+
+    public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
+        super.create();
+    }
+
 
 
 

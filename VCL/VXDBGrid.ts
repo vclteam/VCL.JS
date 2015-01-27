@@ -25,6 +25,9 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         super(aOwner, renderTo);
         (<any>this)._fittowidth = true;
         this.columns = new TGridColumnCollection<TDBGridColumn>(this);
+        if (this.jComponent.hasClass('table-striped')) this._striped = true;
+        if (this.jComponent.hasClass('table-bordered')) this._bordered = true;
+        if (this.jComponent.hasClass('table-condensed')) this._condensed = true;
     }
 
     private _autotablelayout: boolean = false;
@@ -89,6 +92,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._currentPage;
     }
     public set CurrentPage(val: number) {
+        val = Number(val);
         if (val != this._currentPage) {
             this._currentPage = val;
             this.drawDelayed(false);
@@ -171,6 +175,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._footerVisible;
     }
     public set FooterVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._footerVisible) {
             this._footerVisible = val;
             this.drawDelayed(true);
@@ -221,6 +226,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._bordered;
     }
     public set Bordered(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._bordered) {
             this._bordered = val;
             this.drawDelayed(true);
@@ -235,6 +241,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._condensed;
     }
     public set Condensed(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._condensed) {
             this._condensed = val;
             this.drawDelayed(true);
@@ -247,6 +254,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._pagesize;
     }
     public set PageSize(val: number) {
+        val = Number(val);
         if (val != this._pagesize) {
             this._pagesize = Math.floor(val);
             if (this._pagesize < 1) this._pagesize = 1;
@@ -518,6 +526,9 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return cnt;
     }
 
+  
+
+
     public create() {
         //detach all actionbutton
         var self = this;
@@ -733,6 +744,7 @@ export class TDBGrid extends TGridBase {
 
 
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -777,6 +789,7 @@ export class TDBGrid extends TGridBase {
         }
     }
     public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
         this.gridDataSource = new TDBGridDataSource(this);
         //calculate summery
 
@@ -828,6 +841,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         return this._rtl;
     }
     public set Rtl(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._rtl) {
             this._rtl = val;
             this.grid.drawDelayed(true);
@@ -877,6 +891,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         return this._wordwrap;
     }
     public set WordWrap(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._wordwrap) {
             this._wordwrap = val;
             this.grid.drawDelayed(true);
@@ -946,6 +961,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         return this._width;
     }
     public set Width(val: number) {
+        val = Number(val);
         if (val != this._width) {
             this._width = val;
             this.grid.drawDelayed(true);
@@ -1022,6 +1038,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         return this._sortable;
     }
     public set Sortable(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         this._sortable = val;
     }
 
@@ -1158,7 +1175,7 @@ export class TBaseGridDataSource {
                 html += '</ul>';
             }
 
-            mappedData[columnItem.ID] = "<div class='dropdown'>" + html + "</>";
+            mappedData[columnItem.ID] = "<div class='dropup'>" + html + "</>";
         });
         return mappedData;
     }
@@ -1191,18 +1208,23 @@ export class TBaseGridDataSource {
 
             $.each(_data, function (rowIndex, item) {
                 var StringCellVal;
+                var OrigCellVal;
 
                 var icon: V.Icon = null;
                 if (columnItem.onGetValue != null) {
                     StringCellVal = columnItem.formatValue(columnItem.onGetValue(item, columnItem));
-                } else StringCellVal = columnItem.formatValue(_data[rowIndex][columnItem.FieldName]);
+                    OrigCellVal = columnItem.onGetValue(item, columnItem);
+                } else {
+                    StringCellVal = columnItem.formatValue(_data[rowIndex][columnItem.FieldName]);
+                    OrigCellVal = _data[rowIndex][columnItem.FieldName];
+                }
 
-                if (rowIndex > 0 && group && StringCellVal == prevGroup) {
+                if (rowIndex > 0 && group && OrigCellVal == prevGroup) {
                     StringCellVal = "";
                     firstemptygroup = (!emptygroup);
                     emptygroup = true;
                 } else {
-                    prevGroup = StringCellVal;
+                    prevGroup = OrigCellVal;
                     emptygroup = false;
                 }
 

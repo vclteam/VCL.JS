@@ -11,7 +11,7 @@ export class TSparkBase extends VXC.TComponent {
         var col: TSparkValue = new TSparkValue();
         col.Value = value;
         this.values.add(col);
-        this.draw(true);
+        this.drawDelayed(true);
         return col;
     }
     public canvas: JQuery;
@@ -66,7 +66,7 @@ export class TSparkBase extends VXC.TComponent {
     public set LabelPosition(val: V.LabelPosition) {
         if (val != this._labelposition) {
             this._labelposition = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -95,7 +95,7 @@ export class TSparkBase extends VXC.TComponent {
         if (this.LabelVisible) {
             this.jLabel = $('<small/>');
             this.jLabel.addClass('control-label');
-            this.jLabel.addClass('muted');
+            this.jLabel.addClass(V.Application.getBootstrapVersion() == 2 ? 'muted' :'text-muted');
             this.jLabel.text(this.LabelText);
             if (this.LabelTextColor) this.jLabel.css('color', this.LabelTextColor);
             if (this.LabelPosition == V.LabelPosition.TopLeft) {
@@ -290,7 +290,7 @@ export class TSparkBar extends TSparkBase {
     public set Spacing(val: number) {
         if (val != this._spacing) {
             this._spacing = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -350,6 +350,7 @@ export class TDBSparkBar extends TSparkBar {
     }
 
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -375,7 +376,7 @@ export class TDBSparkBar extends TSparkBar {
     public set DataField(val: string) {
         if (val != this._datafield) {
             this._datafield = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -388,6 +389,11 @@ export class TDBSparkBar extends TSparkBar {
             if (val != null) values.push(val);
         });
         return values;
+    }
+
+    public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
+        super.create();
     }
 }
 
@@ -402,6 +408,7 @@ export class TDBSparkPie extends TSparkPie {
     }
 
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -428,7 +435,7 @@ export class TDBSparkPie extends TSparkPie {
     public set DataField(val: string) {
         if (val != this._datafield) {
             this._datafield = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -442,6 +449,12 @@ export class TDBSparkPie extends TSparkPie {
         });
         return values;
     }
+
+    public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
+        super.create();
+    }
+
 }
 
 export class TDBSparkLine extends TSparkLine {
@@ -454,6 +467,7 @@ export class TDBSparkLine extends TSparkLine {
     }
 
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -479,7 +493,7 @@ export class TDBSparkLine extends TSparkLine {
     public set DataField(val: string) {
         if (val != this._datafield) {
             this._datafield = val.toUpperCase();
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -493,6 +507,12 @@ export class TDBSparkLine extends TSparkLine {
         });
         return values;
     }
+
+    public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
+        super.create();
+    }
+
 }
 
 

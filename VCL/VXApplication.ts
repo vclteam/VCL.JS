@@ -15,7 +15,9 @@ export class TApplication {
     private igonreaAthenticationPage: string = "";
     public navbaritems = new VXO.TCollection<TNavbarItem>();
 
-    public onNavigateToPage: (path : string) => void;
+    public onNavigateToPage: (url: string) => void;
+    public onBrandClicked: () => void;
+    public onSessionTimeout: () => void;
 
     public initialize() {
         var self: TApplication = this;
@@ -29,9 +31,6 @@ export class TApplication {
                 self.navigateToPage(this.buildPageURL(self.MainPage));
             });
 
-            this.get('#api/:params', function () {
-                if (self.onNavigateToPage) self.onNavigateToPage(this.params ? this.params.params : this.params);
-            });
             this.get('#show/:class/:params', function () {
                 var className: string = self.hexToString(this.params["class"]);
                 var args: any[] = [];
@@ -56,6 +55,10 @@ export class TApplication {
                     });
                 }
             })
+            this.get('#:params', function () {
+                if (self.onNavigateToPage) self.onNavigateToPage(this.params);
+            });
+
         });
     }
 
@@ -74,6 +77,10 @@ export class TApplication {
         }
     }
 
+
+    /**
+    convert color names to hex codes
+    */
     public colourNameToHex(colour): string {
         var colours = {
             "aliceblue": "#f0f8ff", "antiquewhite": "#faebd7", "aqua": "#00ffff", "aquamarine": "#7fffd4", "azure": "#f0ffff",
@@ -382,6 +389,31 @@ export class TApplication {
         return item;
     }
 
+    //private _showtotopButton: boolean = false;
+    /**
+    * enable a button on the bottom of the screen that scoll the screen to the top
+    */
+    /*public get ShowToTopButton(): boolean {
+        return this._showtotopButton;
+    }
+    public set ShowToTopButton(val: boolean) {
+        if (val != this._showtotopButton) {
+            this._showtotopButton = val;
+        }
+    }*/
+
+    private _showgototopicon: boolean = false;
+    public get ShowGotoTopWidget(): boolean {
+        return this._showgototopicon;
+    }
+    public set ShowGotoTopWidget(val: boolean) {
+        if (val != this._showgototopicon) {
+            this._showgototopicon = val;
+        }
+    }
+
+
+
     private _mainpage: string = "PageHome";
     /**
     * Identifies the page in the application that is the main page.
@@ -395,6 +427,42 @@ export class TApplication {
             this._mainpage = val;
         }
     }
+
+    private _sessiontimeout: number;
+    /**
+    * Identifies the page in the application that is the main page.
+    * The main page is the first page created in the main body of the default page. 
+    */
+    public get SessionTimeout(): number {
+        return this._sessiontimeout;
+    }
+    public set SessionTimeout(val: number) {
+        //if (val != this._sessiontimeout) {
+            this._sessiontimeout = val;
+            this._setsessiontimeout();
+        //}
+    }
+
+    private _sessionevents: string = 'mousemove keydown DOMMouseScroll mousewheel mousedown';
+    private _setsessiontimeoutHandle;
+    private _lastsessiontime : Date;
+    private _setsessiontimeout(): void{
+        $(document).unbind($.trim((this._sessionevents + ' ').split(' ').join('.idleTimer ')));
+        if (this._setsessiontimeoutHandle) clearTimeout(this._setsessiontimeoutHandle);
+        if (this.SessionTimeout < 1) return;
+
+        $(document).bind($.trim((this._sessionevents + ' ').split(' ').join('.idleTimer ')), (event) => {
+            if (this._lastsessiontime && new Date().getTime() - this._lastsessiontime.getTime() < 1000) return;
+            this._lastsessiontime = new Date();
+            if (!this.Authenticated) return;
+            if (this._setsessiontimeoutHandle) clearTimeout(this._setsessiontimeoutHandle);
+            this._setsessiontimeoutHandle = setTimeout(() => {
+                $(document).unbind($.trim((this._sessionevents + ' ').split(' ').join('.idleTimer ')));
+                if (this.onSessionTimeout) this.onSessionTimeout();
+            }, this.SessionTimeout * 1000);
+        });
+    }
+
 
     private _loginpage: string = "PageLogin";
     /**
@@ -536,6 +604,7 @@ export class TApplication {
         return this.getSessionValue('_authenticated', false);
     }
     public set Authenticated(val: boolean) {
+
         if (val != this.Authenticated) {
             this.setSessionValue('_authenticated', val);
 
@@ -551,6 +620,7 @@ export class TApplication {
         return this.getSessionValue('_currencydecimals', 2);
     }
     public set CurrencyDecimals(val: number) {
+        val = Number(val);
         if (val != this.CurrencyDecimals) {
             this.setSessionValue('_currencydecimals', val);
 
@@ -672,7 +742,34 @@ export class TApplication {
     * Rebuild the default page
     */
     public refreshDefaultPage(): void {
-        $('#AppNavBar').find('.brand').text(this.ApplicationBrandName);
+        $('#AppNavBar').find('.brand').text(this.ApplicationBrandName).off("click").click(() => {
+            if (this.onBrandClicked != null) (V.tryAndCatch(() => { this.onBrandClicked(); }));
+            return true; //hadeling the menu
+        })
+
+        if (this.ShowGotoTopWidget) {
+            if ($(window).find('#toTop_____').length == 0) {
+                var btn = $("<a id='toTop_____'  style='display: inline'>");
+                $('body').append(btn);
+                btn.fadeOut();
+                btn.on('click', () => {
+                    $("html, body").animate({ scrollTop: 0 }, "slow", () => {
+                        btn.fadeOut("slow");
+                    });
+                })
+                $(window).on('scroll', function () {
+                    if ($(this).scrollTop() > 100) {
+                        btn.fadeIn('slow');
+                    } else {
+                        btn.fadeOut("slow");
+                    }
+                });
+
+
+
+            }
+        }
+
         var navLeft: JQuery = $('#NavLeft');
         var navRight: JQuery = $('#NavRight');
         navLeft.empty();
@@ -1250,3 +1347,4 @@ class passwordStrength {
         return score * -5;
     }
 }
+

@@ -24,6 +24,7 @@ export class TComboboxBase extends VXB.TEditorBase {
         return this._showsearch;
     }
     public set ShowSearchBox(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showsearch) {
             this._showsearch = val;
             this.drawDelayed(true);
@@ -36,11 +37,24 @@ export class TComboboxBase extends VXB.TEditorBase {
         return this._dropup;
     }
     public set DropUp(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._dropup) {
             this._dropup = val;
             this.drawDelayed(true);
         }
     }
+
+    private _borderradius: number = null;
+    public get BorderRadius(): number {
+        return this._borderradius;
+    }
+    public set BorderRadius(val: number) {
+        if (val != this._borderradius) {
+            this._borderradius = val;
+            this.drawDelayed(true);
+        }
+    }
+
 
     private _noneselectedtext: string = "Nothing selected";
     /**
@@ -241,6 +255,7 @@ export class TComboboxBase extends VXB.TEditorBase {
                 gitm.appendTo(this.jEdit);
             } else gitm = this.jEdit;
             this.items.forEach((item: TComboItem) => {
+                if (!item.Visible) return true;
                 if (item.Group == group) {
                     itm = $('<option/>');
                     if (!item.Enabled) itm.attr('disabled', "disabled");
@@ -253,6 +268,10 @@ export class TComboboxBase extends VXB.TEditorBase {
                         if (!item.SubText != null && item.SubText.toString().length > 0) {
                             itm.attr('data-subtext', item.SubText.toString());
                         }
+                    if (item.Icon) itm.attr('data-icon', V.iconEnumToBootstrapStyle(<any>item.Icon));
+                    else if (item.ImageURL) {
+                        itm.attr('data-content', '<img src="' + item.ImageURL + '"/><span class="text" style="margin-left:3px">' + item.Text+'</span>');
+                    }
                     }
                     itm.appendTo(gitm);
                 }
@@ -265,7 +284,9 @@ export class TComboboxBase extends VXB.TEditorBase {
         options.noneSelectedText = this.NoneSelectedText;
         options.Rtl = this.Rtl;
 
-        this.jEdit.selectpicker(options);
+
+        var jq = this.jEdit.selectpicker(options);
+        if (this.BorderRadius) this.jComponent.find('.dropdown-toggle').css('border-radius', this.BorderRadius + 'px').css('-webkit-border-radius', this.BorderRadius + 'px');
 
         if (this.ButtonVisible) {
             this.jImage = $('<i/>');
@@ -305,12 +326,12 @@ export class TComboboxBase extends VXB.TEditorBase {
 
     public checkAll() {
         this.items.forEach((item) => { item.Checked = true });
-        this.draw(true);
+        this.drawDelayed(true);
     }
 
     public uncheckAll() {
         this.items.forEach((item) => { item.Checked = false });
-        this.draw(false);
+        this.drawDelayed(false);
     }
 
     public get SelectedItems(): V.TComboItem[] {
@@ -328,7 +349,7 @@ export class TComboboxBase extends VXB.TEditorBase {
                 if (!this.MultipleSelect) break;
             }
         }
-        this.draw(false);
+        this.drawDelayed(false);
     }
 }
 
@@ -357,7 +378,7 @@ export class TCombobox extends TComboboxBase {
                 }
             }
         }
-        this.draw(true);
+        this.drawDelayed(true);
     }
 
     public create() {
@@ -417,6 +438,7 @@ export class TDBCombobox extends TComboboxBase {
         return this._dataset;
     }
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -473,6 +495,7 @@ export class TDBCombobox extends TComboboxBase {
     }
 
     public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
         super.create();
         var self = this;
         this.jEdit.change(() => {
@@ -558,6 +581,7 @@ export class TComboItem extends VXM.TMenuItem {
         return this._checked;
     }
     public set Checked(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._checked) {
             this._checked = val;
             if (this.OwnerCollection) this.OwnerCollection.refresh();

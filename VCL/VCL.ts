@@ -84,6 +84,7 @@ export class TInput extends VXInputMod.TInput { };
 export class TInputTypeaHead extends VXInputMod.TInputTypeaHead { };
 export class TTypeaHeadItem extends VXInputMod.TTypeaHeadItem { };
 export class TTextArea extends VXInputMod.TTextArea { };
+export class TDBLabeledText extends VXInputMod.TDBLabeledText { };
 export class TDBTextArea extends VXInputMod.TDBTextArea { };
 export class TInputNumeric extends VXInputMod.TInputNumeric { };
 export class TDBInputNumeric extends VXInputMod.TDBInputNumeric { };
@@ -140,6 +141,7 @@ import VXDatasetMod = require("./VXDataset");
 */
 export class TDataset extends VXDatasetMod.TDataset { };
 export class TClientDataset extends VXDatasetMod.TClientDataset { };
+export class TNestedClientDataset extends VXDatasetMod.TNestedClientDataset { };
 
 import VXComboboxMod = require("./VXCombo");
 export class TComboItem extends VXComboboxMod.TComboItem { };
@@ -858,4 +860,36 @@ export function getClassStyleHexColor(selector, style: string): string {
     $elem.remove();
     function hex(x) { return ("0" + parseInt(x).toString(16)).slice(-2); }
     return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);;
+}
+
+
+export function createComponentByElement(elem: Element, parent: VXContainMod.TContainer): TComponent {
+    var rc: TComponent;
+    for (var property in this) {
+        var componentClass = elem.tagName;
+        if (this.hasOwnProperty(property) && "V." + (<string>property).toUpperCase() == componentClass.toUpperCase()) {
+            if (!elem.getAttribute('id')) elem.setAttribute('id', TObject.genGUID());
+            rc = new this[property](parent, elem.getAttribute('id'));
+            for (var item in rc) {
+                if ((<string>item).indexOf('_') == 0) continue;
+                var a = elem.getAttribute ("v." + item);
+                if (a) {
+                    rc[item] = a;
+                }
+            }
+            break;
+        }
+    }
+    return rc;
+}
+
+
+export function convertaAnyToBoolean(val: any) {
+    if (!val) return false;
+    if (typeof val == "boolean") return val;
+    switch (val.toLowerCase()) {
+        case "true": case "yes": case "1": return true;
+        case "false": case "no": case "0": case null: return false;
+        default: return Boolean(val);
+    }
 }

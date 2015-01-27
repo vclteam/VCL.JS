@@ -130,7 +130,7 @@
 					.css(prop, value);
             }
 
-            var modalOverflow = $(window).height() - 10 < this.$element.height();
+            var modalOverflow = $(window).height() - 10 < this.options.maxHeight;
 
             if (modalOverflow || this.options.modalOverflow) {
                 this.$element
@@ -138,7 +138,7 @@
 					.addClass('modal-overflow');
             } else {
                 this.$element
-					.css('margin-top', 0 - this.$element.height() / 2)
+					.css('margin-top', 0 - this.options.maxHeight / 2)
 					.removeClass('modal-overflow');
             }
         },

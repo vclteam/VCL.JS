@@ -184,9 +184,29 @@ export class TChartDonut extends VXCB.TChartBase {
     }
 
     private _colorPallete: Array<string> = new Array<string>();
-    public get ColorPallete(): Array<string> {
+    public get ColorPallete(): Array<string>
+    {
+        if (!this._colorPallete || this._colorPallete.length == 0)
+        {
+            var btnColor: string;
+            switch (this.BaseColor) {
+                case V.BaseColor.Default: btnColor = "btn"; break;
+                case V.BaseColor.Primary: btnColor = "btn-primary"; break;
+                case V.BaseColor.Info: btnColor = "btn-info"; break;
+                case V.BaseColor.Success: btnColor = "btn-success"; break;
+                case V.BaseColor.Warning: btnColor = "btn-warning"; break;
+                case V.BaseColor.Danger: btnColor = "btn-danger"; break;
+                default: btnColor = "btn-primary"; break;
+            }
+
+            btnColor = V.getClassStyleHexColor(btnColor, 'background-color');
+            var colors = calculateShades(btnColor, this.values.length());
+            for (var j, x, i = colors.length; i; j = Math.floor(Math.random() * i), x = colors[--i], colors[i] = colors[j], colors[j] = x);
+            this._colorPallete = colors;
+        }
         return this._colorPallete;
     }
+
     public set ColorPallete(val: Array<string>) {
         var allColorOK = true;
         if (val) val.forEach((item) => {
@@ -205,6 +225,12 @@ export class TChartDonut extends VXCB.TChartBase {
 
 
     private donut: Donut;
+
+    public selectedItem(idx: number, fireEvents: boolean) {
+        this.donut.clickItem( idx, fireEvents);
+    }
+
+    /*
     public selectedValue(): V.TDountValue {
         if (this.donut == null) return null;
         for (var i = this.donut.segments.length; i--;) {
@@ -213,7 +239,7 @@ export class TChartDonut extends VXCB.TChartBase {
         }
         return null;
     }
-
+    */
 
     public getData(): any[] {
         var dataArray = [];
@@ -232,24 +258,7 @@ export class TChartDonut extends VXCB.TChartBase {
 
         this.TruncateLength = null;
 
-        var btnColor: string;
-        switch (this.BaseColor) {
-            case V.BaseColor.Default: btnColor = "btn"; break;
-            case V.BaseColor.Primary: btnColor = "btn-primary"; break;
-            case V.BaseColor.Info: btnColor = "btn-info"; break;
-            case V.BaseColor.Success: btnColor = "btn-success"; break;
-            case V.BaseColor.Warning: btnColor = "btn-warning"; break;
-            case V.BaseColor.Danger: btnColor = "btn-danger"; break;
-            default: btnColor = "btn-primary"; break;
-        }
 
-        var colors;
-        if (this.ColorPallete && this.ColorPallete.length > 0) colors = this.ColorPallete;
-        else {
-            btnColor = V.getClassStyleHexColor(btnColor, 'background-color');
-            colors = calculateShades(btnColor, dataArray.length);
-            for (var j, x, i = colors.length; i; j = Math.floor(Math.random() * i), x = colors[--i], colors[i] = colors[j], colors[j] = x);
-        }
 
         this.donut = new Donut({
             xkey: "label",
@@ -258,11 +267,12 @@ export class TChartDonut extends VXCB.TChartBase {
             labelColor: '#000000',
             element: this.jComponent[0],
             data: dataArray,
-            colors: colors,
+            colors: this.ColorPallete,
             showZeroVal: this.ShowZeroSlices,
             hideHover: this.ShowHoverLegend,
             startangle: this.StartAngle,
             endangle: this.EndAngle,
+            toolTipFormat: this.ToolTipFormat,
             xLabelFormat: this.XLabelFormat,
             yLabelFormat: this.YLabelFormat,
             behaveLikePie: this.BehaveLikePie,
@@ -327,6 +337,7 @@ export class TDBChartDonut extends TChartDonut {
         return this._dataset;
     }
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (val != this._dataset) {
                 if (this._dataset != null) {
@@ -369,6 +380,7 @@ export class TDBChartDonut extends TChartDonut {
 
         return dataArray;
     }
+
 }
 
 
@@ -408,7 +420,7 @@ class Donut extends VXCB.Grid {
 
         //start hover
         this.hover.hide();
-        if (tipId == "node") {
+        if (tipId && tipId.indexOf("node") != -1) {
             this.hoverItem(idx, series);
             if (this.options.hideHover)
                 this.hover.update.apply(this.hover, this.displayHoverForRow(idx, series));
@@ -527,13 +539,17 @@ class Donut extends VXCB.Grid {
 
 
     click(x, y, evt) {
+        var idx = evt.target.idx;
+        this.clickItem(idx, true);
+    }
+
+    clickItem(/*series: number,*/ idx: number, fireEvents: boolean = true) {
         if (!this.owner) return;
         var owner = <TChartDonut>this.owner;
         if (!owner.SelectionEnabled) return;
 
-        var idx = evt.target.idx;
         //var y = this.fire('click', idx, this.data[idx]);
-        var id = this.data[idx].id;
+        //var id = this.data[idx].id;
         var item = owner.values.toArray()[idx];//owner.values.FindItemByID(id);
         var segment = this.segments[idx];
 
@@ -557,7 +573,13 @@ class Donut extends VXCB.Grid {
             if (owner instanceof TDBChartDonut && (<TDBChartDonut>owner).Dataset != null) {
                 (<TDBChartDonut>owner).Dataset.Recno = parseInt(owner.values.toArray()[idx].ID);
             }
-            if (owner.onClicked != null && idx <= owner.values.length()) (V.tryAndCatch(() => { owner.onClicked(item); }));
+
+            var row = this.data[idx];
+            if (this.options.hideText)
+                this.setLabels(row, segment.color);
+
+            if (fireEvents)
+                if (owner.onClicked != null && idx <= owner.values.length()) (V.tryAndCatch(() => { owner.onClicked(item); }));
         }
         return;
     }
@@ -621,7 +643,7 @@ class Donut extends VXCB.Grid {
         var content: string = "";
         var lblX: string = "";
         if (!this.options.toolTipFormat) {
-            lblX = (this.options.drawlabel ? this.xLabelFormat(row, true) : "");
+            lblX = (this.options.drawlabel ? this.xLabelFormat(row, this.options.humanfriendly) : "");
             content = "<div style='pointer-events: none; color: " + seg.color + "' class='morris-hover-row-label'>" + lblX + "</div>";
         }
         _ref = row.y;

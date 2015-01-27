@@ -8,6 +8,12 @@ export class TAlert extends VXC.TComponent implements V.iTranslatable {
         this.Visible = false;
         this._text = text;
         (<any>this)._fittowidth = true;
+
+        if (this.jComponent.hasClass('alert-error')) this._alertstyle = V.AlertStyle.Error;
+        else if (this.jComponent.hasClass('alert-success')) this._alertstyle = V.AlertStyle.Success;
+        else if (this.jComponent.hasClass('alert-info')) this._alertstyle = V.AlertStyle.Info;
+        else if (this.jComponent.hasClass('alert-danger')) this._alertstyle = V.AlertStyle.Danger;
+
     }
 
     private _rtl: boolean = false;
@@ -15,6 +21,7 @@ export class TAlert extends VXC.TComponent implements V.iTranslatable {
         return this._rtl;
     }
     public set Rtl(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._rtl) {
             this._rtl = val;
             this.drawDelayed(true);
@@ -29,6 +36,7 @@ export class TAlert extends VXC.TComponent implements V.iTranslatable {
         return this._localizable;
     }
     public set Localizable(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._localizable) {
             this._localizable = val;
             this.drawDelayed(true);
@@ -47,7 +55,7 @@ export class TAlert extends VXC.TComponent implements V.iTranslatable {
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -58,7 +66,7 @@ export class TAlert extends VXC.TComponent implements V.iTranslatable {
     public set AlertStyle(val: V.AlertStyle) {
         if (val != this._alertstyle) {
             this._alertstyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -67,9 +75,10 @@ export class TAlert extends VXC.TComponent implements V.iTranslatable {
         return this._closebuttonvisible;
     }
     public set CloseButtonVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._closebuttonvisible) {
             this._closebuttonvisible = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -134,8 +143,9 @@ export class TAlert extends VXC.TComponent implements V.iTranslatable {
 export class TNotification extends VXC.TComponent implements V.iTranslatable  {
     public onClosed: () => void;
 
-    constructor(aOwner: VXC.TComponent) {
+    constructor(aOwner: VXC.TComponent, text?: string) {
         super(aOwner, null);
+        this.Text = text;
         (<any>this)._fittowidth = true;
     }
 
@@ -146,7 +156,7 @@ export class TNotification extends VXC.TComponent implements V.iTranslatable  {
     public set AlertStyle(val: V.AlertStyle) {
         if (val != this._alertstyle) {
             this._alertstyle = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -158,6 +168,7 @@ export class TNotification extends VXC.TComponent implements V.iTranslatable  {
         return this._localizable;
     }
     public set Localizable(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._localizable) {
             this._localizable = val;
             this.drawDelayed(true);
@@ -173,9 +184,10 @@ export class TNotification extends VXC.TComponent implements V.iTranslatable  {
         return this._timeout;
     }
     public set Timeout(val: number) {
+        val = Number(val);
         if (val != this._timeout) {
             this._timeout = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -190,7 +202,7 @@ export class TNotification extends VXC.TComponent implements V.iTranslatable  {
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -202,17 +214,17 @@ export class TNotification extends VXC.TComponent implements V.iTranslatable  {
     public set NotificationPosition(val: V.NotificationPosition) {
         if (val != this._notifposition) {
             this._notifposition = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
     public show() {
         if (this.Timeout > 0)
             this.jComponent.delay(this.Timeout).fadeOut('slow', $.proxy(this.close, this));
-        if (this.NotificationPosition == V.NotificationPosition.TopLeft) $(".notifications.top-left").append(this.jComponent);
-        else if (this.NotificationPosition == V.NotificationPosition.TopRight) $(".notifications.top-right").append(this.jComponent);
-        else if (this.NotificationPosition == V.NotificationPosition.BottomLeft) $(".notifications.bottom-left").append(this.jComponent);
-        else if (this.NotificationPosition == V.NotificationPosition.BottomRight) $(".notifications.bottom-right").append(this.jComponent);
+        if (this.NotificationPosition == V.NotificationPosition.TopLeft) $(".notifications.top-left").append(this.jComponent).css('z-index', '9999');
+        else if (this.NotificationPosition == V.NotificationPosition.TopRight) $(".notifications.top-right").append(this.jComponent).css('z-index', '9999');
+        else if (this.NotificationPosition == V.NotificationPosition.BottomLeft) $(".notifications.bottom-left").append(this.jComponent).css('z-index', '9999');
+        else if (this.NotificationPosition == V.NotificationPosition.BottomRight) $(".notifications.bottom-right").append(this.jComponent).css('z-index', '9999');
         this.jComponent.show();
         this.jComponent.alert();
     }
@@ -226,9 +238,10 @@ export class TNotification extends VXC.TComponent implements V.iTranslatable  {
         return this._closebuttonvisible;
     }
     public set CloseButtonVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._closebuttonvisible) {
             this._closebuttonvisible = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 

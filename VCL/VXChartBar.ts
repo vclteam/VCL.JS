@@ -8,6 +8,7 @@ import VXCB = require("./VXChartBase");
 export class TChartBar extends VXCB.TGridChartBase {
     /** Custom Format value on top */
     public LabelOnTopFormat: (data: any) => string;
+    public ImageOnTopFormat: (data: any) => string;
 
     /** Custom onClick */
     public onClicked: (value: V.TBarValue, series: number, idx: number) => void;
@@ -24,8 +25,21 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._showValueOnTop;
     }
     public set ShowValueOnTop(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showValueOnTop) {
             this._showValueOnTop = val;
+            this.drawDelayed(true);
+        }
+    }
+
+    private _showImageOnTop: boolean = false;
+    public get ShowImageOnTop(): boolean {
+        return this._showImageOnTop;
+    }
+    public set ShowImageOnTop(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
+        if (val != this._showImageOnTop) {
+            this._showImageOnTop = val;
             this.drawDelayed(true);
         }
     }
@@ -35,6 +49,7 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._maximumbarwidth;
     }
     public set MaximumBarWidth(val: number) {
+        val = Number(val);
         if (val != this._maximumbarwidth) {
             this._maximumbarwidth = val;
             this.drawDelayed(true);
@@ -46,6 +61,7 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._minY;
     }
     public set YMin(val: number) {
+        val = Number(val);
         if (val != this._minY) {
             this._minY = val;
             this.drawDelayed(true);
@@ -57,6 +73,7 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._maxY;
     }
     public set YMax(val: number) {
+        val = Number(val);
         if (val != this._maxY) {
             this._maxY = val;
             this.drawDelayed(true);
@@ -86,6 +103,7 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._unselectcolorOpacity;
     }
     public set UnselectedBarOpacity(val: number) {
+        val = Number(val);
         if (val != this._unselectcolorOpacity) {
             if (val > 1 || val < 0) return;
             this._unselectcolorOpacity = val;
@@ -488,6 +506,7 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._showhoverlegend;
     }
     public set ShowHoverLegend(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showhoverlegend) {
             this._showhoverlegend = val;
             this.drawDelayed(true);
@@ -499,6 +518,7 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._barleftopradius;
     }
     public set BarLeftTopRadius(val: number) {
+        val = Number(val);
         if (val != this._barleftopradius) {
             this._barleftopradius = val;
             this.drawDelayed(true);
@@ -510,6 +530,7 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._barlefbottomradius;
     }
     public set BarLeftBottomRadius(val: number) {
+        val = Number(val);
         if (val != this._barlefbottomradius) {
             this._barlefbottomradius = val;
             this.drawDelayed(true);
@@ -544,6 +565,7 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._stack;
     }
     public set Stacked(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._stack) {
             this._stack = val;
             this.drawDelayed(true);
@@ -555,6 +577,7 @@ export class TChartBar extends VXCB.TGridChartBase {
         return this._defSelectionLast;
     }
     public set SetLastSelected(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._defSelectionLast) {
             this._defSelectionLast = val;
             this.drawDelayed(true);
@@ -651,6 +674,7 @@ export class TChartBar extends VXCB.TGridChartBase {
                 yLabelFormat: this.YLabelFormat,
                 toolTipFormat: this.ToolTipFormat,
                 labelOnTopFormat: this.LabelOnTopFormat,
+                imageOnTopFormat: this.ImageOnTopFormat,
                 hideHover: this.ShowHoverLegend,
                 stacked: this.Stacked,
                 barColors: [
@@ -924,6 +948,7 @@ export class TDBChartBar extends TChartBar {
         return this._dataset;
     }
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -937,6 +962,12 @@ export class TDBChartBar extends TChartBar {
             this.drawDelayed(false);
         }
     }
+
+    public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
+        super.create();
+    }
+
 
     public getData(): any[] {
         this.values.clear();
@@ -1008,7 +1039,7 @@ export class Bar extends VXCB.Grid {
         this.onHoverOut = __bind(this.onHoverOut, this);
         this.onHoverMove = __bind(this.onHoverMove, this);
 
-        if ((<TChartBar>this.owner).ShowValueOnTop)
+        if ((<TChartBar>this.owner).ShowValueOnTop || (<TChartBar>this.owner).ShowImageOnTop)
             this.options.paddingXTop = 35;
     }
 
@@ -1133,6 +1164,9 @@ export class Bar extends VXCB.Grid {
         var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, rowold, sidx, size, top, ypos, zeroPos, _refold;
         groupWidth = this.width / this.options.data.length;
         this.barNodes = [];
+        if (this.options.stacked) {
+            this.options.numBars = 1;
+        }
         barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (this.options.numBars - 1)) / this.options.numBars;
         leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
         zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
@@ -1421,13 +1455,23 @@ export class Bar extends VXCB.Grid {
             else bar = this.raphael.path(this.roundedRect(newXpos, yPos, maxWidth, height, cornes)).attr('fill', barColor).attr('opacity', this.options.unselectOpacity).attr('stroke-width', 0);
         }
 
-        if ((<TChartBar>this.owner).ShowValueOnTop) {
+        var me = (<TChartBar>this.owner);
+        if (me.ShowValueOnTop) {
             var l = this.labelOnTopFormat(row, true);
             var w = this.measureText(l).width;
             var s = maxWidth;
             if (w <= (s * 2) && s > 20)
                 this.drawXAxisLabel(newXpos + s / 2, 5, l, 0);
         }
+
+        if (me.ShowImageOnTop) {
+            if (me.ImageOnTopFormat != null) {
+                var src = me.ImageOnTopFormat(row);
+                this.raphael.image(src, newXpos + (maxWidth - 30) / 2, yPos - 30, 30, 30);
+            }
+        }
+
+
 
         bar.node.TipId = "node" + idx + "" + series;
         bar.node.idx = idx;
@@ -1520,6 +1564,7 @@ export class TChartBullet extends VXC.TComponent {
         return this._showsubtitle;
     }
     public set ShowSubTitle(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showsubtitle) {
             this._showsubtitle = val;
             this.drawDelayed(true);
@@ -1531,6 +1576,7 @@ export class TChartBullet extends VXC.TComponent {
         return this._showvalue;
     }
     public set ShowValue(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showvalue) {
             this._showvalue = val;
             this.drawDelayed(true);

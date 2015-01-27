@@ -40,6 +40,7 @@ export class TCarouselPage extends VXO.TCollectionItem {
         return this._visible;
     }
     public set Visible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._visible) {
             this._visible = val;
             if (this) this._carousel.drawDelayed(true);
@@ -96,7 +97,7 @@ export class TCarousel extends VXCO.TContainer {
         // detach panel back before cleaning
         this.items.forEach((item) => {
             var td: V.TContainer = (<any>item)._container
-           if (td) {
+            if (td) {
                 td.jComponent.detach();
             }
         });
@@ -274,6 +275,7 @@ export class TPanelButton {
         return this._visible;
     }
     public set Visible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._visible) {
             this._visible = val;
             this.owner.drawDelayed(true);
@@ -379,6 +381,7 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
         return this._localizable;
     }
     public set Localizable(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._localizable) {
             this._localizable = val;
             this.drawDelayed(true);
@@ -402,6 +405,7 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
         return this._expanded;
     }
     public set Expanded(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._expanded) {
             this._expanded = val;
             this.drawDelayed(false);
@@ -414,6 +418,7 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
         return this._headevisible;
     }
     public set HeaderVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._headevisible) {
             this._headevisible = val;
             this.drawDelayed(false);
@@ -455,6 +460,7 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
         return this._largeheaderbutton;
     }
     public set LargeHeaderButton(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._largeheaderbutton) {
             this._largeheaderbutton = val;
             this.drawDelayed(false);
@@ -564,7 +570,7 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
             var attrs = {};
             $.each($(this.jComponent)[0].attributes, function (idx, attr) {
                 if (attr != null) {
-                    attrs[attr.nodeName] = attr.nodeValue;
+                    attrs[attr.nodeName] = attr.value;
                     attr.nodeValue = "";
                 }
             });
@@ -634,9 +640,9 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
             this.jHeaderText.css('overflow', 'hidden').css('white-space', 'nowrap').css('width', 'auto');
             if (this.HeaderTextAlignment == V.HeaderTextAlignment.Right) {
                 this.jHeaderText.addClass('pull-right').css('text-align', 'right')
-                } else {
+            } else {
                 this.jHeaderText.addClass('pull-left').css('text-align', 'left')
-                }
+            }
         } else {
             this.jButtons.hide();
             this.jHeaderText.css('overflow', 'hidden').css('white-space', 'nowrap').css('width', '99%');
@@ -686,12 +692,12 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
         if (!button.jButton) {
             button.jGroupButton = $('<div>');
             button.jGroupButton.addClass('btn-group');
-            button.jButton = $('<button>');
             button.jImage = $('<img>');
+            button.jButton = $('<button>');
             button.jButton.css('padding', '0px').css('background-color', 'transparent').css('vertical-align', 'middle');
             button.jButton.css('box-shadow', 'none');
             button.jButton.css('border', 'none');
-            if (this.LargeHeaderButton) button.jButton.addClass('icon-large');
+
             if (clickEvent)
                 button.jButton.off("click").click(clickEvent);
             else
@@ -703,6 +709,8 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
             button.jImage.prependTo(button.jButton);
             button.jButton.prependTo(button.jGroupButton);
         }
+        if (this.LargeHeaderButton) button.jButton.addClass('icon-large');
+
 
         if (button.MarginBottom) button.jButton.css('margin-bottom', button.MarginBottom + "px");
         if (button.MarginTop) button.jButton.css('margin-top', button.MarginTop + "px");
@@ -710,23 +718,22 @@ export class TPanel extends VXCO.TContainer implements V.iTranslatable {
         if (button.MarginRight) button.jButton.css('margin-right', button.MarginRight + "px");
         if (button.Color) button.jButton.css('color', button.Color);
 
-        if (button.TextColor) {
-            button.jButton.css('color', button.TextColor);
-        }
+        if (button.TextColor) button.jButton.css('color', button.TextColor);
+
+        button.jButton.removeClass(function (index, css) {
+            return (css.match(/(^|\s)icon-\S+/g) || []).join(' ');
+        });
+        button.jButton.removeClass('btn btn-link icon');
 
         if (button.Text != null && button.Text != "") {
             button.jButton.text(button.Text).addClass('btn-link');
         } else {
             if (button.ImageUrl) {
                 button.jImage.attr('src', button.ImageUrl);
-            }
-            else {
-                button.jButton.removeClass(function (index, css) {
-                    return (css.match(/(^|\s)icon-\S+/g) || []).join(' ');
-                });
+            } else {
                 button.jButton.addClass('btn');
                 button.jButton.addClass("icon");
-                button.jButton.addClass(V.iconEnumToBootstrapStyle(<any>button.Icon)).text('');
+                button.jButton.addClass(V.iconEnumToBootstrapStyle(<any>button.Icon));
             }
         }
 
@@ -962,7 +969,7 @@ export class TGoogleMap extends VXC.TComponent {
         this.heatmapMarkerItems.forEach((item) => {
             if (item.Layer && layers.indexOf(item.Layer) == -1) layers.push(item.Layer);
         });
-        
+
         if (this.heatmapMarkerItems.length()) {
             var homeControlDivs: HTMLElement = document.createElement('div');
             layers.forEach((layer) => {
@@ -1329,6 +1336,7 @@ export class TGoogleMapMarker extends VXO.TCollectionItem {
         return this._visible;
     }
     public set Visible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._visible) {
             this._visible = val;
         }
@@ -1440,6 +1448,7 @@ export class GraphEditorNullLayout implements IGraphEditorLayout {
         return this._fit;
     }
     public set Fit(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fit) {
             this._fit = val;
         }
@@ -1477,6 +1486,7 @@ export class GraphEditorRandomLayout implements IGraphEditorLayout {
         return this._fit;
     }
     public set Fit(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fit) {
             this._fit = val;
         }
@@ -1528,6 +1538,7 @@ export class GraphEditorPresetLayout implements IGraphEditorLayout {
         return this._fit;
     }
     public set Fit(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fit) {
             this._fit = val;
         }
@@ -1587,6 +1598,7 @@ export class GraphEditorGridLayout implements IGraphEditorLayout {
         return this._fit;
     }
     public set Fit(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fit) {
             this._fit = val;
         }
@@ -1668,6 +1680,7 @@ export class GraphEditorCircleLayout implements IGraphEditorLayout {
         return this._fit;
     }
     public set Fit(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fit) {
             this._fit = val;
         }
@@ -1709,6 +1722,7 @@ export class GraphEditorCircleLayout implements IGraphEditorLayout {
         return this._counterclockwise;
     }
     public set Counterclockwise(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._counterclockwise) {
             this._counterclockwise = val;
         }
@@ -1784,6 +1798,7 @@ export class GraphEditorConcentricLayout implements IGraphEditorLayout {
         return this._fit;
     }
     public set Fit(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fit) {
             this._fit = val;
         }
@@ -1856,6 +1871,7 @@ export class GraphEditorConcentricLayout implements IGraphEditorLayout {
         return this._counterclockwise;
     }
     public set Counterclockwise(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._counterclockwise) {
             this._counterclockwise = val;
         }
@@ -1924,6 +1940,7 @@ export class GraphEditorBreadthfirstLayout implements IGraphEditorLayout {
         return this._fit;
     }
     public set Fit(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fit) {
             this._fit = val;
         }
@@ -1938,6 +1955,7 @@ export class GraphEditorBreadthfirstLayout implements IGraphEditorLayout {
         return this._directed;
     }
     public set Directed(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._directed) {
             this._directed = val;
         }
@@ -1952,6 +1970,7 @@ export class GraphEditorBreadthfirstLayout implements IGraphEditorLayout {
         return this._circle;
     }
     public set Circle(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._directed) {
             this._circle = val;
         }
@@ -2044,6 +2063,7 @@ export class GraphEditorCOSELayout implements IGraphEditorLayout {
         return this._fit;
     }
     public set Fit(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fit) {
             this._fit = val;
         }
@@ -2060,6 +2080,7 @@ export class GraphEditorCOSELayout implements IGraphEditorLayout {
 
 
     public set Randomize(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._randomize) {
             this._randomize = val;
         }

@@ -1,5 +1,5 @@
-import VXCO = require("./VXContainer");
 import V = require("./VCL");
+import VXCO = require("./VXContainer");
 import VXO = require("./VXObject");
 import VXM = require("./VXMenu");
 
@@ -62,11 +62,49 @@ export class TComponent extends VXO.TObject {
             this.jComponent[0].id = this.ID;
             this.jComponent.attr("DATA-ID", renderTo);
         }
-        if (aOwner != null) {
-            (<any>aOwner).addComponent(this);
-        }
+        if (aOwner != null) (<any>aOwner).addComponent(this);
         this.addClass(this.getClassName().toUpperCase());
     }
+
+    private checkDataset(name: any) {
+        if (name && typeof name == "string" && this.owner) {
+            var arrName = (<string>name).split('.');
+            var parent = this.owner;
+            for (var i = 0; i < arrName.length; i++) {
+                var rc: any;
+                for (var item in parent) {
+                    if ((<string>item).toUpperCase() == arrName[i].toUpperCase()) {
+                        rc = parent[item];
+                        break;
+                    }
+                }
+                if (!rc) {
+                    V.Application.raiseException(name + " dataset was not found on page " + this.owner.getClassName());
+                    throw name + " dataset was not found on page " + this.owner.getClassName();
+                }
+                parent = rc;
+            }
+
+            if (!rc) {
+                V.Application.raiseException(name + " dataset was not found on page " + this.owner.getClassName());
+                throw name + " dataset was not found on page " + this.owner.getClassName();
+            }
+            return rc;
+        }
+        else return name;
+    }
+
+    private guessDataset() {
+        var VXD = require("./VXDataset");
+        var o = this.owner;
+        var rc: Array<any> = new Array<any>();
+        if ((<VXCO.TContainer>o).components) (<VXCO.TContainer>o).components.forEach((item) => {
+            if (item instanceof VXD.TDataset) {
+                rc.push(item);
+            }
+        });
+        return rc.length == 1 ? rc[0] : null
+    } 
 
     public destroy() {
         if (this.owner != null) {

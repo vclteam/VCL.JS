@@ -14,10 +14,23 @@ export class TInput extends VXB.TInputBase {
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
-            this.draw(false);
+            this.drawDelayed(false);
             //if (this.onChanged) this.onChanged(this);
         }
     }
+
+    private _buttonclickonenter: boolean = false;
+    public get ButtonClickOnEnter(): boolean {
+        return this._buttonclickonenter;
+    }
+    public set ButtonClickOnEnter(val: boolean) {
+        if (val != this._buttonclickonenter) {
+            this._buttonclickonenter = val;
+            this.drawDelayed(false);
+            //if (this.onChanged) this.onChanged(this);
+        }
+    }
+
 
     public create() {
         var self = this;
@@ -26,22 +39,38 @@ export class TInput extends VXB.TInputBase {
             this.Text = this.jEdit.val()
             if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
-        this.jEdit.on("keyup", () => {
+        this.jEdit.keyup((event) => {
             this.Text = this.jEdit.val()
-            if (this.onKeyUp != null) (V.tryAndCatch(() => { this.onKeyUp(event.keyCode); }))
+            if (this.onKeyUp != null) (V.tryAndCatch(() => { this.onKeyUp(event.char); }))
         });
+        this.jEdit.keypress((event) => {
+            if (this.ButtonClickOnEnter && event.charCode == 13 && this.jBtn) this.jBtn.click();
+            var rc = true;
+            if (this.onKeyDown != null) (V.tryAndCatch(() => {
+                var key = event.which;
+                if (event.char) rc = this.onKeyDown(event.char);
+                else if (key) {
+                    var letter = String.fromCharCode(key);
+                    rc = this.onKeyDown(letter.replace('\r', '\n'))
+                }
 
+                //rc = this.onKeyDown(event.char ? event.char : String.fromCharCode(key));
+            }))
+            return rc;
+        });
     }
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
 
-        if (this.jEdit.val() != this.Text)
-            this.jEdit.val(this.Text);
+        if (this.jEdit.val() != this.Text) {
+            if (this.DisplayAsText) this.jEdit.text(this.Text ? this.Text : this.NullText);
+            else this.jEdit.val(this.Text);
+        }
     }
-
 }
+
 export class TDBInput extends VXB.TInputBase {
     private _dataset: VXD.TDataset;
     /**
@@ -51,7 +80,21 @@ export class TDBInput extends VXB.TInputBase {
         return this._dataset;
     }
 
+    /**
+        @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+        @renderTo   (Optional) the id of the html element that will be the parent node for this component
+        @dataset 
+        @datafield
+    **/
+    constructor(aOwner: VXC.TComponent, renderTo?: string, dataset?: V.TDataset, dataField? : string) {
+        super(aOwner, renderTo);
+        if (dataset) this.Dataset = dataset;
+        if (dataField) this.DataField = dataField;
+    }
+
+
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -72,16 +115,43 @@ export class TDBInput extends VXB.TInputBase {
         return this.Dataset.Active;
     }
 
+    /**
+    * Specifies the field from which the edit control displays data.(same as DataField)
+    */
+
+    public get Field(): string {
+        return this._datafield;
+    }
+    public set Field(val: string) {
+        this.DataField = val;
+    }
+
     private _datafield: string;
     /**
-    * Specifies the field from which the edit control displays data.
+    * Specifies the field from which the edit control displays data.(same as Field)
     */
     public get DataField(): string {
         return this._datafield;
     }
     public set DataField(val: string) {
         if (val != this._datafield) {
-            this._datafield = val.toUpperCase();
+            if (this.owner && val && val.split(',').length == 2) {
+                var dsName = val.split(',')[0].toLowerCase();
+                var fldName = val.split(',')[1];
+                var ds;
+                for (var item in this.owner) {
+                    if (item && (<string>item).toLowerCase() == dsName) {
+                        ds = this.owner[item];
+                        break;
+                    }
+                }
+                if (!ds) {
+                    V.Application.raiseException("data source "+this.owner[val.split(',')[0]]+" was not found");
+                    throw "data source " + this.owner[val.split(',')[0]] + " was not found";
+                }
+                this.Dataset = ds;
+                this._datafield = fldName.toUpperCase();
+            } else this._datafield = val.toUpperCase();
         }
     }
 
@@ -96,9 +166,8 @@ export class TDBInput extends VXB.TInputBase {
         if (this.DataField == null || this.DataField.toString() == "") return;
 
         this.Dataset.setFieldValue(this.DataField.toString(), val);
-        this.draw(false);
+        this.drawDelayed(false);
     }
-
 
     private _immidiatepost: boolean;
     public get ImmidiatePost(): boolean {
@@ -107,21 +176,44 @@ export class TDBInput extends VXB.TInputBase {
     public set ImmidiatePost(val: boolean) {
         if (val != this._immidiatepost) {
             this._immidiatepost = val;
-            this.draw(true);
+            this.drawDelayed(true);
+        }
+    }
+
+    private _buttonclickonenter: boolean = false;
+    public get ButtonClickOnEnter(): boolean {
+        return this._buttonclickonenter;
+    }
+    public set ButtonClickOnEnter(val: boolean) {
+        if (val != this._buttonclickonenter) {
+            this._buttonclickonenter = val;
+            this.drawDelayed(false);
+            //if (this.onChanged) this.onChanged(this);
         }
     }
 
 
     public create() {
         super.create();
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
         var self = this;
         this.jEdit.on("change paste", () => {
             this.DataValue = this.jEdit.val();
             if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
-        this.jEdit.on("keyup", () => {
+        this.jEdit.keyup((event) => {
             this.DataValue = this.jEdit.val();
-            if (this.onKeyUp != null) (V.tryAndCatch(() => { this.onKeyUp(event.keyCode); }))
+            if (this.onKeyUp != null) (V.tryAndCatch(() => { this.onKeyUp(event.char); }))
+        });
+
+        this.jEdit.keypress((event) => {
+            if (this.ButtonClickOnEnter && event.charCode == 13 && this.jBtn) this.jBtn.click();
+            var rc = true;
+            if (this.onKeyDown != null) (V.tryAndCatch(() => {
+                var key = event.which;
+                rc = this.onKeyDown(event.char ? event.char : String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key));
+            }))
+            return rc;
         });
 
 
@@ -138,11 +230,52 @@ export class TDBInput extends VXB.TInputBase {
             super.draw(reCreate);
         }
 
-        if (this.jEdit.val() != this.DataValue)
-            this.jEdit.val(this.DataValue);
+        if (this.jEdit.val() != this.DataValue) {
+            if (this.DisplayAsText) this.jEdit.text(this.DataValue ? this.DataValue : this.NullText);
+            else this.jEdit.val(this.DataValue);
+        }
+    }
+}
+
+export class TDBLabeledText extends TDBInput {
+    /**
+        @aOwner     Indicates the component that is responsible for streaming and freeing this component.Onwer must be TContainer
+        @renderTo   (Optional) the id of the html element that will be the parent node for this component
+        @dataset 
+        @datafield
+    **/
+    constructor(aOwner: VXC.TComponent, renderTo?: string, dataset?: V.TDataset, dataField?: string) {
+        super(aOwner, renderTo, dataset,dataField);
+        this.DisplayAsText = true;
+    }
+
+    private _textstyle: V.TextStyle = V.TextStyle.Default;
+    public get TextStyle(): V.TextStyle {
+        return this._textstyle;
+    }
+    public set TextStyle(val: V.TextStyle) {
+        if (val && typeof val == "string") {
+            switch (val.toString().toUpperCase()) {
+                case "H1": val = V.TextStyle.h1; break;
+                case "H2": val = V.TextStyle.h2; break;
+                case "H3": val = V.TextStyle.h3; break;
+                case "H4": val = V.TextStyle.h4; break;
+                case "H5": val = V.TextStyle.h5; break;
+                case "H6": val = V.TextStyle.h6; break;
+                case "LEAD": val = V.TextStyle.lead; break;
+                case "SMALL": val = V.TextStyle.small; break;
+                case "STRONG": val = V.TextStyle.strong; break;
+                default: val = V.TextStyle.Default; break;
+            }
+        }
+        if (val != this._textstyle) {
+            this._textstyle = val;
+            this.drawDelayed(true);
+        }
     }
 
 }
+
 
 export class TInputNumeric extends VXB.TInputBase {
     /**
@@ -161,11 +294,12 @@ export class TInputNumeric extends VXB.TInputBase {
     }
 
     public set Value(val: number) {
+        val = Number(val);
         if (val != this._value) {
             if (val > this.MaxValue) val = this.MaxValue;
             if (val < this.MinValue) val = this.MinValue;
             this._value = <any>val==""?null:val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -174,6 +308,7 @@ export class TInputNumeric extends VXB.TInputBase {
         return this._maxvalue;
     }
     public set MaxValue(val: number) {
+        val = Number(val);
         if (val != this._maxvalue) {
             this._maxvalue = val;
             this.drawDelayed(false);
@@ -185,6 +320,7 @@ export class TInputNumeric extends VXB.TInputBase {
         return this._minvalue;
     }
     public set MinValue(val: number) {
+        val = Number(val);
         if (val != this._minvalue) {
             this._minvalue = val;
             this.drawDelayed(false);
@@ -196,6 +332,7 @@ export class TInputNumeric extends VXB.TInputBase {
         return this._step;
     }
     public set Step(val: number) {
+        val = Number(val);
         if (val != this._step) {
             this._step = val;
         }
@@ -207,6 +344,7 @@ export class TInputNumeric extends VXB.TInputBase {
         return this._precision;
     }
     public set Precision(val: number) {
+        val = Number(val);
         if (val != this._precision) {
             this._precision = val;
             this.drawDelayed(false);
@@ -251,7 +389,8 @@ export class TInputNumeric extends VXB.TInputBase {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        this.jEdit.val(this.Value?this.Value.toString():"");
+        if (this.DisplayAsText) this.jEdit.text(this.Value ? this.Value.toString() : this.NullText);
+        else this.jEdit.val(this.Value?this.Value.toString():"");
     }
 }
 
@@ -276,6 +415,7 @@ export class TDBInputNumeric extends VXB.TInputBase {
     }
 
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -333,6 +473,7 @@ export class TDBInputNumeric extends VXB.TInputBase {
         return this._step;
     }
     public set Step(val: number) {
+        val = Number(val);
         if (val != this._step) {
             this._step = val;
         }
@@ -344,6 +485,7 @@ export class TDBInputNumeric extends VXB.TInputBase {
         return this._precision;
     }
     public set Precision(val: number) {
+        val = Number(val);
         if (val != this._precision) {
             this._precision = val;
             this.drawDelayed(false);
@@ -351,7 +493,9 @@ export class TDBInputNumeric extends VXB.TInputBase {
     }
 
     public create() {
+        if (!this.Dataset) this.Dataset = (<any>this).guessDataset();
         super.create();
+
         this.jComponent.attr('data-trigger', "spinner").addClass('spinner');
 
         //draw the component
@@ -383,7 +527,8 @@ export class TDBInputNumeric extends VXB.TInputBase {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        this.jEdit.val(this.DataValue ? this.DataValue.toString() : "");
+        if (this.DisplayAsText) this.jEdit.text(this.DataValue ? this.DataValue.toString() : this.NullText);
+        else this.jEdit.val(this.DataValue ? this.DataValue.toString() : "");
     }
 }
 
@@ -409,6 +554,7 @@ export class TTextArea extends VXB.TInputBase {
         return this._wrap;
     }
     public set Wrap(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._wrap) {
             this._wrap = val;
             this.drawDelayed(true);
@@ -420,6 +566,7 @@ export class TTextArea extends VXB.TInputBase {
         return this._readonly;
     }
     public set Readonly(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._readonly) {
             this._readonly = val;
             this.drawDelayed(true);
@@ -448,9 +595,9 @@ export class TTextArea extends VXB.TInputBase {
             if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
 
-        this.jEdit.on("keyup", () => {
+        this.jEdit.keyup((event) => {
             this.Text = this.jEdit.val()
-            if (this.onKeyUp != null) (V.tryAndCatch(() => { this.onKeyUp(event.keyCode); }))
+            if (this.onKeyUp != null) (V.tryAndCatch(() => { this.onKeyUp(event.char); }))
         });
 
 
@@ -460,8 +607,10 @@ export class TTextArea extends VXB.TInputBase {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
 
-        if (this.jEdit.val() != this.Text)
+        if (this.jEdit.val() != this.Text) {
+            if (this.DisplayAsText) this.jEdit.text(this.Text ? this.Text : this.NullText);
             this.jEdit.val(this.Text);
+        }
     }
 
 }
@@ -481,6 +630,7 @@ export class TDBTextArea extends VXB.TInputBase {
     }
 
     public set Dataset(val: VXD.TDataset) {
+        val = (<any>this).checkDataset(val);
         if (val != this._dataset) {
             if (this._dataset) {
                 (<any>this._dataset).removeEventListener(VXD.TDataset.EVENT_DATA_CHANGED, this);
@@ -501,6 +651,7 @@ export class TDBTextArea extends VXB.TInputBase {
         return this._wrap;
     }
     public set Wrap(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._wrap) {
             this._wrap = val;
             this.drawDelayed(true);
@@ -549,7 +700,7 @@ export class TDBTextArea extends VXB.TInputBase {
 
         if (val != this._datafield) {
             this.Dataset.setFieldValue(this.DataField.toString(), val);
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
 
@@ -561,7 +712,7 @@ export class TDBTextArea extends VXB.TInputBase {
     public set ImmidiatePost(val: boolean) {
         if (val != this._immidiatepost) {
             this._immidiatepost = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
 
@@ -574,9 +725,9 @@ export class TDBTextArea extends VXB.TInputBase {
             if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(self); }))
         });
 
-        this.jEdit.on("keyup", () => {
+        this.jEdit.keyup((event) => {
             this.DataValue = this.jEdit.val();
-            if (this.onKeyUp != null) (V.tryAndCatch(() => { this.onKeyUp(event.keyCode); }))
+            if (this.onKeyUp != null) (V.tryAndCatch(() => { this.onKeyUp(event.char); }))
         });
 
         if (this.ImmidiatePost) this.jEdit.keyup(() => {
@@ -593,8 +744,10 @@ export class TDBTextArea extends VXB.TInputBase {
             super.draw(reCreate);
         }
 
-        if (this.jEdit.val() != this.DataValue)
-            this.jEdit.val(this.DataValue);
+        if (this.jEdit.val() != this.DataValue) {
+            if (this.DisplayAsText) this.jEdit.text(this.DataValue ? this.DataValue : this.NullText);
+            else this.jEdit.val(this.DataValue);
+        }
     }
 }
 
@@ -652,7 +805,7 @@ export class TInputTypeaHead extends VXB.TInputBase {
     public set Text(val: string) {
         if (val != this._text) {
             this._text = val;
-            this.draw(false);
+            this.drawDelayed(false);
         }
     }
     private _highlightMatchedText: boolean = true;
@@ -662,7 +815,7 @@ export class TInputTypeaHead extends VXB.TInputBase {
     public set HighlightMatchedText(val: boolean) {
         if (val != this._highlightMatchedText) {
             this._highlightMatchedText = val;
-            this.draw(true);
+            this.drawDelayed(true);
         }
     }
     public Items: VXO.TCollection<TTypeaHeadItem> = new VXO.TCollection<TTypeaHeadItem>();
@@ -746,7 +899,9 @@ export class TInputTypeaHead extends VXB.TInputBase {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
 
-        if (this.jEdit.val() != this.Text)
-            this.jEdit.val(this.Text);
+        if (this.jEdit.val() != this.Text) {
+            if (this.DisplayAsText) this.jEdit.text(this.Text ? this.Text : this.NullText);
+            else this.jEdit.val(this.Text);
+        }
     }
 }

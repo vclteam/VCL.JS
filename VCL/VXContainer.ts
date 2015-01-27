@@ -36,6 +36,63 @@ export class TContainer extends VXC.TComponent {
         if (!this.__HTML__) this.__HTML__ = this.getContanierHTML();
         if (this.__HTML__) {
             $(this.jComponent).html(this.__HTML__);
+            if (this.__HTML__.toUpperCase().indexOf('<V.') >= 0) {
+                var VArr = $(this.jComponent).find('*').each((index, elem) => {
+                    if (elem.tagName && elem.tagName.indexOf("V.") == 0) {
+                        var elemId = elem.getAttribute('id');
+                        if (elemId && elemId.length<1) {
+                            V.Application.raiseException(elem.tagName + " component must have an ID");
+                            throw elem.tagName + " component must have an ID";
+                        }
+                        if (elemId && this[elemId]) {
+                            V.Application.raiseException("Bad id for element " + elem.tagName+"-property '" + elemId + "' already exists in " + this.getClassName());
+                            throw "Bad id for element " + elem.tagName+"-property '" + elem.tagName + "' already exists in " + this.getClassName();
+                        }
+                        var comp = V.createComponentByElement(elem, this);
+                        if (!comp) {
+                            V.Application.raiseException(elem.tagName+" component was not found");
+                            throw elem.tagName +" component was not found";
+                        } else if (elemId) this[elemId] = comp;
+                    }
+                });
+            }
+
+            if (V.Application.getBootstrapVersion() == 3) {
+                //check for bootstrap 2 old code
+                $(this.jComponent).find('.row-fluid').each((index, elem) => {
+                    $(elem).removeClass('row-fluid').addClass('row');
+                })
+                $(this.jComponent).find("*[class^='span'").each((index, elem) => {
+                    if ($(elem).hasClass('span1')) $(elem).removeClass('span1').addClass('col-md-1');
+                    else if ($(elem).hasClass('span2')) $(elem).removeClass('span2').addClass('col-md-2');
+                    else if ($(elem).hasClass('span3')) $(elem).removeClass('span3').addClass('col-md-3');
+                    else if ($(elem).hasClass('span4')) $(elem).removeClass('span4').addClass('col-md-4');
+                    else if ($(elem).hasClass('span5')) $(elem).removeClass('span5').addClass('col-md-5');
+                    else if ($(elem).hasClass('span6')) $(elem).removeClass('span6').addClass('col-md-6');
+                    else if ($(elem).hasClass('span7')) $(elem).removeClass('span7').addClass('col-md-7');
+                    else if ($(elem).hasClass('span8')) $(elem).removeClass('span8').addClass('col-md-8');
+                    else if ($(elem).hasClass('span9')) $(elem).removeClass('span9').addClass('col-md-9');
+                    else if ($(elem).hasClass('span10')) $(elem).removeClass('span10').addClass('col-md-10');
+                    else if ($(elem).hasClass('span11')) $(elem).removeClass('span11').addClass('col-md-11');
+                    else if ($(elem).hasClass('span12')) $(elem).removeClass('span12').addClass('col-md-12');
+                })
+                $(this.jComponent).find("*[class^='offset'").each((index, elem) => {
+                    if ($(elem).hasClass('offset1')) $(elem).removeClass('offset1').addClass('col-md-offset-1');
+                    else if ($(elem).hasClass('offset2')) $(elem).removeClass('offset2').addClass('col-md-offset-2');
+                    else if ($(elem).hasClass('offset3')) $(elem).removeClass('offset3').addClass('col-md-offset-3');
+                    else if ($(elem).hasClass('offset4')) $(elem).removeClass('offset4').addClass('col-md-offset-4');
+                    else if ($(elem).hasClass('offset5')) $(elem).removeClass('offset5').addClass('col-md-offset-5');
+                    else if ($(elem).hasClass('offset6')) $(elem).removeClass('offset6').addClass('col-md-offset-6');
+                    else if ($(elem).hasClass('offset7')) $(elem).removeClass('offset7').addClass('col-md-offset-7');
+                    else if ($(elem).hasClass('offset8')) $(elem).removeClass('offset8').addClass('col-md-offset-8');
+                    else if ($(elem).hasClass('offset9')) $(elem).removeClass('offset9').addClass('col-md-offset-9');
+                    else if ($(elem).hasClass('offset10')) $(elem).removeClass('offset10').addClass('col-md-offset-10');
+                    else if ($(elem).hasClass('offset11')) $(elem).removeClass('offset11').addClass('col-md-offset-11');
+                    else if ($(elem).hasClass('offset12')) $(elem).removeClass('offset12').addClass('col-md-offset-12');
+                })
+
+
+            }
             //translate the page
             if (V.Application.ActiveLanguage) {
                 var trnsElem = $(this.jComponent).find('[data-localizable]');
@@ -47,19 +104,19 @@ export class TContainer extends VXC.TComponent {
         }
         if (this.onCreate != null) (V.tryAndCatch(() => { this.onCreate(); }))
         this.jComponent.off("click").click((e) => {
-            if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(aOwner); }));
+            if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(this); }));
         })
         this.jComponent.off("mouseover").mouseover(() => {
-            if (this.onMouseOver != null) (V.tryAndCatch(() => { this.onMouseOver(aOwner); }));
+            if (this.onMouseOver != null) (V.tryAndCatch(() => { this.onMouseOver(this); }));
         })
         this.jComponent.off("mouseout").mouseout(() => {
-            if (this.onMouseOut != null) (V.tryAndCatch(() => { this.onMouseOut(aOwner); }));
+            if (this.onMouseOut != null) (V.tryAndCatch(() => { this.onMouseOut(this); }));
         })
         this.jComponent.off("mouseenter").mouseenter(() => {
-            if (this.onMouseEnter != null) (V.tryAndCatch(() => { this.onMouseEnter(aOwner); }));
+            if (this.onMouseEnter != null) (V.tryAndCatch(() => { this.onMouseEnter(this); }));
         })
         this.jComponent.off("mouseleave").mouseleave(() => {
-            if (this.onMouseLeave != null) (V.tryAndCatch(() => { this.onMouseLeave(aOwner); }));
+            if (this.onMouseLeave != null) (V.tryAndCatch(() => { this.onMouseLeave(this); }));
         })
     }
 
@@ -92,12 +149,11 @@ export class TContainer extends VXC.TComponent {
         return this._overflow;
     }
     public set Overflow(val: V.Overflow) {
-        if (V.Application.checkColorString(val)) {
-            if (val != this._overflow) {
-                this._overflow = val;
-                this.drawDelayed(false);
-            }
+        if (val != this._overflow) {
+            this._overflow = val;
+            this.drawDelayed(false);
         }
+
     }
 
     private _overflow_x: V.Overflow_X;
@@ -106,12 +162,11 @@ export class TContainer extends VXC.TComponent {
         return this._overflow_x;
     }
     public set Overflow_X(val: V.Overflow_X) {
-        if (V.Application.checkColorString(val)) {
-            if (val != this._overflow_x) {
-                this._overflow_x = val;
-                this.drawDelayed(false);
-            }
+        if (val != this._overflow_x) {
+            this._overflow_x = val;
+            this.drawDelayed(false);
         }
+
     }
 
     private _overflow_y: V.Overflow_Y;
@@ -120,11 +175,9 @@ export class TContainer extends VXC.TComponent {
         return this._overflow_y;
     }
     public set Overflow_Y(val: V.Overflow_Y) {
-        if (V.Application.checkColorString(val)) {
-            if (val != this._overflow_y) {
-                this._overflow_y = val;
-                this.drawDelayed(false);
-            }
+        if (val != this._overflow_y) {
+            this._overflow_y = val;
+            this.drawDelayed(false);
         }
     }
 
@@ -171,24 +224,32 @@ export class TContainer extends VXC.TComponent {
     }
 
     private validateContainer(components: VXO.TCollection<VXC.TComponent>): boolean {
-        var rc = true;
+        var containerValid = true;
         components.forEach((item) => {
             if (item instanceof VXB.TEditorBase) {
                 var itm: VXB.TEditorBase = <VXB.TEditorBase>item;
-                if (itm.Required && itm.isEmpty()) {
+                var userDefMessage = null;
+                if (itm.onValidate) {
+                    userDefMessage = itm.onValidate(this);
+                    if (userDefMessage) {
+                        itm.ShowErrorMessage(userDefMessage)
+                        containerValid = false;
+                    }
+                }
+                if (!userDefMessage && itm.Required && itm.isEmpty()) {
                     itm.ShowErrorMessage(V.Application.LocaleSettings.MSG_This_value_is_required)
-                    rc = false;
-                } else if (itm.MinLength > 0 && itm.textLength() < itm.MinLength) {
+                    containerValid = false;
+                } else if (!userDefMessage && itm.MinLength > 0 && itm.textLength() < itm.MinLength) {
                     itm.ShowErrorMessage(V.Application.LocaleSettings.MSG_This_value_is_not_minimum.replace('%s', itm.MinLength.toString()));
-                    rc = false;
-                } else {
+                    containerValid = false;
+                } else if(!userDefMessage) {
                     itm.HideErrorMessage();
                 }
             } else if (item instanceof TContainer) {
-                if (!this.validateContainer((<TContainer>item).components)) rc = false;
+                if (!this.validateContainer((<TContainer>item).components)) containerValid = false;
             }
         })
-        return rc;
+        return containerValid;
     }
 
     private removeShadow() {
@@ -251,7 +312,7 @@ export class TContainer extends VXC.TComponent {
 
         if (drawChilds) {
             this.components.forEach((item: VXC.TComponent) => {
-                item.draw(reCreate);
+                if (item instanceof VXC.TComponent)  item.draw(reCreate);
                 return true;
             });
         }
@@ -330,15 +391,15 @@ export class TContainer extends VXC.TComponent {
     }
 
 
-    private static activeQueries = new VXO.collections.Set<VXD.VXDatasetInt>();
-    private addQuery(query: VXD.VXDatasetInt) {
+    private static activeQueries = new VXO.collections.Set<VXU.VXDatasetInt>();
+    private addQuery(query: VXU.VXDatasetInt) {
         if (query == null) return;
         if (!query.ShowProgressBar) return;
         TContainer.activeQueries.add(query);
         if (TContainer.activeQueries.length() == 1) this.showLoadingProgressBar();
     }
 
-    private removeQuery(query: VXD.VXDatasetInt) {
+    private removeQuery(query: VXU.VXDatasetInt) {
         if (query == null) return;
         if (!query.ShowProgressBar) return;
         TContainer.activeQueries.remove(query);
@@ -444,9 +505,8 @@ export class TRepeater extends TContainer {
             var idx = startPage * this.PageSize + i;
             if (this.onGetItem) {
                 var ctrl = this.onGetItem(idx);
-                var block = $("<div>").css("display", "block");
-                block.append(ctrl.jComponent);
-                this.jContent.append(block);
+                var block = this.createBootstrapRowFluid();
+                
             } else {
                 V.Application.raiseException("TRepeater must provide a component with onGetItem(index : number)")
                 return;

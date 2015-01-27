@@ -68,6 +68,7 @@ export class TChartBase extends VC.TComponent {
         return this._dateFormatLongMode;
     }
     public set DateFormatLongMode(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._dateFormatLongMode) {
             this._dateFormatLongMode = val;
             this.drawDelayed(true);
@@ -125,6 +126,7 @@ export class TChartBase extends VC.TComponent {
         return this._multiSelectMode;
     }
     public set MultiSelectMode(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._multiSelectMode) {
             this._multiSelectMode = val;
         }
