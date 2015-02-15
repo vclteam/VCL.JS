@@ -18,6 +18,7 @@ export class TDateButton extends VXB.TButton {
         return this._calendartype;
     }
     public set CalendarType(val: V.CalendarType) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._calendartype) {
             this._calendartype = val;
             this.drawDelayed(true);
@@ -57,6 +58,7 @@ export class TDateInputBase extends VXI.TEditorBase {
         return this._calendartype;
     }
     public set CalendarType(val: V.CalendarType) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._calendartype) {
             this._calendartype = val;
             this.drawDelayed(true);
@@ -1158,6 +1160,7 @@ Datepicker.prototype = {
     showMode: function (dir) {
         if (dir) {
             this.viewMode = Math.max(this.minViewMode, Math.min(2, this.viewMode + dir));
+            this.viewMode = Math.min(this.viewMode, 1);
         }
         /*
             vitalets: fixing bug of very special conditions:

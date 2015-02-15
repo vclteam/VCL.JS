@@ -11,6 +11,7 @@ import VXDS = require("./VXServer");
 declare var bootbox;
 export class TApplication {
     private static _instance: TApplication;
+    private _freezeRouting: boolean = false;
     private sammy: any;
     private igonreaAthenticationPage: string = "";
     public navbaritems = new VXO.TCollection<TNavbarItem>();
@@ -32,6 +33,7 @@ export class TApplication {
             });
 
             this.get('#show/:class/:params', function () {
+                if (self._freezeRouting) return;
                 var className: string = self.hexToString(this.params["class"]);
                 var args: any[] = [];
                 if (self.AuthenticationRequired && !self.Authenticated &&
@@ -150,9 +152,10 @@ export class TApplication {
     /**
     * create and load page & html file asynchronously  an return an object instance in a callback function
     **/
-    public loadPage(classPathName: string, __args: any[], __callback?: (page: V.TPage) => void) {
+    public loadPage(classPathName: string , __args: any[], __callback?: (page: V.TPage) => void) {
         var self = this;
         var classes: string[] = [];
+        classPathName = classPathName.replace('\\', '/');
         var className = classPathName.split('/')[classPathName.split('/').length - 1];
         classes.push(classPathName);
         classes.push('VCL/Scripts/text.js!' + classPathName + '.html');
@@ -171,19 +174,40 @@ export class TApplication {
         })
     }
 
+    public rewritePageURL<T extends VXO.TObject>(args: any[]) {
+        var params = window.location.hash.split('/');
+        if (params.length == 3) {
+            var classUrl = window.location.hash.split('/')[1];
+            var className: string = this.hexToString(classUrl);
+
+            try {
+                this._freezeRouting = true;
+                var url = this.buildPageURL(className, args);
+                window.location.replace(url);
+            } finally {
+                this._freezeRouting = false;
+            }
+        }
+
+
+    }
+
     /**
      create and load page & html file synchronously  an return an object instance 
      @class : the container class
      @__args  : pass argumant as array
     **/
-    public createPage<T extends VXO.TObject>(Class: { new (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z): T; }, __args: any[], htmlPath?: string): T {
+    public createPage<T extends VXO.TObject>(Class: { new (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z): T; },
+                                                    __args: any[], htmlPath?: string,html? : string): T {
         var self = this;
         var instance;
 
         var defaultPath = (<any>Class).getClassPath ? (<any>Class).getClassPath() + "" : "";
         if (defaultPath) defaultPath = defaultPath + "/";
         var path = (htmlPath ? htmlPath + '/' : defaultPath) + (<any>Class).getClassName() + ".html"
-        new VXDS.TServer(false).getHTML(path,
+
+        if (html && html.length > 3) instance = self.createPageInstance((<any>Class).prototype, html, __args);
+        else new VXDS.TServer(false).getHTML(path,
             (html: any) => {
                 instance = self.createPageInstance((<any>Class).prototype, html, __args);
 
@@ -194,8 +218,6 @@ export class TApplication {
         );
         return instance;
     }
-
-
 
 
     public downloadFile(filename: string, preparingMessage?: string, failMessage?: string, onSuccess?: () => void, onFail?: () => void) {
@@ -283,7 +305,7 @@ export class TApplication {
         var session = this.sammy.session("VCL", function () {
             return {};
         });
-        if (!session[name]) {
+        if (session[name] == undefined) {
             session[name] = defaultValue;
         }
         return session[name];
@@ -346,13 +368,15 @@ export class TApplication {
 
 
 
-    public navigateToPage(className: string, ConstructorArgs?: any[], igonreaAthentication: boolean = false) {
+    public navigateToPage(className: string, ConstructorArgs?: any[], igonreaAthentication: boolean = false
+        , openInNewWindow: Boolean = false) {
         var url: string = this.buildPageURL(className, ConstructorArgs);
         if (igonreaAthentication) {
             this.igonreaAthenticationPage = className;
         }
-        this.sammy.setLocation(url);
-        //this.sammy.runRoute('get', url);
+        if (openInNewWindow) this.windowOpenURL(url, "popup");
+        else this.sammy.setLocation(url);
+        //this.sammy.setLocation(url);
     }
 
     public navigateToURL(URL: string) {
@@ -389,19 +413,20 @@ export class TApplication {
         return item;
     }
 
-    //private _showtotopButton: boolean = false;
+
+    private _contentfluid: boolean = false;
+    public get ContentFluid(): boolean {
+        return this._contentfluid;
+    }
+    public set ContentFluid(val: boolean) {
+        if (val != this._contentfluid) {
+            this._contentfluid = val;
+        }
+    }
+
     /**
     * enable a button on the bottom of the screen that scoll the screen to the top
     */
-    /*public get ShowToTopButton(): boolean {
-        return this._showtotopButton;
-    }
-    public set ShowToTopButton(val: boolean) {
-        if (val != this._showtotopButton) {
-            this._showtotopButton = val;
-        }
-    }*/
-
     private _showgototopicon: boolean = false;
     public get ShowGotoTopWidget(): boolean {
         return this._showgototopicon;
@@ -747,6 +772,8 @@ export class TApplication {
             return true; //hadeling the menu
         })
 
+        if (this.ContentFluid) $('#content').removeClass('container').addClass('container-fluid');
+        else $('#content').removeClass('container-fluid').addClass('container');
         if (this.ShowGotoTopWidget) {
             if ($(window).find('#toTop_____').length == 0) {
                 var btn = $("<a id='toTop_____'  style='display: inline'>");
@@ -1138,7 +1165,7 @@ export class TLocaleSettings {
     public MSG_This_value_is_required: string = "This value is required.";
     public MSG_This_value_is_not_minimum: string = " Must be more than %s characters.";
     public PercentString: string = "%";
-    public LabelPosition: V.LabelPosition = V.LabelPosition.TopLeft;
+    public LabelPosition: V.LabelPosition = 3;//V.LabelPosition.TopLeft;
 }
 
 

@@ -529,6 +529,7 @@ export class TRepeater extends TContainer {
         return this._pagerVisible;
     }
     public set PagerVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._pagerVisible) {
             this._pagerVisible = val;
             this.drawDelayed(true);

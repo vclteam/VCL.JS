@@ -105,6 +105,7 @@ export class TComboboxBase extends VXB.TEditorBase {
         return this._combostyle;
     }
     public set ComboStyle(val: V.ComboStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._combostyle) {
             this._combostyle = val;
             this.drawDelayed(true);
@@ -116,6 +117,7 @@ export class TComboboxBase extends VXB.TEditorBase {
         return this._textaligment;
     }
     public set TextAlignment(val: V.TextAlignment) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._textaligment) {
             this._textaligment = val;
             this.drawDelayed(true);
@@ -177,6 +179,7 @@ export class TComboboxBase extends VXB.TEditorBase {
         return this._buttonicon;
     }
     public set ButtonIcon(val: V.ButtonIcon) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._buttonicon) {
             this._buttonicon = val;
             this.ButtonVisible = true;
@@ -189,6 +192,7 @@ export class TComboboxBase extends VXB.TEditorBase {
         return this._buttonstyle;
     }
     public set ButtonStyle(val: V.ButtonStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._buttonstyle) {
             this._buttonstyle = val;
             this.drawDelayed(true);
@@ -597,6 +601,9 @@ export class TComboItemCollection<T> extends VXO.TCollection<TComboItem> {
         var rc: TComboItem = null;
         this.forEach((item: TComboItem) => {
             if (item.Value == value) {
+                rc = item;
+                return false;
+            } else if (item.Value && value && value.toString().toUpperCase() == item.Value.toString().toUpperCase()) {
                 rc = item;
                 return false;
             }

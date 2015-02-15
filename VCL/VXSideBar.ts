@@ -5,10 +5,12 @@ import VXM = require("./VXMenu");
 export class TBarBase extends VXC.TComponent {
 
     public items = new VXM.TMenuItemCollection<VXM.TMenuItem>();
-    public createItem(text: string, onClicked?: () => void ): VXM.TMenuItem {
+    public createItem(text: string, onClicked?: () => void,gropHeader : string = '~'): VXM.TMenuItem {
         var menuItem = new VXM.TMenuItem();
         menuItem.Text = text;
         menuItem.onClicked = onClicked;
+        menuItem.GroupHeader = gropHeader;
+
         this.items.add(menuItem);
         return menuItem;
     }
@@ -87,6 +89,12 @@ export class TSideBar extends TBarBase {
         }
     }
 
+    private createGroupHeader(caption: string): JQuery{
+        var head: JQuery = $('<li>').addClass("nav-header");
+        head.html(caption);
+        return head;
+
+    }
 
     public create() {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'div', this.FitToWidth, this.FitToHeight);
@@ -99,19 +107,16 @@ export class TSideBar extends TBarBase {
 
 
         if (this.items.length() > 0) {
-            var menuItems: JQuery = this.items.createmenu('nav nav-list');
-            menuItems.appendTo(well);
+            var groups = {}
+            this.items.forEach((item) => { if (item.GroupHeader) groups[item.GroupHeader.toUpperCase()] = item.GroupHeader});
 
-            if (this.Header != null && this.Header.toString().length > 0) {
-                var head: JQuery;
-                head = $('<li>');
-                head.addClass('divider');
+            for (var item in groups) {
+                var menuItems: JQuery = this.items.createmenu('nav nav-list accordion-group', item);
+                var caption = groups[item];
+                if (caption == "~") caption = this.Header;
+                var head = this.createGroupHeader(caption);
                 head.prependTo(menuItems);
-
-                head = $('<li>');
-                head.addClass("nav-header");
-                head.text(this.Header);
-                head.prependTo(menuItems);
+                menuItems.appendTo(well);
             }
         }
         well.appendTo(this.jComponent);

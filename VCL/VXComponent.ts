@@ -31,6 +31,7 @@ export class TComponent extends VXO.TObject {
             throw "only container components can own components";
 
         }
+
         if (renderTo == null) {
             this.jComponent = $("<div>"); //create and empty jComponent
             if (aOwner != null) {
@@ -66,9 +67,19 @@ export class TComponent extends VXO.TObject {
         this.addClass(this.getClassName().toUpperCase());
     }
 
+    /**
+    Return the component HTML representation
+    **/
+
+    public renderHTML(): string {
+        this.draw(true);
+        return this.jComponent[0].outerHTML;
+    }
+
     private checkDataset(name: any) {
         if (name && typeof name == "string" && this.owner) {
             var arrName = (<string>name).split('.');
+            for (var i = 0; i < arrName.length; i++) arrName[i] = arrName[i].trim();
             var parent = this.owner;
             for (var i = 0; i < arrName.length; i++) {
                 var rc: any;
@@ -97,6 +108,7 @@ export class TComponent extends VXO.TObject {
     private guessDataset() {
         var VXD = require("./VXDataset");
         var o = this.owner;
+        if (!o) return null;
         var rc: Array<any> = new Array<any>();
         if ((<VXCO.TContainer>o).components) (<VXCO.TContainer>o).components.forEach((item) => {
             if (item instanceof VXD.TDataset) {
@@ -208,6 +220,7 @@ export class TComponent extends VXO.TObject {
     }
 
     public set StickToTop(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._sticktotop) {
             this._sticktotop = val;
             this.drawDelayed(true);
@@ -224,6 +237,7 @@ export class TComponent extends VXO.TObject {
     }
 
     public set Outline(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._outline) {
             this._outline = val;
             this.drawDelayed(true);
@@ -237,6 +251,7 @@ export class TComponent extends VXO.TObject {
         return this._fittowidth;
     }
     public set FitToWidth(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fittowidth) {
             this._fittowidth = val;
             this.drawDelayed(true);
@@ -248,6 +263,7 @@ export class TComponent extends VXO.TObject {
         return this._fittoheight;
     }
     public set FitToHeight(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._fittoheight) {
             this._fittoheight = val;
             this.drawDelayed(true);
@@ -284,6 +300,7 @@ export class TComponent extends VXO.TObject {
         return this._visible;
     }
     public set Visible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._visible) {
             this._visible = val;
             this.drawDelayed(true);
@@ -295,6 +312,7 @@ export class TComponent extends VXO.TObject {
         return this._enabled;
     }
     public set Enabled(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._enabled) {
             this._enabled = val;
             this.drawDelayed(true);
@@ -509,6 +527,7 @@ export class TComponent extends VXO.TObject {
         return false;
     }
 
+
     public parentInitialized() {
         if (!this.owner) return true;
         return (this.owner).initialized;
@@ -556,6 +575,7 @@ export class TPopupmenuComponent extends TComponent {
     }
 
     public set ShowMenuCaret(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showmenucaret) {
             this._showmenucaret = val;
             this.drawDelayed(true);

@@ -35,9 +35,17 @@ export class TGenericDataset<T> extends VXO.TObject {
     public getFieldValue(fieldname: string): any {
         if (fieldname == null) return null;
         if (this.Recno == -1) return null;
-        var a = this.recordset[this.Recno];
-        return a[fieldname.toUpperCase()];
+        var keup = this.SetFieldNameToUpperCase ? fieldname.toUpperCase() : fieldname;
+        return this.recordset[this.Recno][keup];
     }
+
+    public FieldExists(fieldname: string): boolean {
+        if (fieldname == null) return false;
+        if (this.Recno == -1) return false;
+        var keup = this.SetFieldNameToUpperCase ? fieldname.toUpperCase() : fieldname;
+        return keup in  this.recordset[this.Recno];
+    }
+
 
     public aggregateFieldSum(fieldname: string): number {
         var sum: number = 0;
@@ -49,6 +57,29 @@ export class TGenericDataset<T> extends VXO.TObject {
         });
         return sum;
     }
+
+
+    private _setfieldtouppercase: boolean = true;
+    public get SetFieldNameToUpperCase(): boolean {
+        return this._setfieldtouppercase;
+    }
+    public set SetFieldNameToUpperCase(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
+        this._setfieldtouppercase = val;
+    }
+
+    public find(condition: () => boolean) {
+        var rec: number =-1;
+        this.forEach(() => {
+            if (condition() && rec == -1) {
+                rec = this.Recno;
+            }
+        })
+        if (rec != -1) {
+            this.Recno = rec;
+        }
+    }
+
 
     public aggregateFieldAvg(fieldname: string): number {
         var sum: number = 0;
@@ -91,7 +122,8 @@ export class TGenericDataset<T> extends VXO.TObject {
     public setFieldValue(fieldname: string, value: any): void {
         if (this.Recno == -1) return null;
         var a = this.recordset[this.Recno];
-        a[fieldname.toUpperCase()] = value;
+        var keup = this.SetFieldNameToUpperCase ? fieldname.toUpperCase() : fieldname;
+        a[keup] = value;
         this.dataChanged();
     }
 
@@ -282,6 +314,27 @@ export class TClientDataset extends TDataset implements VXU.VXDatasetInt {
         if (aOwner != null) (<any>aOwner).addComponent(this);
     }
 
+    /*
+    * return a new dataset with distinct values
+    */
+    public distinct(fields: Array<string>) : TClientDataset {
+        if (!fields || !fields.length || fields.length == 0) return null;
+        var cds = new TClientDataset(this.owner);
+        var distinct = {};
+        this.forEach(() => {
+            var recVal = "";
+            fields.forEach((FieldName) => { recVal += this.getFieldValue(FieldName) + "~~"; });
+            if (distinct[recVal] == null) {
+                var rec = {};
+                fields.forEach((FieldName) => { rec[FieldName] = this.getFieldValue(FieldName)});
+                cds.appendRecord(rec);
+                distinct[recVal] = true;
+            }
+        })
+        return cds;
+    } 
+
+
     public loadRemoteResults(data: any) {
         //replace the dates with JS dates - data is loaded from .net backend
         if (data.META || data.DATA) {
@@ -392,12 +445,12 @@ export class TClientDataset extends TDataset implements VXU.VXDatasetInt {
         }
     }
 
-
     private _showprogressbar: boolean = true;
     public get ShowProgressBar(): boolean {
         return this._showprogressbar;
     }
     public set ShowProgressBar(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showprogressbar) {
             this._showprogressbar = val;
         }
@@ -474,7 +527,8 @@ export class TClientDataset extends TDataset implements VXU.VXDatasetInt {
         obj.___RECORDID___ = maxid + 1;
         obj.___CHECKED___ = false;
         for (var key in record) {
-            obj[key.toUpperCase()] = record[key];
+            var keup = this.SetFieldNameToUpperCase ? key.toUpperCase() : key;
+            obj[keup] = record[key];
         }
         this.recordset.push(obj);
         if ((<any>this)._enabledControl && !disableEvents) {
@@ -492,7 +546,8 @@ export class TClientDataset extends TDataset implements VXU.VXDatasetInt {
             for (var i = 0, len = meta.length; i < len; i++) {
                 var obj: any = {};
                 for (var key in meta[i]) {
-                    obj[key.toUpperCase()] = meta[i][key];
+                    var keup = this.SetFieldNameToUpperCase ? key.toUpperCase() : key;
+                    obj[keup] = meta[i][key];
                 }
                 obj["NAME"] = obj["NAME"].toUpperCase();
                 this.metadata.push(obj);
@@ -504,9 +559,14 @@ export class TClientDataset extends TDataset implements VXU.VXDatasetInt {
     * Data represents the client dataset's local, in-memory copy of its data, encoded as a array of any
     */
     private static reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
-    public setData(data: any[]) {
+    public setData(data: Object[]) {
         if (!(data instanceof Array) && (data instanceof Object)) {
             return this.setData([data]);
+        }
+
+        if (data.length > 0 && typeof data[1] != "object") {
+            V.Application.raiseException("dataset except only object or array of objects");
+            return;
         }
         this.recordset = [];
         this.sourceRecordset = null;
@@ -520,8 +580,9 @@ export class TClientDataset extends TDataset implements VXU.VXDatasetInt {
                 obj.___RECORDID___ = i;
                 obj.___CHECKED___ = false;
                 for (var key in data[i]) {
-                    if (typeof data[i][key] == 'string' && TClientDataset.reISO.exec(data[i][key])) obj[key.toUpperCase()] = new Date(data[i][key]);
-                    else obj[key.toUpperCase()] = data[i][key];
+                    var keup = this.SetFieldNameToUpperCase ? key.toUpperCase() : key;
+                    if (typeof data[i][key] == 'string' && TClientDataset.reISO.exec(data[i][key])) obj[keup] = new Date(data[i][key]);
+                    else obj[keup] = data[i][key];
 
                 }
                 this.recordset.push(obj);
@@ -653,6 +714,7 @@ export class TNestedClientDataset extends TClientDataset {
     }
 
     private _parentdataset: TDataset;
+    private _parentRecno: number;
     /**
    * Specifies the dataset that contains the field it represents.
    */
@@ -670,7 +732,12 @@ export class TNestedClientDataset extends TClientDataset {
             this._parentdataset = val;
             if (this._parentdataset) {
                 (<any>this._parentdataset).registerEventListener(TDataset.EVENT_DATA_CHANGED, this, () => { this.setNestedData(this._parentdataset.getFieldValue(this.ownerColumn)); });
-                (<any>this._parentdataset).registerEventListener(TDataset.EVENT_SELECTION_CHANGED, this, () => { this.setNestedData(this._parentdataset.getFieldValue(this.ownerColumn)); });
+                (<any>this._parentdataset).registerEventListener(TDataset.EVENT_SELECTION_CHANGED, this,() => {
+                    if (this._parentRecno != this._parentdataset.Recno) {
+                        this._parentRecno = this._parentdataset.Recno;
+                        this.setNestedData(this._parentdataset.getFieldValue(this.ownerColumn));
+                    }
+                });
                 (<any>this._parentdataset).registerEventListener(TDataset.EVENT_STATE_CHANGED, this, () => { this.setNestedData(this._parentdataset.getFieldValue(this.ownerColumn)); });
             }
         }

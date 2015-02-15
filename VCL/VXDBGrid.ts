@@ -38,6 +38,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._autotablelayout;
     }
     public set AutomaticTableLayout(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._autotablelayout) {
             this._autotablelayout = val;
             this.drawDelayed(true);
@@ -53,6 +54,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._localizable;
     }
     public set Localizable(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._localizable) {
             this._localizable = val;
             this.drawDelayed(true);
@@ -67,6 +69,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._showselectedrecord;
     }
     public set ShowSelectedRecord(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showselectedrecord) {
             this._showselectedrecord = val;
             this.drawDelayed(true);
@@ -81,6 +84,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._striped;
     }
     public set Striped(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._striped) {
             this._striped = val;
             this.drawDelayed(true);
@@ -104,6 +108,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._pageraligment;
     }
     public set PagerAlignment(val: V.PagerAlignment) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._pageraligment) {
             this._pageraligment = val;
             this.drawDelayed(true);
@@ -115,6 +120,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._summeryboxVisible;
     }
     public set SummaryBoxVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._summeryboxVisible) {
             this._summeryboxVisible = val;
             this.drawDelayed(true);
@@ -140,6 +146,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._groupboxVisible;
     }
     public set GroupBoxVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._groupboxVisible) {
             this._groupboxVisible = val;
             this.drawDelayed(true);
@@ -164,6 +171,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._pagerVisible;
     }
     public set PagerVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._pagerVisible) {
             this._pagerVisible = val;
             this.drawDelayed(true);
@@ -187,6 +195,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._showvertlines;
     }
     public set ShowVertLines(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showvertlines) {
             this._showvertlines = val;
             this.drawDelayed(true);
@@ -198,6 +207,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._showhorzlines;
     }
     public set ShowHorzLines(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showhorzlines) {
             this._showhorzlines = val;
             this.drawDelayed(true);
@@ -211,6 +221,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._headerVisible;
     }
     public set HeaderVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._headerVisible) {
             this._headerVisible = val;
             this.drawDelayed(true);
@@ -354,6 +365,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._selectedrecordstyle;
     }
     public set SelectedRecordStyle(val: V.SelectedRowStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._selectedrecordstyle) {
             this._selectedrecordstyle = val;
             this.drawDelayed(true);
@@ -377,6 +389,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._sortmode;
     }
     public set SortMode(val: V.SortMode) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._sortmode) {
             this._sortmode = val;
             this.drawDelayed(true);
@@ -389,6 +402,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._sortcolumnOrder;
     }
     public set SortColumnOrder(val: V.SortColumnOrder) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._sortcolumnOrder) {
             this._sortcolumnOrder = val;
             this.drawDelayed(true);
@@ -422,6 +436,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._firstPageButtonVisible;
     }
     public set FirstPageButtonVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._firstPageButtonVisible) {
             this._firstPageButtonVisible = val;
             this.drawDelayed(true);
@@ -433,6 +448,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._pagecountVisible;
     }
     public set PageCounterVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._pagecountVisible) {
             this._pagecountVisible = val;
             this.drawDelayed(true);
@@ -444,6 +460,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._lastPageButtonVisible;
     }
     public set LastPageButtonVisible(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._lastPageButtonVisible) {
             this._lastPageButtonVisible = val;
             this.drawDelayed(true);
@@ -490,6 +507,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._pagerButtonStyle;
     }
     public set PagerButtonStyle(val: V.PagerButtonStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._pagerButtonStyle) {
             this._pagerButtonStyle = val;
             this.drawDelayed(true);
@@ -501,6 +519,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._pagerButtonSize;
     }
     public set PagerButtonSize(val: V.PagerButtonSize) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._pagerButtonSize) {
             this._pagerButtonSize = val;
             this.drawDelayed(true);
@@ -513,6 +532,7 @@ export class TGridBase extends VXC.TComponent implements V.iTranslatable{
         return this._showselectcheckbox;
     }
     public set ShowSelectCheckbox(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._showselectcheckbox) {
             this._showselectcheckbox = val;
             this.drawDelayed(true);
@@ -867,6 +887,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         return this._aggergateFunction;
     }
     public set AggergateFunction(val: V.AggergateFunction) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._aggergateFunction) {
             if (val && val != V.AggergateFunction.None) this.Aggregatable = true;
             this._aggergateFunction = val;
@@ -937,6 +958,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         return this._currency;
     }
     public set Currency(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._currency) {
             this._currency = val;
             this.grid.drawDelayed(true);
@@ -986,6 +1008,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         return this._textaligment;
     }
     public set TextAlignment(val: V.TextAlignment) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._textaligment) {
             this._textaligment = val;
             this.grid.drawDelayed(true);
@@ -997,6 +1020,7 @@ export class TDBGridColumn extends VXO.TCollectionItem {
         return this._headeraligment;
     }
     public set HeaderTextAlignment(val: V.HeaderTextAlignment) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._headeraligment) {
             this._headeraligment = val;
             this.grid.drawDelayed(true);

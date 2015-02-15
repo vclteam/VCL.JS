@@ -1467,9 +1467,10 @@ export class Bar extends VXCB.Grid {
         if (me.ShowImageOnTop) {
             if (me.ImageOnTopFormat != null) {
                 var src = me.ImageOnTopFormat(row);
-                this.raphael.image(src, newXpos + (maxWidth - 30) / 2, yPos - 30, 30, 30);
+                this.raphael.image(src, newXpos + (maxWidth - 20) / 2, yPos - 22, 20, 20);
             }
         }
+
 
 
 

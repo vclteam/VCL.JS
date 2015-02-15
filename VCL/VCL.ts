@@ -873,7 +873,7 @@ export function createComponentByElement(elem: Element, parent: VXContainMod.TCo
             for (var item in rc) {
                 if ((<string>item).indexOf('_') == 0) continue;
                 var a = elem.getAttribute ("v." + item);
-                if (a) {
+                if (a != null) {
                     rc[item] = a;
                 }
             }
@@ -884,7 +884,7 @@ export function createComponentByElement(elem: Element, parent: VXContainMod.TCo
 }
 
 
-export function convertaAnyToBoolean(val: any) {
+export function convertaAnyToBoolean(val: any) : boolean {
     if (!val) return false;
     if (typeof val == "boolean") return val;
     switch (val.toLowerCase()) {
@@ -892,4 +892,10 @@ export function convertaAnyToBoolean(val: any) {
         case "false": case "no": case "0": case null: return false;
         default: return Boolean(val);
     }
+}
+
+export function convertaAnyToNumber(val: any)  : number{
+    if (!val) return null;
+    if (typeof val == "number") return val;
+    else return parseFloat(val);
 }

@@ -4,7 +4,7 @@ import VXD = require("./VXDataset");
 import VXI = require("./VXInputBase");
 
 export class TTextBase extends VXC.TComponent implements V.iTranslatable  {
-    public onClicked: (sender: TTextBase) => void;
+    public onClicked: (sender: TTextBase,shiftPressed : boolean) => void;
 
     private _rtl: boolean = false;
     public get Rtl(): boolean {

@@ -66,13 +66,25 @@ export class TMenuItem extends VXO.TCollectionItem {
         }
     }
 
+    private _groupheader: string;
+    public get GroupHeader(): string {
+        return this._groupheader;
+    }
+    public set GroupHeader(val: string) {
+        if (val != this._groupheader) {
+            this._groupheader = val;
+            this.create();
+        }
+    }
+
+
 
     private _visible: boolean = true;
     public get Visible(): boolean {
         return this._visible;
     }
     public set Visible(val: boolean) {
-        if (val != this._enabled) {
+        if (val != this._visible) {
             this._visible = val;
             this.create();
         }
@@ -161,13 +173,16 @@ export class TMenuItem extends VXO.TCollectionItem {
 
 
 export class TMenuItemCollection<T> extends VXO.TCollection<TMenuItem> {
-    public createmenu(headerClass : string): JQuery {
+    public createmenu(headerClass : string,groupHeader? : string): JQuery {
         var menu: JQuery = $('<ul>');
         menu.addClass(headerClass);
         this.forEach((menuItem: TMenuItem) => {
-            menuItem.create();
-            menuItem.jComponent.appendTo(menu);
-            return true;
+            if (!groupHeader ||
+                (menuItem.GroupHeader && groupHeader.toUpperCase() == menuItem.GroupHeader.toUpperCase())) {
+                menuItem.create();
+                menuItem.jComponent.appendTo(menu);
+                return true;
+            }
         })
         return menu;
     }

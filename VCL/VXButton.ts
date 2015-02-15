@@ -29,6 +29,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
         return this._textstyle;
     }
     public set TextStyle(val: V.TextStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._textstyle) {
             this._textstyle = val;
             this.drawDelayed(true);
@@ -98,6 +99,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
         return this._buttonsize;
     }
     public set ButtonSize(val: V.ButtonSize) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._buttonsize) {
             this._buttonsize = val;
             this.drawDelayed(true);
@@ -109,6 +111,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
         return this._buttonstyle;
     }
     public set ButtonStyle(val: V.ButtonStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._buttonstyle) {
             this._buttonstyle = val;
             this.drawDelayed(true);
@@ -132,6 +135,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
         return this._buttonicon;
     }
     public set ButtonIcon(val: V.ButtonIcon) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._buttonicon) {
             this._buttonicon= val;
             this.drawDelayed(true);
@@ -170,6 +174,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
         return this._iconalignment;
     }
     public set IconAlignment(val: V.IconAlignment) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._iconalignment) {
             this._iconalignment = val;
             this.drawDelayed(true);
@@ -179,7 +184,7 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
     /**
         Use the OnClick event handler to respond when the user clicks the control. 
     */
-    public onClicked: (sender: TButton) => void;
+    public onClicked: (sender?: TButton, shiftPressed?: boolean) => void;
 
     public jText : JQuery;
     public jImage: JQuery;
@@ -279,8 +284,8 @@ export class TButton extends VXC.TPopupmenuComponent implements V.iTranslatable 
        }
 
         //setup the click event
-        this.jBtn.off("click").click(() => {
-            if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(this); }));
+        this.jBtn.off("click").click((e) => {
+            if (this.onClicked != null) (V.tryAndCatch(() => { this.onClicked(this,e.shiftKey); }));
             return true; //hadeling the menu
         })
         if (!this.Enabled) this.jBtn.attr('disabled', 'disabled');
@@ -319,6 +324,7 @@ export class TFacebookButton extends VXC.TComponent {
         return this._buttonsize;
     }
     public set ButtonSize(val: V.ButtonSize) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._buttonsize) {
             this._buttonsize = val;
             this.drawDelayed(true);
@@ -407,6 +413,7 @@ export class TToggleSwitch extends VXB.TEditorBase {
         return this._switchsize;
     }
     public set SwitchSize(val: V.SwitchSize) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._switchsize) {
             this._switchsize = val;
             this.drawDelayed(true);

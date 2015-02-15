@@ -1657,7 +1657,10 @@ var requirejs, require, define;
             execCb: function (name, callback, args, exports) {
                 var x = callback.apply(exports, args);
                 for (var key in exports) {
-                    if (exports[key].__setClassPath) exports[key].__setClassPath(name);
+
+                    if (exports[key] && exports[key].__setClassPath) {
+                        exports[key].__setClassPath(name);
+                    }
                 }
                 return x;
             },

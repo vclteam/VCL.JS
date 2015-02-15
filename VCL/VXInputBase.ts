@@ -47,6 +47,7 @@ export class TLabeledBase extends VXC.TComponent {
         return this._labelposition;
     }
     public set LabelPosition(val: V.LabelPosition) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._labelposition) {
             this._labelposition = val;
             this.drawDelayed(true);
@@ -247,6 +248,7 @@ export class TInputBase extends TEditorBase {
         return this._inputStyle;
     }
     public set InputStyle(val: V.InputStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._inputStyle) {
             this._inputStyle = val;
             this.drawDelayed(true);
@@ -289,17 +291,17 @@ export class TInputBase extends TEditorBase {
     }
 
 
-    private _nulltext: string = "\xa0";
+    private _nullvaluetext: string = "\xa0";
     /**
     * Specified text is displayed when the value of the editor is null and the editor is not focused. 
     * The prompt text disappears when the editor receives focus
     */
-    public get NullText(): string {
-        return this._nulltext;
+    public get NullValueText(): string {
+        return this._nullvaluetext;
     }
-    public set NullText(val: string) {
-        if (val != this._nulltext) {
-            this._nulltext = val;
+    public set NullValueText(val: string) {
+        if (val != this._nullvaluetext) {
+            this._nullvaluetext = val;
             this.drawDelayed(true);
         }
     }
@@ -424,6 +426,7 @@ export class TInputBase extends TEditorBase {
         return this._textaligment;
     }
     public set TextAlignment(val: V.TextAlignment) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._textaligment) {
             this._textaligment = val;
             this.drawDelayed(true);
@@ -465,6 +468,7 @@ export class TInputBase extends TEditorBase {
         return this._buttonicon;
     }
     public set ButtonIcon(val: V.ButtonIcon) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._buttonicon) {
             this._buttonicon = val;
             this.ButtonVisible = true;
@@ -477,6 +481,7 @@ export class TInputBase extends TEditorBase {
         return this._buttonstyle;
     }
     public set ButtonStyle(val: V.ButtonStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._buttonstyle) {
             this._buttonstyle = val;
             this.drawDelayed(true);

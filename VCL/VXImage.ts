@@ -4,7 +4,7 @@ import V = require("./VCL");
 import VXM = require("./VXMenu");
 
 export class TGraphic extends VXC.TPopupmenuComponent {
-    public onClicked: (sender: TGraphic) => void;
+    public onClicked: (sender: TGraphic, shiftPressed?: boolean) => void;
     public ondblclicked: (sender: TGraphic) => void;
 }
 
@@ -57,6 +57,7 @@ export class TImage extends TGraphic {
         return this._labelposition;
     }
     public set LabelPosition(val: V.LabelPosition) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._labelposition) {
             this._labelposition = val;
             this.drawDelayed(true);
@@ -108,6 +109,7 @@ export class TImage extends TGraphic {
         return this._labelstyle;
     }
     public set TextStyle(val: V.TextStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._labelstyle) {
             this._labelstyle = val;
             this.drawDelayed(true);
@@ -140,8 +142,8 @@ export class TImage extends TGraphic {
         this.jImage.appendTo(this.jComponent);
         
 
-        this.jImage.off("click").click(() => {
-            if (self.onClicked != null && self.Enabled) { V.tryAndCatch(() => { self.onClicked(self); }); return false; }
+        this.jImage.off("click").click((e) => {
+            if (self.onClicked != null && self.Enabled) { V.tryAndCatch(() => { self.onClicked(self, e.shiftKey); }); return false; }
             else return true;
         });
 
@@ -183,7 +185,7 @@ export class TImage extends TGraphic {
             } else if (this.TextStyle == V.TextStyle.small) {
                 this.jLabel = $('<small/>');
             } else this.jLabel = $('<label/>');
-            this.jLabel.off("click").click(() => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(self); })); return false; })
+            this.jLabel.off("click").click((e) => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(self, e.shiftKey); })); return false; })
             this.jLabel.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(self); })); return false; })
 
             this.jLabel.text(this.LabelText);
@@ -273,7 +275,7 @@ export class TGravatarImage extends TGraphic {
         this.jImage = $("<img>");
         this.jImage.appendTo(this.jComponent);
 
-        this.jImage.off("click").click(() => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(self); })); return false; })
+        this.jImage.off("click").click((e) => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(self, e.shiftKey); })); return false; })
         this.jImage.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(self); })); return false; })
 
         this.jImage.attr('src', "http://www.gravatar.com/avatar/" + this.hex_md5(this.Email) + (this.Size?'?s=' + this.Size:''));
@@ -494,6 +496,7 @@ export class TIcon extends TGraphic {
         return this._icon;
     }
     public set Icon(val: V.Icon) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._icon) {
             this._icon = val;
             this.drawDelayed(true);
@@ -517,7 +520,7 @@ export class TIcon extends TGraphic {
         var self = this;
 
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'i', this.FitToWidth, this.FitToHeight);
-        this.jComponent.off("click").click(() => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(self); })); return false; })
+        this.jComponent.off("click").click((e) => { if (self.onClicked != null && self.Enabled) (V.tryAndCatch(() => { self.onClicked(self, e.shiftKey); })); return false; })
         this.jComponent.dblclick(() => { if (this.ondblclicked != null) (V.tryAndCatch(() => { this.ondblclicked(self); })); return false; })
         if (this.onClicked || this.ondblclicked) this.jComponent.css('cursor', 'pointer');
         if (this.jComponent.attr("class")) {

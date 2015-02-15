@@ -46,8 +46,8 @@ export class TText extends VXT.TTextBase {
             this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'small', this.FitToWidth, this.FitToHeight);
         } else this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'p', this.FitToWidth, this.FitToHeight);
 
-        this.jComponent.off("click").click(() => {
-            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self); })); return false; }
+        this.jComponent.off("click").click((e) => {
+            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self, e.shiftKey); })); return false; }
             else if (this.Href) location.href = this.Href;
             else return true;
         })
@@ -67,6 +67,7 @@ export class TText extends VXT.TTextBase {
         return this._textstyle;
     }
     public set TextStyle(val: V.TextStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._textstyle) {
             this._textstyle = val;
             this.drawDelayed(true);
@@ -106,6 +107,7 @@ export class TLabel extends VXT.TTextBase {
         return this._labelstyle;
     }
     public set LabelStyle(val: V.LabelStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._labelstyle) {
             this._labelstyle = val;
             this.drawDelayed(true);
@@ -115,8 +117,8 @@ export class TLabel extends VXT.TTextBase {
     public create() {
         var self = this;
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
-        this.jComponent.off("click").click(() => {
-            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self); })); return false; }
+        this.jComponent.off("click").click((e) => {
+            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self, e.shiftKey); })); return false; }
             else return true;
         })
 
@@ -151,6 +153,7 @@ export class TDBLabel extends VXT.TDBTextBase {
         return this._labelstyle;
     }
     public set LabelStyle(val: V.LabelStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._labelstyle) {
             this._labelstyle = val;
             this.drawDelayed(true);
@@ -190,6 +193,7 @@ export class TBadge extends VXT.TTextBase {
         return this._badgestyle;
     }
     public set BadgeStyle(val: V.BadgeStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._badgestyle) {
             this._badgestyle = val;
             this.drawDelayed(true);
@@ -201,8 +205,8 @@ export class TBadge extends VXT.TTextBase {
         this.jComponent = VXU.VXUtils.changeJComponentType(this.jComponent, 'span', this.FitToWidth, this.FitToHeight);
         this.jComponent.addClass('badge');
         if (this.Rtl == true) this.jComponent.attr("dir", "RTL");
-        this.jComponent.off("click").click(() => {
-            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self); })); return false; }
+        this.jComponent.off("click").click((e) => {
+            if (this.onClicked != null) { (V.tryAndCatch(() => { this.onClicked(self, e.shiftKey); })); return false; }
             else return true;
         })
 
@@ -236,6 +240,7 @@ export class TDBBadge extends VXT.TDBTextBase {
         return this._badgestyle;
     }
     public set BadgeStyle(val: V.BadgeStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._badgestyle) {
             this._badgestyle = val;
             this.drawDelayed(true);
@@ -554,6 +559,7 @@ export class TPillBoxItem extends VXO.TCollectionItem {
         return this._pillboxstyle;
     }
     public set PillBoxItemStyle(val: V.PillBoxStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._pillboxstyle) {
             this._pillboxstyle = val;
         }
@@ -808,6 +814,7 @@ export class TPaginationItem extends VXO.TCollectionItem {
         return this._buttonicon;
     }
     public set ButtonIcon(val: V.ButtonIcon) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._buttonicon) {
             this._buttonicon = val;
             this._pagination.drawDelayed(true);
@@ -819,6 +826,7 @@ export class TPaginationItem extends VXO.TCollectionItem {
         return this._iconalignment;
     }
     public set IconAlignment(val: V.IconAlignment) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._iconalignment) {
             this._iconalignment = val;
             this._pagination.drawDelayed(true);
@@ -903,6 +911,7 @@ export class TPagination extends VXC.TComponent {
         return this._alignment;
     }
     public set PaginationAlignment(val: V.PaginationAlignment) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._alignment) {
             this._alignment = val;
             this.drawDelayed(true);
@@ -914,6 +923,7 @@ export class TPagination extends VXC.TComponent {
         return this._paginationsize;
     }
     public set PaginationSize(val: V.PaginationSize) {
+        val = V.convertaAnyToNumber(val);
         if (val != this._paginationsize) {
             this._paginationsize = val;
             this.drawDelayed(true);

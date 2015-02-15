@@ -24,6 +24,7 @@ export class TInput extends VXB.TInputBase {
         return this._buttonclickonenter;
     }
     public set ButtonClickOnEnter(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._buttonclickonenter) {
             this._buttonclickonenter = val;
             this.drawDelayed(false);
@@ -65,7 +66,7 @@ export class TInput extends VXB.TInputBase {
         super.draw(reCreate);
 
         if (this.jEdit.val() != this.Text) {
-            if (this.DisplayAsText) this.jEdit.text(this.Text ? this.Text : this.NullText);
+            if (this.DisplayAsText) this.jEdit.text(this.Text ? this.Text : this.NullValueText);
             else this.jEdit.val(this.Text);
         }
     }
@@ -174,6 +175,7 @@ export class TDBInput extends VXB.TInputBase {
         return this._immidiatepost;
     }
     public set ImmidiatePost(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._immidiatepost) {
             this._immidiatepost = val;
             this.drawDelayed(true);
@@ -185,6 +187,7 @@ export class TDBInput extends VXB.TInputBase {
         return this._buttonclickonenter;
     }
     public set ButtonClickOnEnter(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._buttonclickonenter) {
             this._buttonclickonenter = val;
             this.drawDelayed(false);
@@ -231,7 +234,7 @@ export class TDBInput extends VXB.TInputBase {
         }
 
         if (this.jEdit.val() != this.DataValue) {
-            if (this.DisplayAsText) this.jEdit.text(this.DataValue ? this.DataValue : this.NullText);
+            if (this.DisplayAsText) this.jEdit.text(this.DataValue ? this.DataValue : this.NullValueText);
             else this.jEdit.val(this.DataValue);
         }
     }
@@ -254,6 +257,7 @@ export class TDBLabeledText extends TDBInput {
         return this._textstyle;
     }
     public set TextStyle(val: V.TextStyle) {
+        val = V.convertaAnyToNumber(val);
         if (val && typeof val == "string") {
             switch (val.toString().toUpperCase()) {
                 case "H1": val = V.TextStyle.h1; break;
@@ -285,6 +289,7 @@ export class TInputNumeric extends VXB.TInputBase {
     constructor(aOwner: VXC.TComponent, renderTo?: string) {
         super(aOwner,renderTo);
         this.TextAlignment = V.TextAlignment.Right;
+        this.ButtonVisible = true;
     }
 
     private _value: number = 0;
@@ -354,15 +359,17 @@ export class TInputNumeric extends VXB.TInputBase {
     public create() {
         super.create();
         var self = this;
+        if (this.jBtn) this.jBtn.hide();
         this.jComponent.attr('data-trigger', "spinner").addClass('spinner');
 
         //draw the component
         var addon = $("<div>").addClass('add-on');
+
         var btdown = $("<a>").css('outline','none').attr('data-spin', "down").addClass('spin-down').attr('tabindex', '-1').append('<i class="icon-sort-down"/>');
         btdown.off('click').click(() => { if (!this.Enabled) return;this.Value -= this.Step; if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); })); });
-
         var btUp = $("<a>").css('outline', 'none').attr('data-spin', "up").addClass('spin-up').attr('tabindex', '-1').append('<i class="icon-sort-up"/>');
         btUp.off('click').click(() => { if (!this.Enabled) return; this.Value += this.Step; if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); })); });
+
         this.jEdit.css('clear', 'none');
         this.jEdit.change(() => {
             var _value = this.jEdit.val();
@@ -378,18 +385,20 @@ export class TInputNumeric extends VXB.TInputBase {
                 if (this.onChanged != null) (V.tryAndCatch(() => { this.onChanged(this); }));
             }
         });
-        addon.css('float', 'right');
-        this.jComponent.addClass('input-append');
-        addon.append(btUp);
-        addon.append(btdown);
-        (<any>this).jinternalSpan.before(addon);
-
+        if (this.ButtonVisible) {
+            addon.css('float', 'right');
+            this.jComponent.addClass('input-append');
+            addon.append(btUp);
+            addon.append(btdown);
+            (<any>this).jinternalSpan.before(addon);
+        }
+        
     }
 
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        if (this.DisplayAsText) this.jEdit.text(this.Value ? this.Value.toString() : this.NullText);
+        if (this.DisplayAsText) this.jEdit.text(this.Value ? this.Value.toString() : this.NullValueText);
         else this.jEdit.val(this.Value?this.Value.toString():"");
     }
 }
@@ -527,7 +536,7 @@ export class TDBInputNumeric extends VXB.TInputBase {
     public draw(reCreate: boolean) {
         if (!this.parentInitialized()) return;
         super.draw(reCreate);
-        if (this.DisplayAsText) this.jEdit.text(this.DataValue ? this.DataValue.toString() : this.NullText);
+        if (this.DisplayAsText) this.jEdit.text(this.DataValue ? this.DataValue.toString() : this.NullValueText);
         else this.jEdit.val(this.DataValue ? this.DataValue.toString() : "");
     }
 }
@@ -608,7 +617,7 @@ export class TTextArea extends VXB.TInputBase {
         super.draw(reCreate);
 
         if (this.jEdit.val() != this.Text) {
-            if (this.DisplayAsText) this.jEdit.text(this.Text ? this.Text : this.NullText);
+            if (this.DisplayAsText) this.jEdit.text(this.Text ? this.Text : this.NullValueText);
             this.jEdit.val(this.Text);
         }
     }
@@ -710,6 +719,7 @@ export class TDBTextArea extends VXB.TInputBase {
         return this._immidiatepost;
     }
     public set ImmidiatePost(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._immidiatepost) {
             this._immidiatepost = val;
             this.drawDelayed(true);
@@ -745,7 +755,7 @@ export class TDBTextArea extends VXB.TInputBase {
         }
 
         if (this.jEdit.val() != this.DataValue) {
-            if (this.DisplayAsText) this.jEdit.text(this.DataValue ? this.DataValue : this.NullText);
+            if (this.DisplayAsText) this.jEdit.text(this.DataValue ? this.DataValue : this.NullValueText);
             else this.jEdit.val(this.DataValue);
         }
     }
@@ -813,6 +823,7 @@ export class TInputTypeaHead extends VXB.TInputBase {
         return this._highlightMatchedText;
     }
     public set HighlightMatchedText(val: boolean) {
+        val = V.convertaAnyToBoolean(val);
         if (val != this._highlightMatchedText) {
             this._highlightMatchedText = val;
             this.drawDelayed(true);
@@ -900,7 +911,7 @@ export class TInputTypeaHead extends VXB.TInputBase {
         super.draw(reCreate);
 
         if (this.jEdit.val() != this.Text) {
-            if (this.DisplayAsText) this.jEdit.text(this.Text ? this.Text : this.NullText);
+            if (this.DisplayAsText) this.jEdit.text(this.Text ? this.Text : this.NullValueText);
             else this.jEdit.val(this.Text);
         }
     }
